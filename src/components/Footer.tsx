@@ -85,6 +85,11 @@ export default function Footer() {
           margin-top: 60px;
         }
 
+        .auth-page .footer {
+          background: linear-gradient(135deg, rgba(96, 165, 250, 0.15) 0%, #f5f5f7 55%, rgba(192, 132, 252, 0.15) 100%);
+          border-top: 1px solid rgba(147, 197, 253, 0.3);
+        }
+
         .footer-inner {
           max-width: 980px;
           margin: 0 auto;
