@@ -6,8 +6,8 @@ interface StoreHeaderProps {
 
 export default function StoreHeader({
   title,
-  subtitle = "",
-  highlightText = "",
+  subtitle,
+  highlightText,
 }: StoreHeaderProps) {
   return (
     <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 xl:mb-12 2xl:mb-16 pt-8">
