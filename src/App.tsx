@@ -205,18 +205,24 @@ function App() {
             </div>
           </div>
 
-          <div className="flex overflow-x-auto gap-8 pb-8 scrollbar-hide snap-x">
+          <motion.div 
+            variants={containerVariants}
+            initial="hidden"
+            whileInView="show"
+            viewport={{ once: true, amount: 0.1 }}
+            className="flex overflow-x-auto gap-8 pb-8 scrollbar-hide snap-x"
+          >
             {categories.map((item, index) => (
-              <div key={index} className="flex flex-col items-center justify-center min-w-[100px] cursor-pointer group snap-start">
+              <motion.div variants={itemVariants} key={index} className="flex flex-col items-center justify-center min-w-[100px] cursor-pointer group snap-start">
                 <div className="group-hover:scale-105 transition-transform duration-300">
                   {item.icon}
                 </div>
                 <span className="text-sm font-medium text-[#1d1d1f] mt-1 group-hover:text-blue-600 transition-colors">
                   {item.name}
                 </span>
-              </div>
+              </motion.div>
             ))}
-          </div>
+          </motion.div>
 
         </div>
 
@@ -228,23 +234,28 @@ function App() {
           </div>
 
           <div className="relative group">
-            <div
+            <motion.div
               ref={scrollRef}
               onScroll={checkScroll}
+              variants={containerVariants}
+              initial="hidden"
+              whileInView="show"
+              viewport={{ once: true, amount: 0.1 }}
               className="flex overflow-x-auto gap-4 md:gap-6 pb-8 pt-4 scrollbar-hide snap-x snap-mandatory"
             >
               <div className="shrink-0 snap-start [--page-padding:16px] sm:[--page-padding:24px]" style={{ width: 'max(var(--page-padding), calc(50vw - 800px + var(--page-padding)))' }}></div>
 
               {latestProducts.map((product, idx) => (
-                <div
+                <motion.div
+                  variants={itemVariants}
                   key={idx}
                   className="min-w-[280px] sm:min-w-[320px] lg:min-w-[380px] xl:min-w-[400px] h-[400px] sm:h-[460px] lg:h-[500px] rounded-[2rem] snap-start relative overflow-hidden cursor-pointer shadow-[2px_4px_16px_rgba(0,0,0,0.04)] hover:shadow-xl hover:scale-[1.02] transition-all duration-300"
                   style={{ background: `linear-gradient(135deg, #${product.from}, #${product.to})` }}
                 >
-                </div>
+                </motion.div>
               ))}
               <div className="shrink-0 snap-end [--page-padding:16px] sm:[--page-padding:24px]" style={{ width: 'max(var(--page-padding), calc(50vw - 800px + var(--page-padding)))' }}></div>
-            </div>
+            </motion.div>
             {canScrollLeft && (
               <button
                 onClick={scrollLeft}
