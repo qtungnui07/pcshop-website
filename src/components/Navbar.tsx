@@ -4,6 +4,15 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Search, ShoppingBag, Monitor, User } from 'lucide-react';
 import { navItems, containerVariants, itemVariants } from '../constants/data';
 
+const generateSlug = (text: string) => {
+  return text.toLowerCase()
+    .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^\w\s-]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+    .trim();
+};
+
 export default function Navbar() {
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
   const [activeSplitCategory, setActiveSplitCategory] = useState<string | null>(null);
@@ -71,7 +80,7 @@ export default function Navbar() {
                 onMouseEnter={() => handleMouseEnter(item.name)}
                 onMouseLeave={handleMouseLeaveItem}
               >
-                <Link to={item.name === 'Cửa hàng' ? '/store' : '/'} className="h-full flex items-center px-2 hover:text-black transition-colors">
+                <Link to={item.name === 'Cửa hàng' ? '/store' : `/${generateSlug(item.name)}`} className="h-full flex items-center px-2 hover:text-black transition-colors">
                   {item.name}
                 </Link>
               </li>
@@ -79,7 +88,7 @@ export default function Navbar() {
 
             <li><a href="#" className="hover:text-black transition-colors"><Search className="w-5 h-5" /></a></li>
             <li><a href="#" className="hover:text-black transition-colors"><ShoppingBag className="w-5 h-5" /></a></li>
-            <li><a href="#" className="hover:text-black transition-colors"><User className="w-5 h-5" /></a></li>
+            <li><Link to="/auth" className="hover:text-black transition-colors"><User className="w-5 h-5" /></Link></li>
           </ul>
         </div>
         <AnimatePresence>
@@ -146,9 +155,9 @@ export default function Navbar() {
                                 <div className="grid grid-cols-2 md:grid-cols-3 gap-y-4 gap-x-8">
                                   {/* @ts-ignore */}
                                   {cat.links.map((link, lIdx) => (
-                                    <a href="#" key={lIdx} className="text-xl font-medium text-[#1d1d1f] hover:text-blue-600 transition-colors block">
+                                    <Link to={`/${generateSlug(currentMenu?.name || '')}/${generateSlug(link)}`} key={lIdx} className="text-xl font-medium text-[#1d1d1f] hover:text-blue-600 transition-colors block">
                                       {link}
-                                    </a>
+                                    </Link>
                                   ))}
                                 </div>
                               </motion.div>
@@ -165,9 +174,9 @@ export default function Navbar() {
                               <ul className="space-y-3">
                                 {col.links.map((link, lIdx) => (
                                   <motion.li variants={itemVariants} key={lIdx}>
-                                    <a href="#" className="text-xl font-medium text-[#1d1d1f] hover:text-blue-600 transition-colors block">
+                                    <Link to={`/${generateSlug(currentMenu?.name || '')}/${generateSlug(link)}`} className="text-xl font-medium text-[#1d1d1f] hover:text-blue-600 transition-colors block">
                                       {link}
-                                    </a>
+                                    </Link>
                                   </motion.li>
                                 ))}
                               </ul>

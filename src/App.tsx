@@ -13,6 +13,10 @@ const routes = Object.keys(modules).map((path) => {
   
   // Transform 'index' or 'folder/index' to correct URLs
   routePath = routePath.replace(/\/index$/, '').replace(/^index$/, '/');
+  
+  // Transform Next.js style dynamic routes: [category] -> :category
+  routePath = routePath.replace(/\[([^\]]+)\]/g, ':$1');
+
   if (routePath !== '/') {
     routePath = `/${routePath}`;
   }
