@@ -1,10 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-<<<<<<< Updated upstream:src/pages/auth/Auth.tsx
-import { Mail, Lock, User, ArrowRight,  Globe } from 'lucide-react';
-=======
 import { Mail, Lock, User, ArrowRight } from 'lucide-react';
->>>>>>> Stashed changes:src/components/Auth.tsx
 
 export default function Auth() {
   const [isLogin, setIsLogin] = useState(true);
