@@ -1,45 +1,45 @@
-import { useState, useEffect } from 'react';
-import Navbar from './components/Navbar';
-import StoreHeader from './components/StoreHeader';
-import CategoryList from './components/CategoryList';
-import ProductCarousel from './components/ProductCarousel';
-import Footer from './components/Footer';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import MainLayout from './layouts/MainLayout';
+import type { ComponentType } from 'react';
+
+// Automatically import all .tsx files inside the pages directory
+const modules = import.meta.glob('./pages/**/*.tsx', { eager: true });
+
+const routes = Object.keys(modules).map((path) => {
+  const match = path.match(/\.\/pages\/(.*)\.tsx$/);
+  if (!match) return null;
+  
+  let routePath = match[1].toLowerCase();
+  
+  // Transform 'index' or 'folder/index' to correct URLs
+  routePath = routePath.replace(/\/index$/, '').replace(/^index$/, '/');
+  if (routePath !== '/') {
+    routePath = `/${routePath}`;
+  }
+
+  // @ts-ignore
+  const Component = modules[path].default as ComponentType;
+  
+  return {
+    path: routePath,
+    Component
+  };
+}).filter(Boolean) as { path: string, Component: ComponentType }[];
 
 function App() {
-  const [currentPage, setCurrentPage] = useState<'home' | 'store'>(() => {
-    return window.location.hash === '#store' ? 'store' : 'home';
-  });
-
-  useEffect(() => {
-    const handleHashChange = () => {
-      setCurrentPage(window.location.hash === '#store' ? 'store' : 'home');
-    };
-    window.addEventListener('hashchange', handleHashChange);
-    return () => window.removeEventListener('hashchange', handleHashChange);
-  }, []);
-
   return (
-    <div className="min-h-screen bg-[#f5f5f7] text-[#1d1d1f] font-sans selection:bg-blue-200">
-      <Navbar />
-
-      {currentPage === 'store' && (
-        <main className="pt-24 pb-12 relative z-10">
-          <div className="max-w-[1700px] mx-auto px-4 md:px-8 lg:px-10 xl:px-12 2xl:px-16">
-            <StoreHeader />
-            <CategoryList />
-          </div>
-          <ProductCarousel />
-        </main>
-      )}
-
-      {currentPage === 'home' && (
-        <main className="pt-24 pb-12 relative z-10 min-h-screen">
-          {/* Blank page */}
-        </main>
-      )}
-
-      <Footer />
-    </div>
+    <BrowserRouter>
+      <Routes>
+        <Route element={<MainLayout />}>
+          {routes.map((route) => {
+            if (route.path === '/') {
+              return <Route key={route.path} index element={<route.Component />} />;
+            }
+            return <Route key={route.path} path={route.path} element={<route.Component />} />;
+          })}
+        </Route>
+      </Routes>
+    </BrowserRouter>
   );
 }
 
