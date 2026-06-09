@@ -24,7 +24,7 @@ function App() {
 
       {currentPage === 'store' && (
         <main className="pt-24 pb-12 relative z-10">
-          <div className="max-w-[1600px] mx-auto px-4 sm:px-6">
+          <div className="max-w-[1700px] mx-auto px-4 md:px-8 lg:px-10 xl:px-12 2xl:px-16">
             <StoreHeader />
             <CategoryList />
           </div>

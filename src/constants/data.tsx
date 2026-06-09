@@ -1,5 +1,5 @@
 import { type Variants } from 'framer-motion';
-import { Box, Monitor, Cpu, HardDrive, Mouse, Keyboard, Headphones } from 'lucide-react';
+import { Box, Monitor, Cpu, HardDrive, Mouse, Keyboard, Headphones, Laptop } from 'lucide-react';
 
 export const navItems = [
   {
@@ -24,6 +24,7 @@ export const navItems = [
       { title: 'Năng Lượng & Tản Nhiệt', links: ['Nguồn (PSU)', 'Tản Nhiệt Khí', 'Tản Nhiệt Nước (AIO/Custom)', 'Case - Vỏ Máy Tính'] },
     ]
   },
+  { name: 'Laptop', dropdown: null },
   { name: 'Phụ kiện', dropdown: null },
   { name: 'Hỗ trợ', dropdown: null },
 ];
@@ -55,17 +56,18 @@ export const itemVariants: Variants = {
 };
 
 export const latestProducts = [
-  { from: "D9F9DF", to: "AEE2FF" },
-  { from: "AEE2FF", to: "B5BAFF" },
-  { from: "B5BAFF", to: "9FA1FF" },
-  { from: "9FA1FF", to: "ECB65F" },
-  { from: "ECB65F", to: "F0E76F" },
-  { from: "F0E76F", to: "D9F9DF" },
+  { badge: "Mới", title: "PC Build Gaming", description: "Sức mạnh vượt trội. Chiến mọi tựa game.", price: "Từ 15.990.000đ", from: "D9F9DF", to: "AEE2FF" },
+  { badge: "Bán chạy", title: "Màn hình 4K", description: "Độ phân giải siêu nét cho đồ họa.", price: "Từ 8.490.000đ", from: "AEE2FF", to: "B5BAFF" },
+  { badge: "Sắp ra mắt", title: "RTX 5090", description: "Đỉnh cao card đồ họa thế hệ mới.", price: "Đang cập nhật", from: "B5BAFF", to: "9FA1FF" },
+  { badge: "Giảm giá", title: "Bàn phím Cơ", description: "Gõ êm ái, LED RGB siêu sáng.", price: "Từ 1.290.000đ", from: "9FA1FF", to: "ECB65F" },
+  { badge: "Mới", title: "Chuột Siêu Nhẹ", description: "Phản hồi nhanh, thiết kế công thái học.", price: "Từ 1.990.000đ", from: "ECB65F", to: "F0E76F" },
+  { badge: "", title: "Tai nghe 7.1", description: "Âm thanh vòm sống động.", price: "Từ 2.490.000đ", from: "F0E76F", to: "D9F9DF" },
 ];
 
 export const categories = [
   { name: 'PC Build', icon: <Box className="w-10 h-10 mb-3 text-[#1d1d1f]" strokeWidth={1} /> },
   { name: 'Màn Hình', icon: <Monitor className="w-10 h-10 mb-3 text-[#1d1d1f]" strokeWidth={1} /> },
+  { name: 'Laptop', icon: <Laptop className="w-10 h-10 mb-3 text-[#1d1d1f]" strokeWidth={1} /> },
   { name: 'Linh Kiện', icon: <Cpu className="w-10 h-10 mb-3 text-[#1d1d1f]" strokeWidth={1} /> },
   { name: 'Lưu Trữ', icon: <HardDrive className="w-10 h-10 mb-3 text-[#1d1d1f]" strokeWidth={1} /> },
   { name: 'Chuột', icon: <Mouse className="w-10 h-10 mb-3 text-[#1d1d1f]" strokeWidth={1} /> },
