@@ -26,7 +26,7 @@ export default function Navbar() {
       >
         <div className="max-w-[1000px] mx-auto px-4">
           <ul className="flex items-center justify-between h-11 text-[12px] text-[#1d1d1f]/80 font-medium tracking-wide">
-            <li><a href="#" className="hover:text-black transition-colors"><Monitor className="w-4 h-4" /></a></li>
+            <li><a href="#home" className="hover:text-black transition-colors"><Monitor className="w-4 h-4" /></a></li>
 
             {navItems.map((item) => (
               <li
@@ -34,7 +34,7 @@ export default function Navbar() {
                 className="hidden md:block h-11"
                 onMouseEnter={() => setActiveMenu(item.name)}
               >
-                <a href="#" className="h-full flex items-center px-2 hover:text-black transition-colors">
+                <a href={item.name === 'Cửa hàng' ? '#store' : '#'} className="h-full flex items-center px-2 hover:text-black transition-colors">
                   {item.name}
                 </a>
               </li>

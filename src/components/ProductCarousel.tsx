@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { ChevronRight, ChevronLeft } from 'lucide-react';
-import { latestProducts } from '../constants/data';
+import { motion } from 'framer-motion';
+import { latestProducts, containerVariants, itemVariants } from '../constants/data';
 
 export default function ProductCarousel() {
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -22,16 +23,16 @@ export default function ProductCarousel() {
   }, []);
 
   const scrollRight = () => {
-    if (scrollRef.current && scrollRef.current.children.length > 0) {
-      const cardWidth = (scrollRef.current.children[0] as HTMLElement).offsetWidth;
+    if (scrollRef.current && scrollRef.current.children.length > 1) {
+      const cardWidth = (scrollRef.current.children[1] as HTMLElement).offsetWidth;
       const gap = window.innerWidth >= 768 ? 24 : 16;
       scrollRef.current.scrollBy({ left: cardWidth + gap, behavior: 'smooth' });
     }
   };
 
   const scrollLeft = () => {
-    if (scrollRef.current && scrollRef.current.children.length > 0) {
-      const cardWidth = (scrollRef.current.children[0] as HTMLElement).offsetWidth;
+    if (scrollRef.current && scrollRef.current.children.length > 1) {
+      const cardWidth = (scrollRef.current.children[1] as HTMLElement).offsetWidth;
       const gap = window.innerWidth >= 768 ? 24 : 16;
       scrollRef.current.scrollBy({ left: -(cardWidth + gap), behavior: 'smooth' });
     }
@@ -46,23 +47,28 @@ export default function ProductCarousel() {
       </div>
 
       <div className="relative group">
-        <div
+        <motion.div
           ref={scrollRef}
           onScroll={checkScroll}
+          variants={containerVariants}
+          initial="hidden"
+          whileInView="show"
+          viewport={{ once: true, amount: 0.1 }}
           className="flex overflow-x-auto gap-4 md:gap-6 pb-8 pt-4 scrollbar-hide snap-x snap-mandatory"
         >
-          <div className="shrink-0 snap-start" style={{ width: 'max(0px, 50vw - 800px)' }}></div>
+          <div className="shrink-0 snap-start [--page-padding:16px] sm:[--page-padding:24px]" style={{ width: 'max(var(--page-padding), calc(50vw - 800px + var(--page-padding)))' }}></div>
 
           {latestProducts.map((product, idx) => (
-            <div
+            <motion.div
+              variants={itemVariants}
               key={idx}
-              className="min-w-[300px] md:min-w-[340px] lg:min-w-[400px] h-[480px] md:h-[500px] rounded-[2rem] snap-start relative overflow-hidden cursor-pointer shadow-[2px_4px_16px_rgba(0,0,0,0.04)] hover:shadow-xl hover:scale-[1.02] transition-all duration-300"
+              className="min-w-[280px] sm:min-w-[320px] lg:min-w-[380px] xl:min-w-[400px] h-[400px] sm:h-[460px] lg:h-[500px] rounded-[2rem] snap-start relative overflow-hidden cursor-pointer shadow-[2px_4px_16px_rgba(0,0,0,0.04)] hover:shadow-xl hover:scale-[1.02] transition-all duration-300"
               style={{ background: `linear-gradient(135deg, #${product.from}, #${product.to})` }}
             >
-            </div>
+            </motion.div>
           ))}
-          <div className="shrink-0 snap-end" style={{ width: 'max(0px, 50vw - 800px)' }}></div>
-        </div>
+          <div className="shrink-0 snap-end [--page-padding:16px] sm:[--page-padding:24px]" style={{ width: 'max(var(--page-padding), calc(50vw - 800px + var(--page-padding)))' }}></div>
+        </motion.div>
         {canScrollLeft && (
           <button
             onClick={scrollLeft}
