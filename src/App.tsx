@@ -202,9 +202,6 @@ function App() {
               <p className="text-[#86868b] text-sm md:text-base font-medium">
                 Cách tốt nhất để mua <br className="hidden md:block" /> <span className="text-[#1d1d1f]">linh kiện bạn thích.</span>
               </p>
-              <a href="#" className="text-blue-600 text-sm hover:underline mt-1 inline-block">
-                Kết nối với Kỹ thuật viên &gt;
-              </a>
             </div>
           </div>
 
@@ -236,17 +233,17 @@ function App() {
               onScroll={checkScroll}
               className="flex overflow-x-auto gap-4 md:gap-6 pb-8 pt-4 scrollbar-hide snap-x snap-mandatory"
             >
-              <div className="shrink-0 snap-start" style={{ width: 'max(0px, 50vw - 800px)' }}></div>
+              <div className="shrink-0 snap-start [--page-padding:16px] sm:[--page-padding:24px]" style={{ width: 'max(var(--page-padding), calc(50vw - 800px + var(--page-padding)))' }}></div>
 
               {latestProducts.map((product, idx) => (
                 <div
                   key={idx}
-                  className="min-w-[300px] md:min-w-[340px] lg:min-w-[400px] h-[480px] md:h-[500px] rounded-[2rem] snap-start relative overflow-hidden cursor-pointer shadow-[2px_4px_16px_rgba(0,0,0,0.04)] hover:shadow-xl hover:scale-[1.02] transition-all duration-300"
+                  className="min-w-[280px] sm:min-w-[320px] lg:min-w-[380px] xl:min-w-[400px] h-[400px] sm:h-[460px] lg:h-[500px] rounded-[2rem] snap-start relative overflow-hidden cursor-pointer shadow-[2px_4px_16px_rgba(0,0,0,0.04)] hover:shadow-xl hover:scale-[1.02] transition-all duration-300"
                   style={{ background: `linear-gradient(135deg, #${product.from}, #${product.to})` }}
                 >
                 </div>
               ))}
-              <div className="shrink-0 snap-end" style={{ width: 'max(0px, 50vw - 800px)' }}></div>
+              <div className="shrink-0 snap-end [--page-padding:16px] sm:[--page-padding:24px]" style={{ width: 'max(var(--page-padding), calc(50vw - 800px + var(--page-padding)))' }}></div>
             </div>
             {canScrollLeft && (
               <button
