@@ -1,191 +1,303 @@
-import { ShieldCheck, Truck, CheckCircle2, Gamepad2, Palette, Clock, Box } from "lucide-react";
+import { ShieldCheck, Truck, CheckCircle2, Wrench, CreditCard, ChevronRight, Heart, ArrowRight } from "lucide-react";
+import { useRef, useState } from "react";
+import { motion } from "framer-motion";
+
+/* ── DATA ─────────────────────────────────────────────────────────── */
 
 const pcCategories = [
-  {
-    name: "PC Gaming",
-    icon: <Gamepad2 className="w-4.5 h-4.5 text-zinc-500" strokeWidth={2.2} />,
-    blockFrom: "#7c3aed",
-    blockTo: "#db2777",
-    glowColor: "rgba(255,100,200,0.4)"
-  },
-  {
-    name: "PC Đồ Họa",
-    icon: <Palette className="w-4.5 h-4.5 text-zinc-500" strokeWidth={2.2} />,
-    blockFrom: "#1d4ed8",
-    blockTo: "#0ea5e9",
-    glowColor: "rgba(100,200,255,0.4)"
-  },
-  {
-    name: "PC Văn Phòng",
-    icon: <Clock className="w-4.5 h-4.5 text-zinc-500" strokeWidth={2.2} />,
-    blockFrom: "#d97706",
-    blockTo: "#fbbf24",
-    glowColor: "rgba(255,220,80,0.45)"
-  },
-  {
-    name: "PC Mini",
-    icon: <Box className="w-4.5 h-4.5 text-zinc-500" strokeWidth={2.2} />,
-    blockFrom: "#059669",
-    blockTo: "#10b981",
-    glowColor: "rgba(52,211,153,0.45)"
-  }
+  { name: "PC Gaming",     from: "#a78bfa", to: "#ec4899", glow: "rgba(236,72,153,0.3)" },
+  { name: "PC Đồ Họa",    from: "#38bdf8", to: "#6366f1", glow: "rgba(99,102,241,0.3)" },
+  { name: "PC Văn Phòng",  from: "#d4d4d8", to: "#a1a1aa", glow: "rgba(113,113,122,0.2)" },
+  { name: "PC Workstation",from: "#1e293b", to: "#334155", glow: "rgba(51,65,85,0.4)" },
+  { name: "PC Mini",       from: "#e2e8f0", to: "#cbd5e1", glow: "rgba(148,163,184,0.25)" },
 ];
 
-export default function PCIndex() {
+const featuredPCs = [
+  { badge: "Bán chạy", badgeColor: "#1d1d1f", name: "PC Gaming Infinity",   specs: "i7-14700K • RTX 4070 SUPER\n32GB RAM • 1TB SSD",          price: "28.990.000đ", from: "#7c3aed", to: "#ec4899" },
+  { badge: "Mới",      badgeColor: "#2563eb", name: "PC Gaming Frost",       specs: "Ryzen 7 7800X3D • RTX 4070 Ti\n32GB RAM • 1TB SSD",       price: "32.990.000đ", from: "#1d4ed8", to: "#38bdf8" },
+  { badge: "Hot",      badgeColor: "#dc2626", name: "PC Gaming Nebula",      specs: "i9-14900K • RTX 4080 SUPER\n32GB RAM • 2TB SSD",          price: "45.990.000đ", from: "#0f172a", to: "#1e40af" },
+  { badge: "",         badgeColor: "",        name: "PC Workstation Pro",    specs: "Threadripper 7970X • RTX 4090\n64GB RAM • 2TB SSD",       price: "89.990.000đ", from: "#18181b", to: "#3f3f46" },
+  { badge: "",         badgeColor: "",        name: "PC Mini White",         specs: "Ryzen 5 7600 • RTX 4060\n16GB RAM • 1TB SSD",             price: "18.990.000đ", from: "#e2e8f0", to: "#f1f5f9" },
+];
+
+const brands = [
+  { label: "intel.",    s: { fontStyle:"italic" as const, fontWeight:700, fontSize:"1.4rem", color:"#0068b5" } },
+  { label: "AMD\u25b3", s: { fontWeight:900, fontSize:"1.1rem", color:"#E0232B" } },
+  { label: "NVIDIA",   s: { fontWeight:900, fontSize:"1.05rem", letterSpacing:"0.04em", color:"#76b900" } },
+  { label: "ASUS",     s: { fontWeight:900, fontSize:"1.2rem", letterSpacing:"0.06em", color:"#1d1d1f" } },
+  { label: "msi",      s: { fontWeight:800, fontSize:"1.25rem", color:"#D40000" } },
+  { label: "GIGABYTE", s: { fontWeight:700, fontSize:"0.9rem", letterSpacing:"0.04em", color:"#1d1d1f" } },
+  { label: "CORSAIR",  s: { fontWeight:700, fontSize:"0.9rem", letterSpacing:"0.05em", color:"#1d1d1f" } },
+];
+
+const perks = [
+  { icon: ShieldCheck, title: "Bảo hành 36 tháng",      desc: "An tâm sử dụng dài lâu" },
+  { icon: Wrench,      title: "Hỗ trợ build miễn phí",  desc: "Tư vấn & lắp ráp tận tình" },
+  { icon: Truck,       title: "Giao hàng toàn quốc",    desc: "Nhanh chóng & an toàn" },
+  { icon: CreditCard,  title: "Trả góp 0% lãi suất",    desc: "Dễ dàng & linh hoạt" },
+];
+
+/* ── GRADIENT BLOCK placeholder ───────────────────────────────────── */
+function Grad({ from, to, glow, className = "", children }: {
+  from: string; to: string; glow?: string; className?: string; children?: React.ReactNode;
+}) {
   return (
-    <div className="max-w-[1700px] mx-auto px-4 md:px-8 lg:px-10 xl:px-12 2xl:px-16">
-      
-      {/* 1. HERO SECTION */}
-      <section className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center py-10 md:py-16">
-        {/* Left Column */}
-        <div className="lg:col-span-7 flex flex-col items-start text-left">
-          <span className="inline-block px-3 py-1 bg-zinc-200/60 text-zinc-600 rounded-full text-xs font-semibold uppercase tracking-wider mb-6">
-            PC Gaming & Workstation
-          </span>
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-zinc-900 leading-tight mb-6 whitespace-pre-line">
-            PC mạnh mẽ{"\n"}cho mọi nhu cầu.
-          </h1>
-          <p className="text-lg text-zinc-500 mb-8 max-w-lg leading-relaxed whitespace-pre-line">
-            Hiệu năng đỉnh cao, thiết kế tinh tế.{"\n"}Được tối ưu cho Gaming, Work và Sáng tạo.
-          </p>
+    <div className={className} style={{ background:`linear-gradient(135deg,${from} 0%,${to} 100%)`, position:"relative", overflow:"hidden" }}>
+      {glow && <div style={{ position:"absolute", inset:0, background:`radial-gradient(circle at 30% 30%,${glow} 0%,transparent 65%)`, pointerEvents:"none" }} />}
+      {children}
+    </div>
+  );
+}
 
-          {/* Action Buttons */}
-          <div className="flex flex-row gap-4 mb-12 w-full sm:w-auto">
-            <button className="flex-1 sm:flex-initial inline-flex items-center justify-center px-8 py-3 bg-[#1d1d1f] hover:bg-zinc-800 text-white font-medium rounded-full transition-all duration-300 shadow-md hover:shadow-lg active:scale-95 cursor-pointer whitespace-nowrap">
-              Xem PC Gaming <span className="ml-2">→</span>
-            </button>
-            <button className="flex-1 sm:flex-initial inline-flex items-center justify-center px-8 py-3 bg-white border border-zinc-300 hover:bg-zinc-50 text-zinc-800 font-medium rounded-full transition-all duration-300 shadow-sm active:scale-95 cursor-pointer whitespace-nowrap">
-              Tự build PC <span className="ml-2">→</span>
-            </button>
-          </div>
+/* ── PAGE ─────────────────────────────────────────────────────────── */
+export default function PCIndex() {
+  const carouselRef = useRef<HTMLDivElement>(null);
+  const [liked, setLiked] = useState<Set<number>>(new Set());
 
-          {/* Hero Bottom Perks */}
-          <div className="flex flex-wrap items-center gap-x-8 gap-y-4 w-full pt-8 border-t border-zinc-200/60">
-            <div className="flex items-center gap-2">
-              <ShieldCheck className="w-5 h-5 text-zinc-600" strokeWidth={2} />
-              <span className="text-[13px] text-zinc-500 leading-tight font-medium whitespace-pre-line">
-                Bảo hành lên đến{"\n"}36 tháng
-              </span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Truck className="w-5 h-5 text-zinc-600" strokeWidth={2} />
-              <span className="text-[13px] text-zinc-500 leading-tight font-medium whitespace-pre-line">
-                Giao hàng nhanh{"\n"}toàn quốc
-              </span>
-            </div>
-            <div className="flex items-center gap-2">
-              <CheckCircle2 className="w-5 h-5 text-zinc-600" strokeWidth={2} />
-              <span className="text-[13px] text-zinc-500 leading-tight font-medium whitespace-pre-line">
-                Test máy kỹ càng{"\n"}trước khi giao
-              </span>
-            </div>
-          </div>
-        </div>
+  const toggleLike = (i: number) =>
+    setLiked(p => { const n = new Set(p); n.has(i) ? n.delete(i) : n.add(i); return n; });
 
-        {/* Right Column - Gradient Block PC Illustration */}
-        <div className="lg:col-span-5 w-full flex justify-center">
-          <div className="w-full aspect-[4/3] sm:aspect-square md:aspect-[4/3] lg:aspect-square bg-gradient-to-br from-[#f8f9fa] via-[#e9ecef] to-[#dee2e6] rounded-[2.5rem] relative overflow-hidden shadow-xl border border-white flex items-center justify-center p-8 group/hero">
-            
-            {/* Ambient Lighting Glows */}
-            <div className="absolute -top-10 -left-10 w-48 h-48 bg-blue-300/20 rounded-full blur-3xl" />
-            <div className="absolute -bottom-10 -right-10 w-48 h-48 bg-purple-300/20 rounded-full blur-3xl" />
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-72 h-72 bg-gradient-to-tr from-cyan-200/20 to-indigo-200/20 rounded-full blur-3xl opacity-60" />
+  const scroll = (dir: "left"|"right") =>
+    carouselRef.current?.scrollBy({ left: dir==="right" ? 260 : -260, behavior:"smooth" });
 
-            {/* Custom CSS PC Case structure */}
-            <div className="w-[62%] h-[88%] bg-[#1b1b1d] rounded-[2.2rem] shadow-[0_25px_60px_-15px_rgba(0,0,0,0.45)] border border-white/10 relative overflow-hidden flex flex-col p-4">
-              
-              {/* Glass reflection highlight */}
-              <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-white/10 pointer-events-none z-20" />
-              
-              {/* Front Panel Mesh/Glass area */}
-              <div className="absolute right-0 top-0 bottom-0 w-10 bg-black/40 border-l border-white/5 z-10 flex flex-col justify-around items-center py-6">
-                {/* 3 front RGB fans */}
-                {[1, 2, 3].map((f) => (
-                  <div key={f} className="w-8 h-8 rounded-full border border-white/10 bg-cyan-100/5 shadow-[0_0_10px_rgba(165,243,252,0.3)] flex items-center justify-center animate-pulse">
-                    <div className="w-3.5 h-3.5 rounded-full border border-white/10 bg-cyan-300/20" />
+  const heroContainer = {
+    hidden: {},
+    show: { transition: { staggerChildren: 0.12, delayChildren: 0.1 } },
+  };
+  const heroItem = {
+    hidden: { opacity: 0, y: 28 },
+    show:   { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.25, 1, 0.5, 1] } },
+  };
+  const heroRight = {
+    hidden: { opacity: 0, x: 40, scale: 0.95 },
+    show:   { opacity: 1, x: 0, scale: 1, transition: { duration: 0.8, ease: [0.25, 1, 0.5, 1], delay: 0.2 } },
+  };
+
+  return (
+    <div>
+      {/* ══ 1. HERO — full-width, flush with navbar ═══════════════════ */}
+      <div
+        style={{
+          background: "linear-gradient(135deg, #ffffff 0%, #f0f6ff 40%, #e3effe 70%, #dceafd 100%)",
+          marginLeft: "calc(-50vw + 50%)",
+          marginRight: "calc(-50vw + 50%)",
+          marginTop: "-96px",
+          paddingTop: "96px",
+          paddingLeft: "calc(50vw - 50%)",
+          paddingRight: "calc(50vw - 50%)",
+          overflow: "hidden",
+          position: "relative",
+        }}
+      >
+        {/* Top-right blue glow */}
+        <div style={{
+          position: "absolute", top: "-10%", right: "-5%",
+          width: 800, height: 800,
+          background: "radial-gradient(circle, rgba(147,197,253,0.35) 0%, rgba(165,180,252,0.15) 40%, transparent 70%)",
+          pointerEvents: "none",
+        }} />
+        {/* Bottom left soft white fade */}
+        <div style={{
+          position: "absolute", bottom: 0, left: 0,
+          width: 600, height: 400,
+          background: "radial-gradient(ellipse at 0% 100%, rgba(255,255,255,0.9) 0%, transparent 70%)",
+          pointerEvents: "none",
+        }} />
+        <div className="max-w-[1500px] mx-auto px-4 md:px-8 lg:px-10 xl:px-12 2xl:px-19">
+          <div className="grid grid-cols-1 lg:grid-cols-2" style={{ minHeight: "calc(100vh - 96px)" }}>
+            {/* Left content */}
+            <motion.div
+              variants={heroContainer}
+              initial="hidden"
+              animate="show"
+              className="flex flex-col items-start justify-center pr-8 py-12"
+            >
+              <motion.span variants={heroItem} className="inline-block px-3 py-1 bg-white/70 text-zinc-500 rounded-full text-[11px] font-semibold uppercase tracking-widest mb-6 border border-zinc-200/60">
+                PC Gaming &amp; Workstation
+              </motion.span>
+              <motion.h1 variants={heroItem} className="text-[3.2rem] md:text-[4.2rem] lg:text-[5rem] font-bold tracking-tight text-zinc-900 leading-[1.08] mb-6">
+                PC mạnh mẽ<br />cho mọi nhu cầu.
+              </motion.h1>
+              <motion.p variants={heroItem} className="text-[17px] text-zinc-500 mb-10 leading-relaxed">
+                Hiệu năng đỉnh cao, thiết kế tinh tế.<br />
+                Được tối ưu cho Gaming, Work và Sáng tạo.
+              </motion.p>
+              <motion.div variants={heroItem} className="flex flex-row gap-3 mb-12">
+                <button className="inline-flex items-center gap-2 px-8 py-3.5 bg-[#1d1d1f] hover:bg-zinc-800 text-white text-[15px] font-semibold rounded-full transition-all duration-200 shadow-md active:scale-95 cursor-pointer">
+                  Xem PC Gaming <ArrowRight className="w-4 h-4" />
+                </button>
+                <button className="inline-flex items-center gap-2 px-8 py-3.5 bg-white/80 border border-zinc-300 hover:bg-white text-zinc-800 text-[15px] font-semibold rounded-full transition-all duration-200 shadow-sm active:scale-95 cursor-pointer">
+                  Tự build PC <ArrowRight className="w-4 h-4" />
+                </button>
+              </motion.div>
+              <motion.div variants={heroItem} className="flex flex-wrap items-center gap-x-8 gap-y-3 pt-7 border-t border-zinc-300/40 w-full">
+                {[
+                  { Icon: ShieldCheck, text: "Bảo hành lên đến\n36 tháng" },
+                  { Icon: Truck,       text: "Giao hàng nhanh\ntoàn quốc" },
+                  { Icon: CheckCircle2,text: "Test máy kỹ càng\ntrước khi giao" },
+                ].map(({ Icon, text }) => (
+                  <div key={text} className="flex items-center gap-2">
+                    <Icon className="w-5 h-5 text-zinc-500 shrink-0" strokeWidth={1.8} />
+                    <span className="text-[13px] text-zinc-500 leading-tight whitespace-pre-line font-medium">{text}</span>
                   </div>
                 ))}
-              </div>
+              </motion.div>
+            </motion.div>
 
-              {/* Inside components */}
-              <div className="flex-1 relative pr-10">
-                {/* Rear exhaust fan */}
-                <div className="absolute left-1 top-2 w-6 h-6 rounded-full border border-white/10 bg-blue-100/5 shadow-[0_0_8px_rgba(147,197,253,0.3)]" />
-
-                {/* AIO Cooler Screen (32C) */}
-                <div className="absolute left-1/3 top-1/4 w-14 h-14 rounded-full border border-white/15 bg-zinc-900 shadow-[0_0_15px_rgba(147,197,253,0.4)] flex items-center justify-center z-10">
-                  <div className="flex flex-col items-center">
-                    <span className="text-[10px] text-zinc-400 font-mono leading-none">CPU</span>
-                    <span className="text-[11px] text-blue-300 font-mono font-bold leading-none mt-0.5">32°C</span>
-                  </div>
-                </div>
-
-                {/* GPU with light strip */}
-                <div className="absolute left-4 top-[56%] w-36 h-7 bg-zinc-800 rounded shadow-[0_0_12px_rgba(168,85,247,0.3)] border border-white/5 flex items-center px-2">
-                  <div className="w-full h-1 bg-gradient-to-r from-blue-400 via-purple-500 to-pink-400 rounded-full animate-pulse" />
-                </div>
-
-                {/* RAM Module slots */}
-                <div className="absolute left-[58%] top-6 h-10 w-4 flex gap-0.5">
-                  <div className="w-0.5 h-full bg-cyan-400/60 shadow-[0_0_6px_rgba(34,211,238,0.5)] rounded-full" />
-                  <div className="w-0.5 h-full bg-cyan-400/60 shadow-[0_0_6px_rgba(34,211,238,0.5)] rounded-full" />
-                </div>
-              </div>
-            </div>
+            {/* Right — PC image with lighting */}
+            <motion.div
+              variants={heroRight}
+              initial="hidden"
+              animate="show"
+              className="hidden lg:flex items-end justify-center relative overflow-visible"
+              style={{ alignSelf: "stretch" }}
+            >
+              {/* Blue glow behind PC */}
+              <div style={{
+                position: "absolute",
+                width: 600, height: 600,
+                background: "radial-gradient(circle, rgba(147,197,253,0.3) 0%, rgba(165,180,252,0.1) 50%, transparent 70%)",
+                bottom: "0%", left: "50%", transform: "translateX(-48%)",
+                pointerEvents: "none",
+                zIndex: 0,
+              }} />
+              {/* Floor reflection */}
+              <div style={{
+                position: "absolute",
+                width: 500, height: 60,
+                background: "radial-gradient(ellipse, rgba(120,170,250,0.2) 0%, transparent 70%)",
+                bottom: "0%", left: "50%", transform: "translateX(-48%)",
+                filter: "blur(10px)",
+                pointerEvents: "none",
+                zIndex: 0,
+              }} />
+              <img
+                src="/src/assets/pc1.png"
+                alt="PC Gaming"
+                style={{
+                  height: "100%",
+                  width: "auto",
+                  objectFit: "contain",
+                  objectPosition: "bottom center",
+                  position: "relative",
+                  zIndex: 1,
+                  transform: "translateX(2%) scale(1.6)",
+                  transformOrigin: "bottom center",
+                  filter: "drop-shadow(0 0 60px rgba(147,197,253,0.3))",
+                }}
+              />
+            </motion.div>
           </div>
         </div>
-      </section>
+      </div>
 
-      {/* 2. SHOP THEO NHU CẦU SECTION */}
-      <section className="mt-20 md:mt-28">
-        <div className="flex justify-between items-end mb-8">
-          <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-zinc-900">
-            Shop theo nhu cầu
-          </h2>
-          <a href="#" className="text-sm font-semibold text-zinc-500 hover:text-zinc-800 transition-colors flex items-center gap-1">
-            Xem tất cả <span className="text-xs">→</span>
-          </a>
-        </div>
+      {/* ══ REST of page inside normal container ═══════════════════════ */}
+      <div className="max-w-[1700px] mx-auto px-4 md:px-8 lg:px-10 xl:px-12 2xl:px-16">
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-5">
-          {pcCategories.map((cat, idx) => {
-            return (
-              <div
-                key={idx}
-                className="cursor-pointer group bg-white rounded-3xl p-3 border border-zinc-100 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] hover:shadow-[0_16px_32px_-6px_rgba(0,0,0,0.12)] hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between"
-              >
-                {/* Image Block with Gradient */}
-                <div
-                  className="w-full aspect-[4/3.2] rounded-2xl overflow-hidden relative"
-                  style={{ background: `linear-gradient(135deg, ${cat.blockFrom} 0%, ${cat.blockTo} 100%)` }}
-                >
-                  <div
-                    className="absolute inset-0"
-                    style={{ background: `radial-gradient(circle at 30% 30%, ${cat.glowColor} 0%, transparent 70%)` }}
-                  />
-
-                  {/* Icon Badge overlay */}
-                  <div className="absolute top-3 left-3 w-9 h-9 rounded-xl bg-white/95 backdrop-blur-md flex items-center justify-center shadow-[0_4px_12px_rgba(0,0,0,0.08)] border border-white/50">
-                    {cat.icon}
-                  </div>
-                </div>
-
-                {/* Label inside Card */}
-                <div className="flex items-center justify-between px-1.5 pt-3 pb-1">
-                  <span className="text-[14px] font-bold text-zinc-800 group-hover:text-zinc-950 transition-colors">
-                    {cat.name}
-                  </span>
-                  <span className="text-zinc-400 text-sm group-hover:text-zinc-700 transition-colors transform group-hover:translate-x-1 duration-200">
-                    →
-                  </span>
+        {/* ══ 2. SHOP THEO NHU CẦU ══════════════════════════════════════ */}
+        <section className="mt-16 md:mt-20">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-xl md:text-2xl font-bold tracking-tight text-zinc-900">Shop theo nhu cầu</h2>
+            <a href="#" className="text-sm font-semibold text-zinc-500 hover:text-zinc-900 transition-colors flex items-center gap-1">
+              Xem tất cả <ChevronRight className="w-4 h-4" />
+            </a>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 md:gap-4">
+            {pcCategories.map((cat, i) => (
+              <div key={i} className="group cursor-pointer bg-white rounded-2xl border border-zinc-100 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 overflow-hidden">
+                <Grad from={cat.from} to={cat.to} glow={cat.glow} className="w-full aspect-[4/3]" />
+                <div className="flex items-center justify-between px-3 py-3">
+                  <span className="text-[13px] font-semibold text-zinc-800 group-hover:text-zinc-950 transition-colors">{cat.name}</span>
+                  <ChevronRight className="w-4 h-4 text-zinc-400 group-hover:text-zinc-700 group-hover:translate-x-0.5 transition-all duration-200" />
                 </div>
               </div>
-            );
-          })}
-        </div>
+            ))}
+          </div>
+        </section>
 
-      </section>
+        {/* ══ 3. PC NỔI BẬT ═════════════════════════════════════════════ */}
+        <section className="mt-16 md:mt-20">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-xl md:text-2xl font-bold tracking-tight text-zinc-900">PC nổi bật</h2>
+            <a href="#" className="text-sm font-semibold text-zinc-500 hover:text-zinc-900 transition-colors flex items-center gap-1">
+              Xem tất cả <ChevronRight className="w-4 h-4" />
+            </a>
+          </div>
+          <div className="relative group/carousel">
+            <button onClick={() => scroll("left")}
+              className="absolute -left-4 top-1/2 -translate-y-1/2 z-10 w-9 h-9 rounded-full bg-white shadow-md border border-zinc-200 flex items-center justify-center opacity-0 group-hover/carousel:opacity-100 transition-opacity hover:bg-zinc-50 active:scale-95 cursor-pointer">
+              <ChevronRight className="w-4 h-4 text-zinc-700 rotate-180" />
+            </button>
+            <div ref={carouselRef} className="flex gap-4 overflow-x-auto pb-2" style={{ scrollbarWidth:"none" }}>
+              {featuredPCs.map((pc, i) => (
+                <div key={i} className="flex-none w-[220px] md:w-[235px] bg-white rounded-2xl border border-zinc-100 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 overflow-hidden">
+                  <div className="relative">
+                    <Grad from={pc.from} to={pc.to} className="w-full aspect-[4/3.5]" />
+                    {pc.badge && (
+                      <span className="absolute top-2.5 left-2.5 px-2.5 py-0.5 text-[10px] font-bold text-white rounded-full" style={{ background: pc.badgeColor }}>
+                        {pc.badge}
+                      </span>
+                    )}
+                  </div>
+                  <div className="p-3.5">
+                    <p className="text-[13px] font-bold text-zinc-900 leading-tight mb-1">{pc.name}</p>
+                    <p className="text-[11px] text-zinc-400 leading-snug whitespace-pre-line mb-3">{pc.specs}</p>
+                    <div className="flex items-center justify-between">
+                      <span className="text-[13px] font-bold text-zinc-900">{pc.price}</span>
+                      <button onClick={() => toggleLike(i)} className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-zinc-100 transition-colors cursor-pointer">
+                        <Heart className={`w-4 h-4 transition-colors ${liked.has(i) ? "fill-red-500 text-red-500" : "text-zinc-400"}`} />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+              <div className="flex-none w-14 flex items-center justify-center">
+                <button onClick={() => scroll("right")} className="w-10 h-10 rounded-full bg-zinc-100 hover:bg-zinc-200 transition-colors flex items-center justify-center cursor-pointer active:scale-95">
+                  <ChevronRight className="w-5 h-5 text-zinc-600" />
+                </button>
+              </div>
+            </div>
+            <button onClick={() => scroll("right")}
+              className="absolute -right-4 top-1/2 -translate-y-1/2 z-10 w-9 h-9 rounded-full bg-white shadow-md border border-zinc-200 flex items-center justify-center opacity-0 group-hover/carousel:opacity-100 transition-opacity hover:bg-zinc-50 active:scale-95 cursor-pointer">
+              <ChevronRight className="w-4 h-4 text-zinc-700" />
+            </button>
+          </div>
+        </section>
 
+        {/* ══ 4. BRANDS ══════════════════════════════════════════════════ */}
+        <section className="mt-16 md:mt-20 border-t border-b border-zinc-200/60 py-7">
+          <div className="flex items-center gap-10 overflow-x-auto" style={{ scrollbarWidth:"none" }}>
+            {brands.map((b, i) => (
+              <div key={i} className="flex-none opacity-40 hover:opacity-80 transition-opacity cursor-pointer select-none">
+                <span style={b.s}>{b.label}</span>
+              </div>
+            ))}
+            <div className="flex-none ml-auto">
+              <button className="w-8 h-8 rounded-full bg-zinc-100 hover:bg-zinc-200 transition-colors flex items-center justify-center cursor-pointer">
+                <ChevronRight className="w-4 h-4 text-zinc-600" />
+              </button>
+            </div>
+          </div>
+        </section>
+
+        {/* ══ 5. PERKS ═══════════════════════════════════════════════════ */}
+        <section className="mt-10 mb-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
+            {perks.map(({ icon: Icon, title, desc }, i) => (
+              <div key={i} className="flex items-start gap-3 py-2">
+                <div className="w-10 h-10 rounded-xl bg-zinc-100 flex items-center justify-center shrink-0">
+                  <Icon className="w-5 h-5 text-zinc-600" strokeWidth={1.8} />
+                </div>
+                <div>
+                  <p className="text-[13px] font-semibold text-zinc-800 leading-tight">{title}</p>
+                  <p className="text-[12px] text-zinc-400 leading-tight mt-0.5">{desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+      </div>
     </div>
   );
 }
