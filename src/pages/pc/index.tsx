@@ -66,11 +66,11 @@ export default function PCIndex() {
   };
   const heroItem = {
     hidden: { opacity: 0, y: 28 },
-    show:   { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.25, 1, 0.5, 1] } },
+    show:   { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.25, 1, 0.5, 1] as const } },
   };
   const heroRight = {
     hidden: { opacity: 0, x: 40, scale: 0.95 },
-    show:   { opacity: 1, x: 0, scale: 1, transition: { duration: 0.8, ease: [0.25, 1, 0.5, 1], delay: 0.2 } },
+    show:   { opacity: 1, x: 0, scale: 1, transition: { duration: 0.8, ease: [0.25, 1, 0.5, 1] as const, delay: 0.2 } },
   };
 
   return (
