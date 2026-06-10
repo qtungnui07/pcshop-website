@@ -72,6 +72,15 @@ function Grad({ from, to, glow, className = "", children }: {
   );
 }
 
+const getCategorySlug = (name: string) => {
+  return name.toLowerCase()
+    .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^\w\s-]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+    .trim();
+};
+
 /* ── PAGE ─────────────────────────────────────────────────────────── */
 export default function PCIndex() {
   const [liked, setLiked] = useState<Set<number>>(new Set());
@@ -152,9 +161,9 @@ export default function PCIndex() {
                 Được tối ưu cho Gaming, Work và Sáng tạo.
               </motion.p>
               <motion.div variants={heroItem} className="flex flex-row gap-3 mb-12">
-                <button className="inline-flex items-center gap-2 px-8 py-3.5 bg-[#1d1d1f] hover:bg-zinc-800 text-white text-[15px] font-semibold rounded-full transition-all duration-200 shadow-md active:scale-95 cursor-pointer">
+                <Link to="/pc/pc-gaming" className="inline-flex items-center gap-2 px-8 py-3.5 bg-[#1d1d1f] hover:bg-zinc-800 text-white text-[15px] font-semibold rounded-full transition-all duration-200 shadow-md active:scale-95 cursor-pointer">
                   Xem PC Gaming <ArrowRight className="w-4 h-4" />
-                </button>
+                </Link>
                 <button className="inline-flex items-center gap-2 px-8 py-3.5 bg-white/80 border border-zinc-300 hover:bg-white text-zinc-800 text-[15px] font-semibold rounded-full transition-all duration-200 shadow-sm active:scale-95 cursor-pointer">
                   Tự build PC <ArrowRight className="w-4 h-4" />
                 </button>
@@ -233,13 +242,13 @@ export default function PCIndex() {
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 md:gap-4">
             {pcCategories.map((cat, i) => (
-              <div key={i} className="group cursor-pointer bg-white rounded-2xl border border-zinc-100 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 overflow-hidden">
+              <Link to={`/pc/${getCategorySlug(cat.name)}`} key={i} className="group cursor-pointer bg-white rounded-2xl border border-zinc-100 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 overflow-hidden block">
                 <Grad from={cat.from} to={cat.to} glow={cat.glow} className="w-full aspect-[4/3]" />
                 <div className="flex items-center justify-between px-3 py-3">
                   <span className="text-[13px] font-semibold text-zinc-800 group-hover:text-zinc-950 transition-colors">{cat.name}</span>
                   <ChevronRight className="w-4 h-4 text-zinc-400 group-hover:text-zinc-700 group-hover:translate-x-0.5 transition-all duration-200" />
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         </section>
