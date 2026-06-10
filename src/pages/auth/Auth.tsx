@@ -1,20 +1,100 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Mail, Lock, User, ArrowRight } from 'lucide-react';
+import { Mail, Lock, User, ArrowRight, Check } from 'lucide-react';
+
+function RequirementItem({ satisfied, label }: { satisfied: boolean; label: string }) {
+  return (
+    <div className="flex items-center gap-2">
+      <div className="relative w-4 h-4 flex items-center justify-center shrink-0">
+        <motion.div
+          className="absolute inset-0 rounded-full border"
+          animate={{
+            scale: satisfied ? [1, 1.15, 1] : 1,
+            borderColor: satisfied ? '#22c55e' : '#e5e7eb',
+            backgroundColor: satisfied ? 'rgba(34, 197, 94, 0.08)' : 'rgba(0, 0, 0, 0)',
+          }}
+          transition={{ duration: 0.3 }}
+        />
+        {satisfied ? (
+          <motion.div
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ type: "spring", stiffness: 350, damping: 20 }}
+          >
+            <Check className="w-2.5 h-2.5 text-green-600" strokeWidth={3} />
+          </motion.div>
+        ) : (
+          <div className="w-1.5 h-1.5 bg-gray-300 rounded-full" />
+        )}
+      </div>
+      <span className={`text-[11px] transition-colors duration-300 ${satisfied ? 'text-green-600 font-medium' : 'text-gray-400'}`}>
+        {label}
+      </span>
+    </div>
+  );
+}
 
 export default function Auth() {
   const [isLogin, setIsLogin] = useState(true);
 
-  return (
-    <div className="min-h-screen w-full flex items-center justify-center p-4 overflow-hidden relative -mt-24 pt-24">
-      {/* Background with abstract animated shapes */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-[20%] -left-[10%] w-[50%] h-[50%] rounded-full bg-blue-400/20 blur-[120px]" />
-        <div className="absolute top-[60%] -right-[10%] w-[40%] h-[60%] rounded-full bg-purple-400/20 blur-[120px]" />
-      </div>
+  // Form states
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [errors, setErrors] = useState<{ name?: string; email?: string; password?: string }>({});
 
+  // Password requirement formulas
+  const hasMinLength = password.length >= 8;
+  const hasUppercase = /[A-Z]/.test(password);
+  const hasLowercase = /[a-z]/.test(password);
+  const hasSpecial = /[^A-Za-z0-9]/.test(password);
+
+  const handleTabChange = (login: boolean) => {
+    setIsLogin(login);
+    setName('');
+    setEmail('');
+    setPassword('');
+    setErrors({});
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const newErrors: { name?: string; email?: string; password?: string } = {};
+
+    // Name check
+    if (!isLogin && !name.trim()) {
+      newErrors.name = 'Vui lòng nhập họ và tên';
+    }
+
+    // Email check
+    if (!email.trim()) {
+      newErrors.email = 'Vui lòng nhập email';
+    } else if (!/\S+@\S+\.\S+/.test(email)) {
+      newErrors.email = 'Email không đúng định dạng';
+    }
+
+    // Password check
+    if (!password) {
+      newErrors.password = 'Vui lòng nhập mật khẩu';
+    } else if (!isLogin) {
+      if (!hasMinLength || !hasUppercase || !hasLowercase || !hasSpecial) {
+        newErrors.password = 'Mật khẩu chưa đáp ứng đầy đủ yêu cầu';
+      }
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+
+    alert(isLogin ? 'Đăng nhập thành công!' : 'Đăng ký tài khoản thành công!');
+  };
+
+  return (
+    <div className="w-full max-w-xl px-4 relative z-10">
       <motion.div
-        className="w-full max-w-md bg-white/70 backdrop-blur-xl border border-white/40 shadow-2xl rounded-3xl p-8 relative z-10"
+        className="w-full bg-white/70 backdrop-blur-xl border border-white/40 shadow-2xl rounded-3xl p-8"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, ease: "easeOut" }}
@@ -29,13 +109,13 @@ export default function Auth() {
               style={{ transform: isLogin ? 'translateX(0)' : 'translateX(100%)' }}
             />
             <button
-              onClick={() => setIsLogin(true)}
+              onClick={() => handleTabChange(true)}
               className={`px-4 py-1.5 text-sm font-medium rounded-full relative z-10 transition-colors ${isLogin ? 'text-gray-900' : 'text-gray-500 hover:text-gray-900'}`}
             >
               Đăng nhập
             </button>
             <button
-              onClick={() => setIsLogin(false)}
+              onClick={() => handleTabChange(false)}
               className={`px-4 py-1.5 text-sm font-medium rounded-full relative z-10 transition-colors ${!isLogin ? 'text-gray-900' : 'text-gray-500 hover:text-gray-900'}`}
             >
               Đăng ký
@@ -57,7 +137,7 @@ export default function Auth() {
             exit={{ opacity: 0, x: isLogin ? 20 : -20 }}
             transition={{ duration: 0.3, ease: "easeInOut" }}
           >
-            <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
+            <form className="space-y-4" onSubmit={handleSubmit}>
               {!isLogin && (
                 <div className="space-y-1.5">
                   <label className="text-sm font-medium text-gray-700">Họ và tên</label>
@@ -67,10 +147,28 @@ export default function Auth() {
                     </div>
                     <input
                       type="text"
-                      className="w-full pl-10 pr-4 py-2.5 bg-gray-50/50 border border-gray-200 rounded-xl text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all outline-none"
+                      value={name}
+                      onChange={(e) => {
+                        setName(e.target.value);
+                        if (errors.name) setErrors(prev => ({ ...prev, name: undefined }));
+                      }}
+                      className={`w-full pl-10 pr-4 py-2.5 bg-gray-50/50 border rounded-xl text-gray-900 focus:ring-2 transition-all outline-none ${
+                        errors.name
+                          ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
+                          : 'border-gray-200 focus:ring-blue-500 focus:border-blue-500'
+                      }`}
                       placeholder="Nguyễn Văn A"
                     />
                   </div>
+                  {errors.name && (
+                    <motion.p
+                      initial={{ opacity: 0, y: -5 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="text-xs text-red-500 mt-1 font-medium pl-1"
+                    >
+                      {errors.name}
+                    </motion.p>
+                  )}
                 </div>
               )}
 
@@ -82,17 +180,35 @@ export default function Auth() {
                   </div>
                   <input
                     type="email"
-                    className="w-full pl-10 pr-4 py-2.5 bg-gray-50/50 border border-gray-200 rounded-xl text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all outline-none"
+                    value={email}
+                    onChange={(e) => {
+                      setEmail(e.target.value);
+                      if (errors.email) setErrors(prev => ({ ...prev, email: undefined }));
+                    }}
+                    className={`w-full pl-10 pr-4 py-2.5 bg-gray-50/50 border rounded-xl text-gray-900 focus:ring-2 transition-all outline-none ${
+                      errors.email
+                        ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
+                        : 'border-gray-200 focus:ring-blue-500 focus:border-blue-500'
+                    }`}
                     placeholder="you@example.com"
                   />
                 </div>
+                {errors.email && (
+                  <motion.p
+                    initial={{ opacity: 0, y: -5 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="text-xs text-red-500 mt-1 font-medium pl-1"
+                  >
+                    {errors.email}
+                  </motion.p>
+                )}
               </div>
 
               <div className="space-y-1.5">
                 <div className="flex justify-between items-center">
                   <label className="text-sm font-medium text-gray-700">Mật khẩu</label>
                   {isLogin && (
-                    <a href="#" className="text-xs text-blue-600 hover:text-blue-700 font-medium transition-colors">Quên mật khẩu?</a>
+                    <Link to="/auth/forgot-password" className="text-xs text-blue-600 hover:text-blue-700 font-medium transition-colors">Quên mật khẩu?</Link>
                   )}
                 </div>
                 <div className="relative">
@@ -101,15 +217,49 @@ export default function Auth() {
                   </div>
                   <input
                     type="password"
-                    className="w-full pl-10 pr-4 py-2.5 bg-gray-50/50 border border-gray-200 rounded-xl text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all outline-none"
+                    value={password}
+                    onChange={(e) => {
+                      setPassword(e.target.value);
+                      if (errors.password) setErrors(prev => ({ ...prev, password: undefined }));
+                    }}
+                    className={`w-full pl-10 pr-4 py-2.5 bg-gray-50/50 border rounded-xl text-gray-900 focus:ring-2 transition-all outline-none ${
+                      errors.password
+                        ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
+                        : 'border-gray-200 focus:ring-blue-500 focus:border-blue-500'
+                    }`}
                     placeholder="••••••••"
                   />
                 </div>
+                {errors.password && (
+                  <motion.p
+                    initial={{ opacity: 0, y: -5 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="text-xs text-red-500 mt-1 font-medium pl-1"
+                  >
+                    {errors.password}
+                  </motion.p>
+                )}
+
+                {/* Password requirement checklist during registration */}
+                {!isLogin && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className="grid grid-cols-2 gap-x-4 gap-y-2 pt-3 mt-2 border-t border-gray-100/80 overflow-hidden"
+                  >
+                    <RequirementItem satisfied={hasMinLength} label="Tối thiểu 8 ký tự" />
+                    <RequirementItem satisfied={hasUppercase} label="1 ký tự viết hoa" />
+                    <RequirementItem satisfied={hasLowercase} label="1 ký tự viết thường" />
+                    <RequirementItem satisfied={hasSpecial} label="1 ký tự đặc biệt" />
+                  </motion.div>
+                )}
               </div>
 
               <motion.button
                 whileHover={{ scale: 1.01 }}
                 whileTap={{ scale: 0.99 }}
+                type="submit"
                 className="w-full mt-6 py-3 px-4 bg-gray-900 text-white rounded-xl font-medium shadow-lg shadow-gray-900/20 hover:bg-gray-800 transition-all flex items-center justify-center group"
               >
                 {isLogin ? 'Đăng nhập' : 'Tạo tài khoản'}

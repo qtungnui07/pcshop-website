@@ -86,8 +86,9 @@ export default function Footer() {
         }
 
         .auth-page .footer {
-          background: linear-gradient(135deg, rgba(96, 165, 250, 0.15) 0%, #f5f5f7 55%, rgba(192, 132, 252, 0.15) 100%);
-          border-top: 1px solid rgba(147, 197, 253, 0.3);
+          background: transparent;
+          border-top: 1px solid rgba(0, 0, 0, 0.05);
+          margin-top: 40px;
         }
 
         .footer-inner {
