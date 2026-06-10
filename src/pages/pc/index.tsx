@@ -1,6 +1,7 @@
 import { ShieldCheck, Truck, CheckCircle2, Wrench, CreditCard, ChevronRight, Heart, ArrowRight } from "lucide-react";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
 
 interface PCItem {
   badge: string;
@@ -226,9 +227,9 @@ export default function PCIndex() {
         <section className="mt-16 md:mt-20">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-xl md:text-2xl font-bold tracking-tight text-zinc-900">Shop theo nhu cầu</h2>
-            <a href="#" className="text-sm font-semibold text-zinc-500 hover:text-zinc-900 transition-colors flex items-center gap-1">
+            <Link to="/pc/all" className="text-sm font-semibold text-zinc-500 hover:text-zinc-900 transition-colors flex items-center gap-1">
               Xem tất cả <ChevronRight className="w-4 h-4" />
-            </a>
+            </Link>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 md:gap-4">
             {pcCategories.map((cat, i) => (
@@ -247,9 +248,9 @@ export default function PCIndex() {
         <section className="mt-16 md:mt-20">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-xl md:text-2xl font-bold tracking-tight text-zinc-900">PC nổi bật</h2>
-            <a href="#" className="text-sm font-semibold text-zinc-500 hover:text-zinc-900 transition-colors flex items-center gap-1">
+            <Link to="/pc/all" className="text-sm font-semibold text-zinc-500 hover:text-zinc-900 transition-colors flex items-center gap-1">
               Xem tất cả <ChevronRight className="w-4 h-4" />
-            </a>
+            </Link>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
             {pcs.map((pc, i) => (
