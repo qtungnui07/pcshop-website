@@ -30,7 +30,7 @@ export default function MainLayout() {
         </div>
       )}
 
-      <main className={`relative z-10 flex-1 flex items-center justify-center ${isAuth ? 'pt-32 pb-20' : 'pt-24 pb-12'}`}>
+      <main className={`relative z-10 flex-1 w-full ${isAuth ? 'flex flex-col items-center justify-center pt-32 pb-20' : 'pt-24 pb-12'}`}>
         <Outlet />
       </main>
       <Footer />

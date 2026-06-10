@@ -1,6 +1,17 @@
 import { ShieldCheck, Truck, CheckCircle2, Wrench, CreditCard, ChevronRight, Heart, ArrowRight } from "lucide-react";
-import { useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
+
+interface PCItem {
+  badge: string;
+  badgeColor: string;
+  name: string;
+  specs: string;
+  price: string;
+  from: string;
+  to: string;
+  image?: string;
+}
 
 /* ── DATA ─────────────────────────────────────────────────────────── */
 
@@ -62,14 +73,20 @@ function Grad({ from, to, glow, className = "", children }: {
 
 /* ── PAGE ─────────────────────────────────────────────────────────── */
 export default function PCIndex() {
-  const carouselRef = useRef<HTMLDivElement>(null);
   const [liked, setLiked] = useState<Set<number>>(new Set());
+  const [pcs, setPcs] = useState<PCItem[]>(featuredPCs);
+
+  useEffect(() => {
+    fetch("http://localhost:3001/api/featured-pcs")
+      .then((res) => res.json())
+      .then((data) => setPcs(data))
+      .catch((err) => console.error("Error fetching featured PCs from backend:", err));
+  }, []);
 
   const toggleLike = (i: number) =>
     setLiked(p => { const n = new Set(p); n.has(i) ? n.delete(i) : n.add(i); return n; });
 
-  const scroll = (dir: "left"|"right") =>
-    carouselRef.current?.scrollBy({ left: dir==="right" ? 260 : -260, behavior:"smooth" });
+
 
   const heroContainer = {
     hidden: {},
@@ -234,44 +251,39 @@ export default function PCIndex() {
               Xem tất cả <ChevronRight className="w-4 h-4" />
             </a>
           </div>
-          <div className="relative group/carousel">
-            <button onClick={() => scroll("left")}
-              className="absolute -left-4 top-1/2 -translate-y-1/2 z-10 w-9 h-9 rounded-full bg-white shadow-md border border-zinc-200 flex items-center justify-center opacity-0 group-hover/carousel:opacity-100 transition-opacity hover:bg-zinc-50 active:scale-95 cursor-pointer">
-              <ChevronRight className="w-4 h-4 text-zinc-700 rotate-180" />
-            </button>
-            <div ref={carouselRef} className="flex gap-4 overflow-x-auto pb-2" style={{ scrollbarWidth:"none" }}>
-              {featuredPCs.map((pc, i) => (
-                <div key={i} className="flex-none w-[220px] md:w-[235px] bg-white rounded-2xl border border-zinc-100 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 overflow-hidden">
-                  <div className="relative">
-                    <Grad from={pc.from} to={pc.to} className="w-full aspect-[4/3.5]" />
-                    {pc.badge && (
-                      <span className="absolute top-2.5 left-2.5 px-2.5 py-0.5 text-[10px] font-bold text-white rounded-full" style={{ background: pc.badgeColor }}>
-                        {pc.badge}
-                      </span>
-                    )}
-                  </div>
-                  <div className="p-3.5">
-                    <p className="text-[13px] font-bold text-zinc-900 leading-tight mb-1">{pc.name}</p>
-                    <p className="text-[11px] text-zinc-400 leading-snug whitespace-pre-line mb-3">{pc.specs}</p>
-                    <div className="flex items-center justify-between">
-                      <span className="text-[13px] font-bold text-zinc-900">{pc.price}</span>
-                      <button onClick={() => toggleLike(i)} className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-zinc-100 transition-colors cursor-pointer">
-                        <Heart className={`w-4 h-4 transition-colors ${liked.has(i) ? "fill-red-500 text-red-500" : "text-zinc-400"}`} />
-                      </button>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+            {pcs.map((pc, i) => (
+              <div key={i} className="w-full bg-white rounded-2xl border border-zinc-100 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 overflow-hidden group/card">
+                <div className="relative">
+                  {pc.image ? (
+                    <div className="w-full aspect-[4/3.5] bg-[#0c0c0e] flex items-center justify-center p-3.5 overflow-hidden">
+                      <img
+                        src={pc.image}
+                        alt={pc.name}
+                        className="max-h-full max-w-full object-contain drop-shadow-[0_8px_20px_rgba(255,255,255,0.08)] transition-transform duration-300 group-hover/card:scale-105"
+                      />
                     </div>
+                  ) : (
+                    <Grad from={pc.from} to={pc.to} className="w-full aspect-[4/3.5]" />
+                  )}
+                  {pc.badge && (
+                    <span className="absolute top-2.5 left-2.5 px-2.5 py-0.5 text-[10px] font-bold text-white rounded-full" style={{ background: pc.badgeColor }}>
+                      {pc.badge}
+                    </span>
+                  )}
+                </div>
+                <div className="p-3.5">
+                  <p className="text-[13px] font-bold text-zinc-900 leading-tight mb-1">{pc.name}</p>
+                  <p className="text-[11px] text-zinc-400 leading-snug whitespace-pre-line mb-3">{pc.specs}</p>
+                  <div className="flex items-center justify-between">
+                    <span className="text-[13px] font-bold text-zinc-900">{pc.price}</span>
+                    <button onClick={() => toggleLike(i)} className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-zinc-100 transition-colors cursor-pointer">
+                      <Heart className={`w-4 h-4 transition-colors ${liked.has(i) ? "fill-red-500 text-red-500" : "text-zinc-400"}`} />
+                    </button>
                   </div>
                 </div>
-              ))}
-              <div className="flex-none w-14 flex items-center justify-center">
-                <button onClick={() => scroll("right")} className="w-10 h-10 rounded-full bg-zinc-100 hover:bg-zinc-200 transition-colors flex items-center justify-center cursor-pointer active:scale-95">
-                  <ChevronRight className="w-5 h-5 text-zinc-600" />
-                </button>
               </div>
-            </div>
-            <button onClick={() => scroll("right")}
-              className="absolute -right-4 top-1/2 -translate-y-1/2 z-10 w-9 h-9 rounded-full bg-white shadow-md border border-zinc-200 flex items-center justify-center opacity-0 group-hover/carousel:opacity-100 transition-opacity hover:bg-zinc-50 active:scale-95 cursor-pointer">
-              <ChevronRight className="w-4 h-4 text-zinc-700" />
-            </button>
+            ))}
           </div>
         </section>
 
