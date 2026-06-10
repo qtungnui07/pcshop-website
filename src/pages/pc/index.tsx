@@ -21,13 +21,13 @@ const featuredPCs = [
 ];
 
 const brands = [
-  { label: "intel.",    s: { fontStyle:"italic" as const, fontWeight:700, fontSize:"1.4rem", color:"#0068b5" } },
-  { label: "AMD\u25b3", s: { fontWeight:900, fontSize:"1.1rem", color:"#E0232B" } },
-  { label: "NVIDIA",   s: { fontWeight:900, fontSize:"1.05rem", letterSpacing:"0.04em", color:"#76b900" } },
-  { label: "ASUS",     s: { fontWeight:900, fontSize:"1.2rem", letterSpacing:"0.06em", color:"#1d1d1f" } },
-  { label: "msi",      s: { fontWeight:800, fontSize:"1.25rem", color:"#D40000" } },
-  { label: "GIGABYTE", s: { fontWeight:700, fontSize:"0.9rem", letterSpacing:"0.04em", color:"#1d1d1f" } },
-  { label: "CORSAIR",  s: { fontWeight:700, fontSize:"0.9rem", letterSpacing:"0.05em", color:"#1d1d1f" } },
+  { name: "Intel", logo: "https://upload.wikimedia.org/wikipedia/commons/8/85/Intel_logo_2023.svg" },
+  { name: "AMD", logo: "https://upload.wikimedia.org/wikipedia/commons/7/7c/AMD_Logo.svg" },
+  { name: "Nvidia", logo: "https://upload.wikimedia.org/wikipedia/commons/2/21/Nvidia_logo.svg" },
+  { name: "Asus", logo: "https://upload.wikimedia.org/wikipedia/commons/d/de/Asus_Logo.svg" },
+  { name: "MSI", logo: "https://upload.wikimedia.org/wikipedia/commons/a/ae/MSI_Logo.svg" },
+  { name: "Gigabyte", logo: "https://upload.wikimedia.org/wikipedia/commons/8/8a/Gigabyte_Technology_logo.svg" },
+  { name: "Corsair", logo: "https://upload.wikimedia.org/wikipedia/commons/b/b3/Corsair_Components_logo.svg" },
 ];
 
 const perks = [
@@ -265,17 +265,19 @@ export default function PCIndex() {
         </section>
 
         {/* ══ 4. BRANDS ══════════════════════════════════════════════════ */}
-        <section className="mt-16 md:mt-20 border-t border-b border-zinc-200/60 py-7">
-          <div className="flex items-center gap-10 overflow-x-auto" style={{ scrollbarWidth:"none" }}>
-            {brands.map((b, i) => (
-              <div key={i} className="flex-none opacity-40 hover:opacity-80 transition-opacity cursor-pointer select-none">
-                <span style={b.s}>{b.label}</span>
-              </div>
-            ))}
-            <div className="flex-none ml-auto">
-              <button className="w-8 h-8 rounded-full bg-zinc-100 hover:bg-zinc-200 transition-colors flex items-center justify-center cursor-pointer">
-                <ChevronRight className="w-4 h-4 text-zinc-600" />
-              </button>
+        <section className="mt-16 md:mt-20 border-t border-b border-zinc-200/60 py-5 overflow-hidden">
+          <div className="flex w-full overflow-hidden select-none">
+            <div className="flex gap-20 animate-infinite-scroll py-2">
+              {/* Loop multiple times to make it seamless on wide screens */}
+              {[...brands, ...brands, ...brands].map((b, i) => (
+                <div key={i} className="flex items-center justify-center h-8 w-24 shrink-0 cursor-pointer">
+                  <img 
+                    src={b.logo} 
+                    alt={b.name} 
+                    className="max-h-full max-w-full object-contain opacity-35 hover:opacity-85 transition-all duration-200 grayscale brightness-[0.2]"
+                  />
+                </div>
+              ))}
             </div>
           </div>
         </section>
