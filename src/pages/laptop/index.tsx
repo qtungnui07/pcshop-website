@@ -1,7 +1,7 @@
 import {
   GraduationCap, Briefcase, Gamepad2, Palette, Feather, BatteryFull,
-  ChevronRight, Heart, ArrowRight, Grid, List, RotateCcw,
-  ShieldCheck, Truck, CheckCircle2, ChevronDown, Cpu, Monitor
+  ChevronRight, Heart, Grid, List, RotateCcw,
+  ShieldCheck, Truck, CheckCircle2, ChevronDown
 } from "lucide-react";
 import { useState } from "react";
 import { motion } from "framer-motion";
@@ -26,35 +26,7 @@ const products = [
   { brand: "MSI", name: "MSI Stealth 16 Studio", specs: "Intel Core i7-13700H / 32GB /\n1TB SSD / RTX 4070 / 16\" 16:10", price: "37.990.000 đ", img: "https://asset.msi.com/resize/image/global/product/product_1672728476839352c3c97db317e0b510ed9c882193.png62405b38c58fe0f07fcef2367d8a9ba1/1024.png" },
 ];
 
-const useCases = [
-  {
-    title: "Học tập & Văn phòng",
-    features: [
-      { icon: BatteryFull, text: "Pin lâu" },
-      { icon: Feather, text: "Nhẹ & bền bỉ" },
-      { icon: CheckCircle2, text: "Hiệu năng ổn định" }
-    ],
-    img: "https://images.acer.com/is/image/acer/swift-go-14-sfg14-72-sfg14-73-glare-silver-ui-01?$Product-Cards-XL$"
-  },
-  {
-    title: "Gaming",
-    features: [
-      { icon: Gamepad2, text: "Hiệu năng mạnh mẽ" },
-      { icon: Monitor, text: "Màn hình 144Hz+" },
-      { icon: Cpu, text: "Tản nhiệt tối ưu" }
-    ],
-    img: "https://dlcdnwebimgs.asus.com/gain/d3ad557c-864a-4d7a-8f4b-2d7c58ed00ee/w800"
-  },
-  {
-    title: "Sáng tạo nội dung",
-    features: [
-      { icon: Palette, text: "Màn hình màu chuẩn" },
-      { icon: Cpu, text: "Hiệu năng xử lý cao" },
-      { icon: Briefcase, text: "Đồ họa chuyên nghiệp" }
-    ],
-    img: "https://p1-ofp.static.pub/fes/cms/2022/07/12/3og7y6a14mve0h7m99a4zcwf47u10v359190.png"
-  }
-];
+
 
 const perks = [
   { icon: ShieldCheck, title: "Bảo hành chính hãng", desc: "An tâm sử dụng dài lâu" },
