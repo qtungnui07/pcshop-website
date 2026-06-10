@@ -1,25 +1,57 @@
+import { Link } from 'react-router-dom';
 import { navItems } from '../constants/data';
 
+const generateSlug = (text: string) => {
+  return text
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/đ/g, "d")
+    .replace(/[^a-z0-9\s-]/g, "")
+    .trim()
+    .replace(/\s+/g, "-");
+};
+
+const getMenuSlug = (name: string) => {
+  if (name === 'Cửa hàng') return 'store';
+  return generateSlug(name);
+};
+
 // Derive footer columns directly from navItems so Navbar & Footer stay in sync.
-// - Each nav item with a dropdown becomes a column (title = nav item name).
-// - Items without a dropdown are listed as standalone quick-links at the bottom.
+// - Each nav item with a dropdown or isSplit becomes a column.
 function buildFooterColumns() {
   return navItems
-    .filter((item) => item.dropdown && item.dropdown.length > 0)
-    .map((item) => ({
-      title: item.name,
-      // Flatten all links across every dropdown section of this nav item
-      links: item.dropdown!.flatMap((section) =>
-        section.links.map((link) => ({ label: link, href: '#' }))
-      ),
-    }));
+    .filter((item) => (item.dropdown && item.dropdown.length > 0) || item.isSplit)
+    .map((item) => {
+      let links: { label: string; to: string }[] = [];
+      if (item.isSplit && item.splitData) {
+        links = item.splitData.map((d) => ({
+          label: d.name,
+          to: `/${getMenuSlug(item.name)}/${generateSlug(d.name)}`
+        }));
+      } else if (item.dropdown) {
+        links = item.dropdown.flatMap((section) =>
+          section.links.map((link) => ({
+            label: link,
+            to: `/${getMenuSlug(item.name)}/${generateSlug(link)}`
+          }))
+        );
+      }
+      return {
+        title: item.name,
+        links
+      };
+    });
 }
 
-// Nav items without a dropdown become "quick links" in the footer bottom bar
+// Nav items without a dropdown and not split become "quick links" in the footer bottom bar
 function buildQuickLinks() {
   return navItems
-    .filter((item) => !item.dropdown || item.dropdown.length === 0)
-    .map((item) => ({ label: item.name, href: '#' }));
+    .filter((item) => (!item.dropdown || item.dropdown.length === 0) && !item.isSplit)
+    .map((item) => ({
+      label: item.name,
+      to: `/${getMenuSlug(item.name)}`
+    }));
 }
 
 export default function Footer() {
@@ -43,9 +75,9 @@ export default function Footer() {
               <ul className="footer-col-links">
                 {col.links.map((link) => (
                   <li key={link.label}>
-                    <a href={link.href} className="footer-link">
+                    <Link to={link.to} className="footer-link">
                       {link.label}
-                    </a>
+                    </Link>
                   </li>
                 ))}
               </ul>
@@ -64,9 +96,9 @@ export default function Footer() {
             <div className="footer-quick-links">
               {quickLinks.map((link, i) => (
                 <span key={link.label} className="footer-quick-link-wrap">
-                  <a href={link.href} className="footer-bottom-link">
+                  <Link to={link.to} className="footer-bottom-link">
                     {link.label}
-                  </a>
+                  </Link>
                   {i < quickLinks.length - 1 && (
                     <span className="footer-sep">|</span>
                   )}
