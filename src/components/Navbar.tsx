@@ -13,6 +13,11 @@ const generateSlug = (text: string) => {
     .trim();
 };
 
+const getMenuSlug = (name: string) => {
+  if (name === 'Cửa hàng') return 'store';
+  return generateSlug(name);
+};
+
 export default function Navbar() {
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
   const [activeSplitCategory, setActiveSplitCategory] = useState<string | null>(null);
@@ -155,7 +160,7 @@ export default function Navbar() {
                                 <div className="grid grid-cols-2 md:grid-cols-3 gap-y-4 gap-x-8">
                                   {/* @ts-ignore */}
                                   {cat.links.map((link, lIdx) => (
-                                    <Link to={`/${generateSlug(currentMenu?.name || '')}/${generateSlug(link)}`} key={lIdx} className="text-xl font-medium text-[#1d1d1f] hover:text-blue-600 transition-colors block">
+                                    <Link to={`/${getMenuSlug(currentMenu?.name || '')}/${generateSlug(link)}`} key={lIdx} className="text-xl font-medium text-[#1d1d1f] hover:text-blue-600 transition-colors block">
                                       {link}
                                     </Link>
                                   ))}
@@ -174,7 +179,7 @@ export default function Navbar() {
                               <ul className="space-y-3">
                                 {col.links.map((link, lIdx) => (
                                   <motion.li variants={itemVariants} key={lIdx}>
-                                    <Link to={`/${generateSlug(currentMenu?.name || '')}/${generateSlug(link)}`} className="text-xl font-medium text-[#1d1d1f] hover:text-blue-600 transition-colors block">
+                                    <Link to={`/${getMenuSlug(currentMenu?.name || '')}/${generateSlug(link)}`} className="text-xl font-medium text-[#1d1d1f] hover:text-blue-600 transition-colors block">
                                       {link}
                                     </Link>
                                   </motion.li>
