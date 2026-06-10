@@ -13,7 +13,7 @@ export const navItems = [
   {
     name: 'PC',
     dropdown: [
-      { title: 'Theo Nhu Cầu', links: ['PC Gaming', 'PC Đồ Họa 3D', 'PC Sinh Viên - Văn Phòng', 'Mini PC'] },
+      { title: 'Theo Nhu Cầu', links: ['PC Gaming', 'PC Đồ Họa 3D', 'PC Văn Phòng', 'Mini PC'] },
       { title: 'Theo Mức Giá', links: ['Phổ thông (Dưới 15Tr)', 'Tầm trung (15 - 30Tr)', 'Cao cấp (Trên 30Tr)', 'Hi-End Custom'] },
     ]
   },
