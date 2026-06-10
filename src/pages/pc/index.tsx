@@ -24,10 +24,21 @@ const brands = [
   { name: "Intel", logo: "https://upload.wikimedia.org/wikipedia/commons/8/85/Intel_logo_2023.svg" },
   { name: "AMD", logo: "https://upload.wikimedia.org/wikipedia/commons/7/7c/AMD_Logo.svg" },
   { name: "Nvidia", logo: "https://upload.wikimedia.org/wikipedia/commons/2/21/Nvidia_logo.svg" },
-  { name: "Asus", logo: "https://upload.wikimedia.org/wikipedia/commons/d/de/Asus_Logo.svg" },
-  { name: "MSI", logo: "https://upload.wikimedia.org/wikipedia/commons/a/ae/MSI_Logo.svg" },
-  { name: "Gigabyte", logo: "https://upload.wikimedia.org/wikipedia/commons/8/8a/Gigabyte_Technology_logo.svg" },
-  { name: "Corsair", logo: "https://upload.wikimedia.org/wikipedia/commons/b/b3/Corsair_Components_logo.svg" },
+  { name: "Asus", logo: "https://upload.wikimedia.org/wikipedia/commons/8/86/Asus_blue_logo.svg" },
+  { name: "MSI", logo: "https://upload.wikimedia.org/wikipedia/commons/4/47/Micro-Star_International_logo2020.svg" },
+  { name: "Gigabyte", logo: "https://upload.wikimedia.org/wikipedia/commons/c/c3/Gigabyte_Technology_logo_20080107.svg" },
+  { name: "AORUS", logo: "https://upload.wikimedia.org/wikipedia/commons/3/3b/%E0%B8%95%E0%B8%B1%E0%B8%A7%E0%B8%AD%E0%B8%A2%E0%B9%88%E0%B8%B2%E0%B8%87_AORUS_Black.png" },
+  { name: "Corsair", logo: "https://upload.wikimedia.org/wikipedia/commons/2/2c/Corsair_2020_logo.svg" },
+  { name: "Dell", logo: "https://upload.wikimedia.org/wikipedia/commons/4/48/Dell_Logo.svg" },
+  { name: "Acer", logo: "https://upload.wikimedia.org/wikipedia/commons/0/00/Acer_2011.svg" },
+  { name: "Razer", logo: "https://upload.wikimedia.org/wikipedia/en/thumb/4/40/Razer_snake_logo.svg/960px-Razer_snake_logo.svg.png" },
+  { name: "Kingston", logo: "https://upload.wikimedia.org/wikipedia/commons/f/f5/%E0%B8%95%E0%B8%B1%E0%B8%A7%E0%B8%AD%E0%B8%A2%E0%B9%88%E0%B8%B2%E0%B8%87_Kingston_WhiteHead_White_BG_Black.png" },
+  { name: "Cooler Master", logo: "https://upload.wikimedia.org/wikipedia/commons/1/1d/Cooler_Master_Logo.svg" },
+  { name: "HyperX", logo: "https://images.seeklogo.com/logo-png/42/1/hyperx-logo-png_seeklogo-425410.png" },
+  { name: "SanDisk", logo: "https://upload.wikimedia.org/wikipedia/commons/b/bb/SanDisk-Logo.svg" },
+  { name: "Samsung", logo: "https://upload.wikimedia.org/wikipedia/commons/0/00/Samsung_Orig_Wordmark_BLACK_RGB.png" },
+  { name: "Logitech", logo: "https://upload.wikimedia.org/wikipedia/commons/e/eb/Logitech_G_logo_stack_blue.svg" },
+  { name: "Apple", logo: "https://upload.wikimedia.org/wikipedia/commons/f/fa/Apple_logo_black.svg" },
 ];
 
 const perks = [
@@ -69,8 +80,8 @@ export default function PCIndex() {
     show:   { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.25, 1, 0.5, 1] as const } },
   };
   const heroRight = {
-    hidden: { opacity: 0, x: 40, scale: 0.95 },
-    show:   { opacity: 1, x: 0, scale: 1, transition: { duration: 0.8, ease: [0.25, 1, 0.5, 1] as const, delay: 0.2 } },
+    hidden: { opacity: 0, y: 60, scale: 0.96 },
+    show:   { opacity: 1, y: 0, scale: 1, transition: { duration: 1.3, ease: [0.25, 1, 0.5, 1] as const, delay: 0.25 } },
   };
 
   return (
@@ -181,7 +192,7 @@ export default function PCIndex() {
                   objectPosition: "bottom center",
                   position: "relative",
                   zIndex: 1,
-                  transform: "translateX(2%) scale(1.2)",
+                  transform: "translateX(2%) scale(1.4)",
                   transformOrigin: "bottom center",
                   filter: "drop-shadow(0 0 60px rgba(147,197,253,0.3))",
                 }}
@@ -274,7 +285,7 @@ export default function PCIndex() {
                   <img 
                     src={b.logo} 
                     alt={b.name} 
-                    className="max-h-full max-w-full object-contain opacity-35 hover:opacity-85 transition-all duration-200 grayscale brightness-[0.2]"
+                    className="max-h-full max-w-full object-contain opacity-35 hover:opacity-85 transition-all duration-300 grayscale brightness-[0.2]"
                   />
                 </div>
               ))}

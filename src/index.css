@@ -22,9 +22,5 @@ html, body {
 }
 
 .animate-infinite-scroll {
-  animation: infinite-scroll 22s linear infinite;
-}
-
-.animate-infinite-scroll:hover {
-  animation-play-state: paused;
+  animation: infinite-scroll 68s linear infinite;
 }
