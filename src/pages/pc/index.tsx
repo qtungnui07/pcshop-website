@@ -181,7 +181,7 @@ export default function PCIndex() {
                   objectPosition: "bottom center",
                   position: "relative",
                   zIndex: 1,
-                  transform: "translateX(2%) scale(1.6)",
+                  transform: "translateX(2%) scale(1.2)",
                   transformOrigin: "bottom center",
                   filter: "drop-shadow(0 0 60px rgba(147,197,253,0.3))",
                 }}
