@@ -7,10 +7,11 @@ import { navItems, containerVariants, itemVariants } from '../constants/data';
 const generateSlug = (text: string) => {
   return text.toLowerCase()
     .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^\w\s-]/g, '')
+    .replace(/đ/g, "d")
+    .replace(/[^a-z0-9\s-]/g, "")
+    .trim()
     .replace(/\s+/g, '-')
-    .replace(/-+/g, '-')
-    .trim();
+    .replace(/-+/g, '-');
 };
 
 const getMenuSlug = (name: string) => {
