@@ -367,6 +367,19 @@
       ],
       "image": "https://images.unsplash.com/photo-1707858004668-d33b9a1d1956?auto=format&fit=crop&w=1600&q=85",
       "fallbackIcon": "Mouse"
+    },
+    {
+      "id": 906,
+      "name": "Lê Tiến Hưng",
+      "brand": "Logitech",
+      "category": "Cáp & Hub",
+      "price": 1000,
+      "badge": "Không ai mua",
+      "colors": [
+        "Hồng"
+      ],
+      "image": "http://localhost:3001/images/demo-product.jpg",
+      "fallbackIcon": "Cable"
     }
   ],
   "tickets": [

@@ -20,41 +20,59 @@ import {
   X,
   Speaker,
 } from "lucide-react";
-import { useMemo, useState, useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { useSearchParams } from "react-router-dom";
 
 /*
   src/pages/phu-kien/index.tsx
 
-  Style: premium / Apple-like / clean ecommerce.
-  Ảnh đang dùng là ảnh thật từ Unsplash CDN. Nếu muốn ổn định lâu dài hơn,
-  hãy tải ảnh về public/accessories/ rồi đổi URL trong mảng REAL_IMAGES.
+  Trang này chỉ là FRONTEND HIỂN THỊ.
+  Không hardcode danh sách sản phẩm phụ kiện trong file này.
+
+  Luồng đúng:
+  Admin thêm/sửa/xóa phụ kiện
+  → Backend lưu dữ liệu
+  → Trang /phu-kien fetch từ /api/accessories
+  → Frontend render sản phẩm.
 */
 
-type AccessoryCategory =
-  | "Tai nghe"
-  | "Bàn phím"
-  | "Chuột"
-  | "Lót chuột"
-  | "Loa"
-  | "Webcam"
-  | "Giá đỡ"
-  | "Cáp & Hub";
-
-type ProductColor = "Đen" | "Trắng" | "Hồng" | "Xanh lá" | "Xanh dương" | "Tím";
-
 type AccessoryProduct = {
-  id: number;
+  id: string;
   name: string;
   brand: string;
-  category: AccessoryCategory;
+  category: string;
   price: number;
   badge?: string;
-  colors: ProductColor[];
+  colors: string[];
   image: string;
-  fallbackIcon: React.ElementType | string;
+  fallbackIcon?: React.ElementType | string;
+  isActive?: boolean;
+  createdAt?: string;
 };
+
+type RawAccessoryProduct = {
+  id?: string | number;
+  name?: string;
+  brand?: string;
+  category?: string;
+  price?: number | string;
+  badge?: string;
+  colors?: string[] | string;
+  image?: string;
+  fallbackIcon?: React.ElementType | string;
+  isActive?: boolean;
+  createdAt?: string;
+};
+
+const API_BASE =
+  typeof window !== "undefined" &&
+    (window.location.hostname === "localhost" ||
+      window.location.hostname === "127.0.0.1")
+    ? "http://localhost:3001"
+    : "https://api-pc.qtitpc.dev";
+
+const DEFAULT_MAX_PRICE = 10_900_000;
 
 const ICON_MAP: Record<string, React.ElementType> = {
   Headphones,
@@ -64,7 +82,7 @@ const ICON_MAP: Record<string, React.ElementType> = {
   Speaker,
   Webcam,
   Monitor,
-  Cable
+  Cable,
 };
 
 const REAL_IMAGES = {
@@ -72,12 +90,8 @@ const REAL_IMAGES = {
     "https://images.unsplash.com/photo-1707858004668-d33b9a1d1956?auto=format&fit=crop&w=1600&q=85",
   setupDark:
     "https://images.unsplash.com/photo-1707858057802-ab1227691ed5?auto=format&fit=crop&w=1200&q=85",
-  keyboardBlack:
-    "https://images.unsplash.com/photo-1661588756719-8c7bd8bdc72d?auto=format&fit=crop&w=1200&q=85",
   keyboardWhite:
     "https://images.unsplash.com/photo-1632078965632-575bd4061be4?auto=format&fit=crop&w=1200&q=85",
-  keyboardMono:
-    "https://images.unsplash.com/photo-1636858508196-d4043dad51fd?auto=format&fit=crop&w=1200&q=85",
   headphonesWhite:
     "https://images.unsplash.com/photo-1713926304458-b8e00dfa9911?auto=format&fit=crop&w=1200&q=85",
   webcam:
@@ -86,136 +100,30 @@ const REAL_IMAGES = {
     "https://images.unsplash.com/photo-1715321835688-831f4767cf93?auto=format&fit=crop&w=1200&q=85",
 };
 
-const categories: {
-  name: AccessoryCategory;
+const HERO_ACCESSORIES_IMAGE = "/accessories/hero-phu-kien.png";
+
+const baseCategories: {
+  name: string;
   image: string;
   Icon: React.ElementType;
-  count: number;
 }[] = [
-  { name: "Tai nghe", image: REAL_IMAGES.headphonesWhite, Icon: Headphones, count: 45 },
-  { name: "Bàn phím", image: REAL_IMAGES.keyboardWhite, Icon: Keyboard, count: 62 },
-  { name: "Chuột", image: REAL_IMAGES.hero, Icon: Mouse, count: 58 },
-  { name: "Lót chuột", image: REAL_IMAGES.setupDark, Icon: Grid3X3, count: 32 },
-  { name: "Loa", image: REAL_IMAGES.speaker, Icon: Speaker, count: 28 },
-  { name: "Webcam", image: REAL_IMAGES.webcam, Icon: Webcam, count: 21 },
-  { name: "Giá đỡ", image: REAL_IMAGES.setupDark, Icon: Monitor, count: 18 },
-  { name: "Cáp & Hub", image: REAL_IMAGES.setupDark, Icon: Cable, count: 36 },
-];
+    { name: "Tai nghe", image: REAL_IMAGES.headphonesWhite, Icon: Headphones },
+    { name: "Bàn phím", image: REAL_IMAGES.keyboardWhite, Icon: Keyboard },
+    { name: "Chuột", image: REAL_IMAGES.hero, Icon: Mouse },
+    { name: "Lót chuột", image: REAL_IMAGES.setupDark, Icon: Grid3X3 },
+    { name: "Loa", image: REAL_IMAGES.speaker, Icon: Speaker },
+    { name: "Webcam", image: REAL_IMAGES.webcam, Icon: Webcam },
+    { name: "Giá đỡ", image: REAL_IMAGES.setupDark, Icon: Monitor },
+    { name: "Cáp & Hub", image: REAL_IMAGES.setupDark, Icon: Cable },
+  ];
 
-const brands = ["Logitech", "Razer", "HyperX", "Corsair", "Keychron", "UGREEN", "Harman Kardon"];
-
-const colorOptions: { name: ProductColor; className: string }[] = [
+const baseColorOptions: { name: string; className: string }[] = [
   { name: "Đen", className: "bg-black" },
   { name: "Trắng", className: "bg-white border border-zinc-300" },
   { name: "Hồng", className: "bg-pink-300" },
   { name: "Xanh lá", className: "bg-emerald-400" },
   { name: "Xanh dương", className: "bg-cyan-500" },
   { name: "Tím", className: "bg-violet-500" },
-];
-
-const defaultProducts: AccessoryProduct[] = [
-  {
-    id: 1,
-    name: "Logitech G Pro X 2",
-    brand: "Logitech",
-    category: "Tai nghe",
-    price: 3990000,
-    badge: "Mới",
-    colors: ["Đen", "Trắng"],
-    image: REAL_IMAGES.headphonesWhite,
-    fallbackIcon: Headphones,
-  },
-  {
-    id: 2,
-    name: "Razer BlackWidow V4",
-    brand: "Razer",
-    category: "Bàn phím",
-    price: 4290000,
-    badge: "Bán chạy",
-    colors: ["Đen"],
-    image: REAL_IMAGES.keyboardBlack,
-    fallbackIcon: Keyboard,
-  },
-  {
-    id: 3,
-    name: "Logitech G Pro X Superlight 2",
-    brand: "Logitech",
-    category: "Chuột",
-    price: 2690000,
-    colors: ["Trắng", "Đen", "Hồng"],
-    image: REAL_IMAGES.hero,
-    fallbackIcon: Mouse,
-  },
-  {
-    id: 4,
-    name: "Razer Gigantus V2 Large",
-    brand: "Razer",
-    category: "Lót chuột",
-    price: 490000,
-    colors: ["Đen"],
-    image: REAL_IMAGES.setupDark,
-    fallbackIcon: Grid3X3,
-  },
-  {
-    id: 5,
-    name: "Harman Kardon Onyx Studio 8",
-    brand: "Harman Kardon",
-    category: "Loa",
-    price: 5490000,
-    colors: ["Đen", "Trắng"],
-    image: REAL_IMAGES.speaker,
-    fallbackIcon: Speaker,
-  },
-  {
-    id: 6,
-    name: "Logitech Brio 4K",
-    brand: "Logitech",
-    category: "Webcam",
-    price: 4690000,
-    colors: ["Đen"],
-    image: REAL_IMAGES.webcam,
-    fallbackIcon: Webcam,
-  },
-  {
-    id: 7,
-    name: "Razer Base Station V2 Chroma",
-    brand: "Razer",
-    category: "Giá đỡ",
-    price: 1590000,
-    colors: ["Đen"],
-    image: REAL_IMAGES.setupDark,
-    fallbackIcon: Monitor,
-  },
-  {
-    id: 8,
-    name: "UGREEN USB-C Hub 7-in-1",
-    brand: "UGREEN",
-    category: "Cáp & Hub",
-    price: 890000,
-    colors: ["Đen", "Trắng"],
-    image: REAL_IMAGES.setupDark,
-    fallbackIcon: Cable,
-  },
-  {
-    id: 9,
-    name: "Keychron K8 Pro",
-    brand: "Keychron",
-    category: "Bàn phím",
-    price: 3190000,
-    colors: ["Đen", "Xanh dương"],
-    image: REAL_IMAGES.keyboardMono,
-    fallbackIcon: Keyboard,
-  },
-  {
-    id: 10,
-    name: "HyperX Pulsefire Haste 2",
-    brand: "HyperX",
-    category: "Chuột",
-    price: 1290000,
-    colors: ["Trắng", "Đen", "Hồng"],
-    image: REAL_IMAGES.hero,
-    fallbackIcon: Mouse,
-  },
 ];
 
 const heroBenefits = [
@@ -273,13 +181,77 @@ const comboItems = [
 ];
 
 function formatPrice(price: number) {
-  return new Intl.NumberFormat("vi-VN").format(price) + " đ";
+  return new Intl.NumberFormat("vi-VN").format(price || 0) + " đ";
+}
+
+function toNumberPrice(value: number | string | undefined) {
+  if (typeof value === "number") return value;
+
+  if (typeof value === "string") {
+    const cleanValue = value.replace(/[^\d]/g, "");
+    return Number(cleanValue) || 0;
+  }
+
+  return 0;
+}
+
+function normalizeColors(value: string[] | string | undefined) {
+  if (Array.isArray(value)) {
+    return value.map((color) => String(color).trim()).filter(Boolean);
+  }
+
+  if (typeof value === "string") {
+    return value
+      .split(",")
+      .map((color) => color.trim())
+      .filter(Boolean);
+  }
+
+  return [];
+}
+
+function normalizeProducts(data: unknown): AccessoryProduct[] {
+  if (!Array.isArray(data)) return [];
+
+  return data
+    .filter((item): item is RawAccessoryProduct => {
+      return Boolean(item && typeof item === "object" && item.isActive !== false);
+    })
+    .map((item, index) => {
+      const id = item.id ? String(item.id) : `accessory-${index}`;
+
+      return {
+        id,
+        name: item.name?.trim() || "Sản phẩm chưa đặt tên",
+        brand: item.brand?.trim() || "Khác",
+        category: item.category?.trim() || "Khác",
+        price: toNumberPrice(item.price),
+        badge: item.badge?.trim() || "",
+        colors: normalizeColors(item.colors),
+        image: item.image?.trim() || "",
+        fallbackIcon: item.fallbackIcon,
+        isActive: item.isActive !== false,
+        createdAt: item.createdAt,
+      };
+    });
 }
 
 function toggleSetValue<T>(set: Set<T>, value: T) {
   const next = new Set(set);
   next.has(value) ? next.delete(value) : next.add(value);
   return next;
+}
+
+function getIconByCategory(category: string) {
+  const categoryItem = baseCategories.find((item) => item.name === category);
+  return categoryItem?.Icon || Headphones;
+}
+
+function getColorClass(colorName: string, colorOptions: { name: string; className: string }[]) {
+  return (
+    colorOptions.find((item) => item.name === colorName)?.className ??
+    "bg-zinc-300"
+  );
 }
 
 function ImageWithFallback({
@@ -297,7 +269,7 @@ function ImageWithFallback({
 }) {
   const [failed, setFailed] = useState(false);
 
-  if (failed) {
+  if (!src || failed) {
     return (
       <div className={`${className} flex items-center justify-center bg-[#fbfbfd]`}>
         <Icon className={iconClassName} strokeWidth={1.25} />
@@ -336,9 +308,8 @@ function FilterCheckbox({
     >
       <span className="flex items-center gap-2 text-[12px] text-zinc-600">
         <span
-          className={`h-3.5 w-3.5 rounded-[3px] border transition ${
-            checked ? "border-zinc-950 bg-zinc-950" : "border-zinc-300 bg-white"
-          }`}
+          className={`h-3.5 w-3.5 rounded-[3px] border transition ${checked ? "border-zinc-950 bg-zinc-950" : "border-zinc-300 bg-white"
+            }`}
         />
         {label}
       </span>
@@ -350,85 +321,98 @@ function FilterCheckbox({
   );
 }
 
-const API_BASE = typeof window !== "undefined" && (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1")
-  ? "http://localhost:3001"
-  : "https://api-pc.qtitpc.dev";
-
-const getCategorySlug = (name: string) => {
-  return name.toLowerCase()
-    .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
-    .replace(/đ/g, "d")
-    .replace(/[^a-z0-9\s-]/g, "")
-    .trim()
-    .replace(/\s+/g, '-')
-    .replace(/-+/g, '-');
-};
-
 export default function PhuKienIndex() {
-  const [products, setProducts] = useState<AccessoryProduct[]>(defaultProducts);
+  const [products, setProducts] = useState<AccessoryProduct[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState("");
 
-  useEffect(() => {
-    fetch(`${API_BASE}/api/accessories`)
-      .then((res) => res.json())
-      .then((data) => setProducts(data))
-      .catch((err) => console.error("Error fetching accessories:", err));
-  }, []);
-
-  const [searchParams, setSearchParams] = useSearchParams();
-
-  const selectedCategories = useMemo(() => {
-    const catParam = searchParams.get("category");
-    if (!catParam) return new Set<AccessoryCategory>();
-    
-    const slugs = catParam.split(",");
-    const result = new Set<AccessoryCategory>();
-    
-    categories.forEach(cat => {
-      if (slugs.includes(getCategorySlug(cat.name))) {
-        result.add(cat.name);
-      }
-    });
-    return result;
-  }, [searchParams]);
-
-  const toggleCategory = (name: AccessoryCategory) => {
-    const slug = getCategorySlug(name);
-    const catParam = searchParams.get("category");
-    let newSlugs: string[] = [];
-    
-    if (catParam) {
-      const currentSlugs = catParam.split(",");
-      if (currentSlugs.includes(slug)) {
-        newSlugs = currentSlugs.filter(s => s !== slug);
-      } else {
-        newSlugs = [...currentSlugs, slug];
-      }
-    } else {
-      newSlugs = [slug];
-    }
-    
-    const nextParams = new URLSearchParams(searchParams);
-    if (newSlugs.length > 0) {
-      nextParams.set("category", newSlugs.join(","));
-    } else {
-      nextParams.delete("category");
-    }
-    setSearchParams(nextParams);
-  };
-
+  const [selectedCategories, setSelectedCategories] = useState<Set<string>>(new Set());
   const [selectedBrands, setSelectedBrands] = useState<Set<string>>(new Set());
-  const [selectedColors, setSelectedColors] = useState<Set<ProductColor>>(new Set());
-  const [liked, setLiked] = useState<Set<number>>(new Set());
+  const [selectedColors, setSelectedColors] = useState<Set<string>>(new Set());
+  const [liked, setLiked] = useState<Set<string>>(new Set());
   const [sortBy, setSortBy] = useState("newest");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
-  const [maxPrice, setMaxPrice] = useState(10_900_000);
+  const [maxPrice, setMaxPrice] = useState(DEFAULT_MAX_PRICE);
   const [showMobileFilter, setShowMobileFilter] = useState(false);
+
+  useEffect(() => {
+    setLoading(true);
+    setFetchError("");
+
+    fetch(`${API_BASE}/api/accessories`)
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error("Không thể tải dữ liệu phụ kiện.");
+        }
+
+        return res.json();
+      })
+      .then((data) => {
+        const normalizedProducts = normalizeProducts(data);
+        setProducts(normalizedProducts);
+
+        const highestPrice =
+          normalizedProducts.length > 0
+            ? Math.max(DEFAULT_MAX_PRICE, ...normalizedProducts.map((product) => product.price))
+            : DEFAULT_MAX_PRICE;
+
+        setMaxPrice(highestPrice);
+      })
+      .catch((err) => {
+        console.error("Error fetching accessories:", err);
+        setProducts([]);
+        setFetchError("Không thể kết nối tới backend phụ kiện.");
+      })
+      .finally(() => setLoading(false));
+  }, []);
+
+  const highestPrice = useMemo(() => {
+    if (products.length === 0) return DEFAULT_MAX_PRICE;
+    return Math.max(DEFAULT_MAX_PRICE, ...products.map((product) => product.price));
+  }, [products]);
+
+  const categories = useMemo(() => {
+    const extraCategoryNames = [
+      ...new Set(
+        products
+          .map((product) => product.category)
+          .filter((category) => !baseCategories.some((item) => item.name === category))
+      ),
+    ];
+
+    const extraCategories = extraCategoryNames.map((name) => ({
+      name,
+      image: REAL_IMAGES.setupDark,
+      Icon: Headphones,
+    }));
+
+    return [...baseCategories, ...extraCategories].map((category) => ({
+      ...category,
+      count: products.filter((product) => product.category === category.name).length,
+    }));
+  }, [products]);
+
+  const brands = useMemo(() => {
+    return [...new Set(products.map((product) => product.brand).filter(Boolean))];
+  }, [products]);
+
+  const colorOptions = useMemo(() => {
+    const productColors = [
+      ...new Set(products.flatMap((product) => product.colors || [])),
+    ];
+
+    const extraColors = productColors
+      .filter((color) => !baseColorOptions.some((item) => item.name === color))
+      .map((color) => ({ name: color, className: "bg-zinc-300" }));
+
+    return [...baseColorOptions, ...extraColors];
+  }, [products]);
 
   const hasActiveFilter =
     selectedCategories.size > 0 ||
     selectedBrands.size > 0 ||
     selectedColors.size > 0 ||
-    maxPrice < 10_900_000;
+    maxPrice < highestPrice;
 
   const filteredProducts = useMemo(() => {
     let result = products.filter((product) => {
@@ -459,23 +443,29 @@ export default function PhuKienIndex() {
       result = [...result].sort((a, b) => a.name.localeCompare(b.name));
     }
 
+    if (sortBy === "newest") {
+      result = [...result].sort((a, b) => {
+        const timeA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+        const timeB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+        return timeB - timeA;
+      });
+    }
+
     return result;
-  }, [selectedCategories, selectedBrands, selectedColors, sortBy, maxPrice]);
+  }, [products, selectedCategories, selectedBrands, selectedColors, sortBy, maxPrice]);
 
   const resetFilters = () => {
-    const nextParams = new URLSearchParams(searchParams);
-    nextParams.delete("category");
-    setSearchParams(nextParams);
+    setSelectedCategories(new Set());
     setSelectedBrands(new Set());
     setSelectedColors(new Set());
-    setMaxPrice(10_900_000);
+    setMaxPrice(highestPrice);
   };
 
   return (
     <div className="bg-white text-[#1d1d1f]">
       {/* HERO */}
       <section
-        className="relative overflow-hidden border-b border-zinc-100 bg-[#f7f7fa]"
+        className="relative overflow-hidden border-b border-zinc-100 bg-[linear-gradient(90deg,#f8f8fa_0%,#f5f5f7_50%,#f2f2f4_100%)]"
         style={{
           marginLeft: "calc(-50vw + 50%)",
           marginRight: "calc(-50vw + 50%)",
@@ -483,38 +473,48 @@ export default function PhuKienIndex() {
           paddingTop: "96px",
         }}
       >
-        <div className="relative mx-auto grid min-h-[520px] max-w-[1700px] grid-cols-1 items-center gap-8 px-4 py-12 md:px-8 lg:grid-cols-[0.86fr_1.14fr] lg:px-10 xl:px-12 2xl:px-16">
+        <div className="relative mx-auto grid min-h-[570px] max-w-[1700px] grid-cols-1 items-center gap-10 px-4 py-14 md:px-8 lg:grid-cols-[0.82fr_1.18fr] lg:px-10 xl:px-12 2xl:px-16">
           <motion.div
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.55, ease: [0.25, 1, 0.5, 1] }}
             className="z-[2]"
           >
-            <p className="mb-4 text-[13px] font-semibold uppercase tracking-[0.16em] text-zinc-600">
-              Phụ kiện
-            </p>
+            <div className="mb-7 inline-flex rounded-full border border-zinc-200 bg-white/70 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-zinc-600 shadow-sm backdrop-blur">
+              Phụ kiện cao cấp
+            </div>
 
-            <h1 className="mb-5 text-[3.25rem] font-black uppercase leading-[0.95] tracking-[-0.05em] text-zinc-950 md:text-[4.8rem] lg:text-[5.15rem]">
+            <h1 className="mb-7 max-w-[660px] text-[3rem] font-bold leading-[1.12] tracking-[-0.035em] text-[#1d1d1f] md:text-[4.25rem] lg:text-[4.85rem]">
               Nâng tầm
               <br />
               trải nghiệm.
             </h1>
 
-            <p className="mb-7 max-w-[410px] text-[15px] leading-[1.75] text-zinc-500">
-              Những phụ kiện chất lượng giúp bạn làm việc, giải trí và sáng tạo
-              tốt hơn mỗi ngày.
+            <p className="mb-8 max-w-[470px] text-[15px] leading-7 text-zinc-600 md:text-[16px]">
+              Phụ kiện tối giản, đồng bộ và tinh tế cho góc làm việc,
+              giải trí và sáng tạo mỗi ngày.
             </p>
 
-            <button className="rounded-lg bg-zinc-950 px-6 py-3 text-[13px] font-semibold text-white shadow-[0_8px_24px_rgba(0,0,0,0.14)] transition hover:bg-zinc-800 active:scale-95">
-              Khám phá ngay
-            </button>
+            <div className="flex flex-wrap items-center gap-3">
+              <button className="inline-flex items-center gap-2 rounded-full bg-zinc-950 px-7 py-3.5 text-[13px] font-bold text-white shadow-[0_14px_30px_rgba(0,0,0,0.18)] transition hover:-translate-y-0.5 hover:bg-zinc-800 active:scale-95">
+                Khám phá ngay
+                <ChevronRight className="h-4 w-4" />
+              </button>
 
-            <div className="mt-10 grid max-w-[720px] grid-cols-2 gap-x-7 gap-y-5 lg:grid-cols-4">
+              <button className="inline-flex items-center gap-2 rounded-full border border-zinc-200 bg-white/80 px-7 py-3.5 text-[13px] font-bold text-zinc-900 shadow-sm transition hover:-translate-y-0.5 hover:bg-white active:scale-95">
+                Xem phụ kiện
+                <ChevronRight className="h-4 w-4" />
+              </button>
+            </div>
+
+            <div className="mt-12 grid max-w-[650px] grid-cols-2 gap-x-7 gap-y-5 border-t border-zinc-200/80 pt-7 lg:grid-cols-4">
               {heroBenefits.map(({ Icon, title, desc }) => (
                 <div key={title} className="flex items-start gap-3">
-                  <Icon className="mt-0.5 h-8 w-8 shrink-0 text-zinc-950" strokeWidth={1.45} />
+                  <Icon className="mt-0.5 h-5 w-5 shrink-0 text-zinc-800" strokeWidth={1.75} />
                   <div>
-                    <h3 className="text-[12px] font-bold text-zinc-950">{title}</h3>
+                    <h3 className="text-[12px] font-bold leading-snug text-zinc-950">
+                      {title}
+                    </h3>
                     <p className="mt-1 whitespace-pre-line text-[11px] leading-relaxed text-zinc-500">
                       {desc}
                     </p>
@@ -525,28 +525,25 @@ export default function PhuKienIndex() {
           </motion.div>
 
           <motion.div
-            initial={{ opacity: 0, y: 35, scale: 0.985 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
+            initial={{ opacity: 0, x: 32, scale: 0.985 }}
+            animate={{ opacity: 1, x: 0, scale: 1 }}
             transition={{ duration: 0.75, ease: [0.25, 1, 0.5, 1], delay: 0.08 }}
-            className="relative hidden h-[410px] lg:block"
+            className="relative hidden h-[460px] lg:block"
           >
-            <div className="absolute inset-0 rounded-[40px] bg-[radial-gradient(circle_at_52%_50%,rgba(255,255,255,0.95),rgba(247,247,250,0)_62%)]" />
+            <div className="absolute -inset-8 rounded-[44px] bg-[radial-gradient(circle_at_52%_45%,rgba(255,255,255,0.95),rgba(255,255,255,0)_65%)]" />
 
             <ImageWithFallback
-              src={REAL_IMAGES.hero}
-              alt="Bộ phụ kiện máy tính"
+              src={HERO_ACCESSORIES_IMAGE}
+              alt="Bộ phụ kiện máy tính màu trắng"
               Icon={Keyboard}
-              className="absolute left-[4%] top-[6%] h-[390px] w-[92%] rounded-[32px] object-cover object-center mix-blend-multiply opacity-[0.95] drop-shadow-[0_28px_45px_rgba(0,0,0,0.16)]"
+              className="absolute right-0 top-1/2 h-[420px] w-[94%] -translate-y-1/2 rounded-[34px] object-cover object-center shadow-[0_28px_70px_rgba(15,23,42,0.16)] ring-1 ring-white/80"
               iconClassName="h-28 w-28 text-zinc-900"
             />
-
-            <div className="pointer-events-none absolute inset-y-0 left-0 w-32 bg-gradient-to-r from-[#f7f7fa] to-transparent" />
-            <div className="pointer-events-none absolute inset-y-0 right-0 w-20 bg-gradient-to-l from-[#f7f7fa] to-transparent" />
           </motion.div>
         </div>
       </section>
 
-      <main id="accessories-main" className="mx-auto max-w-[1700px] px-4 md:px-8 lg:px-10 xl:px-12 2xl:px-16">
+      <main className="mx-auto max-w-[1700px] px-4 md:px-8 lg:px-10 xl:px-12 2xl:px-16">
         {/* CATEGORIES */}
         <section className="py-9">
           <div className="mb-5 flex items-center justify-between">
@@ -568,10 +565,9 @@ export default function PhuKienIndex() {
               <button
                 key={name}
                 type="button"
-                onClick={() => toggleCategory(name)}
-                className={`group rounded-[20px] border bg-[#fbfbfd] p-3.5 shadow-[0_4px_18px_rgba(0,0,0,0.04)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_14px_30px_rgba(0,0,0,0.07)] ${
-                  selectedCategories.has(name) ? "border-zinc-900" : "border-zinc-100"
-                }`}
+                onClick={() => setSelectedCategories((prev) => toggleSetValue(prev, name))}
+                className={`group rounded-[20px] border bg-[#fbfbfd] p-3.5 shadow-[0_4px_18px_rgba(0,0,0,0.04)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_14px_30px_rgba(0,0,0,0.07)] ${selectedCategories.has(name) ? "border-zinc-900" : "border-zinc-100"
+                  }`}
               >
                 <div className="mb-3 flex h-[108px] items-center justify-center overflow-hidden rounded-[16px] bg-white">
                   <ImageWithFallback
@@ -616,9 +612,8 @@ export default function PhuKienIndex() {
         <section className="grid grid-cols-1 gap-8 lg:grid-cols-[245px_1fr]">
           {/* FILTER SIDEBAR */}
           <aside
-            className={`fixed inset-y-0 left-0 z-50 w-[300px] overflow-y-auto bg-white p-5 shadow-2xl transition-transform lg:sticky lg:top-24 lg:z-auto lg:h-fit lg:w-auto lg:translate-x-0 lg:rounded-[20px] lg:border lg:border-zinc-100 lg:shadow-[0_6px_22px_rgba(0,0,0,0.05)] ${
-              showMobileFilter ? "translate-x-0" : "-translate-x-full"
-            }`}
+            className={`fixed inset-y-0 left-0 z-50 w-[300px] overflow-y-auto bg-white p-5 shadow-2xl transition-transform lg:sticky lg:top-24 lg:z-auto lg:h-fit lg:w-auto lg:translate-x-0 lg:rounded-[20px] lg:border lg:border-zinc-100 lg:shadow-[0_6px_22px_rgba(0,0,0,0.05)] ${showMobileFilter ? "translate-x-0" : "-translate-x-full"
+              }`}
           >
             <div className="mb-6 flex items-center justify-between">
               <h3 className="text-[15px] font-bold text-zinc-950">Bộ lọc</h3>
@@ -643,20 +638,24 @@ export default function PhuKienIndex() {
             <div className="space-y-6">
               <div>
                 <h4 className="mb-3 text-[13px] font-semibold text-zinc-900">Danh mục</h4>
-                {categories.slice(0, 5).map((cat) => (
+                {categories.slice(0, 8).map((cat) => (
                   <FilterCheckbox
                     key={cat.name}
                     label={cat.name}
                     count={cat.count}
                     checked={selectedCategories.has(cat.name)}
-                    onChange={() => toggleCategory(cat.name)}
+                    onChange={() =>
+                      setSelectedCategories((prev) => toggleSetValue(prev, cat.name))
+                    }
                   />
                 ))}
 
-                <button className="mt-2 flex items-center gap-1 text-[12px] font-medium text-zinc-600">
-                  Hiển thị thêm
-                  <ChevronDown className="h-3.5 w-3.5" />
-                </button>
+                {categories.length > 8 && (
+                  <button className="mt-2 flex items-center gap-1 text-[12px] font-medium text-zinc-600">
+                    Hiển thị thêm
+                    <ChevronDown className="h-3.5 w-3.5" />
+                  </button>
+                )}
               </div>
 
               <div className="border-t border-zinc-100 pt-5">
@@ -669,7 +668,7 @@ export default function PhuKienIndex() {
                 <input
                   type="range"
                   min={100000}
-                  max={10900000}
+                  max={highestPrice}
                   step={100000}
                   value={maxPrice}
                   onChange={(e) => setMaxPrice(Number(e.target.value))}
@@ -689,20 +688,26 @@ export default function PhuKienIndex() {
               <div className="border-t border-zinc-100 pt-5">
                 <h4 className="mb-3 text-[13px] font-semibold text-zinc-900">Thương hiệu</h4>
 
-                {brands.slice(0, 5).map((brand) => (
-                  <FilterCheckbox
-                    key={brand}
-                    label={brand}
-                    count={products.filter((p) => p.brand === brand).length}
-                    checked={selectedBrands.has(brand)}
-                    onChange={() => setSelectedBrands((prev) => toggleSetValue(prev, brand))}
-                  />
-                ))}
+                {brands.length === 0 ? (
+                  <p className="text-[12px] text-zinc-400">Chưa có thương hiệu</p>
+                ) : (
+                  brands.slice(0, 5).map((brand) => (
+                    <FilterCheckbox
+                      key={brand}
+                      label={brand}
+                      count={products.filter((p) => p.brand === brand).length}
+                      checked={selectedBrands.has(brand)}
+                      onChange={() => setSelectedBrands((prev) => toggleSetValue(prev, brand))}
+                    />
+                  ))
+                )}
 
-                <button className="mt-2 flex items-center gap-1 text-[12px] font-medium text-zinc-600">
-                  Hiển thị thêm
-                  <ChevronDown className="h-3.5 w-3.5" />
-                </button>
+                {brands.length > 5 && (
+                  <button className="mt-2 flex items-center gap-1 text-[12px] font-medium text-zinc-600">
+                    Hiển thị thêm
+                    <ChevronDown className="h-3.5 w-3.5" />
+                  </button>
+                )}
               </div>
 
               <div className="border-t border-zinc-100 pt-5">
@@ -714,17 +719,18 @@ export default function PhuKienIndex() {
                       key={color.name}
                       title={color.name}
                       onClick={() => setSelectedColors((prev) => toggleSetValue(prev, color.name))}
-                      className={`h-5 w-5 rounded-full ring-offset-2 transition ${color.className} ${
-                        selectedColors.has(color.name) ? "ring-2 ring-zinc-950" : ""
-                      }`}
+                      className={`h-5 w-5 rounded-full ring-offset-2 transition ${color.className} ${selectedColors.has(color.name) ? "ring-2 ring-zinc-950" : ""
+                        }`}
                     />
                   ))}
                 </div>
 
-                <button className="mt-4 flex items-center gap-1 text-[12px] font-medium text-zinc-600">
-                  Hiển thị thêm
-                  <ChevronDown className="h-3.5 w-3.5" />
-                </button>
+                {colorOptions.length > 6 && (
+                  <button className="mt-4 flex items-center gap-1 text-[12px] font-medium text-zinc-600">
+                    Hiển thị thêm
+                    <ChevronDown className="h-3.5 w-3.5" />
+                  </button>
+                )}
               </div>
             </div>
           </aside>
@@ -764,18 +770,16 @@ export default function PhuKienIndex() {
                 <div className="flex rounded-lg border border-zinc-200 bg-white p-1 shadow-sm">
                   <button
                     onClick={() => setViewMode("grid")}
-                    className={`rounded-md p-2 ${
-                      viewMode === "grid" ? "bg-zinc-100 text-zinc-950" : "text-zinc-400"
-                    }`}
+                    className={`rounded-md p-2 ${viewMode === "grid" ? "bg-zinc-100 text-zinc-950" : "text-zinc-400"
+                      }`}
                   >
                     <Grid3X3 className="h-4 w-4" />
                   </button>
 
                   <button
                     onClick={() => setViewMode("list")}
-                    className={`rounded-md p-2 ${
-                      viewMode === "list" ? "bg-zinc-100 text-zinc-950" : "text-zinc-400"
-                    }`}
+                    className={`rounded-md p-2 ${viewMode === "list" ? "bg-zinc-100 text-zinc-950" : "text-zinc-400"
+                      }`}
                   >
                     <List className="h-4 w-4" />
                   </button>
@@ -783,7 +787,41 @@ export default function PhuKienIndex() {
               </div>
             </div>
 
-            {filteredProducts.length === 0 ? (
+            {loading ? (
+              <div className="flex min-h-[420px] flex-col items-center justify-center rounded-2xl bg-[#fbfbfd] text-center shadow-sm">
+                <div className="mb-4 h-9 w-9 animate-spin rounded-full border-4 border-zinc-200 border-t-zinc-900" />
+                <h3 className="text-lg font-bold text-zinc-900">
+                  Đang tải phụ kiện từ backend...
+                </h3>
+              </div>
+            ) : fetchError ? (
+              <div className="flex min-h-[420px] flex-col items-center justify-center rounded-2xl bg-[#fbfbfd] text-center shadow-sm">
+                <Search className="mb-4 h-10 w-10 text-zinc-300" />
+                <h3 className="text-lg font-bold text-zinc-900">
+                  {fetchError}
+                </h3>
+                <p className="mt-2 text-sm text-zinc-500">
+                  Kiểm tra backend đã chạy và có route /api/accessories chưa.
+                </p>
+              </div>
+            ) : products.length === 0 ? (
+              <div className="flex min-h-[420px] flex-col items-center justify-center rounded-2xl bg-[#fbfbfd] text-center shadow-sm">
+                <Search className="mb-4 h-10 w-10 text-zinc-300" />
+                <h3 className="text-lg font-bold text-zinc-900">
+                  Chưa có phụ kiện nào
+                </h3>
+                <p className="mt-2 max-w-md text-sm leading-6 text-zinc-500">
+                  Trang này không tự có sẵn sản phẩm. Sản phẩm phụ kiện sẽ hiển thị
+                  sau khi admin thêm dữ liệu trong trang quản trị.
+                </p>
+                <Link
+                  to="/admin/phu-kien"
+                  className="mt-5 rounded-full bg-zinc-950 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-zinc-800"
+                >
+                  Mở admin phụ kiện
+                </Link>
+              </div>
+            ) : filteredProducts.length === 0 ? (
               <div className="flex min-h-[420px] flex-col items-center justify-center rounded-2xl bg-[#fbfbfd] text-center shadow-sm">
                 <Search className="mb-4 h-10 w-10 text-zinc-300" />
                 <h3 className="text-lg font-bold text-zinc-900">
@@ -809,14 +847,16 @@ export default function PhuKienIndex() {
               >
                 {filteredProducts.map((product) => {
                   const isLiked = liked.has(product.id);
-                  const Icon = typeof product.fallbackIcon === "string" ? (ICON_MAP[product.fallbackIcon] || Headphones) : product.fallbackIcon;
+                  const Icon =
+                    typeof product.fallbackIcon === "string"
+                      ? ICON_MAP[product.fallbackIcon] || getIconByCategory(product.category)
+                      : product.fallbackIcon || getIconByCategory(product.category);
 
                   return (
                     <article
                       key={product.id}
-                      className={`group relative overflow-hidden rounded-[20px] border border-zinc-100 bg-white shadow-[0_4px_18px_rgba(0,0,0,0.04)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_16px_32px_rgba(0,0,0,0.08)] ${
-                        viewMode === "list" ? "grid grid-cols-[210px_1fr] items-center" : ""
-                      }`}
+                      className={`group relative overflow-hidden rounded-[20px] border border-zinc-100 bg-white shadow-[0_4px_18px_rgba(0,0,0,0.04)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_16px_32px_rgba(0,0,0,0.08)] ${viewMode === "list" ? "grid grid-cols-[210px_1fr] items-center" : ""
+                        }`}
                     >
                       <button
                         onClick={() =>
@@ -825,9 +865,8 @@ export default function PhuKienIndex() {
                         className="absolute right-4 top-4 z-[2] flex h-8 w-8 items-center justify-center rounded-full bg-white/90 text-zinc-400 shadow-sm transition hover:text-zinc-950"
                       >
                         <Heart
-                          className={`h-4 w-4 ${
-                            isLiked ? "fill-red-500 text-red-500" : ""
-                          }`}
+                          className={`h-4 w-4 ${isLiked ? "fill-red-500 text-red-500" : ""
+                            }`}
                         />
                       </button>
 
@@ -861,19 +900,16 @@ export default function PhuKienIndex() {
                         </p>
 
                         <div className="flex gap-1.5">
-                          {product.colors.slice(0, 4).map((color) => {
-                            const colorClass =
-                              colorOptions.find((item) => item.name === color)?.className ??
-                              "bg-zinc-300";
-
-                            return (
-                              <span
-                                key={color}
-                                title={color}
-                                className={`h-3.5 w-3.5 rounded-full ${colorClass}`}
-                              />
-                            );
-                          })}
+                          {product.colors.slice(0, 4).map((color) => (
+                            <span
+                              key={color}
+                              title={color}
+                              className={`h-3.5 w-3.5 rounded-full ${getColorClass(
+                                color,
+                                colorOptions
+                              )}`}
+                            />
+                          ))}
                         </div>
                       </div>
                     </article>
