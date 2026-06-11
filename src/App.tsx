@@ -1,6 +1,7 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import MainLayout from './layouts/MainLayout';
 import type { ComponentType } from 'react';
+import { useEffect } from 'react';
 
 // Automatically import all .tsx files inside the pages directory
 const modules = import.meta.glob('./pages/**/*.tsx', { eager: true });
@@ -30,9 +31,46 @@ const routes = Object.keys(modules).map((path) => {
   };
 }).filter(Boolean) as { path: string, Component: ComponentType }[];
 
+function ScrollToTop() {
+  const { pathname, search } = useLocation();
+
+  useEffect(() => {
+    const isPCCategory = pathname.startsWith('/pc/') && pathname !== '/pc';
+    const searchParams = new URLSearchParams(search);
+    const hasAccessoryCategory = pathname === '/phu-kien' && searchParams.get('category');
+
+    if (isPCCategory) {
+      const timer = setTimeout(() => {
+        const element = document.getElementById("products-section");
+        if (element) {
+          element.scrollIntoView({ behavior: "smooth", block: "start" });
+        } else {
+          window.scrollTo({ top: 0, behavior: 'instant' as any });
+        }
+      }, 100);
+      return () => clearTimeout(timer);
+    } else if (hasAccessoryCategory) {
+      const timer = setTimeout(() => {
+        const element = document.getElementById("accessories-main");
+        if (element) {
+          element.scrollIntoView({ behavior: "smooth", block: "start" });
+        } else {
+          window.scrollTo({ top: 0, behavior: 'instant' as any });
+        }
+      }, 100);
+      return () => clearTimeout(timer);
+    } else {
+      window.scrollTo({ top: 0, behavior: 'instant' as any });
+    }
+  }, [pathname, search]);
+
+  return null;
+}
+
 function App() {
   return (
     <BrowserRouter>
+      <ScrollToTop />
       <Routes>
         <Route element={<MainLayout />}>
           {routes.map((route) => {

@@ -178,13 +178,20 @@ export default function Navbar() {
                                 {col.title}
                               </motion.h3>
                               <ul className="space-y-3">
-                                {col.links.map((link, lIdx) => (
-                                  <motion.li variants={itemVariants} key={lIdx}>
-                                    <Link to={`/${getMenuSlug(currentMenu?.name || '')}/${generateSlug(link)}`} className="text-xl font-medium text-[#1d1d1f] hover:text-blue-600 transition-colors block">
-                                      {link}
-                                    </Link>
-                                  </motion.li>
-                                ))}
+                                {col.links.map((link, lIdx) => {
+                                  const menuSlug = getMenuSlug(currentMenu?.name || '');
+                                  const linkSlug = generateSlug(link);
+                                  const targetUrl = menuSlug === 'phu-kien'
+                                    ? `/phu-kien?category=${linkSlug}`
+                                    : `/${menuSlug}/${linkSlug}`;
+                                  return (
+                                    <motion.li variants={itemVariants} key={lIdx}>
+                                      <Link to={targetUrl} className="text-xl font-medium text-[#1d1d1f] hover:text-blue-600 transition-colors block">
+                                        {link}
+                                      </Link>
+                                    </motion.li>
+                                  );
+                                })}
                               </ul>
                             </div>
                           ))}

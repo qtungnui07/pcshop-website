@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import { useMemo, useState, useEffect } from "react";
 import { motion } from "framer-motion";
+import { useSearchParams } from "react-router-dom";
 
 /*
   src/pages/phu-kien/index.tsx
@@ -353,6 +354,16 @@ const API_BASE = typeof window !== "undefined" && (window.location.hostname === 
   ? "http://localhost:3001"
   : "https://api-pc.qtitpc.dev";
 
+const getCategorySlug = (name: string) => {
+  return name.toLowerCase()
+    .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+    .replace(/đ/g, "d")
+    .replace(/[^a-z0-9\s-]/g, "")
+    .trim()
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-');
+};
+
 export default function PhuKienIndex() {
   const [products, setProducts] = useState<AccessoryProduct[]>(defaultProducts);
 
@@ -363,7 +374,48 @@ export default function PhuKienIndex() {
       .catch((err) => console.error("Error fetching accessories:", err));
   }, []);
 
-  const [selectedCategories, setSelectedCategories] = useState<Set<AccessoryCategory>>(new Set());
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const selectedCategories = useMemo(() => {
+    const catParam = searchParams.get("category");
+    if (!catParam) return new Set<AccessoryCategory>();
+    
+    const slugs = catParam.split(",");
+    const result = new Set<AccessoryCategory>();
+    
+    categories.forEach(cat => {
+      if (slugs.includes(getCategorySlug(cat.name))) {
+        result.add(cat.name);
+      }
+    });
+    return result;
+  }, [searchParams]);
+
+  const toggleCategory = (name: AccessoryCategory) => {
+    const slug = getCategorySlug(name);
+    const catParam = searchParams.get("category");
+    let newSlugs: string[] = [];
+    
+    if (catParam) {
+      const currentSlugs = catParam.split(",");
+      if (currentSlugs.includes(slug)) {
+        newSlugs = currentSlugs.filter(s => s !== slug);
+      } else {
+        newSlugs = [...currentSlugs, slug];
+      }
+    } else {
+      newSlugs = [slug];
+    }
+    
+    const nextParams = new URLSearchParams(searchParams);
+    if (newSlugs.length > 0) {
+      nextParams.set("category", newSlugs.join(","));
+    } else {
+      nextParams.delete("category");
+    }
+    setSearchParams(nextParams);
+  };
+
   const [selectedBrands, setSelectedBrands] = useState<Set<string>>(new Set());
   const [selectedColors, setSelectedColors] = useState<Set<ProductColor>>(new Set());
   const [liked, setLiked] = useState<Set<number>>(new Set());
@@ -411,7 +463,9 @@ export default function PhuKienIndex() {
   }, [selectedCategories, selectedBrands, selectedColors, sortBy, maxPrice]);
 
   const resetFilters = () => {
-    setSelectedCategories(new Set());
+    const nextParams = new URLSearchParams(searchParams);
+    nextParams.delete("category");
+    setSearchParams(nextParams);
     setSelectedBrands(new Set());
     setSelectedColors(new Set());
     setMaxPrice(10_900_000);
@@ -492,7 +546,7 @@ export default function PhuKienIndex() {
         </div>
       </section>
 
-      <main className="mx-auto max-w-[1700px] px-4 md:px-8 lg:px-10 xl:px-12 2xl:px-16">
+      <main id="accessories-main" className="mx-auto max-w-[1700px] px-4 md:px-8 lg:px-10 xl:px-12 2xl:px-16">
         {/* CATEGORIES */}
         <section className="py-9">
           <div className="mb-5 flex items-center justify-between">
@@ -514,7 +568,7 @@ export default function PhuKienIndex() {
               <button
                 key={name}
                 type="button"
-                onClick={() => setSelectedCategories((prev) => toggleSetValue(prev, name))}
+                onClick={() => toggleCategory(name)}
                 className={`group rounded-[20px] border bg-[#fbfbfd] p-3.5 shadow-[0_4px_18px_rgba(0,0,0,0.04)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_14px_30px_rgba(0,0,0,0.07)] ${
                   selectedCategories.has(name) ? "border-zinc-900" : "border-zinc-100"
                 }`}
@@ -595,9 +649,7 @@ export default function PhuKienIndex() {
                     label={cat.name}
                     count={cat.count}
                     checked={selectedCategories.has(cat.name)}
-                    onChange={() =>
-                      setSelectedCategories((prev) => toggleSetValue(prev, cat.name))
-                    }
+                    onChange={() => toggleCategory(cat.name)}
                   />
                 ))}
 

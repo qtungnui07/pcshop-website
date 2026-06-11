@@ -24,17 +24,23 @@ function buildFooterColumns() {
     .filter((item) => (item.dropdown && item.dropdown.length > 0) || item.isSplit)
     .map((item) => {
       let links: { label: string; to: string }[] = [];
+      const menuSlug = getMenuSlug(item.name);
       if (item.isSplit && item.splitData) {
         links = item.splitData.map((d) => ({
           label: d.name,
-          to: `/${getMenuSlug(item.name)}/${generateSlug(d.name)}`
+          to: `/${menuSlug}/${generateSlug(d.name)}`
         }));
       } else if (item.dropdown) {
         links = item.dropdown.flatMap((section) =>
-          section.links.map((link) => ({
-            label: link,
-            to: `/${getMenuSlug(item.name)}/${generateSlug(link)}`
-          }))
+          section.links.map((link) => {
+            const linkSlug = generateSlug(link);
+            return {
+              label: link,
+              to: menuSlug === 'phu-kien'
+                ? `/phu-kien?category=${linkSlug}`
+                : `/${menuSlug}/${linkSlug}`
+            };
+          })
         );
       }
       return {

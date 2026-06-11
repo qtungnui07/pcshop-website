@@ -6,14 +6,14 @@ const getCategoryUrl = (name: string) => {
   switch (name.toLowerCase()) {
     case 'pc': return '/pc';
     case 'laptop': return '/laptop';
-    case 'màn hình': return '/phu-kien/man-hinh';
+    case 'màn hình': return '/phu-kien?category=man-hinh';
     case 'cpu': return '/linh-kien/cpu-vi-xu-ly';
     case 'gpu': return '/linh-kien/vga-card-man-hinh';
     case 'ram': return '/linh-kien/ram';
     case 'hdd/ssd': return '/linh-kien/o-cung-ssd';
-    case 'chuột': return '/phu-kien/chuot';
-    case 'bàn phím': return '/phu-kien/ban-phim';
-    case 'âm thanh': return '/phu-kien/tai-nghe';
+    case 'chuột': return '/phu-kien?category=chuot';
+    case 'bàn phím': return '/phu-kien?category=ban-phim';
+    case 'âm thanh': return '/phu-kien?category=tai-nghe';
     default: return `/store/${name.toLowerCase()}`;
   }
 };
