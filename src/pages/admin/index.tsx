@@ -56,6 +56,7 @@ interface ComponentItem {
   badge?: string;
   badgeColor?: string;
   color?: string; // fallback color representation
+  category?: string;
 }
 
 interface AccessoryItem {
@@ -641,7 +642,8 @@ export default function AdminIndex() {
         price: formPrice.trim(),
         badge: formBadge.trim(),
         badgeColor: formBadgeColor,
-        color: formLinhKienColor
+        color: formLinhKienColor,
+        category: formLinhKienCategory
       };
       newItem = componentItem;
     } else {

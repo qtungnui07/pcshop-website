@@ -5,6 +5,7 @@ import {
 } from "lucide-react";
 import { useState, useEffect, useMemo } from "react";
 import { motion } from "framer-motion";
+import { useSearchParams } from "react-router-dom";
 
 /* ── TYPES ─────────────────────────────────────────────────────────── */
 interface Product {
@@ -14,6 +15,7 @@ interface Product {
   badge?: string;
   badgeColor?: string;
   color?: string;
+  category?: string;
 }
 
 /* ── DATA ──────────────────────────────────────────────────────────── */
@@ -44,10 +46,19 @@ const defaultProducts: Product[] = [
   { name: "TeamGroup T-Force Vulcan Z",  specs: "16GB (2x8GB) DDR4 3200MHz",  price: "890.000đ",   color: "#dc2626" },
 ];
 
-const BRANDS = ["Corsair", "G.Skill", "Kingston", "TeamGroup", "Crucial", "Apacer"];
-const CAPACITIES = ["8GB", "16GB", "32GB", "64GB", "128GB"];
-const TYPES = ["DDR4", "DDR5"];
-const BUSES = ["2666MHz", "3200MHz", "3600MHz", "4800MHz", "5600MHz", "6000MHz", "6400MHz"];
+
+const getCategoryBrands = (category: string) => {
+  const cat = category.toLowerCase();
+  if (cat === "ram") return ["Corsair", "G.Skill", "Kingston", "TeamGroup", "Crucial", "Apacer"];
+  if (cat === "cpu") return ["Intel", "AMD"];
+  if (cat === "vga") return ["NVIDIA", "AMD", "ASUS", "MSI", "Gigabyte"];
+  if (cat === "mainboard") return ["ASUS", "MSI", "Gigabyte", "Intel", "AMD"];
+  if (cat === "ssd" || cat === "hdd") return ["Samsung", "Kingston", "Crucial", "Western Digital", "Seagate"];
+  if (cat === "psu") return ["Corsair", "MSI", "Asus", "Seasonic", "Antec"];
+  if (cat === "cooling") return ["Corsair", "Lian Li", "Thermalright", "Noctua", "Deepcool"];
+  if (cat === "case") return ["Corsair", "Lian Li", "NZXT", "Asus", "Montech"];
+  return [];
+};
 
 const MAX_PRICE = 20_000_000;
 const MIN_PRICE = 100_000;
@@ -156,10 +167,16 @@ export default function LinhKienIndex() {
   const [selCapacities, setSelCapacities] = useState<Set<string>>(new Set());
   const [selTypes, setSelTypes] = useState<Set<string>>(new Set());
   const [selBuses, setSelBuses] = useState<Set<string>>(new Set());
+  const [selSeries, setSelSeries] = useState<Set<string>>(new Set());
+  const [selWattages, setSelWattages] = useState<Set<string>>(new Set());
+  const [selSizes, setSelSizes] = useState<Set<string>>(new Set());
   const [minPrice,   setMinPrice]   = useState(MIN_PRICE);
   const [maxPrice,   setMaxPrice]   = useState(MAX_PRICE);
   const [activeInput, setActiveInput] = useState<'min' | 'max'>('min');
 
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  // Load from API on mount
   useEffect(() => {
     fetch(`${API_BASE}/api/components`)
       .then((res) => res.json())
@@ -167,43 +184,138 @@ export default function LinhKienIndex() {
       .catch((err) => console.error("Error fetching components:", err));
   }, []);
 
+  // Sync from URL params to React states
+  useEffect(() => {
+    const category = searchParams.get("category") || "ram";
+    setActiveCategory(category);
+
+    const brands = searchParams.get("brand");
+    setSelBrands(brands ? new Set(brands.split(",")) : new Set());
+
+    const capacities = searchParams.get("capacity");
+    setSelCapacities(capacities ? new Set(capacities.split(",")) : new Set());
+
+    const types = searchParams.get("type");
+    setSelTypes(types ? new Set(types.split(",")) : new Set());
+
+    const buses = searchParams.get("bus");
+    setSelBuses(buses ? new Set(buses.split(",")) : new Set());
+
+    const cpuSeries = searchParams.get("cpuSeries");
+    const vgaSeries = searchParams.get("vgaSeries");
+    const series = cpuSeries || vgaSeries || searchParams.get("series");
+    setSelSeries(series ? new Set(series.split(",")) : new Set());
+
+    const wattages = searchParams.get("wattage");
+    setSelWattages(wattages ? new Set(wattages.split(",")) : new Set());
+
+    const chipset = searchParams.get("chipset");
+    const size = searchParams.get("size");
+    const sizes = chipset || size || searchParams.get("sizes");
+    setSelSizes(sizes ? new Set(sizes.split(",")) : new Set());
+
+    const minP = searchParams.get("minPrice");
+    setMinPrice(minP ? Number(minP) : MIN_PRICE);
+
+    const maxP = searchParams.get("maxPrice");
+    setMaxPrice(maxP ? Number(maxP) : MAX_PRICE);
+  }, [searchParams]);
+
   const toggleLike = (i: number) => {
     setLiked(p => toggleSet(p, i));
   };
 
   const hasActiveFilter =
     selBrands.size > 0 || selCapacities.size > 0 || selTypes.size > 0 ||
-    selBuses.size > 0 || minPrice > MIN_PRICE || maxPrice < MAX_PRICE;
+    selBuses.size > 0 || selSeries.size > 0 || selWattages.size > 0 ||
+    selSizes.size > 0 || minPrice > MIN_PRICE || maxPrice < MAX_PRICE;
 
   const resetFilters = () => {
     setSelBrands(new Set());
     setSelCapacities(new Set());
     setSelTypes(new Set());
     setSelBuses(new Set());
+    setSelSeries(new Set());
+    setSelWattages(new Set());
+    setSelSizes(new Set());
     setMinPrice(MIN_PRICE);
     setMaxPrice(MAX_PRICE);
+
+    // Keep only category in search params
+    setSearchParams({ category: activeCategory });
+  };
+
+  const handleFilterToggle = (
+    set: Set<string>,
+    setFn: React.Dispatch<React.SetStateAction<Set<string>>>,
+    value: string,
+    paramName: string
+  ) => {
+    const next = new Set(set);
+    if (next.has(value)) next.delete(value);
+    else next.add(value);
+    setFn(next);
+
+    // Sync to URL
+    const newParams = new URLSearchParams(searchParams);
+    if (next.size > 0) {
+      newParams.set(paramName, Array.from(next).join(","));
+    } else {
+      newParams.delete(paramName);
+    }
+    setSearchParams(newParams);
+  };
+
+  const handleCategorySelect = (catId: string) => {
+    setActiveCategory(catId);
+    resetFilters();
+    setSearchParams({ category: catId });
   };
 
   /* Derived filtered + sorted list */
   const filteredProducts = useMemo(() => {
     let result = products.filter(p => {
+      // 1. Filter by category
+      const pCat = (p.category || 'RAM').toLowerCase();
+      if (pCat !== activeCategory.toLowerCase()) return false;
+
+      // 2. Filter by price range
       const priceNum = parsePrice(p.price);
       if (priceNum < minPrice || priceNum > maxPrice) return false;
 
+      // 3. Filter by Brand
       if (selBrands.size > 0) {
         if (!Array.from(selBrands).some(b => p.name.toLowerCase().includes(b.toLowerCase()))) return false;
       }
       
+      // 4. Filter by Capacity
       if (selCapacities.size > 0) {
         if (!Array.from(selCapacities).some(c => p.specs.includes(c))) return false;
       }
 
+      // 5. Filter by Type (DDR4, DDR5, NVMe, SATA, AIO, etc.)
       if (selTypes.size > 0) {
-        if (!Array.from(selTypes).some(t => p.specs.includes(t))) return false;
+        if (!Array.from(selTypes).some(t => p.specs.toLowerCase().includes(t.toLowerCase()))) return false;
       }
 
-      if (selBuses.size > 0) {
+      // 6. Filter by Bus (RAM only)
+      if (activeCategory === "ram" && selBuses.size > 0) {
         if (!Array.from(selBuses).some(b => p.specs.includes(b.replace('MHz', '')))) return false;
+      }
+
+      // 7. Filter by CPU / VGA Series
+      if (selSeries.size > 0) {
+        if (!Array.from(selSeries).some(s => p.name.toLowerCase().includes(s.toLowerCase()) || p.specs.toLowerCase().includes(s.toLowerCase()))) return false;
+      }
+
+      // 8. Filter by PSU Wattage
+      if (selWattages.size > 0) {
+        if (!Array.from(selWattages).some(w => p.specs.toLowerCase().includes(w.toLowerCase()))) return false;
+      }
+
+      // 9. Filter by Mainboard / Case Size
+      if (selSizes.size > 0) {
+        if (!Array.from(selSizes).some(sz => p.specs.toLowerCase().includes(sz.toLowerCase()) || p.name.toLowerCase().includes(sz.toLowerCase()))) return false;
       }
 
       return true;
@@ -213,7 +325,7 @@ export default function LinhKienIndex() {
     if (sortBy === "price-desc") result = [...result].sort((a, b) => parsePrice(b.price) - parsePrice(a.price));
     if (sortBy === "name")       result = [...result].sort((a, b) => a.name.localeCompare(b.name));
     return result;
-  }, [products, selBrands, selCapacities, selTypes, selBuses, minPrice, maxPrice, sortBy]);
+  }, [products, activeCategory, selBrands, selCapacities, selTypes, selBuses, selSeries, selWattages, selSizes, minPrice, maxPrice, sortBy]);
 
   const heroContainer = {
     hidden: {},
@@ -282,6 +394,11 @@ export default function LinhKienIndex() {
             onChange={e => {
               const val = Math.min(Number(e.target.value), maxPrice - 500000);
               setMinPrice(val);
+              
+              // Sync price to URL
+              const newParams = new URLSearchParams(searchParams);
+              newParams.set("minPrice", String(val));
+              setSearchParams(newParams);
             }}
             className="dual-range-slider"
             style={{ zIndex: activeInput === 'min' ? 10 : 3 }}
@@ -295,6 +412,11 @@ export default function LinhKienIndex() {
             onChange={e => {
               const val = Math.max(Number(e.target.value), minPrice + 500000);
               setMaxPrice(val);
+
+              // Sync price to URL
+              const newParams = new URLSearchParams(searchParams);
+              newParams.set("maxPrice", String(val));
+              setSearchParams(newParams);
             }}
             className="dual-range-slider"
             style={{ zIndex: activeInput === 'max' ? 10 : 3 }}
@@ -302,53 +424,185 @@ export default function LinhKienIndex() {
         </div>
       </div>
 
-      <FilterGroup title="Thương hiệu">
-        {BRANDS.map(b => (
-          <FilterCheckbox
-            key={b}
-            label={b}
-            count={products.filter(p => p.name.toLowerCase().includes(b.toLowerCase())).length}
-            checked={selBrands.has(b)}
-            onChange={() => setSelBrands(prev => toggleSet(prev, b))}
-          />
-        ))}
-      </FilterGroup>
+      {/* Brand Filters */}
+      {getCategoryBrands(activeCategory).length > 0 && (
+        <FilterGroup title="Thương hiệu">
+          {getCategoryBrands(activeCategory).map(b => (
+            <FilterCheckbox
+              key={b}
+              label={b}
+              count={products.filter(p => p.category?.toLowerCase() === activeCategory.toLowerCase() && p.name.toLowerCase().includes(b.toLowerCase())).length}
+              checked={selBrands.has(b)}
+              onChange={() => handleFilterToggle(selBrands, setSelBrands, b, "brand")}
+            />
+          ))}
+        </FilterGroup>
+      )}
 
-      <FilterGroup title="Dung lượng">
-        {CAPACITIES.map(c => (
-          <FilterCheckbox
-            key={c}
-            label={c}
-            count={products.filter(p => p.specs.includes(c)).length}
-            checked={selCapacities.has(c)}
-            onChange={() => setSelCapacities(prev => toggleSet(prev, c))}
-          />
-        ))}
-      </FilterGroup>
+      {/* Dynamic Filters based on category */}
+      {activeCategory === "ram" && (
+        <>
+          <FilterGroup title="Dung lượng">
+            {["4GB", "8GB", "16GB", "32GB", "64GB", "128GB"].map(c => (
+              <FilterCheckbox
+                key={c}
+                label={c}
+                count={products.filter(p => p.category?.toLowerCase() === "ram" && p.specs.includes(c)).length}
+                checked={selCapacities.has(c)}
+                onChange={() => handleFilterToggle(selCapacities, setSelCapacities, c, "capacity")}
+              />
+            ))}
+          </FilterGroup>
+          <FilterGroup title="Loại RAM">
+            {["DDR4", "DDR5"].map(t => (
+              <FilterCheckbox
+                key={t}
+                label={t}
+                count={products.filter(p => p.category?.toLowerCase() === "ram" && p.specs.includes(t)).length}
+                checked={selTypes.has(t)}
+                onChange={() => handleFilterToggle(selTypes, setSelTypes, t, "type")}
+              />
+            ))}
+          </FilterGroup>
+          <FilterGroup title="Tốc độ Bus">
+            {["2666MHz", "3200MHz", "3600MHz", "4800MHz", "5600MHz", "6000MHz", "6400MHz"].map(b => (
+              <FilterCheckbox
+                key={b}
+                label={b}
+                count={products.filter(p => p.category?.toLowerCase() === "ram" && p.specs.includes(b.replace('MHz', ''))).length}
+                checked={selBuses.has(b)}
+                onChange={() => handleFilterToggle(selBuses, setSelBuses, b, "bus")}
+              />
+            ))}
+          </FilterGroup>
+        </>
+      )}
 
-      <FilterGroup title="Loại RAM">
-        {TYPES.map(t => (
-          <FilterCheckbox
-            key={t}
-            label={t}
-            count={products.filter(p => p.specs.includes(t)).length}
-            checked={selTypes.has(t)}
-            onChange={() => setSelTypes(prev => toggleSet(prev, t))}
-          />
-        ))}
-      </FilterGroup>
+      {activeCategory === "cpu" && (
+        <FilterGroup title="Dòng CPU">
+          {["Core i3", "Core i5", "Core i7", "Core i9", "Ryzen 5", "Ryzen 7", "Ryzen 9"].map(s => (
+            <FilterCheckbox
+              key={s}
+              label={s}
+              count={products.filter(p => p.category?.toLowerCase() === "cpu" && p.name.includes(s)).length}
+              checked={selSeries.has(s)}
+              onChange={() => handleFilterToggle(selSeries, setSelSeries, s, "cpuSeries")}
+            />
+          ))}
+        </FilterGroup>
+      )}
 
-      <FilterGroup title="Tốc độ Bus">
-        {BUSES.map(b => (
-          <FilterCheckbox
-            key={b}
-            label={b}
-            count={products.filter(p => p.specs.includes(b.replace('MHz', ''))).length}
-            checked={selBuses.has(b)}
-            onChange={() => setSelBuses(prev => toggleSet(prev, b))}
-          />
-        ))}
-      </FilterGroup>
+      {activeCategory === "vga" && (
+        <FilterGroup title="Dòng Card đồ họa">
+          {["RTX 4090", "RTX 4080", "RTX 4070", "RTX 4060", "RTX 30 Series", "RX 7000", "RX 6000"].map(s => (
+            <FilterCheckbox
+              key={s}
+              label={s}
+              count={products.filter(p => p.category?.toLowerCase() === "vga" && p.specs.includes(s.replace(' Series', ''))).length}
+              checked={selSeries.has(s)}
+              onChange={() => handleFilterToggle(selSeries, setSelSeries, s, "vgaSeries")}
+            />
+          ))}
+        </FilterGroup>
+      )}
+
+      {activeCategory === "mainboard" && (
+        <FilterGroup title="Chipset">
+          {["Z790", "B760", "X670", "B650", "ITX"].map(s => (
+            <FilterCheckbox
+              key={s}
+              label={s}
+              count={products.filter(p => p.category?.toLowerCase() === "mainboard" && (p.name.includes(s) || p.specs.includes(s))).length}
+              checked={selSizes.has(s)}
+              onChange={() => handleFilterToggle(selSizes, setSelSizes, s, "chipset")}
+            />
+          ))}
+        </FilterGroup>
+      )}
+
+      {(activeCategory === "ssd" || activeCategory === "hdd") && (
+        <>
+          <FilterGroup title="Dung lượng">
+            {["256GB", "512GB", "1TB", "2TB", "4TB", "8TB+"].map(c => (
+              <FilterCheckbox
+                key={c}
+                label={c}
+                count={products.filter(p => p.category?.toLowerCase() === activeCategory && p.specs.includes(c)).length}
+                checked={selCapacities.has(c)}
+                onChange={() => handleFilterToggle(selCapacities, setSelCapacities, c, "capacity")}
+              />
+            ))}
+          </FilterGroup>
+          {activeCategory === "ssd" && (
+            <FilterGroup title="Chuẩn kết nối">
+              {["NVMe", "SATA"].map(t => (
+                <FilterCheckbox
+                  key={t}
+                  label={t}
+                  count={products.filter(p => p.category?.toLowerCase() === "ssd" && p.specs.includes(t)).length}
+                  checked={selTypes.has(t)}
+                  onChange={() => handleFilterToggle(selTypes, setSelTypes, t, "type")}
+                />
+              ))}
+            </FilterGroup>
+          )}
+        </>
+      )}
+
+      {activeCategory === "psu" && (
+        <>
+          <FilterGroup title="Công suất">
+            {["500W", "650W", "750W", "850W", "1000W"].map(w => (
+              <FilterCheckbox
+                key={w}
+                label={w}
+                count={products.filter(p => p.category?.toLowerCase() === "psu" && p.specs.includes(w)).length}
+                checked={selWattages.has(w)}
+                onChange={() => handleFilterToggle(selWattages, setSelWattages, w, "wattage")}
+              />
+            ))}
+          </FilterGroup>
+          <FilterGroup title="Chứng nhận 80 Plus">
+            {["Bronze", "Gold", "Platinum"].map(c => (
+              <FilterCheckbox
+                key={c}
+                label={c}
+                count={products.filter(p => p.category?.toLowerCase() === "psu" && p.specs.includes(c)).length}
+                checked={selTypes.has(c)}
+                onChange={() => handleFilterToggle(selTypes, setSelTypes, c, "cert")}
+              />
+            ))}
+          </FilterGroup>
+        </>
+      )}
+
+      {activeCategory === "cooling" && (
+        <FilterGroup title="Loại tản nhiệt">
+          {["Khí", "AIO", "Custom", "Quạt"].map(t => (
+            <FilterCheckbox
+              key={t}
+              label={t}
+              count={products.filter(p => p.category?.toLowerCase() === "cooling" && p.specs.includes(t)).length}
+              checked={selTypes.has(t)}
+              onChange={() => handleFilterToggle(selTypes, setSelTypes, t, "type")}
+            />
+          ))}
+        </FilterGroup>
+      )}
+
+      {activeCategory === "case" && (
+        <FilterGroup title="Kích thước">
+          {["ITX", "Micro ATX", "Mid Tower", "Full Tower"].map(s => (
+            <FilterCheckbox
+              key={s}
+              label={s}
+              count={products.filter(p => p.category?.toLowerCase() === "case" && p.specs.includes(s)).length}
+              checked={selSizes.has(s)}
+              onChange={() => handleFilterToggle(selSizes, setSelSizes, s, "size")}
+            />
+          ))}
+        </FilterGroup>
+      )}
 
       {hasActiveFilter && (
         <button
@@ -454,7 +708,7 @@ export default function LinhKienIndex() {
             {componentCategories.map(cat => (
               <button
                 key={cat.id}
-                onClick={() => setActiveCategory(cat.id)}
+                onClick={() => handleCategorySelect(cat.id)}
                 className={`group cursor-pointer bg-white rounded-2xl border shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 overflow-hidden text-left
                   ${activeCategory === cat.id
                     ? "border-zinc-900 ring-2 ring-zinc-900/10"
