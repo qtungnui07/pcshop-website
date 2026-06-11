@@ -308,11 +308,11 @@ export default function PCIndex() {
               <div key={i} className="w-full bg-white rounded-2xl border border-zinc-100 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 overflow-hidden group/card">
                 <div className="relative">
                   {pc.image ? (
-                    <div className="w-full aspect-[4/3.5] bg-[#0c0c0e] flex items-center justify-center p-3.5 overflow-hidden">
+                    <div className="w-full aspect-[4/3.5] relative overflow-hidden bg-zinc-900">
                       <img
                         src={pc.image}
                         alt={pc.name}
-                        className="max-h-full max-w-full object-contain drop-shadow-[0_8px_20px_rgba(255,255,255,0.08)] transition-transform duration-300 group-hover/card:scale-105"
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover/card:scale-105"
                       />
                     </div>
                   ) : (
