@@ -360,20 +360,53 @@ serve({
       return Response.json(db.pcs, { headers });
     }
 
-    // GET Components
-    if (url.pathname === "/api/components" && req.method === "GET") {
+    // GET & POST Components
+    if (url.pathname === "/api/components") {
+      if (req.method === "POST") {
+        try {
+          const body = await req.json();
+          const db = await readData();
+          db.components = body;
+          await writeData(db);
+          return Response.json({ success: true }, { headers });
+        } catch (err) {
+          return Response.json({ error: "Invalid JSON body" }, { status: 400, headers });
+        }
+      }
       const db = await readData();
       return Response.json(db.components, { headers });
     }
 
-    // GET Laptops
-    if (url.pathname === "/api/laptops" && req.method === "GET") {
+    // GET & POST Laptops
+    if (url.pathname === "/api/laptops") {
+      if (req.method === "POST") {
+        try {
+          const body = await req.json();
+          const db = await readData();
+          db.laptops = body;
+          await writeData(db);
+          return Response.json({ success: true }, { headers });
+        } catch (err) {
+          return Response.json({ error: "Invalid JSON body" }, { status: 400, headers });
+        }
+      }
       const db = await readData();
       return Response.json(db.laptops, { headers });
     }
 
-    // GET Accessories
-    if (url.pathname === "/api/accessories" && req.method === "GET") {
+    // GET & POST Accessories
+    if (url.pathname === "/api/accessories") {
+      if (req.method === "POST") {
+        try {
+          const body = await req.json();
+          const db = await readData();
+          db.accessories = body;
+          await writeData(db);
+          return Response.json({ success: true }, { headers });
+        } catch (err) {
+          return Response.json({ error: "Invalid JSON body" }, { status: 400, headers });
+        }
+      }
       const db = await readData();
       return Response.json(db.accessories, { headers });
     }
