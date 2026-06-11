@@ -98,5 +98,125 @@
     "from": "#4338ca",
     "to": "#6d28d9",
     "image": "http://localhost:3001/images/pcs/pc-nebula.png"
+  },
+  {
+    "badge": "Đồ họa chuyên nghiệp",
+    "badgeColor": "#8b5cf6",
+    "name": "PC Creator Studio Pro",
+    "specs": "i7-14700K • RTX 4070 Ti\n32GB RAM • 1TB SSD",
+    "price": "38.990.000đ",
+    "from": "#38bdf8",
+    "to": "#6366f1",
+    "image": "http://localhost:3001/images/pcs/pc-nebula.png"
+  },
+  {
+    "badge": "Render 3D",
+    "badgeColor": "#dc2626",
+    "name": "PC Render Beast 3D",
+    "specs": "i9-14900K • RTX 4090\n64GB RAM • 2TB SSD",
+    "price": "79.990.000đ",
+    "from": "#0f172a",
+    "to": "#1e40af",
+    "image": "http://localhost:3001/images/pcs/pc-infinity.png"
+  },
+  {
+    "badge": "Khuyên dùng",
+    "badgeColor": "#10b981",
+    "name": "PC AMD Ryzen Design",
+    "specs": "Ryzen 9 7900 • RTX 4070\n32GB RAM • 1TB SSD",
+    "price": "34.990.000đ",
+    "from": "#f472b6",
+    "to": "#db2777",
+    "image": "http://localhost:3001/images/pcs/pc-frost.png"
+  },
+  {
+    "badge": "",
+    "badgeColor": "",
+    "name": "PC Văn Phòng Intel Basic",
+    "specs": "Core i3-14100 • Onboard\n16GB RAM • 512GB SSD",
+    "price": "8.490.000đ",
+    "from": "#cbd5e1",
+    "to": "#94a3b8",
+    "image": "http://localhost:3001/images/pcs/pc-mini.png"
+  },
+  {
+    "badge": "Tiết kiệm điện",
+    "badgeColor": "#10b981",
+    "name": "PC Văn Phòng AMD Pro",
+    "specs": "Ryzen 5 5600G • Onboard\n16GB RAM • 512GB SSD",
+    "price": "9.990.000đ",
+    "from": "#d4d4d8",
+    "to": "#a1a1aa",
+    "image": "http://localhost:3001/images/pcs/pc-mini.png"
+  },
+  {
+    "badge": "",
+    "badgeColor": "",
+    "name": "PC Văn Phòng ASUS Slim",
+    "specs": "Core i5-13400 • Onboard\n16GB RAM • 512GB SSD",
+    "price": "11.490.000đ",
+    "from": "#e2e8f0",
+    "to": "#cbd5e1",
+    "image": "http://localhost:3001/images/pcs/pc-mini.png"
+  },
+  {
+    "badge": "Siêu Cấp Workstation",
+    "badgeColor": "#1d1d1f",
+    "name": "PC Workstation Dual Intel",
+    "specs": "Intel Core i9-14900 • RTX 4090\n128GB RAM • 2TB SSD",
+    "price": "98.990.000đ",
+    "from": "#0f172a",
+    "to": "#1e293b",
+    "image": "http://localhost:3001/images/pcs/pc-workstation.png"
+  },
+  {
+    "badge": "Cực mạnh",
+    "badgeColor": "#8b5cf6",
+    "name": "PC Workstation Ryzen Thread",
+    "specs": "Ryzen 9 7950X • RTX 4080\n128GB RAM • 2TB SSD",
+    "price": "82.990.000đ",
+    "from": "#1e293b",
+    "to": "#334155",
+    "image": "http://localhost:3001/images/pcs/pc-workstation.png"
+  },
+  {
+    "badge": "",
+    "badgeColor": "",
+    "name": "PC Workstation Entry Studio",
+    "specs": "i7-14700 • RTX 4070\n64GB RAM • 1TB SSD",
+    "price": "39.990.000đ",
+    "from": "#cbd5e1",
+    "to": "#94a3b8",
+    "image": "http://localhost:3001/images/pcs/pc-workstation.png"
+  },
+  {
+    "badge": "ROG Gaming NUC",
+    "badgeColor": "#dc2626",
+    "name": "PC Mini ROG NUC Ultra 9",
+    "specs": "Core i9-14900 • RTX 4070\n32GB RAM • 1TB SSD",
+    "price": "49.990.000đ",
+    "from": "#7c3aed",
+    "to": "#ec4899",
+    "image": "http://localhost:3001/images/pcs/pc-mini.png"
+  },
+  {
+    "badge": "",
+    "badgeColor": "",
+    "name": "PC Mini MSI Cubi Pro",
+    "specs": "Core i5-13400 • Onboard\n16GB RAM • 512GB SSD",
+    "price": "11.490.000đ",
+    "from": "#cbd5e1",
+    "to": "#94a3b8",
+    "image": "http://localhost:3001/images/pcs/pc-mini.png"
+  },
+  {
+    "badge": "Hỗ trợ nâng cấp",
+    "badgeColor": "#2563eb",
+    "name": "PC Mini Corsair Edition",
+    "specs": "Ryzen 7 5700G • Onboard\n16GB RAM • 1TB SSD",
+    "price": "13.990.000đ",
+    "from": "#374151",
+    "to": "#111827",
+    "image": "http://localhost:3001/images/pcs/pc-mini.png"
   }
 ]
