@@ -395,6 +395,7 @@ export default function AdminIndex() {
 
   // Editor states
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
+  const [editorOffsetTop, setEditorOffsetTop] = useState(0);
   
   // Shared Form inputs
   const [formName, setFormName] = useState("");
@@ -615,6 +616,16 @@ export default function AdminIndex() {
 
     setEditingIndex(originalIndex);
     setFormErrors({});
+
+    // Smooth scroll to editor panel on mobile/tablet
+    setTimeout(() => {
+      if (window.innerWidth < 1024) {
+        const editorEl = document.getElementById("admin-editor-panel");
+        if (editorEl) {
+          editorEl.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+      }
+    }, 100);
 
     if (activeCategory === "accounts") {
       setAccountName(item.name || "");
@@ -1014,7 +1025,7 @@ export default function AdminIndex() {
           <p className="text-sm font-bold">Đang kết nối cơ sở dữ liệu...</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        <div id="admin-grid-container" className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start relative">
           
           {/* ── LEFT: PRODUCT LIST (7 Columns) ────────────────────────── */}
           <div className="lg:col-span-7 xl:col-span-8 flex flex-col gap-4">
@@ -1054,6 +1065,7 @@ export default function AdminIndex() {
                   return (
                     <div
                       key={originalIndex}
+                      id={`admin-item-card-${originalIndex}`}
                       className={`flex items-center justify-between bg-white border rounded-2xl p-4 transition-all shadow-sm ${
                         editingIndex === originalIndex
                           ? "ring-2 ring-zinc-950 border-transparent bg-zinc-50/20"
@@ -1264,7 +1276,10 @@ export default function AdminIndex() {
           </div>
 
           {/* ── RIGHT: EDITOR FORM PANE (4-5 Columns) ────────────────── */}
-          <div className="lg:col-span-5 xl:col-span-4">
+          <div 
+            id="admin-editor-panel"
+            className="lg:col-span-5 xl:col-span-4 lg:sticky lg:top-24 lg:max-h-[calc(100vh-120px)] lg:overflow-y-auto pr-1"
+          >
             <AnimatePresence mode="wait">
               {editingIndex !== null ? (
                 <motion.form
@@ -1273,7 +1288,7 @@ export default function AdminIndex() {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: 15 }}
                   onSubmit={handleSaveForm}
-                  className="bg-white border border-zinc-200 rounded-2xl p-5 shadow-sm sticky top-24"
+                  className="bg-white border border-zinc-200 rounded-2xl p-5 shadow-sm"
                 >
                   <h2 className="text-sm font-extrabold text-zinc-900 mb-4 flex items-center gap-1.5 border-b border-zinc-100 pb-3">
                     <Sparkles className="w-5 h-5 text-zinc-950" />
@@ -1780,7 +1795,9 @@ export default function AdminIndex() {
                     </button>
                     <button
                       type="button"
-                      onClick={() => setEditingIndex(null)}
+                      onClick={() => {
+                        setEditingIndex(null);
+                      }}
                       className="px-4 py-2.5 border border-zinc-200 hover:bg-zinc-100 text-zinc-500 hover:text-zinc-700 text-xs font-bold rounded-xl transition-colors cursor-pointer"
                     >
                       Hủy

@@ -57,12 +57,12 @@ const brands = [
   { name: "Apple", logo: "https://upload.wikimedia.org/wikipedia/commons/f/fa/Apple_logo_black.svg" },
 ];
 
-const perks = [
-  { icon: ShieldCheck, title: "Bảo hành 36 tháng",      desc: "An tâm sử dụng dài lâu" },
-  { icon: Wrench,      title: "Hỗ trợ build miễn phí",  desc: "Tư vấn & lắp ráp tận tình" },
-  { icon: Truck,       title: "Giao hàng toàn quốc",    desc: "Nhanh chóng & an toàn" },
-  { icon: CreditCard,  title: "Trả góp 0% lãi suất",    desc: "Dễ dàng & linh hoạt" },
-];
+// const perks = [
+//   { icon: ShieldCheck, title: "Bảo hành 36 tháng",      desc: "An tâm sử dụng dài lâu" },
+ 
+//   { icon: Truck,       title: "Giao hàng toàn quốc",    desc: "Nhanh chóng & an toàn" },
+//   { icon: CreditCard,  title: "Trả góp 0% lãi suất",    desc: "Dễ dàng & linh hoạt" },
+// ];
 
 /* ── GRADIENT BLOCK placeholder ───────────────────────────────────── */
 function Grad({ from, to, glow, className = "", children }: {
@@ -204,6 +204,8 @@ export default function PCIndex() {
                   { Icon: ShieldCheck, text: "Bảo hành lên đến\n36 tháng" },
                   { Icon: Truck,       text: "Giao hàng nhanh\ntoàn quốc" },
                   { Icon: CheckCircle2,text: "Test máy kỹ càng\ntrước khi giao" },
+                  { Icon: CreditCard,  text: "Trả góp 0% lãi suất" },
+                  { Icon: Wrench,      text: "Hỗ trợ build miễn phí" },
                 ].map(({ Icon, text }) => (
                   <div key={text} className="flex items-center gap-2">
                     <Icon className="w-5 h-5 text-zinc-700 shrink-0" strokeWidth={1.8} />
@@ -360,7 +362,7 @@ export default function PCIndex() {
         </section>
 
         {/* ══ 5. PERKS ═══════════════════════════════════════════════════ */}
-        <section className="mt-10 mb-8">
+        {/* <section className="mt-10 mb-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
             {perks.map(({ icon: Icon, title, desc }, i) => (
               <div key={i} className="flex items-start gap-3 py-2">
@@ -374,7 +376,7 @@ export default function PCIndex() {
               </div>
             ))}
           </div>
-        </section>
+        </section> */}
 
       </div>
     </div>

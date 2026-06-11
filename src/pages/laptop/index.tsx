@@ -251,6 +251,13 @@ export default function LaptopIndex() {
   const [maxPrice,   setMaxPrice]   = useState(MAX_PRICE);
   const [activeInput, setActiveInput] = useState<'min' | 'max'>('min');
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 16;
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [selBrands, selRAMs, selCPUs, selScreens, selGPUs, minPrice, maxPrice, sortBy, activeCategory]);
+
   const toggleLike = (id: number) =>
     setLiked(p => toggleSet(p, id));
 
@@ -296,7 +303,16 @@ export default function LaptopIndex() {
     if (sortBy === "price-desc") result = [...result].sort((a, b) => b.price - a.price);
     if (sortBy === "name")       result = [...result].sort((a, b) => a.name.localeCompare(b.name));
     return result;
-  }, [selBrands, selRAMs, selCPUs, selScreens, selGPUs, minPrice, maxPrice, sortBy, activeCategory]);
+  }, [products, selBrands, selRAMs, selCPUs, selScreens, selGPUs, minPrice, maxPrice, sortBy, activeCategory]);
+
+  const totalPages = useMemo(() => {
+    return Math.ceil(filteredProducts.length / ITEMS_PER_PAGE) || 1;
+  }, [filteredProducts.length]);
+
+  const paginatedProducts = useMemo(() => {
+    const start = (currentPage - 1) * ITEMS_PER_PAGE;
+    return filteredProducts.slice(start, start + ITEMS_PER_PAGE);
+  }, [filteredProducts, currentPage]);
 
   const heroContainer = {
     hidden: {},
@@ -469,9 +485,12 @@ export default function LaptopIndex() {
         className="overflow-hidden relative"
         style={{
           background: "linear-gradient(135deg, #ffffff 0%, #f0f6ff 40%, #e3effe 70%, #dceafd 100%)",
+          marginLeft: "calc(-50vw + 50%)",
+          marginRight: "calc(-50vw + 50%)",
           marginTop: "-96px",
-          paddingTop: "calc(96px + 2.5rem)",
-          paddingBottom: "6rem",
+          paddingTop: "96px",
+          paddingLeft: "calc(50vw - 50%)",
+          paddingRight: "calc(50vw - 50%)",
         }}
       >
         {/* Top-right blue glow */}
@@ -490,28 +509,40 @@ export default function LaptopIndex() {
         }} />
         
         <div className="max-w-[1700px] mx-auto px-4 md:px-8 lg:px-10 xl:px-12 2xl:px-16 relative z-10">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
-            <motion.div variants={heroContainer} initial="hidden" animate="show" className="max-w-2xl relative z-10">
-              <motion.h1 variants={heroItem} className="text-[3rem] md:text-[4rem] lg:text-[4.5rem] font-bold tracking-tight text-zinc-900 leading-[1.08] mb-6 whitespace-nowrap">
-                Laptop Gaming<br />hiệu năng bứt phá.
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center" style={{ minHeight: "calc(100vh - 96px)" }}>
+            <motion.div variants={heroContainer} initial="hidden" animate="show" className="max-w-2xl flex flex-col items-start justify-center pr-8 py-12 relative z-10">
+              <motion.div variants={heroItem}>
+                <span className="inline-block px-3 py-1 bg-white/70 text-zinc-500 rounded-full text-[11px] font-semibold uppercase tracking-widest mb-6 border border-zinc-200/60">
+                  Laptop chính hãng
+                </span>
+              </motion.div>
+              <motion.h1 variants={heroItem} className="text-[3.2rem] md:text-[4.2rem] lg:text-[5rem] font-bold tracking-tight text-zinc-900 leading-[1.08] mb-6 whitespace-nowrap">
+                Bứt phá giới hạn<br />làm chủ công nghệ.
               </motion.h1>
-              <motion.p variants={heroItem} className="text-[17px] text-zinc-500 mb-10 leading-relaxed max-w-md">
-                Sức mạnh tản nhiệt đỉnh cao,<br />
-                sẵn sàng cùng bạn chiến mọi tựa game.
+              <motion.p variants={heroItem} className="text-[17px] text-zinc-500 mb-10 leading-relaxed">
+                Laptop sẽ giúp bạn bật nguồn cảm hứng<br />
+                sẵn sàng cùng bạn chinh phục mọi thử thách.
               </motion.p>
-              <motion.div variants={heroItem} className="flex flex-wrap items-center gap-3">
-                <button className="inline-flex items-center gap-2 px-8 py-3.5 bg-[#1d1d1f] hover:bg-zinc-800 text-white text-[15px] font-semibold rounded-full transition-all duration-200 shadow-md active:scale-95 cursor-pointer">
+              <motion.div variants={heroItem} className="flex flex-row gap-3 mb-12">
+                <button
+                  onClick={() => {
+                    document
+                      .getElementById("chon-laptop-theo-nhu-cau")
+                      ?.scrollIntoView({ behavior: "smooth", block: "start" });
+                  }}
+                  className="inline-flex items-center gap-2 px-8 py-3.5 bg-[#1d1d1f] hover:bg-zinc-800 text-white text-[15px] font-semibold rounded-full transition-all duration-200 shadow-md active:scale-95 cursor-pointer"
+                >
                   Khám phá ngay <ArrowRight className="w-4 h-4" />
                 </button>
                 <button className="inline-flex items-center gap-2 px-8 py-3.5 bg-white/80 border border-zinc-300 hover:bg-white text-zinc-800 text-[15px] font-semibold rounded-full transition-all duration-200 shadow-sm active:scale-95 cursor-pointer">
                   Tư vấn chọn laptop <ArrowRight className="w-4 h-4" />
                 </button>
               </motion.div>
-              <motion.div variants={heroItem} className="flex flex-wrap items-center gap-x-8 gap-y-3 pt-7 mt-8 border-t border-zinc-200 w-full">
+              <motion.div variants={heroItem} className="flex flex-wrap items-center gap-x-8 gap-y-3 pt-7 border-t border-zinc-300/40 w-full">
                 {perks.map(({ icon: Icon, title }) => (
                   <div key={title} className="flex items-center gap-2">
-                    <Icon className="w-5 h-5 text-zinc-500 shrink-0" strokeWidth={1.8} />
-                    <span className="text-[13px] text-zinc-500 leading-tight whitespace-pre-line font-medium">{title}</span>
+                    <Icon className="w-5 h-5 text-zinc-700 shrink-0" strokeWidth={1.8} />
+                    <span className="text-[13px] text-zinc-700 leading-tight whitespace-pre-line font-semibold">{title}</span>
                   </div>
                 ))}
               </motion.div>
@@ -521,15 +552,37 @@ export default function LaptopIndex() {
               initial={{ opacity: 0, x: 50, scale: 0.95 }}
               animate={{ opacity: 1, x: 0, scale: 1 }}
               transition={{ duration: 1, ease: [0.25, 1, 0.5, 1], delay: 0.2 }}
-              className="relative hidden lg:block"
+              className="relative hidden lg:flex items-end justify-center"
+              style={{ alignSelf: "stretch" }}
             >
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-zinc-200/40 rounded-full blur-3xl opacity-60 pointer-events-none" />
-              <img
-                src="https://images.unsplash.com/photo-1611186871348-b1ce696e52c9?q=80&w=2070&auto=format&fit=crop"
-                alt="Laptop display"
-                className="w-full relative z-10 object-cover rounded-xl shadow-2xl mix-blend-multiply"
-                onError={e => { (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?q=80&w=2071&auto=format&fit=crop"; }}
-              />
+              {/* Blue glow behind Laptop */}
+              <div style={{
+                position: "absolute",
+                width: 600, height: 600,
+                background: "radial-gradient(circle, rgba(147,197,253,0.3) 0%, rgba(165,180,252,0.1) 50%, transparent 70%)",
+                bottom: "0%", left: "50%", transform: "translateX(-48%)",
+                pointerEvents: "none",
+                zIndex: 0,
+              }} />
+              
+              {/* Floor reflection */}
+              <div style={{
+                position: "absolute",
+                width: 500, height: 60,
+                background: "radial-gradient(ellipse, rgba(120,170,250,0.2) 0%, transparent 70%)",
+                bottom: "0%", left: "50%", transform: "translateX(-48%)",
+                pointerEvents: "none",
+                zIndex: 1,
+              }} />
+
+              <div className="relative z-10 w-full h-[450px] flex items-center justify-center overflow-hidden mb-12">
+                <img
+                  src="https://images.unsplash.com/photo-1611186871348-b1ce696e52c9?q=80&w=2070&auto=format&fit=crop"
+                  alt="Laptop display"
+                  className="max-h-[380px] w-auto relative z-10 object-contain rounded-xl shadow-2xl mix-blend-multiply"
+                  onError={e => { (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?q=80&w=2071&auto=format&fit=crop"; }}
+                />
+              </div>
             </motion.div>
           </div>
         </div>
@@ -538,7 +591,7 @@ export default function LaptopIndex() {
       <div className="max-w-[1700px] mx-auto px-4 md:px-8 lg:px-10 xl:px-12 2xl:px-16 mt-8 md:mt-10">
 
         {/* ══ 2. CHỌN THEO NHU CẦU ═══════════════════════════════════════ */}
-        <section className="mb-16 md:mb-20">
+        <section id="chon-laptop-theo-nhu-cau" className="scroll-mt-28 mb-16 md:mb-20">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-xl md:text-2xl font-bold tracking-tight text-zinc-900">Chọn laptop theo nhu cầu</h2>
             {activeCategory !== null && (
@@ -724,7 +777,7 @@ export default function LaptopIndex() {
                 ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
                 : "flex flex-col gap-3"
               }>
-                {filteredProducts.map((p) => (
+                {paginatedProducts.map((p) => (
                   viewMode === "grid" ? (
                     <div key={p.id} className="group bg-white rounded-2xl border border-zinc-100 p-4 shadow-sm hover:shadow-md hover:border-zinc-200 hover:-translate-y-0.5 transition-all duration-300 flex flex-col relative">
                       <button
@@ -769,17 +822,51 @@ export default function LaptopIndex() {
             )}
 
             {/* Pagination */}
-            {filteredProducts.length > 0 && (
+            {totalPages > 1 && (
               <div className="flex items-center justify-center gap-2 mt-10">
-                <button className="w-9 h-9 flex items-center justify-center rounded-lg border border-zinc-200 text-zinc-400 hover:bg-zinc-50 transition-colors cursor-pointer">
+                <button
+                  disabled={currentPage === 1}
+                  onClick={() => {
+                    setCurrentPage(p => Math.max(1, p - 1));
+                    document.getElementById("products-section")?.scrollIntoView({ behavior: "smooth" });
+                  }}
+                  className={`w-9 h-9 flex items-center justify-center rounded-lg border border-zinc-200 transition-colors ${
+                    currentPage === 1 ? "text-zinc-300 cursor-not-allowed opacity-50" : "text-zinc-600 hover:bg-zinc-50 cursor-pointer"
+                  }`}
+                >
                   <ChevronDown className="w-4 h-4 rotate-90" />
                 </button>
-                <button className="w-9 h-9 flex items-center justify-center rounded-lg bg-zinc-900 text-white font-medium text-[13px]">1</button>
-                <button className="w-9 h-9 flex items-center justify-center rounded-lg border border-zinc-200 text-zinc-600 hover:bg-zinc-50 font-medium text-[13px] transition-colors cursor-pointer">2</button>
-                <button className="w-9 h-9 flex items-center justify-center rounded-lg border border-zinc-200 text-zinc-600 hover:bg-zinc-50 font-medium text-[13px] transition-colors cursor-pointer">3</button>
-                <span className="px-2 text-zinc-400">...</span>
-                <button className="w-9 h-9 flex items-center justify-center rounded-lg border border-zinc-200 text-zinc-600 hover:bg-zinc-50 font-medium text-[13px] transition-colors cursor-pointer">6</button>
-                <button className="w-9 h-9 flex items-center justify-center rounded-lg border border-zinc-200 text-zinc-600 hover:bg-zinc-50 transition-colors cursor-pointer">
+                
+                {Array.from({ length: totalPages }, (_, idx) => {
+                  const pageNum = idx + 1;
+                  return (
+                    <button
+                      key={pageNum}
+                      onClick={() => {
+                        setCurrentPage(pageNum);
+                        document.getElementById("products-section")?.scrollIntoView({ behavior: "smooth" });
+                      }}
+                      className={`w-9 h-9 flex items-center justify-center rounded-lg font-medium text-[13px] transition-colors cursor-pointer ${
+                        currentPage === pageNum
+                          ? "bg-zinc-950 text-white"
+                          : "border border-zinc-200 text-zinc-600 hover:bg-zinc-50"
+                      }`}
+                    >
+                      {pageNum}
+                    </button>
+                  );
+                })}
+
+                <button
+                  disabled={currentPage === totalPages}
+                  onClick={() => {
+                    setCurrentPage(p => Math.min(totalPages, p + 1));
+                    document.getElementById("products-section")?.scrollIntoView({ behavior: "smooth" });
+                  }}
+                  className={`w-9 h-9 flex items-center justify-center rounded-lg border border-zinc-200 transition-colors ${
+                    currentPage === totalPages ? "text-zinc-300 cursor-not-allowed opacity-50" : "text-zinc-600 hover:bg-zinc-50 cursor-pointer"
+                  }`}
+                >
                   <ChevronDown className="w-4 h-4 -rotate-90" />
                 </button>
               </div>

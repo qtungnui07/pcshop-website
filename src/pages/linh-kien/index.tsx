@@ -20,15 +20,15 @@ interface Product {
 
 /* ── DATA ──────────────────────────────────────────────────────────── */
 const componentCategories = [
-  { id: "ram",       label: "RAM",              from: "#7c3aed", to: "#a78bfa", glow: "rgba(167,139,250,0.35)" },
-  { id: "cpu",       label: "CPU / Vi Xử Lý",  from: "#0f172a", to: "#1e3a5f", glow: "rgba(56,189,248,0.25)" },
-  { id: "vga",       label: "VGA / Card Màn",   from: "#dc2626", to: "#f97316", glow: "rgba(249,115,22,0.30)" },
-  { id: "mainboard", label: "Mainboard",         from: "#065f46", to: "#059669", glow: "rgba(5,150,105,0.30)" },
-  { id: "ssd",       label: "SSD / Ổ Cứng SSD", from: "#1e40af", to: "#38bdf8", glow: "rgba(56,189,248,0.30)" },
-  { id: "hdd",       label: "HDD / Ổ Cứng HDD", from: "#374151", to: "#6b7280", glow: "rgba(107,114,128,0.25)" },
-  { id: "psu",       label: "PSU / Nguồn",       from: "#78350f", to: "#d97706", glow: "rgba(217,119,6,0.30)" },
-  { id: "cooling",   label: "Tản Nhiệt",         from: "#164e63", to: "#06b6d4", glow: "rgba(6,182,212,0.30)" },
-  { id: "case",      label: "Case / Vỏ Máy",     from: "#1c1917", to: "#44403c", glow: "rgba(68,64,60,0.40)" },
+  { id: "ram",       label: "RAM",             glow: "rgba(167,139,250,0.35)", image: "ram.webp" },
+  { id: "cpu",       label: "CPU / Vi Xử Lý",  glow: "rgba(56,189,248,0.25)", image: "cpu.webp" },
+  { id: "vga",       label: "VGA / Card Màn",   glow: "rgba(249,115,22,0.30)", image: "gpu.webp" },
+  { id: "mainboard", label: "Mainboard", glow: "rgba(5,150,105,0.30)", image: "main.jpg" },
+  { id: "ssd",       label: "SSD / Ổ Cứng SSD", glow: "rgba(56,189,248,0.30)", image: "ssd.jpg" },
+  { id: "hdd",       label: "HDD / Ổ Cứng HDD", glow: "rgba(107,114,128,0.25)", image: "hdd.jpg" },
+  { id: "psu",       label: "PSU / Nguồn",        glow: "rgba(217,119,6,0.30)", image: "psu.webp" },
+  { id: "cooling",   label: "Tản Nhiệt",        glow: "rgba(6,182,212,0.30)", image: "tannhiet.webp" },
+  { id: "case",      label: "Case / Vỏ Máy",     glow: "rgba(68,64,60,0.40)", image: "case.webp" },
 ];
 
 const defaultProducts: Product[] = [
@@ -195,12 +195,6 @@ function formatPrice(p: number) {
   return new Intl.NumberFormat("vi-VN").format(p) + " đ";
 }
 
-function toggleSet<T>(set: Set<T>, value: T): Set<T> {
-  const next = new Set(set);
-  next.has(value) ? next.delete(value) : next.add(value);
-  return next;
-}
-
 /* ── FilterCheckbox ─────────────────────────────────────────────────── */
 function FilterCheckbox({
   checked, label, count, onChange,
@@ -270,7 +264,7 @@ const API_BASE = typeof window !== "undefined"
 
 /* ── PAGE ──────────────────────────────────────────────────────────── */
 export default function LinhKienIndex() {
-  const [liked, setLiked] = useState<Set<number>>(new Set());
+  const [liked, setLiked] = useState<Set<string>>(new Set());
   const [activeCategory, setActiveCategory] = useState("ram");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [products, setProducts] = useState<Product[]>(defaultProducts);
@@ -337,9 +331,32 @@ export default function LinhKienIndex() {
     setMaxPrice(maxP ? Number(maxP) : MAX_PRICE);
   }, [searchParams]);
 
-  const toggleLike = (i: number) => {
-    setLiked(p => toggleSet(p, i));
+  const toggleLike = (name: string) => {
+    setLiked(p => {
+      const next = new Set(p);
+      next.has(name) ? next.delete(name) : next.add(name);
+      return next;
+    });
   };
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 16;
+
+  // Reset page when category or filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [
+    activeCategory,
+    selBrands,
+    selCapacities,
+    selTypes,
+    selBuses,
+    selSeries,
+    selWattages,
+    selSizes,
+    minPrice,
+    maxPrice
+  ]);
 
   const hasActiveFilter =
     selBrands.size > 0 || selCapacities.size > 0 || selTypes.size > 0 ||
@@ -442,6 +459,15 @@ export default function LinhKienIndex() {
     if (sortBy === "name")       result = [...result].sort((a, b) => a.name.localeCompare(b.name));
     return result;
   }, [products, activeCategory, selBrands, selCapacities, selTypes, selBuses, selSeries, selWattages, selSizes, minPrice, maxPrice, sortBy]);
+
+  const totalPages = useMemo(() => {
+    return Math.ceil(filteredProducts.length / ITEMS_PER_PAGE) || 1;
+  }, [filteredProducts.length]);
+
+  const paginatedProducts = useMemo(() => {
+    const start = (currentPage - 1) * ITEMS_PER_PAGE;
+    return filteredProducts.slice(start, start + ITEMS_PER_PAGE);
+  }, [filteredProducts, currentPage]);
 
   const heroContainer = {
     hidden: {},
@@ -735,46 +761,73 @@ export default function LinhKienIndex() {
     <div className="bg-[#fafafa] min-h-screen pb-16">
 
       {/* ══ 1. HERO ═════════════════════════════════════════════════════ */}
-      <div className="relative overflow-hidden" style={{ background: "linear-gradient(135deg, #f8fafc 0%, #f0f4f8 40%, #e8eef5 100%)" }}>
-        {/* BG glow */}
-        <div className="absolute inset-0 pointer-events-none">
-          <div style={{ position: "absolute", top: "-10%", right: "-5%", width: 700, height: 700, background: "radial-gradient(circle, rgba(147,197,253,0.25) 0%, transparent 65%)" }} />
-          <div style={{ position: "absolute", bottom: 0, left: 0, width: 500, height: 300, background: "radial-gradient(ellipse at 0% 100%, rgba(255,255,255,0.8) 0%, transparent 70%)" }} />
-        </div>
+      <div 
+        className="relative overflow-hidden" 
+        style={{ 
+          background: "linear-gradient(135deg, #ffffff 0%, #f0f6ff 40%, #e3effe 70%, #dceafd 100%)",
+          marginLeft: "calc(-50vw + 50%)",
+          marginRight: "calc(-50vw + 50%)",
+          marginTop: "-96px",
+          paddingTop: "96px",
+          paddingLeft: "calc(50vw - 50%)",
+          paddingRight: "calc(50vw - 50%)",
+          position: "relative",
+        }}
+      >
+        {/* Top-right blue glow */}
+        <div style={{
+          position: "absolute", top: "-10%", right: "-5%",
+          width: 800, height: 800,
+          background: "radial-gradient(circle, rgba(147,197,253,0.35) 0%, rgba(165,180,252,0.15) 40%, transparent 70%)",
+          pointerEvents: "none",
+        }} />
+        {/* Bottom left soft white fade */}
+        <div style={{
+          position: "absolute", bottom: 0, left: 0,
+          width: 600, height: 400,
+          background: "radial-gradient(ellipse at 0% 100%, rgba(255,255,255,0.9) 0%, transparent 70%)",
+          pointerEvents: "none",
+        }} />
 
-        <div className="max-w-[1700px] mx-auto px-4 md:px-8 lg:px-10 xl:px-12 2xl:px-16 py-10 md:py-16 relative">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+        <div className="max-w-[1600px] mx-auto px-4 md:px-8 lg:px-10 xl:px-12 2xl:px-16 relative z-10">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center" style={{ minHeight: "calc(100vh - 96px)" }}>
 
             {/* Left */}
-            <motion.div variants={heroContainer} initial="hidden" animate="show" className="max-w-2xl">
+            <motion.div variants={heroContainer} initial="hidden" animate="show" className="max-w-2xl flex flex-col items-start justify-center pr-8 py-12 relative z-10">
               <motion.div variants={heroItem}>
-                <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold tracking-widest uppercase text-zinc-500 mb-5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-zinc-400" />
+                <span className="inline-block px-3 py-1 bg-white/70 text-zinc-500 rounded-full text-[11px] font-semibold uppercase tracking-widest mb-6 border border-zinc-200/60">
                   Linh kiện chính hãng
                 </span>
               </motion.div>
               <motion.h1 variants={heroItem} className="text-[3.2rem] md:text-[4.2rem] lg:text-[5rem] font-bold tracking-tight text-zinc-900 leading-[1.08] mb-6">
                 Linh kiện PC<br />cho mọi cấu hình.
               </motion.h1>
-              <motion.p variants={heroItem} className="text-[16px] text-zinc-500 leading-relaxed mb-8">
+              <motion.p variants={heroItem} className="text-[17px] text-zinc-500 leading-relaxed mb-10">
                 Đa dạng linh kiện chính hãng, chất lượng cao.<br />
                 Tương thích tối ưu – Bền bỉ – Hiệu suất vượt trội.
               </motion.p>
-              <motion.div variants={heroItem} className="flex flex-wrap gap-3">
-                <button className="inline-flex items-center gap-2 px-7 py-3 bg-zinc-900 hover:bg-zinc-800 text-white text-[14px] font-semibold rounded-lg transition-all duration-200 shadow-lg shadow-zinc-900/20 active:scale-95 cursor-pointer">
+              <motion.div variants={heroItem} className="flex flex-row gap-3 mb-12">
+                <button
+                  onClick={() => {
+                    document
+                      .getElementById("danh-muc-linh-kien")
+                      ?.scrollIntoView({ behavior: "smooth", block: "start" });
+                  }}
+                  className="inline-flex items-center gap-2 px-8 py-3.5 bg-[#1d1d1f] hover:bg-zinc-800 text-white text-[15px] font-semibold rounded-full transition-all duration-200 shadow-md active:scale-95 cursor-pointer"
+                >
                   Xem linh kiện <ChevronRight className="w-4 h-4" />
                 </button>
-                <button className="inline-flex items-center gap-2 px-7 py-3 bg-white border border-zinc-200 hover:bg-zinc-50 text-zinc-800 text-[14px] font-semibold rounded-lg transition-all duration-200 shadow-sm active:scale-95 cursor-pointer">
+                <button className="inline-flex items-center gap-2 px-8 py-3.5 bg-white/80 border border-zinc-300 hover:bg-white text-zinc-800 text-[15px] font-semibold rounded-full transition-all duration-200 shadow-sm active:scale-95 cursor-pointer">
                   Hướng dẫn build PC <ChevronRight className="w-4 h-4" />
                 </button>
               </motion.div>
 
               {/* Mini perks */}
-              <motion.div variants={heroItem} className="flex flex-wrap gap-6 mt-10 pt-8 border-t border-zinc-200/60">
+              <motion.div variants={heroItem} className="flex flex-wrap items-center gap-x-8 gap-y-3 pt-7 border-t border-zinc-300/40 w-full">
                 {perks.map(({ icon: Icon, title }) => (
                   <div key={title} className="flex items-center gap-2">
-                    <Icon className="w-5 h-5 text-zinc-500 shrink-0" strokeWidth={1.6} />
-                    <span className="text-[12px] text-zinc-500 font-medium leading-tight">{title}</span>
+                    <Icon className="w-5 h-5 text-zinc-700 shrink-0" strokeWidth={1.8} />
+                    <span className="text-[13px] text-zinc-700 leading-tight whitespace-pre-line font-semibold">{title}</span>
                   </div>
                 ))}
               </motion.div>
@@ -786,11 +839,30 @@ export default function LinhKienIndex() {
               animate={{ opacity: 1, x: 0, scale: 1 }}
               transition={{ duration: 1, ease: [0.25, 1, 0.5, 1], delay: 0.2 }}
               className="relative hidden lg:flex items-end justify-center"
-              style={{ minHeight: 340 }}
+              style={{ alignSelf: "stretch" }}
             >
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80%] h-[80%] rounded-full blur-3xl opacity-60 pointer-events-none" style={{ background: "radial-gradient(circle, rgba(147,197,253,0.35) 0%, transparent 70%)" }} />
+              {/* Blue glow behind PC */}
+              <div style={{
+                position: "absolute",
+                width: 600, height: 600,
+                background: "radial-gradient(circle, rgba(147,197,253,0.3) 0%, rgba(165,180,252,0.1) 50%, transparent 70%)",
+                bottom: "0%", left: "50%", transform: "translateX(-48%)",
+                pointerEvents: "none",
+                zIndex: 0,
+              }} />
+              
+              {/* Floor reflection */}
+              <div style={{
+                position: "absolute",
+                width: 500, height: 60,
+                background: "radial-gradient(ellipse, rgba(120,170,250,0.2) 0%, transparent 70%)",
+                bottom: "0%", left: "50%", transform: "translateX(-48%)",
+                pointerEvents: "none",
+                zIndex: 1,
+              }} />
+
               {/* PC Case hero placeholder */}
-              <div className="relative z-10 flex flex-col items-center justify-center w-[360px] h-[320px] rounded-3xl border-2 border-zinc-200/60 bg-white/40 backdrop-blur shadow-2xl">
+              <div className="relative z-10 flex flex-col items-center justify-center w-[400px] h-[360px] rounded-3xl border-2 border-zinc-200/60 bg-white/40 backdrop-blur shadow-2xl mb-12">
                 <div className="flex flex-col items-center gap-3 opacity-40">
                   <svg width="80" height="80" viewBox="0 0 64 64" fill="none" stroke="#64748b" strokeWidth="1.5">
                     <rect x="12" y="4" width="40" height="56" rx="4" />
@@ -813,7 +885,7 @@ export default function LinhKienIndex() {
       <div className="max-w-[1700px] mx-auto px-4 md:px-8 lg:px-10 xl:px-12 2xl:px-16 mt-10">
 
         {/* ══ 2. CATEGORY NAV ═══════════════════════════════════════════ */}
-        <section className="mb-10">
+        <section id="danh-muc-linh-kien" className="scroll-mt-28 mb-10">
           <div className="flex items-center justify-between mb-5">
             <h2 className="text-[18px] font-bold text-zinc-900">Danh mục linh kiện</h2>
             <a href="#" className="text-[13px] font-semibold text-zinc-500 hover:text-zinc-900 flex items-center gap-1 transition-colors">
@@ -832,10 +904,9 @@ export default function LinhKienIndex() {
               >
                 {/* Gradient block */}
                 <div
-                  className="w-full aspect-[4/3] relative"
+                  className="w-full aspect-[4/3] relative flex items-center justify-center overflow-hidden"
                   style={{
-                    background: `linear-gradient(135deg, ${cat.from} 0%, ${cat.to} 100%)`,
-                    overflow: "hidden",
+                    // background: `linear-gradient(135deg, ${cat.from} 0%, ${cat.to} 100%)`,
                   }}
                 >
                   <div style={{
@@ -843,6 +914,14 @@ export default function LinhKienIndex() {
                     background: `radial-gradient(circle at 30% 30%, ${cat.glow} 0%, transparent 65%)`,
                     pointerEvents: "none",
                   }} />
+                  {cat.image && (
+                    <img
+                      src={`${API_BASE}/images/linh-kien/${cat.image}`}
+                      alt={cat.label}
+                      className="absolute inset-0 w-full h-full object-contain p-2 group-hover:scale-105 transition-transform duration-300"
+                      style={{ mixBlendMode: "multiply" }}
+                    />
+                  )}
                   {activeCategory === cat.id && (
                     <div className="absolute inset-0 ring-2 ring-inset ring-white/20" />
                   )}
@@ -931,7 +1010,7 @@ export default function LinhKienIndex() {
           )}
 
           {/* Products */}
-          <main className="flex-1 min-w-0">
+          <main id="components-grid-top" className="flex-1 min-w-0">
             {/* Toolbar */}
             <div className="hidden lg:flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
               <p className="text-[13px] text-zinc-500 font-medium">
@@ -986,7 +1065,7 @@ export default function LinhKienIndex() {
                 ? "grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-3.5"
                 : "flex flex-col gap-3"
               }>
-                {filteredProducts.map((p, i) => (
+                {paginatedProducts.map((p, i) => (
                   viewMode === "grid" ? (
                     <div key={i} className="group bg-white rounded-2xl border border-zinc-100 p-3.5 shadow-sm hover:shadow-md hover:border-zinc-200 transition-all duration-300 flex flex-col relative">
                       {/* Badge */}
@@ -1000,10 +1079,10 @@ export default function LinhKienIndex() {
                       )}
                       {/* Like */}
                       <button
-                        onClick={() => toggleLike(i)}
-                        className="absolute top-3 right-3 z-10 w-7 h-7 flex items-center justify-center rounded-full bg-white border border-zinc-100 shadow-sm hover:bg-zinc-50 transition-colors cursor-pointer"
+                        onClick={() => toggleLike(p.name)}
+                        className="absolute top-3 right-3 z-10 w-7 h-7 flex items-center justify-center rounded-full bg-white border border-zinc-100 shadow-sm hover:bg-white transition-colors cursor-pointer"
                       >
-                        <Heart className={`w-3.5 h-3.5 transition-colors ${liked.has(i) ? "fill-red-500 text-red-500" : "text-zinc-300"}`} />
+                        <Heart className={`w-3.5 h-3.5 transition-colors ${liked.has(p.name) ? "fill-red-500 text-red-500" : "text-zinc-300"}`} />
                       </button>
                       {/* Image placeholder */}
                       <ProductPlaceholder color={p.color} />
@@ -1029,8 +1108,8 @@ export default function LinhKienIndex() {
                       <div className="text-right shrink-0">
                         <p className="text-[14px] font-extrabold text-zinc-900">{p.price}</p>
                       </div>
-                      <button onClick={() => toggleLike(i)} className="w-7 h-7 flex items-center justify-center rounded-full bg-zinc-50 hover:bg-zinc-100 transition-colors cursor-pointer shrink-0">
-                        <Heart className={`w-3.5 h-3.5 transition-colors ${liked.has(i) ? "fill-red-500 text-red-500" : "text-zinc-300"}`} />
+                      <button onClick={() => toggleLike(p.name)} className="w-7 h-7 flex items-center justify-center rounded-full bg-zinc-50 hover:bg-zinc-100 transition-colors cursor-pointer shrink-0">
+                        <Heart className={`w-3.5 h-3.5 transition-colors ${liked.has(p.name) ? "fill-red-500 text-red-500" : "text-zinc-300"}`} />
                       </button>
                     </div>
                   )
@@ -1039,25 +1118,49 @@ export default function LinhKienIndex() {
             )}
 
             {/* Pagination */}
-            {filteredProducts.length > 0 && (
+            {totalPages > 1 && (
               <div className="flex items-center justify-center gap-1.5 mt-10">
-                <button className="w-8 h-8 flex items-center justify-center rounded-lg border border-zinc-200 text-zinc-400 hover:bg-zinc-50 transition-colors cursor-pointer">
+                <button
+                  disabled={currentPage === 1}
+                  onClick={() => {
+                    setCurrentPage(p => Math.max(1, p - 1));
+                    document.getElementById("components-grid-top")?.scrollIntoView({ behavior: "smooth" });
+                  }}
+                  className={`w-8 h-8 flex items-center justify-center rounded-lg border border-zinc-200 transition-colors ${
+                    currentPage === 1 ? "text-zinc-350 cursor-not-allowed" : "text-zinc-650 hover:bg-zinc-50 cursor-pointer"
+                  }`}
+                >
                   <ChevronLeft className="w-4 h-4" />
                 </button>
-                {[1, 2, 3].map(n => (
-                  <button
-                    key={n}
-                    className={`w-8 h-8 flex items-center justify-center rounded-lg text-[13px] font-medium transition-colors cursor-pointer
-                      ${n === 1 ? "bg-zinc-900 text-white" : "border border-zinc-200 text-zinc-600 hover:bg-zinc-50"}`}
-                  >
-                    {n}
-                  </button>
-                ))}
-                <span className="px-1 text-zinc-400 text-[13px]">...</span>
-                <button className="w-8 h-8 flex items-center justify-center rounded-lg border border-zinc-200 text-zinc-600 hover:bg-zinc-50 text-[13px] font-medium transition-colors cursor-pointer">
-                  7
-                </button>
-                <button className="w-8 h-8 flex items-center justify-center rounded-lg border border-zinc-200 text-zinc-400 hover:bg-zinc-50 transition-colors cursor-pointer">
+                {Array.from({ length: totalPages }, (_, idx) => {
+                  const pageNum = idx + 1;
+                  return (
+                    <button
+                      key={pageNum}
+                      onClick={() => {
+                        setCurrentPage(pageNum);
+                        document.getElementById("components-grid-top")?.scrollIntoView({ behavior: "smooth" });
+                      }}
+                      className={`w-8 h-8 flex items-center justify-center rounded-lg text-[13px] font-medium transition-colors cursor-pointer ${
+                        currentPage === pageNum
+                          ? "bg-zinc-900 text-white"
+                          : "border border-zinc-200 text-zinc-600 hover:bg-zinc-50"
+                      }`}
+                    >
+                      {pageNum}
+                    </button>
+                  );
+                })}
+                <button
+                  disabled={currentPage === totalPages}
+                  onClick={() => {
+                    setCurrentPage(p => Math.min(totalPages, p + 1));
+                    document.getElementById("components-grid-top")?.scrollIntoView({ behavior: "smooth" });
+                  }}
+                  className={`w-8 h-8 flex items-center justify-center rounded-lg border border-zinc-200 transition-colors ${
+                    currentPage === totalPages ? "text-zinc-350 cursor-not-allowed" : "text-zinc-650 hover:bg-zinc-50 cursor-pointer"
+                  }`}
+                >
                   <ChevronRight className="w-4 h-4" />
                 </button>
               </div>

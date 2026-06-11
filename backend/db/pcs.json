@@ -7,7 +7,7 @@
     "price": "28.990.000đ",
     "from": "#7c3aed",
     "to": "#ec4899",
-    "image": "http://localhost:3001/images/pcs/pc-infinity.png"
+    "image": "https://api-pc.qtitpc.dev/images/pcs/pc-infinity.png"
   },
   {
     "badge": "Mới",
@@ -17,7 +17,7 @@
     "price": "32.990.000đ",
     "from": "#1d4ed8",
     "to": "#38bdf8",
-    "image": "http://localhost:3001/images/pcs/pc-frost.png"
+    "image": "https://api-pc.qtitpc.dev/images/pcs/pc-frost.png"
   },
   {
     "badge": "Hot",
@@ -27,7 +27,7 @@
     "price": "45.990.000đ",
     "from": "#0f172a",
     "to": "#1e40af",
-    "image": "http://localhost:3001/images/pcs/pc-nebula.png"
+    "image": "https://api-pc.qtitpc.dev/images/pcs/pc-nebula.png"
   },
   {
     "badge": "",
@@ -37,7 +37,7 @@
     "price": "89.990.000đ",
     "from": "#18181b",
     "to": "#3f3f46",
-    "image": "http://localhost:3001/images/pcs/pc-workstation.png"
+    "image": "https://api-pc.qtitpc.dev/images/pcs/pc-workstation.png"
   },
   {
     "badge": "",
@@ -47,7 +47,7 @@
     "price": "18.990.000đ",
     "from": "#e2e8f0",
     "to": "#f1f5f9",
-    "image": "http://localhost:3001/images/pcs/pc-mini.png"
+    "image": "https://api-pc.qtitpc.dev/images/pcs/pc-mini.png"
   },
   {
     "badge": "Sale",
@@ -57,7 +57,7 @@
     "price": "24.500.000đ",
     "from": "#f59e0b",
     "to": "#e11d48",
-    "image": "http://localhost:3001/images/pcs/pc-infinity.png"
+    "image": "https://api-pc.qtitpc.dev/images/pcs/pc-infinity.png"
   },
   {
     "badge": "Mới",
@@ -67,7 +67,7 @@
     "price": "38.990.000đ",
     "from": "#06b6d4",
     "to": "#3b82f6",
-    "image": "http://localhost:3001/images/pcs/pc-frost.png"
+    "image": "https://api-pc.qtitpc.dev/images/pcs/pc-frost.png"
   },
   {
     "badge": "",
@@ -77,7 +77,7 @@
     "price": "27.800.000đ",
     "from": "#4b5563",
     "to": "#1f2937",
-    "image": "http://localhost:3001/images/pcs/pc-workstation.png"
+    "image": "https://api-pc.qtitpc.dev/images/pcs/pc-workstation.png"
   },
   {
     "badge": "",
@@ -87,7 +87,7 @@
     "price": "29.990.000đ",
     "from": "#374151",
     "to": "#111827",
-    "image": "http://localhost:3001/images/pcs/pc-mini.png"
+    "image": "https://api-pc.qtitpc.dev/images/pcs/pc-mini.png"
   },
   {
     "badge": "Hot",
@@ -97,7 +97,7 @@
     "price": "39.990.000đ",
     "from": "#4338ca",
     "to": "#6d28d9",
-    "image": "http://localhost:3001/images/pcs/pc-nebula.png"
+    "image": "https://api-pc.qtitpc.dev/images/pcs/pc-nebula.png"
   },
   {
     "badge": "Đồ họa chuyên nghiệp",
@@ -107,7 +107,7 @@
     "price": "38.990.000đ",
     "from": "#38bdf8",
     "to": "#6366f1",
-    "image": "http://localhost:3001/images/pcs/pc-nebula.png"
+    "image": "https://api-pc.qtitpc.dev/images/pcs/pc-nebula.png"
   },
   {
     "badge": "Render 3D",
@@ -117,7 +117,7 @@
     "price": "79.990.000đ",
     "from": "#0f172a",
     "to": "#1e40af",
-    "image": "http://localhost:3001/images/pcs/pc-infinity.png"
+    "image": "https://api-pc.qtitpc.dev/images/pcs/pc-infinity.png"
   },
   {
     "badge": "Khuyên dùng",
@@ -127,7 +127,7 @@
     "price": "34.990.000đ",
     "from": "#f472b6",
     "to": "#db2777",
-    "image": "http://localhost:3001/images/pcs/pc-frost.png"
+    "image": "https://api-pc.qtitpc.dev/images/pcs/pc-frost.png"
   },
   {
     "badge": "",
@@ -137,7 +137,7 @@
     "price": "8.490.000đ",
     "from": "#cbd5e1",
     "to": "#94a3b8",
-    "image": "http://localhost:3001/images/pcs/pc-mini.png"
+    "image": "https://api-pc.qtitpc.dev/images/pcs/pc-mini.png"
   },
   {
     "badge": "Tiết kiệm điện",
@@ -147,7 +147,7 @@
     "price": "9.990.000đ",
     "from": "#d4d4d8",
     "to": "#a1a1aa",
-    "image": "http://localhost:3001/images/pcs/pc-mini.png"
+    "image": "https://api-pc.qtitpc.dev/images/pcs/pc-mini.png"
   },
   {
     "badge": "",
@@ -157,7 +157,7 @@
     "price": "11.490.000đ",
     "from": "#e2e8f0",
     "to": "#cbd5e1",
-    "image": "http://localhost:3001/images/pcs/pc-mini.png"
+    "image": "https://api-pc.qtitpc.dev/images/pcs/pc-mini.png"
   },
   {
     "badge": "Siêu Cấp Workstation",
@@ -167,7 +167,7 @@
     "price": "98.990.000đ",
     "from": "#0f172a",
     "to": "#1e293b",
-    "image": "http://localhost:3001/images/pcs/pc-workstation.png"
+    "image": "https://api-pc.qtitpc.dev/images/pcs/pc-workstation.png"
   },
   {
     "badge": "Cực mạnh",
@@ -177,7 +177,7 @@
     "price": "82.990.000đ",
     "from": "#1e293b",
     "to": "#334155",
-    "image": "http://localhost:3001/images/pcs/pc-workstation.png"
+    "image": "https://api-pc.qtitpc.dev/images/pcs/pc-workstation.png"
   },
   {
     "badge": "",
@@ -187,7 +187,7 @@
     "price": "39.990.000đ",
     "from": "#cbd5e1",
     "to": "#94a3b8",
-    "image": "http://localhost:3001/images/pcs/pc-workstation.png"
+    "image": "https://api-pc.qtitpc.dev/images/pcs/pc-workstation.png"
   },
   {
     "badge": "ROG Gaming NUC",
@@ -197,7 +197,7 @@
     "price": "49.990.000đ",
     "from": "#7c3aed",
     "to": "#ec4899",
-    "image": "http://localhost:3001/images/pcs/pc-mini.png"
+    "image": "https://api-pc.qtitpc.dev/images/pcs/pc-mini.png"
   },
   {
     "badge": "",
@@ -207,7 +207,7 @@
     "price": "11.490.000đ",
     "from": "#cbd5e1",
     "to": "#94a3b8",
-    "image": "http://localhost:3001/images/pcs/pc-mini.png"
+    "image": "https://api-pc.qtitpc.dev/images/pcs/pc-mini.png"
   },
   {
     "badge": "Hỗ trợ nâng cấp",
@@ -217,6 +217,6 @@
     "price": "13.990.000đ",
     "from": "#374151",
     "to": "#111827",
-    "image": "http://localhost:3001/images/pcs/pc-mini.png"
+    "image": "https://api-pc.qtitpc.dev/images/pcs/pc-mini.png"
   }
 ]
