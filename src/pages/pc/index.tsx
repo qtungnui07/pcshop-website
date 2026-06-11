@@ -75,11 +75,16 @@ function Grad({ from, to, glow, className = "", children }: {
 const getCategorySlug = (name: string) => {
   return name.toLowerCase()
     .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^\w\s-]/g, '')
+    .replace(/đ/g, "d")
+    .replace(/[^a-z0-9\s-]/g, "")
+    .trim()
     .replace(/\s+/g, '-')
-    .replace(/-+/g, '-')
-    .trim();
+    .replace(/-+/g, '-');
 };
+
+const API_BASE = typeof window !== "undefined" && (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1")
+  ? "http://localhost:3001"
+  : "https://api-pc.qtitpc.dev";
 
 /* ── PAGE ─────────────────────────────────────────────────────────── */
 export default function PCIndex() {
@@ -87,7 +92,7 @@ export default function PCIndex() {
   const [pcs, setPcs] = useState<PCItem[]>(featuredPCs);
 
   useEffect(() => {
-    fetch("http://localhost:3001/api/featured-pcs")
+    fetch(`${API_BASE}/api/featured-pcs`)
       .then((res) => res.json())
       .then((data) => setPcs(data))
       .catch((err) => console.error("Error fetching featured PCs from backend:", err));
@@ -141,14 +146,14 @@ export default function PCIndex() {
           background: "radial-gradient(ellipse at 0% 100%, rgba(255,255,255,0.9) 0%, transparent 70%)",
           pointerEvents: "none",
         }} />
-        <div className="max-w-[1500px] mx-auto px-4 md:px-8 lg:px-10 xl:px-12 2xl:px-19">
+        <div className="max-w-[1500px] mx-auto px-4 md:px-8 lg:px-10 xl:px-12 2xl:px-19 relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-2" style={{ minHeight: "calc(100vh - 96px)" }}>
             {/* Left content */}
             <motion.div
               variants={heroContainer}
               initial="hidden"
               animate="show"
-              className="flex flex-col items-start justify-center pr-8 py-12"
+              className="flex flex-col items-start justify-center pr-8 py-12 relative z-10"
             >
               <motion.span variants={heroItem} className="inline-block px-3 py-1 bg-white/70 text-zinc-500 rounded-full text-[11px] font-semibold uppercase tracking-widest mb-6 border border-zinc-200/60">
                 PC Gaming &amp; Workstation
@@ -175,8 +180,8 @@ export default function PCIndex() {
                   { Icon: CheckCircle2,text: "Test máy kỹ càng\ntrước khi giao" },
                 ].map(({ Icon, text }) => (
                   <div key={text} className="flex items-center gap-2">
-                    <Icon className="w-5 h-5 text-zinc-500 shrink-0" strokeWidth={1.8} />
-                    <span className="text-[13px] text-zinc-500 leading-tight whitespace-pre-line font-medium">{text}</span>
+                    <Icon className="w-5 h-5 text-zinc-700 shrink-0" strokeWidth={1.8} />
+                    <span className="text-[13px] text-zinc-700 leading-tight whitespace-pre-line font-semibold">{text}</span>
                   </div>
                 ))}
               </motion.div>

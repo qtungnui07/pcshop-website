@@ -1,0 +1,13 @@
+[Unit]
+Description=Cloudflare Tunnel for PC Shop
+After=network.target
+
+[Service]
+Type=simple
+User=qtitpc
+ExecStart=/usr/bin/cloudflared --no-autoupdate --config /home/q/.cloudflared/pc-shop.yml tunnel run
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

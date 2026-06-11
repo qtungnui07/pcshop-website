@@ -43,6 +43,24 @@ const categoryMappings = {
     glow: "rgba(99,102,241,0.3)",
     bgGradient: "linear-gradient(135deg, #ffffff 0%, #f0f9ff 40%, #e0f2fe 70%, #bae6fd 100%)",
   },
+  "pc-o-hoa": {
+    title: "PC ĐỒ HỌA",
+    subtitle: "thiết kế mượt mà, render nhanh chóng.",
+    dbCategoryName: "PC Đồ Họa" as const,
+    from: "#38bdf8",
+    to: "#6366f1",
+    glow: "rgba(99,102,241,0.3)",
+    bgGradient: "linear-gradient(135deg, #ffffff 0%, #f0f9ff 40%, #e0f2fe 70%, #bae6fd 100%)",
+  },
+  "pc-o-hoa-3d": {
+    title: "PC ĐỒ HỌA",
+    subtitle: "thiết kế mượt mà, render nhanh chóng.",
+    dbCategoryName: "PC Đồ Họa" as const,
+    from: "#38bdf8",
+    to: "#6366f1",
+    glow: "rgba(99,102,241,0.3)",
+    bgGradient: "linear-gradient(135deg, #ffffff 0%, #f0f9ff 40%, #e0f2fe 70%, #bae6fd 100%)",
+  },
   "pc-van-phong": {
     title: "PC VĂN PHÒNG",
     subtitle: "hiệu suất tối ưu cho công việc hàng ngày.",
@@ -254,7 +272,7 @@ export default function PCCategoryPage() {
           pointerEvents: "none",
         }} />
 
-        <div className="max-w-[1500px] mx-auto px-4 md:px-8 lg:px-10 xl:px-12 2xl:px-19">
+        <div className="max-w-[1500px] mx-auto px-4 md:px-8 lg:px-10 xl:px-12 2xl:px-19 relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-2" style={{ minHeight: "calc(100vh - 96px)" }}>
             
             {/* Left content */}
@@ -310,8 +328,8 @@ export default function PCCategoryPage() {
                   { Icon: CheckCircle2,text: "Hỗ trợ lắp ráp\nmiễn phí" },
                 ].map(({ Icon, text }) => (
                   <div key={text} className="flex items-center gap-2">
-                    <Icon className="w-5 h-5 text-zinc-500 shrink-0" strokeWidth={1.8} />
-                    <span className="text-[13px] text-zinc-500 leading-tight whitespace-pre-line font-medium">{text}</span>
+                    <Icon className="w-5 h-5 text-zinc-700 shrink-0" strokeWidth={1.8} />
+                    <span className="text-[13px] text-zinc-700 leading-tight whitespace-pre-line font-semibold">{text}</span>
                   </div>
                 ))}
               </motion.div>

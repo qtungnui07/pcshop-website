@@ -63,6 +63,10 @@ const INITIAL_MOCK_TICKETS: Ticket[] = [
   }
 ];
 
+const API_BASE = typeof window !== "undefined" && (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1")
+  ? "http://localhost:3001"
+  : "https://api-pc.qtitpc.dev";
+
 export default function HoTroIndex() {
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [currentView, setCurrentView] = useState<"home" | "create">("home");
@@ -100,13 +104,21 @@ export default function HoTroIndex() {
 
   // Load tickets on mount
   useEffect(() => {
-    const localData = localStorage.getItem("pcstore_tickets");
-    if (localData) {
-      setTickets(JSON.parse(localData));
-    } else {
-      setTickets(INITIAL_MOCK_TICKETS);
-      localStorage.setItem("pcstore_tickets", JSON.stringify(INITIAL_MOCK_TICKETS));
-    }
+    fetch(`${API_BASE}/api/tickets`)
+      .then((res) => res.json())
+      .then((data) => {
+        setTickets(data);
+      })
+      .catch((err) => {
+        console.error("Failed to fetch tickets from backend, falling back to localStorage:", err);
+        const localData = localStorage.getItem("pcstore_tickets");
+        if (localData) {
+          setTickets(JSON.parse(localData));
+        } else {
+          setTickets(INITIAL_MOCK_TICKETS);
+          localStorage.setItem("pcstore_tickets", JSON.stringify(INITIAL_MOCK_TICKETS));
+        }
+      });
   }, []);
 
   const saveTickets = (updated: Ticket[]) => {
@@ -226,6 +238,13 @@ export default function HoTroIndex() {
 
     const updatedList = [newTicket, ...tickets];
     saveTickets(updatedList);
+
+    fetch(`${API_BASE}/api/tickets`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(newTicket)
+    }).catch(err => console.error("Error submitting ticket to backend:", err));
+
     showToast(`Yêu cầu ${newTicketId} của bạn đã được gửi thành công!`);
 
     setTimeout(() => {
@@ -237,6 +256,13 @@ export default function HoTroIndex() {
     if (confirm(`Bạn có chắc chắn muốn hủy bỏ yêu cầu hỗ trợ #${ticketId}?`)) {
       const updated = tickets.map(t => t.id === ticketId ? { ...t, status: "cancelled" } : t);
       saveTickets(updated);
+
+      fetch(`${API_BASE}/api/tickets/update`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: ticketId, status: "cancelled" })
+      }).catch(err => console.error("Error updating ticket on backend:", err));
+
       showToast(`Đã hủy yêu cầu #${ticketId}`);
       setIsModalOpen(false);
     }
@@ -254,7 +280,7 @@ export default function HoTroIndex() {
   const activeCount = tickets.filter(t => t.status !== "cancelled" && t.status !== "completed").length;
 
   return (
-    <div className="w-full font-sans">
+    <div className="w-full font-sans ho-tro-scope">
       <main className="main-content max-w-[1200px] mx-auto px-4 md:px-6">
         
         {/* ═════════════════════════════════════════════════════════════════ */}
