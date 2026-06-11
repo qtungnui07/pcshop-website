@@ -1,4 +1,7 @@
-import { ShieldCheck, Truck, CheckCircle2, Wrench, CreditCard, ChevronRight, Heart, ArrowRight } from "lucide-react";
+import { 
+  ShieldCheck, Truck, CheckCircle2, Wrench, CreditCard, ChevronRight, Heart, ArrowRight,
+  Gamepad2, Palette, Clock, Cpu, Box 
+} from "lucide-react";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
@@ -18,11 +21,11 @@ interface PCItem {
 /* ── DATA ─────────────────────────────────────────────────────────── */
 
 const pcCategories = [
-  { name: "PC Gaming",     from: "#a78bfa", to: "#ec4899", glow: "rgba(236,72,153,0.3)", imgName: "pc-infinity.png" },
-  { name: "PC Đồ Họa",    from: "#38bdf8", to: "#6366f1", glow: "rgba(99,102,241,0.3)", imgName: "pc-nebula.png" },
-  { name: "PC Văn Phòng",  from: "#d4d4d8", to: "#a1a1aa", glow: "rgba(113,113,122,0.2)", imgName: "pc-frost.png" },
-  { name: "PC Workstation",from: "#1e293b", to: "#334155", glow: "rgba(51,65,85,0.4)", imgName: "pc-workstation.png" },
-  { name: "PC Mini",       from: "#e2e8f0", to: "#cbd5e1", glow: "rgba(148,163,184,0.25)", imgName: "pc-mini.png" },
+  { name: "PC Gaming",     imgName: "cat-gaming.png",      Icon: Gamepad2 },
+  { name: "PC Đồ Họa",    imgName: "cat-dohoa.png",       Icon: Palette },
+  { name: "PC Văn Phòng",  imgName: "cat-vanphong.png",    Icon: Clock },
+  { name: "PC Workstation",imgName: "cat-workstation.png",  Icon: Cpu },
+  { name: "PC Mini",       imgName: "cat-mini.png",        Icon: Box },
 ];
 
 const featuredPCs = [
@@ -269,15 +272,22 @@ export default function PCIndex() {
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 md:gap-4">
             {pcCategories.map((cat, i) => (
               <Link to={`/pc/${getCategorySlug(cat.name)}`} key={i} className="group cursor-pointer bg-white rounded-2xl border border-zinc-100 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 overflow-hidden block">
-                <Grad from={cat.from} to={cat.to} glow={cat.glow} className="w-full aspect-[4/3] flex items-center justify-center p-4">
+                <div className="w-full aspect-[4/3] relative overflow-hidden bg-zinc-50">
                   <img 
                     src={`/images/${cat.imgName}`} 
                     alt={cat.name} 
-                    className="max-h-full max-w-full object-contain transition-transform duration-300 group-hover:scale-110 drop-shadow-[0_8px_16px_rgba(0,0,0,0.15)]" 
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" 
                   />
-                </Grad>
-                <div className="flex items-center justify-between px-3 py-3">
-                  <span className="text-[13px] font-semibold text-zinc-800 group-hover:text-zinc-950 transition-colors">{cat.name}</span>
+                  <div className="absolute top-3 left-3 w-9 h-9 rounded-xl bg-white/80 backdrop-blur flex items-center justify-center border border-white/20 shadow-sm">
+                    {cat.name === "PC Workstation" ? (
+                      <span className="text-[11px] font-black text-zinc-500">Ai</span>
+                    ) : (
+                      <cat.Icon className="w-4.5 h-4.5 text-zinc-500" strokeWidth={1.8} />
+                    )}
+                  </div>
+                </div>
+                <div className="flex items-center justify-between px-3.5 py-3">
+                  <span className="text-[13px] font-bold text-zinc-800 group-hover:text-zinc-950 transition-colors">{cat.name}</span>
                   <ChevronRight className="w-4 h-4 text-zinc-400 group-hover:text-zinc-700 group-hover:translate-x-0.5 transition-all duration-200" />
                 </div>
               </Link>
