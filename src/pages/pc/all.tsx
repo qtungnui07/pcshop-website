@@ -240,8 +240,17 @@ export default function AllPCsPage() {
                     </span>
                   )}
 
-                  <div className="aspect-[4/3] flex items-center justify-center mb-4 p-4">
-                    <img src={p.img} alt={p.name} className="max-w-full max-h-full object-contain group-hover:scale-105 transition-transform duration-500" />
+                  <div className={`aspect-[4/3] flex items-center justify-center mb-4 overflow-hidden rounded-xl ${
+                    p.img.includes('/images/') ? 'bg-zinc-900' : 'p-4 bg-zinc-50/50'
+                  }`}>
+                    <img
+                      src={p.img}
+                      alt={p.name}
+                      className={p.img.includes('/images/')
+                        ? "w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        : "max-w-full max-h-full object-contain group-hover:scale-105 transition-transform duration-500"
+                      }
+                    />
                   </div>
                   <div className="flex flex-col flex-1">
                     <h3 className="text-[14px] font-bold text-zinc-900 leading-tight mb-2 line-clamp-2 min-h-[40px]">{p.name}</h3>

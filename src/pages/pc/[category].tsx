@@ -641,11 +641,16 @@ export default function PCCategoryPage() {
                     )}
 
                     {/* Image */}
-                    <div className="aspect-[4/3] flex items-center justify-center mb-4 p-4 relative overflow-hidden bg-zinc-50/50 rounded-xl">
+                     <div className={`aspect-[4/3] flex items-center justify-center mb-4 relative overflow-hidden rounded-xl ${
+                      p.img.includes('/images/') ? 'bg-zinc-900' : 'bg-zinc-50/50 p-4'
+                    }`}>
                       <img 
                         src={p.img} 
                         alt={p.name} 
-                        className="max-w-full max-h-full object-contain group-hover:scale-104 transition-transform duration-500 drop-shadow-[0_4px_12px_rgba(0,0,0,0.06)]" 
+                        className={p.img.includes('/images/')
+                          ? "w-full h-full object-cover group-hover:scale-104 transition-transform duration-500"
+                          : "max-w-full max-h-full object-contain group-hover:scale-104 transition-transform duration-500 drop-shadow-[0_4px_12px_rgba(0,0,0,0.06)]"
+                        }
                       />
                     </div>
 
@@ -684,11 +689,16 @@ export default function PCCategoryPage() {
                     )}
 
                     {/* Image container */}
-                    <div className="w-[180px] h-[135px] shrink-0 flex items-center justify-center p-3 bg-zinc-50/50 rounded-xl overflow-hidden">
+                     <div className={`w-[180px] h-[135px] shrink-0 flex items-center justify-center rounded-xl overflow-hidden ${
+                      p.img.includes('/images/') ? 'bg-zinc-900' : 'bg-zinc-50/50 p-3'
+                    }`}>
                       <img 
                         src={p.img} 
                         alt={p.name} 
-                        className="max-w-full max-h-full object-contain group-hover:scale-103 transition-transform duration-500 drop-shadow-[0_4px_12px_rgba(0,0,0,0.06)]" 
+                        className={p.img.includes('/images/')
+                          ? "w-full h-full object-cover group-hover:scale-103 transition-transform duration-500"
+                          : "max-w-full max-h-full object-contain group-hover:scale-103 transition-transform duration-500 drop-shadow-[0_4px_12px_rgba(0,0,0,0.06)]"
+                        }
                       />
                     </div>
 
