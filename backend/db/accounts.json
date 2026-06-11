@@ -45,5 +45,25 @@
     "role": "user",
     "avatar": "",
     "provider": "local"
+  },
+  {
+    "id": "acc-1781188575514",
+    "name": "Tung Dinh Quang",
+    "email": "21107.qt.vn@gmail.com",
+    "password": "",
+    "role": "user",
+    "avatar": "https://api-pc.qtitpc.dev/images/users/avatar-1781188621794-nd0bdat.png",
+    "provider": "google",
+    "phone": "",
+    "address": ""
+  },
+  {
+    "id": "acc-1781188967064",
+    "name": "Quang Tung Dinh",
+    "email": "samsunga03qtx2@gmail.com",
+    "password": "",
+    "role": "user",
+    "avatar": "https://img.clerk.com/eyJ0eXBlIjoicHJveHkiLCJzcmMiOiJodHRwczovL2ltYWdlcy5jbGVyay5kZXYvb2F1dGhfZ29vZ2xlL2ltZ18zRXprb0ZhUEw1djBFUU5Fb1AzZlhtZ3Y4alEifQ",
+    "provider": "google"
   }
 ]

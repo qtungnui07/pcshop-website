@@ -426,6 +426,21 @@ function verifyAdmin(req: Request, db: any): boolean {
   return user && user.role === "admin";
 }
 
+function rewriteLocalImage(imgUrl: string, origin: string): string {
+  if (!imgUrl) return imgUrl;
+  if (imgUrl.startsWith("/")) {
+    return `${origin}${imgUrl}`;
+  }
+  if (
+    imgUrl.includes("localhost:3001") ||
+    imgUrl.includes("127.0.0.1:3001") ||
+    imgUrl.includes("api-pc.qtitpc.dev")
+  ) {
+    return imgUrl.replace(/^https?:\/\/[^\/]+/g, origin);
+  }
+  return imgUrl;
+}
+
 serve({
   port: PORT,
   async fetch(req: Request) {
@@ -467,7 +482,7 @@ serve({
       const origin = `${req.headers.get("x-forwarded-proto") || "http"}://${req.headers.get("x-forwarded-host") || req.headers.get("host") || `localhost:${PORT}`}`;
       const pcsWithOrigin = db.pcs.map((pc: any) => ({
         ...pc,
-        image: pc.image ? pc.image.replace(/^https?:\/\/[^\/]+/g, origin) : pc.image
+        image: rewriteLocalImage(pc.image, origin)
       }));
       return Response.json(pcsWithOrigin, { headers });
     }
@@ -503,7 +518,13 @@ serve({
         }
       }
       const db = await readData();
-      return Response.json(db.laptops, { headers });
+      const origin = `${req.headers.get("x-forwarded-proto") || "http"}://${req.headers.get("x-forwarded-host") || req.headers.get("host") || `localhost:${PORT}`}`;
+      const laptopsWithOrigin = db.laptops.map((laptop: any) => ({
+        ...laptop,
+        img: rewriteLocalImage(laptop.img, origin),
+        image: rewriteLocalImage(laptop.image, origin)
+      }));
+      return Response.json(laptopsWithOrigin, { headers });
     }
 
     // GET & POST Accessories
@@ -520,7 +541,12 @@ serve({
         }
       }
       const db = await readData();
-      return Response.json(db.accessories, { headers });
+      const origin = `${req.headers.get("x-forwarded-proto") || "http"}://${req.headers.get("x-forwarded-host") || req.headers.get("host") || `localhost:${PORT}`}`;
+      const accessoriesWithOrigin = db.accessories.map((acc: any) => ({
+        ...acc,
+        image: rewriteLocalImage(acc.image, origin)
+      }));
+      return Response.json(accessoriesWithOrigin, { headers });
     }
 
     // GET & POST Support Tickets

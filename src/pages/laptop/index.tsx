@@ -4,7 +4,7 @@ import {
   ShieldCheck, Truck, CheckCircle2, ChevronDown,
   SlidersHorizontal, X, Search, ArrowRight,
 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { motion } from "framer-motion";
 
 /* ── TYPES ─────────────────────────────────────────────────────────── */
@@ -74,7 +74,7 @@ const categories = [
   },
 ];
 
-const products: LaptopProduct[] = [
+const defaultProducts: LaptopProduct[] = [
   { id: 1,  brand: "ASUS",   name: "ASUS ROG Zephyrus G14 2024",  cpu: "AMD Ryzen 9",    ram: "16GB", screen: "13 - 14 inch",   gpu: "NVIDIA RTX 4060", specs: "Ryzen 9 8945HS / 16GB /\n1TB SSD / RTX 4060 / 14\" OLED",        price: 28990000, badge: "Bán chạy", img: "https://dlcdnwebimgs.asus.com/gain/97f4b8da-e77d-418c-8515-3850123533be/w800" },
   { id: 2,  brand: "Apple",  name: "MacBook Air M3 13 inch",       cpu: "Apple M Series", ram: "16GB", screen: "13 - 14 inch",   gpu: "Apple M Series" as any, specs: "Apple M3 / 16GB / 512GB SSD /\n13.6\" Liquid Retina",               price: 24990000, img: "https://store.storeimages.cdn-apple.com/8756/as-images.apple.com/is/mba13-midnight-select-202402?wid=904&hei=840&fmt=jpeg&qlt=90&.v=1708367688034" },
   { id: 3,  brand: "Dell",   name: "Dell XPS 13 Plus 9320",        cpu: "Intel Core i7",  ram: "16GB", screen: "13 - 14 inch",   gpu: "Intel Iris Xe",   specs: "Intel Core i7-1360P / 16GB /\n512GB SSD / 13.4\" FHD+",             price: 27490000, img: "https://i.dell.com/is/image/DellContent/content/dam/ss2/product-images/dell-client-products/notebooks/xps-notebooks/xps-13-9320/media-gallery/xs9320nt-cnb-00000ff090-gy.psd?fmt=png-alpha&pscan=auto&scl=1&hei=402&wid=555&qlt=100,1&resMode=sharp2&size=555,402&chrss=full" },
@@ -156,9 +156,86 @@ function FilterGroup({ title, children }: { title: string; children: React.React
   );
 }
 
+function parseLaptopProduct(raw: any, index: number): LaptopProduct {
+  const priceVal = parseInt(raw.price?.toString().replace(/[^\d]/g, ""), 10) || 0;
+  const specsStr = raw.specs || "";
+  const nameLower = (raw.name || "").toLowerCase();
+
+  let brandVal: LaptopBrand = "ASUS";
+  if (raw.brand && ["ASUS", "Apple", "Dell", "Lenovo", "HP", "Acer", "MSI"].includes(raw.brand)) {
+    brandVal = raw.brand as LaptopBrand;
+  } else {
+    if (nameLower.includes("asus")) brandVal = "ASUS";
+    else if (nameLower.includes("macbook") || nameLower.includes("apple")) brandVal = "Apple";
+    else if (nameLower.includes("dell")) brandVal = "Dell";
+    else if (nameLower.includes("lenovo") || nameLower.includes("thinkpad")) brandVal = "Lenovo";
+    else if (nameLower.includes("hp") || nameLower.includes("spectre") || nameLower.includes("omen")) brandVal = "HP";
+    else if (nameLower.includes("acer") || nameLower.includes("swift")) brandVal = "Acer";
+    else if (nameLower.includes("msi") || nameLower.includes("stealth")) brandVal = "MSI";
+  }
+
+  let ramVal: LaptopRAM = "16GB";
+  if (specsStr.includes("32GB")) ramVal = "32GB";
+  else if (specsStr.includes("8GB")) ramVal = "8GB";
+
+  let cpuVal: LaptopCPU = "Intel Core i7";
+  if (specsStr.includes("M3 Pro")) cpuVal = "Apple M Series";
+  else if (specsStr.includes("M3")) cpuVal = "Apple M Series";
+  else if (specsStr.includes("M2")) cpuVal = "Apple M Series";
+  else if (specsStr.includes("M1")) cpuVal = "Apple M Series";
+  else if (specsStr.includes("i9") || specsStr.includes("14900")) cpuVal = "Intel Core i9";
+  else if (specsStr.includes("i5") || specsStr.includes("125H")) cpuVal = "Intel Core i5";
+  else if (specsStr.includes("Ryzen 9")) cpuVal = "AMD Ryzen 9";
+  else if (specsStr.includes("Ryzen 7")) cpuVal = "AMD Ryzen 7";
+
+  let gpuVal: LaptopGPU = "Intel Iris Xe";
+  if (specsStr.includes("4070")) gpuVal = "NVIDIA RTX 4070";
+  else if (specsStr.includes("4060")) gpuVal = "NVIDIA RTX 4060";
+  else if (specsStr.toLowerCase().includes("radeon")) gpuVal = "AMD Radeon";
+
+  let screenVal: LaptopScreen = "13 - 14 inch";
+  if (specsStr.includes('15.6"') || specsStr.includes('15.6 inch')) screenVal = "15 - 15.6 inch";
+  else if (specsStr.includes('16"') || specsStr.includes('16 inch') || specsStr.includes('16.1"')) screenVal = "16 inch trở lên";
+
+  return {
+    id: raw.id || (index + 1),
+    brand: brandVal,
+    name: raw.name || "",
+    cpu: cpuVal,
+    ram: ramVal,
+    screen: screenVal,
+    gpu: gpuVal,
+    specs: specsStr,
+    price: priceVal,
+    badge: raw.badge || undefined,
+    img: raw.image || raw.img || ""
+  };
+}
+
 /* ── PAGE ───────────────────────────────────────────────────────────── */
 export default function LaptopIndex() {
-  const [liked, setLiked] = useState<Set<number>>(new Set());
+  const API_BASE =
+    typeof window !== "undefined"
+      ? (window.location.hostname.includes("qtitpc.dev")
+        ? "https://api-pc.qtitpc.dev"
+        : `${window.location.protocol}//${window.location.hostname}:3001`)
+      : "http://localhost:3001";
+
+  const [products, setProducts] = useState<LaptopProduct[]>(defaultProducts);
+
+  useEffect(() => {
+    fetch(`${API_BASE}/api/laptops`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data)) {
+          const parsed = data.map((item, idx) => parseLaptopProduct(item, idx));
+          setProducts(parsed);
+        }
+      })
+      .catch((err) => console.error("Error fetching laptops from backend:", err));
+  }, []);
+
+  const [liked, setLiked] = useState<Set<any>>(new Set());
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [sortBy, setSortBy] = useState("newest");
   const [showMobileFilter, setShowMobileFilter] = useState(false);

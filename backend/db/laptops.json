@@ -4,55 +4,95 @@
     "name": "ASUS ROG Zephyrus G14 2024",
     "specs": "Ryzen 9 8945HS / 16GB /\n1TB SSD / RTX 4060 / 14\" OLED",
     "price": "28.990.000 đ",
-    "img": "https://dlcdnwebimgs.asus.com/gain/97f4b8da-e77d-418c-8515-3850123533be/w800"
+    "img": "http://localhost:3001/gain/97f4b8da-e77d-418c-8515-3850123533be/w800",
+    "image": "http://localhost:3001/gain/97f4b8da-e77d-418c-8515-3850123533be/w800"
   },
   {
     "brand": "Apple",
     "name": "MacBook Air M3 13 inch",
     "specs": "Apple M3 / 16GB / 512GB SSD /\n13.6\" Liquid Retina",
     "price": "24.990.000 đ",
-    "img": "https://store.storeimages.cdn-apple.com/8756/as-images.apple.com/is/mba13-midnight-select-202402?wid=904&hei=840&fmt=jpeg&qlt=90&.v=1708367688034"
+    "img": "http://localhost:3001/8756/as-images.apple.com/is/mba13-midnight-select-202402?wid=904&hei=840&fmt=jpeg&qlt=90&.v=1708367688034",
+    "image": "http://localhost:3001/8756/as-images.apple.com/is/mba13-midnight-select-202402?wid=904&hei=840&fmt=jpeg&qlt=90&.v=1708367688034"
   },
   {
     "brand": "Dell",
     "name": "Dell XPS 13 Plus 9320",
     "specs": "Intel Core i7-1360P / 16GB /\n512GB SSD / 13.4\" FHD+",
     "price": "27.490.000 đ",
-    "img": "https://i.dell.com/is/image/DellContent/content/dam/ss2/product-images/dell-client-products/notebooks/xps-notebooks/xps-13-9320/media-gallery/xs9320nt-cnb-00000ff090-gy.psd?fmt=png-alpha&pscan=auto&scl=1&hei=402&wid=555&qlt=100,1&resMode=sharp2&size=555,402&chrss=full"
+    "img": "http://localhost:3001/is/image/DellContent/content/dam/ss2/product-images/dell-client-products/notebooks/xps-notebooks/xps-13-9320/media-gallery/xs9320nt-cnb-00000ff090-gy.psd?fmt=png-alpha&pscan=auto&scl=1&hei=402&wid=555&qlt=100,1&resMode=sharp2&size=555,402&chrss=full",
+    "image": "http://localhost:3001/is/image/DellContent/content/dam/ss2/product-images/dell-client-products/notebooks/xps-notebooks/xps-13-9320/media-gallery/xs9320nt-cnb-00000ff090-gy.psd?fmt=png-alpha&pscan=auto&scl=1&hei=402&wid=555&qlt=100,1&resMode=sharp2&size=555,402&chrss=full"
   },
   {
     "brand": "Lenovo",
     "name": "Lenovo Yoga Slim 7i Pro",
     "specs": "Intel Core i7-13700H / 16GB /\n1TB SSD / 14.5\" 3K",
     "price": "24.490.000 đ",
-    "img": "https://p1-ofp.static.pub/fes/cms/2022/07/12/3og7y6a14mve0h7m99a4zcwf47u10v359190.png"
+    "img": "http://localhost:3001/fes/cms/2022/07/12/3og7y6a14mve0h7m99a4zcwf47u10v359190.png",
+    "image": "http://localhost:3001/fes/cms/2022/07/12/3og7y6a14mve0h7m99a4zcwf47u10v359190.png"
   },
   {
     "brand": "HP",
     "name": "HP Spectre x360 14",
     "specs": "Intel Core i7-1355U / 16GB /\n1TB SSD / 14\" 2.8K OLED",
     "price": "26.990.000 đ",
-    "img": "https://ssl-product-images.www8-hp.com/digmedialib/prodimg/lowres/c08404555.png"
+    "img": "http://localhost:3001/digmedialib/prodimg/lowres/c08404555.png",
+    "image": "http://localhost:3001/digmedialib/prodimg/lowres/c08404555.png"
   },
   {
     "brand": "Acer",
     "name": "Acer Swift Go 14 OLED",
     "specs": "Intel Core Ultra 5 125H / 16GB /\n512GB SSD / 14\" 2.8K OLED",
     "price": "20.990.000 đ",
-    "img": "https://images.acer.com/is/image/acer/swift-go-14-sfg14-72-sfg14-73-glare-silver-ui-01?$Product-Cards-XL$"
+    "img": "http://localhost:3001/is/image/acer/swift-go-14-sfg14-72-sfg14-73-glare-silver-ui-01?$Product-Cards-XL$",
+    "image": "http://localhost:3001/is/image/acer/swift-go-14-sfg14-72-sfg14-73-glare-silver-ui-01?$Product-Cards-XL$"
   },
   {
     "brand": "ASUS",
     "name": "ASUS TUF Gaming A15",
-    "specs": "AMD Ryzen 7 7735HS / 16GB /\n512GB SSD / RTX 4060 / 15.6\" FHD 144Hz",
+    "specs": "AMD Ryzen 7 7735HS / 16GB /\n512GB SSD / RTX 4060 / 15.6\" 144Hz",
     "price": "24.490.000 đ",
-    "img": "https://dlcdnwebimgs.asus.com/gain/d3ad557c-864a-4d7a-8f4b-2d7c58ed00ee/w800"
+    "img": "http://localhost:3001/gain/d3ad557c-864a-4d7a-8f4b-2d7c58ed00ee/w800",
+    "image": "http://localhost:3001/gain/d3ad557c-864a-4d7a-8f4b-2d7c58ed00ee/w800"
   },
   {
     "brand": "MSI",
     "name": "MSI Stealth 16 Studio",
     "specs": "Intel Core i7-13700H / 32GB /\n1TB SSD / RTX 4070 / 16\" 16:10",
     "price": "37.990.000 đ",
-    "img": "https://asset.msi.com/resize/image/global/product/product_1672728476839352c3c97db317e0b510ed9c882193.png62405b38c58fe0f07fcef2367d8a9ba1/1024.png"
+    "img": "http://localhost:3001/resize/image/global/product/product_1672728476839352c3c97db317e0b510ed9c882193.png62405b38c58fe0f07fcef2367d8a9ba1/1024.png",
+    "image": "http://localhost:3001/resize/image/global/product/product_1672728476839352c3c97db317e0b510ed9c882193.png62405b38c58fe0f07fcef2367d8a9ba1/1024.png"
+  },
+  {
+    "brand": "Apple",
+    "name": "MacBook Pro M3 Pro 14 inch",
+    "specs": "Apple M3 Pro / 32GB / 1TB SSD /\n14.2\" Liquid Retina XDR",
+    "price": "49.990.000 đ",
+    "img": "http://localhost:3001/8756/as-images.apple.com/is/mbp14-spacegray-select-202310?wid=904&hei=840&fmt=jpeg&qlt=90&.v=1697230830200",
+    "image": "http://localhost:3001/8756/as-images.apple.com/is/mbp14-spacegray-select-202310?wid=904&hei=840&fmt=jpeg&qlt=90&.v=1697230830200"
+  },
+  {
+    "brand": "Dell",
+    "name": "Dell Alienware m16 R2",
+    "specs": "Intel Core i9-14900HX / 32GB /\n1TB SSD / RTX 4070 / 16\" QHD+",
+    "price": "52.990.000 đ",
+    "img": "http://localhost:3001/is/image/DellContent/content/dam/ss2/product-images/dell-client-products/notebooks/alienware-notebooks/alienware-m16-r2/spi/notebook-alienware-m16-r2-nt-front-open-hero.psd?fmt=png-alpha&pscan=auto&scl=1&hei=402&wid=555&qlt=100,1&resMode=sharp2&size=555,402",
+    "image": "http://localhost:3001/is/image/DellContent/content/dam/ss2/product-images/dell-client-products/notebooks/alienware-notebooks/alienware-m16-r2/spi/notebook-alienware-m16-r2-nt-front-open-hero.psd?fmt=png-alpha&pscan=auto&scl=1&hei=402&wid=555&qlt=100,1&resMode=sharp2&size=555,402"
+  },
+  {
+    "brand": "HP",
+    "name": "HP OMEN 16",
+    "specs": "AMD Ryzen 7 7745HX / 16GB /\n512GB SSD / RTX 4060 / 16.1\" 165Hz",
+    "price": "26.490.000 đ",
+    "img": "http://localhost:3001/digmedialib/prodimg/lowres/c08538591.png",
+    "image": "http://localhost:3001/digmedialib/prodimg/lowres/c08538591.png"
+  },
+  {
+    "brand": "Lenovo",
+    "name": "Lenovo ThinkPad X1 Carbon",
+    "specs": "Intel Core i7-1365U / 16GB /\n512GB SSD / 14\" 2.8K OLED",
+    "price": "42.990.000 đ",
+    "img": "http://localhost:3001/fes/cms/2023/02/08/jf0hbfmfrlprkbgkm8v9oalz1twvix693003.png",
+    "image": "http://localhost:3001/fes/cms/2023/02/08/jf0hbfmfrlprkbgkm8v9oalz1twvix693003.png"
   }
 ]
