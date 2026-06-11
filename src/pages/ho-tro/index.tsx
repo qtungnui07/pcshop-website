@@ -63,6 +63,10 @@ const INITIAL_MOCK_TICKETS: Ticket[] = [
   }
 ];
 
+const API_BASE = typeof window !== "undefined" && (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1")
+  ? "http://localhost:3001"
+  : "https://api-pc.qtitpc.dev";
+
 export default function HoTroIndex() {
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [currentView, setCurrentView] = useState<"home" | "create">("home");
@@ -100,7 +104,7 @@ export default function HoTroIndex() {
 
   // Load tickets on mount
   useEffect(() => {
-    fetch("http://localhost:3001/api/tickets")
+    fetch(`${API_BASE}/api/tickets`)
       .then((res) => res.json())
       .then((data) => {
         setTickets(data);
@@ -235,7 +239,7 @@ export default function HoTroIndex() {
     const updatedList = [newTicket, ...tickets];
     saveTickets(updatedList);
 
-    fetch("http://localhost:3001/api/tickets", {
+    fetch(`${API_BASE}/api/tickets`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(newTicket)
@@ -253,7 +257,7 @@ export default function HoTroIndex() {
       const updated = tickets.map(t => t.id === ticketId ? { ...t, status: "cancelled" } : t);
       saveTickets(updated);
 
-      fetch("http://localhost:3001/api/tickets/update", {
+      fetch(`${API_BASE}/api/tickets/update`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id: ticketId, status: "cancelled" })
@@ -276,7 +280,7 @@ export default function HoTroIndex() {
   const activeCount = tickets.filter(t => t.status !== "cancelled" && t.status !== "completed").length;
 
   return (
-    <div className="w-full bg-[#f8fafc] min-h-screen py-6 font-sans">
+    <div className="w-full bg-[#f8fafc] min-h-screen py-6 font-sans ho-tro-scope">
       <main className="main-content">
         
         {/* ═════════════════════════════════════════════════════════════════ */}

@@ -141,6 +141,10 @@ function ProductPlaceholder({ color = "#e5e7eb" }: { color?: string }) {
   );
 }
 
+const API_BASE = typeof window !== "undefined" && (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1")
+  ? "http://localhost:3001"
+  : "https://api-pc.qtitpc.dev";
+
 /* ── PAGE ──────────────────────────────────────────────────────────── */
 export default function LinhKienIndex() {
   const [liked, setLiked] = useState<Set<number>>(new Set());
@@ -149,7 +153,7 @@ export default function LinhKienIndex() {
   const [products, setProducts] = useState<Product[]>(defaultProducts);
 
   useEffect(() => {
-    fetch("http://localhost:3001/api/components")
+    fetch(`${API_BASE}/api/components`)
       .then((res) => res.json())
       .then((data) => setProducts(data))
       .catch((err) => console.error("Error fetching components:", err));

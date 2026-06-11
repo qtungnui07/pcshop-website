@@ -68,6 +68,9 @@ interface AccessoryItem {
 }
 
 const PORT = 3001;
+const API_BASE = typeof window !== "undefined" && (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1")
+  ? `http://localhost:${PORT}`
+  : "https://api-pc.qtitpc.dev";
 
 // Image templates served by backend for PCs
 const PC_IMAGE_TEMPLATES = [
@@ -308,10 +311,10 @@ export default function AdminIndex() {
     setLoading(true);
     try {
       const [pcsRes, laptopsRes, componentsRes, accessoriesRes] = await Promise.all([
-        fetch(`http://localhost:${PORT}/api/featured-pcs`).then(r => r.json()),
-        fetch(`http://localhost:${PORT}/api/laptops`).then(r => r.json()),
-        fetch(`http://localhost:${PORT}/api/components`).then(r => r.json()),
-        fetch(`http://localhost:${PORT}/api/accessories`).then(r => r.json())
+        fetch(`${API_BASE}/api/featured-pcs`).then(r => r.json()),
+        fetch(`${API_BASE}/api/laptops`).then(r => r.json()),
+        fetch(`${API_BASE}/api/components`).then(r => r.json()),
+        fetch(`${API_BASE}/api/accessories`).then(r => r.json())
       ]);
       
       setPcs(pcsRes);
@@ -616,16 +619,16 @@ export default function AdminIndex() {
     let payload: any = [];
 
     if (activeCategory === "pc") {
-      url = `http://localhost:${PORT}/api/featured-pcs`;
+      url = `${API_BASE}/api/featured-pcs`;
       payload = pcs;
     } else if (activeCategory === "laptop") {
-      url = `http://localhost:${PORT}/api/laptops`;
+      url = `${API_BASE}/api/laptops`;
       payload = laptops;
     } else if (activeCategory === "linh-kien") {
-      url = `http://localhost:${PORT}/api/components`;
+      url = `${API_BASE}/api/components`;
       payload = components;
     } else {
-      url = `http://localhost:${PORT}/api/accessories`;
+      url = `${API_BASE}/api/accessories`;
       payload = accessories;
     }
 

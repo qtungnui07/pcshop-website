@@ -349,11 +349,15 @@ function FilterCheckbox({
   );
 }
 
+const API_BASE = typeof window !== "undefined" && (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1")
+  ? "http://localhost:3001"
+  : "https://api-pc.qtitpc.dev";
+
 export default function PhuKienIndex() {
   const [products, setProducts] = useState<AccessoryProduct[]>(defaultProducts);
 
   useEffect(() => {
-    fetch("http://localhost:3001/api/accessories")
+    fetch(`${API_BASE}/api/accessories`)
       .then((res) => res.json())
       .then((data) => setProducts(data))
       .catch((err) => console.error("Error fetching accessories:", err));

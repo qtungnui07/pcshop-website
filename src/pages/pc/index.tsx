@@ -81,13 +81,17 @@ const getCategorySlug = (name: string) => {
     .trim();
 };
 
+const API_BASE = typeof window !== "undefined" && (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1")
+  ? "http://localhost:3001"
+  : "https://api-pc.qtitpc.dev";
+
 /* ── PAGE ─────────────────────────────────────────────────────────── */
 export default function PCIndex() {
   const [liked, setLiked] = useState<Set<number>>(new Set());
   const [pcs, setPcs] = useState<PCItem[]>(featuredPCs);
 
   useEffect(() => {
-    fetch("http://localhost:3001/api/featured-pcs")
+    fetch(`${API_BASE}/api/featured-pcs`)
       .then((res) => res.json())
       .then((data) => setPcs(data))
       .catch((err) => console.error("Error fetching featured PCs from backend:", err));

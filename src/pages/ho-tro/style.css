@@ -895,12 +895,12 @@ body {
     color: var(--color-theme-red);
 }
 
-input[type="text"],
-input[type="email"],
-input[type="tel"],
-input[type="date"],
-select,
-textarea {
+.ho-tro-scope input[type="text"],
+.ho-tro-scope input[type="email"],
+.ho-tro-scope input[type="tel"],
+.ho-tro-scope input[type="date"],
+.ho-tro-scope select,
+.ho-tro-scope textarea {
     width: 100%;
     font-family: var(--font-sans);
     font-size: 14.5px;
@@ -913,14 +913,14 @@ textarea {
     transition: var(--transition-fast);
 }
 
-input::placeholder,
-textarea::placeholder {
+.ho-tro-scope input::placeholder,
+.ho-tro-scope textarea::placeholder {
     color: var(--color-text-muted);
 }
 
-input:focus,
-select:focus,
-textarea:focus {
+.ho-tro-scope input:focus,
+.ho-tro-scope select:focus,
+.ho-tro-scope textarea:focus {
     border-color: var(--color-primary);
     box-shadow: 0 0 0 2px rgba(2, 6, 23, 0.04);
 }
