@@ -2,7 +2,7 @@ import {
   GraduationCap, Briefcase, Gamepad2, Palette, Feather, BatteryFull,
   ChevronRight, Heart, Grid, List, RotateCcw,
   ShieldCheck, Truck, CheckCircle2, ChevronDown,
-  SlidersHorizontal, X, Search,
+  SlidersHorizontal, X, Search, ArrowRight,
 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { motion } from "framer-motion";
@@ -30,12 +30,48 @@ interface LaptopProduct {
 
 /* ── DATA ──────────────────────────────────────────────────────────── */
 const categories = [
-  { icon: GraduationCap, title: "Học tập",         desc: "Nhẹ, pin lâu,\nhiệu năng ổn định" },
-  { icon: Briefcase,     title: "Văn phòng",        desc: "Linh hoạt, bền bỉ,\nxử lý mượt mà" },
-  { icon: Gamepad2,      title: "Gaming",           desc: "Hiệu năng mạnh mẽ,\ntrải nghiệm đỉnh cao" },
-  { icon: Palette,       title: "Đồ họa - Sáng tạo",desc: "Màn hình đẹp, hiệu năng\nxử lý vượt trội" },
-  { icon: Feather,       title: "Mỏng nhẹ",         desc: "Thiết kế mỏng nhẹ,\ndi chuyển dễ dàng" },
-  { icon: BatteryFull,   title: "Pin lâu",           desc: "Làm việc cả ngày\nkhông lo hết pin" },
+  {
+    icon: GraduationCap,
+    title: "Học tập",
+    desc: "Nhẹ, pin lâu, hiệu năng ổn định",
+    img: "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?q=80&w=800&auto=format&fit=crop",
+    filterBrands: ["Lenovo", "Acer", "HP"] as LaptopBrand[],
+  },
+  {
+    icon: Briefcase,
+    title: "Văn phòng",
+    desc: "Linh hoạt, bền bỉ, xử lý mượt mà",
+    img: "https://images.unsplash.com/photo-1593642632559-0c6d3fc62b89?q=80&w=800&auto=format&fit=crop",
+    filterBrands: ["Dell", "Lenovo", "HP"] as LaptopBrand[],
+  },
+  {
+    icon: Gamepad2,
+    title: "Gaming",
+    desc: "Hiệu năng mạnh mẽ, trải nghiệm đỉnh cao",
+    img: "https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=800&auto=format&fit=crop",
+    filterBrands: ["ASUS", "MSI", "Acer"] as LaptopBrand[],
+  },
+  {
+    icon: Palette,
+    title: "Đồ họa - Sáng tạo",
+    desc: "Màn hình đẹp, hiệu năng xử lý vượt trội",
+    img: "https://images.unsplash.com/photo-1626785774573-4b799315345d?q=80&w=800&auto=format&fit=crop",
+    filterBrands: ["Apple", "ASUS", "Dell"] as LaptopBrand[],
+  },
+  {
+    icon: Feather,
+    title: "Mỏng nhẹ",
+    desc: "Thiết kế mỏng nhẹ, di chuyển dễ dàng",
+    img: "https://images.unsplash.com/photo-1611186871348-b1ce696e52c9?q=80&w=800&auto=format&fit=crop",
+    filterBrands: ["Apple", "Dell", "Lenovo"] as LaptopBrand[],
+  },
+  {
+    icon: BatteryFull,
+    title: "Pin lâu",
+    desc: "Làm việc cả ngày không lo hết pin",
+    img: "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?q=80&w=800&auto=format&fit=crop",
+    filterBrands: ["Apple", "Lenovo", "HP"] as LaptopBrand[],
+  },
 ];
 
 const products: LaptopProduct[] = [
@@ -126,6 +162,7 @@ export default function LaptopIndex() {
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [sortBy, setSortBy] = useState("newest");
   const [showMobileFilter, setShowMobileFilter] = useState(false);
+  const [activeCategory, setActiveCategory] = useState<number | null>(null);
 
   /* Filter state */
   const [selBrands,  setSelBrands]  = useState<Set<LaptopBrand>>(new Set());
@@ -142,7 +179,8 @@ export default function LaptopIndex() {
 
   const hasActiveFilter =
     selBrands.size > 0 || selRAMs.size > 0 || selCPUs.size > 0 ||
-    selScreens.size > 0 || selGPUs.size > 0 || minPrice > MIN_PRICE || maxPrice < MAX_PRICE;
+    selScreens.size > 0 || selGPUs.size > 0 || minPrice > MIN_PRICE || maxPrice < MAX_PRICE ||
+    activeCategory !== null;
 
   const resetFilters = () => {
     setSelBrands(new Set());
@@ -152,6 +190,17 @@ export default function LaptopIndex() {
     setSelGPUs(new Set());
     setMinPrice(MIN_PRICE);
     setMaxPrice(MAX_PRICE);
+    setActiveCategory(null);
+  };
+
+  const handleCategoryClick = (idx: number) => {
+    if (activeCategory === idx) {
+      setActiveCategory(null);
+      setSelBrands(new Set());
+    } else {
+      setActiveCategory(idx);
+      setSelBrands(new Set(categories[idx].filterBrands));
+    }
   };
 
   /* Derived filtered + sorted list */
@@ -170,7 +219,7 @@ export default function LaptopIndex() {
     if (sortBy === "price-desc") result = [...result].sort((a, b) => b.price - a.price);
     if (sortBy === "name")       result = [...result].sort((a, b) => a.name.localeCompare(b.name));
     return result;
-  }, [selBrands, selRAMs, selCPUs, selScreens, selGPUs, minPrice, maxPrice, sortBy]);
+  }, [selBrands, selRAMs, selCPUs, selScreens, selGPUs, minPrice, maxPrice, sortBy, activeCategory]);
 
   const heroContainer = {
     hidden: {},
@@ -337,11 +386,16 @@ export default function LaptopIndex() {
   );
 
   return (
-    <div className="bg-[#fafafa] min-h-screen pb-16">
+    <div className="bg-white min-h-screen pb-16">
       {/* ══ 1. HERO ═════════════════════════════════════════════════════ */}
       <div 
-        className="pt-10 pb-16 md:pt-16 md:pb-24 overflow-hidden relative"
-        style={{ background: "linear-gradient(135deg, #ffffff 0%, #f0f6ff 40%, #e3effe 70%, #dceafd 100%)" }}
+        className="overflow-hidden relative"
+        style={{
+          background: "linear-gradient(135deg, #ffffff 0%, #f0f6ff 40%, #e3effe 70%, #dceafd 100%)",
+          marginTop: "-96px",
+          paddingTop: "calc(96px + 2.5rem)",
+          paddingBottom: "6rem",
+        }}
       >
         {/* Top-right blue glow */}
         <div style={{
@@ -368,12 +422,12 @@ export default function LaptopIndex() {
                 Sức mạnh tản nhiệt đỉnh cao,<br />
                 sẵn sàng cùng bạn chiến mọi tựa game.
               </motion.p>
-              <motion.div variants={heroItem} className="flex flex-wrap items-center gap-4">
-                <button className="px-8 py-3.5 bg-zinc-900 hover:bg-zinc-800 text-white text-[15px] font-semibold rounded-lg transition-all duration-200 shadow-lg shadow-zinc-900/20 active:scale-95 cursor-pointer">
-                  Khám phá ngay
+              <motion.div variants={heroItem} className="flex flex-wrap items-center gap-3">
+                <button className="inline-flex items-center gap-2 px-8 py-3.5 bg-[#1d1d1f] hover:bg-zinc-800 text-white text-[15px] font-semibold rounded-full transition-all duration-200 shadow-md active:scale-95 cursor-pointer">
+                  Khám phá ngay <ArrowRight className="w-4 h-4" />
                 </button>
-                <button className="px-8 py-3.5 bg-white border border-zinc-200 hover:bg-zinc-50 text-zinc-800 text-[15px] font-semibold rounded-lg transition-all duration-200 shadow-sm active:scale-95 cursor-pointer">
-                  Tư vấn chọn laptop
+                <button className="inline-flex items-center gap-2 px-8 py-3.5 bg-white/80 border border-zinc-300 hover:bg-white text-zinc-800 text-[15px] font-semibold rounded-full transition-all duration-200 shadow-sm active:scale-95 cursor-pointer">
+                  Tư vấn chọn laptop <ArrowRight className="w-4 h-4" />
                 </button>
               </motion.div>
               <motion.div variants={heroItem} className="flex flex-wrap items-center gap-x-8 gap-y-3 pt-7 mt-8 border-t border-zinc-200 w-full">
@@ -408,22 +462,62 @@ export default function LaptopIndex() {
 
         {/* ══ 2. CHỌN THEO NHU CẦU ═══════════════════════════════════════ */}
         <section className="mb-16 md:mb-20">
-          <h2 className="text-xl md:text-2xl font-bold tracking-tight text-zinc-900 mb-8">Chọn laptop theo nhu cầu</h2>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-            {categories.map((cat, i) => (
-              <div key={i} className="group cursor-pointer bg-white rounded-2xl p-5 border border-zinc-100 shadow-sm hover:shadow-md hover:border-zinc-200 transition-all duration-300 flex flex-col h-full relative overflow-hidden">
-                <div className="w-12 h-12 rounded-xl bg-zinc-50 border border-zinc-100 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
-                  <cat.icon className="w-6 h-6 text-zinc-700" strokeWidth={1.5} />
-                </div>
-                <h3 className="text-[15px] font-bold text-zinc-900 mb-2">{cat.title}</h3>
-                <p className="text-[12px] text-zinc-500 whitespace-pre-line leading-relaxed flex-1">{cat.desc}</p>
-                <div className="mt-4 flex justify-end">
-                  <div className="w-6 h-6 rounded-full bg-zinc-50 flex items-center justify-center group-hover:bg-zinc-900 group-hover:text-white transition-colors duration-300">
-                    <ChevronRight className="w-3.5 h-3.5" />
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-xl md:text-2xl font-bold tracking-tight text-zinc-900">Chọn laptop theo nhu cầu</h2>
+            {activeCategory !== null && (
+              <button
+                onClick={resetFilters}
+                className="flex items-center gap-1.5 text-sm font-medium text-zinc-500 hover:text-zinc-900 transition-colors"
+              >
+                <RotateCcw className="w-3.5 h-3.5" /> Bỏ chọn
+              </button>
+            )}
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3 md:gap-4">
+            {categories.map((cat, i) => {
+              const isActive = activeCategory === i;
+              return (
+                <button
+                  key={i}
+                  onClick={() => handleCategoryClick(i)}
+                  className={`group cursor-pointer rounded-2xl border transition-all duration-200 overflow-hidden text-left block w-full ${
+                    isActive
+                      ? "border-zinc-900 shadow-lg ring-2 ring-zinc-900/10 -translate-y-0.5"
+                      : "border-zinc-100 bg-white shadow-sm hover:shadow-md hover:border-zinc-200 hover:-translate-y-0.5"
+                  }`}
+                >
+                  {/* Thumbnail image */}
+                  <div className="w-full aspect-[4/3] relative overflow-hidden bg-zinc-100">
+                    <img
+                      src={cat.img}
+                      alt={cat.title}
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
+                    {/* Overlay khi active */}
+                    {isActive && (
+                      <div className="absolute inset-0 bg-zinc-900/20" />
+                    )}
+                    {/* Icon badge */}
+                    <div className={`absolute top-2.5 left-2.5 w-8 h-8 rounded-xl backdrop-blur flex items-center justify-center border shadow-sm transition-colors ${
+                      isActive ? "bg-zinc-900 border-zinc-900" : "bg-white/80 border-white/20"
+                    }`}>
+                      <cat.icon className={`w-4 h-4 ${isActive ? "text-white" : "text-zinc-500"}`} strokeWidth={1.8} />
+                    </div>
                   </div>
-                </div>
-              </div>
-            ))}
+                  {/* Label */}
+                  <div className={`flex items-center justify-between px-3.5 py-3 ${
+                    isActive ? "bg-zinc-900" : "bg-white"
+                  }`}>
+                    <span className={`text-[13px] font-bold transition-colors ${
+                      isActive ? "text-white" : "text-zinc-800 group-hover:text-zinc-950"
+                    }`}>{cat.title}</span>
+                    <ChevronRight className={`w-4 h-4 transition-all duration-200 ${
+                      isActive ? "text-white rotate-90" : "text-zinc-400 group-hover:text-zinc-700 group-hover:translate-x-0.5"
+                    }`} />
+                  </div>
+                </button>
+              );
+            })}
           </div>
         </section>
 
@@ -449,6 +543,7 @@ export default function LaptopIndex() {
         </section>
 
         {/* ══ 4. MAIN LAYOUT: FILTERS & GRID ════════════════════════════ */}
+        <div id="products-section" />
         <div className="flex flex-col lg:flex-row gap-8 lg:gap-10">
 
           {/* Desktop Sidebar */}
