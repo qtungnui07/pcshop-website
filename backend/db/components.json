@@ -461,5 +461,201 @@
     "price": "2.290.000đ",
     "color": "#e0e7ef",
     "category": "Case"
+  },
+  {
+    "name": "Corsair Vengeance LPX DDR4 8G",
+    "specs": "8GB DDR4 3200MHz Black",
+    "price": "550.000đ",
+    "color": "#111",
+    "category": "RAM"
+  },
+  {
+    "name": "Corsair Vengeance LPX DDR4 16G",
+    "specs": "16GB (2x8GB) DDR4 3200MHz Black",
+    "price": "1.090.000đ",
+    "color": "#111",
+    "category": "RAM"
+  },
+  {
+    "name": "Kingston Fury Beast RGB DDR4",
+    "specs": "16GB (2x8GB) DDR4 3600MHz RGB",
+    "price": "1.390.000đ",
+    "color": "#1a1a2e",
+    "category": "RAM"
+  },
+  {
+    "name": "G.Skill Trident Z Royal Gold",
+    "specs": "16GB (2x8GB) DDR4 3600MHz Gold",
+    "price": "2.490.000đ",
+    "badge": "Premium",
+    "badgeColor": "#f59e0b",
+    "color": "#fca5a5",
+    "category": "RAM"
+  },
+  {
+    "name": "G.Skill Trident Z Royal Silver",
+    "specs": "32GB (2x16GB) DDR4 3600MHz Silver",
+    "price": "3.990.000đ",
+    "badge": "Premium",
+    "badgeColor": "#64748b",
+    "color": "#e2e8f0",
+    "category": "RAM"
+  },
+  {
+    "name": "TeamGroup T-Force Delta DDR5 16G",
+    "specs": "16GB (2x8GB) DDR5 5200MHz RGB",
+    "price": "1.990.000đ",
+    "color": "#111827",
+    "category": "RAM"
+  },
+  {
+    "name": "TeamGroup T-Force Delta DDR5 32G",
+    "specs": "32GB (2x16GB) DDR5 6000MHz RGB",
+    "price": "3.790.000đ",
+    "color": "#111827",
+    "category": "RAM"
+  },
+  {
+    "name": "Crucial Pro DDR5",
+    "specs": "32GB (2x16GB) DDR5 5600MHz Black",
+    "price": "2.690.000đ",
+    "color": "#1f2937",
+    "category": "RAM"
+  },
+  {
+    "name": "Corsair Dominator Titanium",
+    "specs": "32GB (2x16GB) DDR5 7200MHz White",
+    "price": "6.990.000đ",
+    "badge": "Siêu cấp",
+    "badgeColor": "#dc2626",
+    "color": "#e0e7ef",
+    "category": "RAM"
+  },
+  {
+    "name": "G.Skill Trident Z5 Neo",
+    "specs": "64GB (2x32GB) DDR5 6000MHz RGB",
+    "price": "6.490.000đ",
+    "color": "#2d2d2d",
+    "category": "RAM"
+  },
+  {
+    "name": "Intel Core i3-12100F",
+    "specs": "4 Cores / 8 Threads up to 4.3GHz LGA1700",
+    "price": "1.990.000đ",
+    "color": "#1a1a2e",
+    "category": "CPU"
+  },
+  {
+    "name": "Intel Core i5-12400F",
+    "specs": "6 Cores / 12 Threads up to 4.4GHz LGA1700",
+    "price": "3.490.000đ",
+    "badge": "Bán chạy",
+    "badgeColor": "#f97316",
+    "color": "#1a1a2e",
+    "category": "CPU"
+  },
+  {
+    "name": "Intel Core i5-13400F",
+    "specs": "10 Cores / 16 Threads up to 4.6GHz LGA1700",
+    "price": "4.990.000đ",
+    "color": "#1a1a2e",
+    "category": "CPU"
+  },
+  {
+    "name": "Intel Core i7-13700K",
+    "specs": "16 Cores / 24 Threads up to 5.4GHz LGA1700",
+    "price": "8.990.000đ",
+    "color": "#1a1a2e",
+    "category": "CPU"
+  },
+  {
+    "name": "AMD Ryzen 5 5600X",
+    "specs": "6 Cores / 12 Threads up to 4.6GHz AM4",
+    "price": "3.890.000đ",
+    "color": "#1f2937",
+    "category": "CPU"
+  },
+  {
+    "name": "AMD Ryzen 5 7600X",
+    "specs": "6 Cores / 12 Threads up to 5.3GHz AM5",
+    "price": "5.790.000đ",
+    "color": "#1f2937",
+    "category": "CPU"
+  },
+  {
+    "name": "AMD Ryzen 7 5700X",
+    "specs": "8 Cores / 16 Threads up to 4.6GHz AM4",
+    "price": "4.890.000đ",
+    "color": "#1f2937",
+    "category": "CPU"
+  },
+  {
+    "name": "AMD Ryzen 9 7950X",
+    "specs": "16 Cores / 32 Threads up to 5.7GHz AM5",
+    "price": "14.990.000đ",
+    "badge": "Flagship",
+    "badgeColor": "#8b5cf6",
+    "color": "#1f2937",
+    "category": "CPU"
+  },
+  {
+    "name": "MSI GTX 1650 D6 VENTUS XS",
+    "specs": "4GB GDDR6 / 128-bit / 2 Fan",
+    "price": "3.690.000đ",
+    "color": "#111",
+    "category": "VGA"
+  },
+  {
+    "name": "ASUS Dual Radeon RX 6600",
+    "specs": "8GB GDDR6 / 128-bit / 2 Fan",
+    "price": "5.990.000đ",
+    "color": "#2d2d2d",
+    "category": "VGA"
+  },
+  {
+    "name": "Gigabyte RTX 3060 WINDFORCE",
+    "specs": "12GB GDDR6 / 192-bit / 2 Fan",
+    "price": "7.990.000đ",
+    "color": "#c8d0dc",
+    "category": "VGA"
+  },
+  {
+    "name": "MSI RTX 4060 Ti GAMING X",
+    "specs": "8GB GDDR6 / 128-bit / Twin Frozr",
+    "price": "11.490.000đ",
+    "badge": "RGB",
+    "badgeColor": "#22c55e",
+    "color": "#111",
+    "category": "VGA"
+  },
+  {
+    "name": "Gigabyte RTX 4070 WINDFORCE",
+    "specs": "12GB GDDR6X / 192-bit / 3 Fan",
+    "price": "16.990.000đ",
+    "color": "#c8d0dc",
+    "category": "VGA"
+  },
+  {
+    "name": "ASUS TUF RTX 4070 Ti SUPER OC",
+    "specs": "16GB GDDR6X / 256-bit / 3 Fan",
+    "price": "25.990.000đ",
+    "color": "#2d2d2d",
+    "category": "VGA"
+  },
+  {
+    "name": "ASUS ROG Strix RTX 4090 OC",
+    "specs": "24GB GDDR6X / 384-bit / Flagship GPU",
+    "price": "69.990.000đ",
+    "badge": "Khủng",
+    "badgeColor": "#dc2626",
+    "color": "#cbd5e1",
+    "category": "VGA"
+  },
+  {
+    "name": "PowerColor Hellhound RX 7800 XT",
+    "specs": "16GB GDDR6 / 256-bit / Led Ice Blue",
+    "price": "14.490.000đ",
+    "color": "#1c1917",
+    "category": "VGA"
   }
 ]
