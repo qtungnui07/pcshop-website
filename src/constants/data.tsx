@@ -32,7 +32,17 @@ export const navItems = [
       { name: 'Case - Vỏ Máy Tính', title: 'Kích Thước', links: ['Mini ITX', 'Micro ATX', 'Mid Tower', 'Full Tower'] },
     ]
   },
-  { name: 'Laptop', dropdown: null },
+  {
+    name: 'Laptop',
+    isSplit: true,
+    splitData: [
+      { name: 'Thương Hiệu', title: 'Các dòng Gaming', links: ['ASUS ROG', 'ASUS TUF', 'Acer Nitro', 'Acer Predator', 'MSI Katana', 'MSI Cyborg', 'Lenovo Legion', 'Lenovo LOQ', 'Dell Alienware', 'HP Omen', 'Gigabyte'] },
+      { name: 'Card Đồ Họa (VGA)', title: 'Theo GPU', links: ['NVIDIA RTX 3050', 'NVIDIA RTX 4050', 'NVIDIA RTX 4060', 'NVIDIA RTX 4070', 'NVIDIA RTX 4080', 'NVIDIA RTX 4090'] },
+      { name: 'Vi Xử Lý (CPU)', title: 'Theo CPU', links: ['Intel Core i5', 'Intel Core i7', 'Intel Core i9', 'AMD Ryzen 5', 'AMD Ryzen 7', 'AMD Ryzen 9'] },
+      { name: 'Màn Hình', title: 'Tần số quét & Kích thước', links: ['15.6 inch', '16 inch', '17.3 inch', '144Hz', '165Hz', '240Hz'] },
+      { name: 'Mức Giá', title: 'Phân Khúc Giá', links: ['Dưới 20 Triệu', '20 - 25 Triệu', '25 - 30 Triệu', '30 - 40 Triệu', 'Trên 40 Triệu (Hi-End)'] }
+    ]
+  },
   { name: 'Phụ kiện', dropdown: [
     {
       title: 'Danh mục phụ kiện', 
