@@ -23,11 +23,23 @@ export default function CategoriesSection() {
             whileHover={{ y: -5 }}
             className="group cursor-pointer rounded-2xl overflow-hidden bg-white border border-[#e8e8ed] shadow-sm hover:shadow-md transition-all duration-300"
           >
-            {/* Gradient placeholder */}
+            {/* Product image */}
             <div
-              className="w-full aspect-[4/3]"
-              style={{ background: `linear-gradient(135deg, ${cat.from}, ${cat.to})` }}
-            />
+              className="relative w-full aspect-[4/3] overflow-hidden bg-zinc-50"
+              style={{
+                background: cat.imgName
+                  ? `linear-gradient(135deg, ${cat.from || '#f8fafc'}, ${cat.to || '#eef2ff'})`
+                  : '#f8fafc'
+              }}
+            >
+              {(cat.imgName || cat.image) && (
+                <img
+                  src={cat.imgName ? `/images/${cat.imgName}` : cat.image}
+                  alt={cat.name}
+                  className="absolute inset-0 h-full w-full object-contain p-3 transition-transform duration-300 group-hover:scale-105"
+                />
+              )}
+            </div>
             <div className="px-4 py-3 flex items-center justify-between">
               <span className="text-sm font-semibold text-[#1d1d1f]">{cat.name}</span>
               <ArrowRight className="w-4 h-4 text-[#86868b] group-hover:translate-x-1 transition-transform duration-200" />

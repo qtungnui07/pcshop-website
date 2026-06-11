@@ -6,6 +6,7 @@ import {
 } from "lucide-react";
 import { useMemo, useState, useEffect } from "react";
 import { motion } from "framer-motion";
+import AddToCartButton from "../../components/AddToCartButton";
 
 /* ── TYPES ─────────────────────────────────────────────────────────── */
 type LaptopBrand = "ASUS" | "Apple" | "Dell" | "Lenovo" | "HP" | "Acer" | "MSI";
@@ -797,7 +798,19 @@ export default function LaptopIndex() {
                       <div className="flex flex-col flex-1">
                         <h3 className="text-[14px] font-bold text-zinc-900 leading-tight mb-2 line-clamp-2">{p.name}</h3>
                         <p className="text-[12px] text-zinc-500 leading-relaxed mb-4 flex-1 whitespace-pre-line">{p.specs}</p>
-                        <div className="text-[15px] font-bold text-zinc-900">{formatPrice(p.price)}</div>
+                        <div className="flex items-center justify-between gap-3">
+                          <div className="text-[15px] font-bold text-zinc-900">{formatPrice(p.price)}</div>
+                          <AddToCartButton
+                            product={{
+                              id: `laptop-${p.id}`,
+                              name: p.name,
+                              specs: p.specs,
+                              price: p.price,
+                              image: p.img,
+                              category: "Laptop",
+                            }}
+                          />
+                        </div>
                       </div>
                     </div>
                   ) : (
@@ -812,6 +825,16 @@ export default function LaptopIndex() {
                       <div className="text-right shrink-0">
                         <p className="text-[14px] font-extrabold text-zinc-900">{formatPrice(p.price)}</p>
                       </div>
+                      <AddToCartButton
+                        product={{
+                          id: `laptop-${p.id}`,
+                          name: p.name,
+                          specs: p.specs,
+                          price: p.price,
+                          image: p.img,
+                          category: "Laptop",
+                        }}
+                      />
                       <button onClick={() => toggleLike(p.id)} className="w-7 h-7 flex items-center justify-center rounded-full bg-zinc-50 hover:bg-zinc-100 transition-colors cursor-pointer shrink-0">
                         <Heart className={`w-3.5 h-3.5 transition-colors ${liked.has(p.id) ? "fill-red-500 text-red-500" : "text-zinc-300"}`} />
                       </button>

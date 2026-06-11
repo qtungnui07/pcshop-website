@@ -9,6 +9,7 @@ import {
   ChevronDown 
 } from "lucide-react";
 import { pcProducts, type PCProduct } from "../../constants/pcData";
+import AddToCartButton from "../../components/AddToCartButton";
 
 const API_BASE =
   typeof window !== "undefined"
@@ -406,7 +407,19 @@ export default function AllPCsPage() {
                   <div className="flex flex-col flex-1">
                     <h3 className="text-[14px] font-bold text-zinc-900 leading-tight mb-2 line-clamp-2 min-h-[40px]">{p.name}</h3>
                     <p className="text-[12px] text-zinc-500 leading-relaxed mb-4 flex-1 whitespace-pre-line">{p.specs}</p>
-                    <div className="text-[15px] font-bold text-zinc-900">{p.priceStr}</div>
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="text-[15px] font-bold text-zinc-900">{p.priceStr}</div>
+                      <AddToCartButton
+                        product={{
+                          id: `pc-${p.id}`,
+                          name: p.name,
+                          specs: p.specs,
+                          price: p.price,
+                          image: p.img,
+                          category: "PC",
+                        }}
+                      />
+                    </div>
                   </div>
                 </div>
               ))}

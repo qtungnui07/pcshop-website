@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { type CSSProperties, useCallback, useEffect, useState } from "react";
 import {
   Plus,
   Trash2,
@@ -55,6 +55,7 @@ interface ComponentItem {
   price: string;
   badge?: string;
   badgeColor?: string;
+  image?: string;
   color?: string; // fallback color representation
   category?: string;
 }
@@ -395,7 +396,7 @@ export default function AdminIndex() {
 
   // Editor states
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
-  // const [editorOffsetTop, setEditorOffsetTop] = useState(0);
+  const [editorOffsetTop, setEditorOffsetTop] = useState(0);
   
   // Shared Form inputs
   const [formName, setFormName] = useState("");
@@ -459,6 +460,7 @@ export default function AdminIndex() {
       
       setDirty({ pc: false, laptop: false, "linh-kien": false, "phu-kien": false, tickets: false, accounts: false });
       setEditingIndex(null);
+      setEditorOffsetTop(0);
     } catch (err) {
       console.error("Error loading products in admin:", err);
     } finally {
@@ -501,6 +503,37 @@ export default function AdminIndex() {
       return matchName || matchSpecs || matchBrand || matchCategory || matchEmail || matchRole || matchProvider || matchTicketTitle || matchTicketStatus || matchTicketId;
     });
   };
+
+  const syncEditorPanelToItem = useCallback((originalIndex: number | null) => {
+    if (originalIndex === null || originalIndex < 0 || typeof window === "undefined") {
+      setEditorOffsetTop(0);
+      return;
+    }
+
+    window.requestAnimationFrame(() => {
+      const gridEl = document.getElementById("admin-grid-container");
+      const cardEl = document.getElementById(`admin-item-card-${originalIndex}`);
+
+      if (!gridEl || !cardEl) {
+        setEditorOffsetTop(0);
+        return;
+      }
+
+      const gridRect = gridEl.getBoundingClientRect();
+      const cardRect = cardEl.getBoundingClientRect();
+      setEditorOffsetTop(Math.max(0, cardRect.top - gridRect.top));
+    });
+  }, []);
+
+  useEffect(() => {
+    syncEditorPanelToItem(editingIndex);
+  }, [editingIndex, searchQuery, activeCategory, syncEditorPanelToItem]);
+
+  useEffect(() => {
+    const handleResize = () => syncEditorPanelToItem(editingIndex);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, [editingIndex, syncEditorPanelToItem]);
 
   // Re-ordering handler
   const handleMove = (indexInFilteredList: number, direction: "up" | "down") => {
@@ -549,6 +582,7 @@ export default function AdminIndex() {
     const filteredList = getFilteredList();
     const activeList = getActiveList();
     const item = filteredList[indexInFilteredList];
+    const originalIndex = activeList.findIndex(x => x === item);
     
     if (activeCategory === "accounts" && user && item.email === user.email) {
       alert("Bạn không thể tự xóa tài khoản của chính mình!");
@@ -561,14 +595,16 @@ export default function AdminIndex() {
     updateActiveListState(newList);
     setDirty({ ...dirty, [activeCategory]: true });
     
-    if (editingIndex === indexInFilteredList) {
+    if (editingIndex === originalIndex) {
       setEditingIndex(null);
+      setEditorOffsetTop(0);
     }
   };
 
   // Start Create Item
   const handleStartCreate = () => {
     setEditingIndex(-1); // -1 is new item
+    setEditorOffsetTop(0);
     setFormErrors({});
 
     // Reset fields to category-specific defaults
@@ -577,6 +613,7 @@ export default function AdminIndex() {
     setFormPrice("");
     setFormBadge("");
     setFormBadgeColor("#1d1d1f");
+    setFormImage("");
     setCustomImageUrl("");
     setIsCustomImage(false);
 
@@ -615,6 +652,7 @@ export default function AdminIndex() {
     if (originalIndex === -1) return;
 
     setEditingIndex(originalIndex);
+    syncEditorPanelToItem(originalIndex);
     setFormErrors({});
 
     // Smooth scroll to editor panel on mobile/tablet
@@ -659,6 +697,7 @@ export default function AdminIndex() {
         setFormImage(item.img || item.image || "");
       } else if (activeCategory === "linh-kien") {
         setFormLinhKienColor(item.color || "#e0e7ef");
+        setFormImage(item.image || "");
         // Derive category if not stored explicitly
         setFormLinhKienCategory(item.category || "RAM");
       } else {
@@ -697,6 +736,7 @@ export default function AdminIndex() {
       setFormImage(template.img || template.image || "");
     } else if (activeCategory === "linh-kien") {
       setFormLinhKienColor(template.color);
+      setFormImage(template.image || "");
     } else {
       setFormBrand(template.brand);
       setFormPhuKienCategory(template.category);
@@ -790,6 +830,7 @@ export default function AdminIndex() {
         price: formPrice.trim(),
         badge: formBadge.trim(),
         badgeColor: formBadgeColor,
+        image: formImage.trim(),
         color: formLinhKienColor,
         category: formLinhKienCategory
       };
@@ -822,6 +863,7 @@ export default function AdminIndex() {
     updateActiveListState(originalList);
     setDirty({ ...dirty, [activeCategory]: true });
     setEditingIndex(null); // close editing pane
+    setEditorOffsetTop(0);
   };
 
   // Submit list to backend JSON database
@@ -999,6 +1041,7 @@ export default function AdminIndex() {
               onClick={() => {
                 setActiveCategory(cat.id);
                 setEditingIndex(null);
+                setEditorOffsetTop(0);
                 setSearchQuery("");
               }}
               className={`flex items-center gap-3 p-4 rounded-2xl border text-left transition-all duration-300 cursor-pointer ${
@@ -1102,10 +1145,28 @@ export default function AdminIndex() {
                         )}
 
                         {activeCategory === "linh-kien" && (
-                          <div className="w-16 h-16 rounded-xl flex items-center justify-center border border-zinc-200 relative overflow-hidden flex-shrink-0" style={{ background: `linear-gradient(135deg, ${item.color || '#e0e7ef'}22 0%, ${item.color || '#e0e7ef'}44 100%)` }}>
+                          <div
+                            className="w-16 h-16 bg-white rounded-xl flex items-center justify-center border border-zinc-100 relative overflow-hidden flex-shrink-0"
+                          >
                             <Cpu className="w-7 h-7 text-zinc-400" />
+                            {item.image ? (
+                              <>
+                                <div
+                                  className="absolute left-1/2 top-1/2 h-9 w-9 -translate-x-1/2 -translate-y-1/2 rounded-full blur-xl opacity-25"
+                                  style={{ backgroundColor: item.color || "#e0e7ef" }}
+                                />
+                                <img
+                                  src={item.image}
+                                  alt={item.name}
+                                  className="absolute inset-1 z-10 m-auto max-w-[calc(100%-8px)] max-h-[calc(100%-8px)] object-contain"
+                                  onError={(e) => {
+                                    e.currentTarget.style.display = "none";
+                                  }}
+                                />
+                              </>
+                            ) : null}
                             {item.badge && (
-                              <span className="absolute bottom-0 left-0 right-0 text-[8px] font-extrabold text-white text-center py-0.5" style={{ background: item.badgeColor || '#22c55e' }}>
+                              <span className="absolute bottom-0 left-0 right-0 z-20 text-[8px] font-extrabold text-white text-center py-0.5" style={{ background: item.badgeColor || '#22c55e' }}>
                                 {item.badge}
                               </span>
                             )}
@@ -1278,7 +1339,8 @@ export default function AdminIndex() {
           {/* ── RIGHT: EDITOR FORM PANE (4-5 Columns) ────────────────── */}
           <div 
             id="admin-editor-panel"
-            className="lg:col-span-5 xl:col-span-4 lg:sticky lg:top-24 lg:max-h-[calc(100vh-120px)] lg:overflow-y-auto pr-1"
+            className="lg:col-span-5 xl:col-span-4 lg:sticky lg:top-24 lg:mt-[var(--editor-offset-top)] lg:max-h-[calc(100vh-120px)] lg:overflow-y-auto pr-1 transition-[margin-top] duration-300 ease-out"
+            style={{ "--editor-offset-top": `${editorOffsetTop}px` } as CSSProperties}
           >
             <AnimatePresence mode="wait">
               {editingIndex !== null ? (
@@ -1797,6 +1859,7 @@ export default function AdminIndex() {
                       type="button"
                       onClick={() => {
                         setEditingIndex(null);
+                        setEditorOffsetTop(0);
                       }}
                       className="px-4 py-2.5 border border-zinc-200 hover:bg-zinc-100 text-zinc-500 hover:text-zinc-700 text-xs font-bold rounded-xl transition-colors cursor-pointer"
                     >

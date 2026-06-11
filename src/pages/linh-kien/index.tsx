@@ -6,6 +6,8 @@ import {
 import { useState, useEffect, useMemo } from "react";
 import { motion } from "framer-motion";
 import { useSearchParams } from "react-router-dom";
+import componentsHeroImage from "../../assets/Thiết kế chưa có tên (1).png";
+import AddToCartButton from "../../components/AddToCartButton";
 
 /* ── TYPES ─────────────────────────────────────────────────────────── */
 interface Product {
@@ -14,6 +16,7 @@ interface Product {
   price: string;
   badge?: string;
   badgeColor?: string;
+  image?: string;
   color?: string;
   category?: string;
 }
@@ -235,13 +238,42 @@ function FilterGroup({ title, children }: { title: string; children: React.React
   );
 }
 
-/* ── PRODUCT PLACEHOLDER IMAGE ─────────────────────────────────────── */
-function ProductPlaceholder({ color = "#e5e7eb" }: { color?: string }) {
+/* ── PRODUCT IMAGE ─────────────────────────────────────────────────── */
+function ProductImage({
+  src,
+  alt,
+  color = "#e5e7eb",
+}: {
+  src?: string;
+  alt: string;
+  color?: string;
+}) {
+  const [imageFailed, setImageFailed] = useState(false);
+  const shouldShowImage = Boolean(src && !imageFailed);
+
   return (
     <div
-      className="w-full aspect-[4/3] rounded-xl flex items-center justify-center"
-      style={{ background: `linear-gradient(135deg, ${color}22 0%, ${color}44 100%)`, border: `1px solid ${color}33` }}
+      className="relative w-full aspect-[4/3] rounded-xl flex items-center justify-center overflow-hidden bg-white"
+      style={shouldShowImage
+        ? { border: "1px solid #f1f5f9" }
+        : { background: "#f8fafc", border: "1px solid #e5e7eb" }
+      }
     >
+      {shouldShowImage ? (
+        <>
+          <div
+            className="absolute left-1/2 top-1/2 h-3/5 w-3/5 -translate-x-1/2 -translate-y-1/2 rounded-full blur-2xl opacity-25"
+            style={{ backgroundColor: color }}
+          />
+          <img
+            src={src}
+            alt={alt}
+            className="absolute inset-2 m-auto max-w-[calc(100%-16px)] max-h-[calc(100%-16px)] object-contain"
+            loading="lazy"
+            onError={() => setImageFailed(true)}
+          />
+        </>
+      ) : (
       <div className="flex flex-col items-center gap-2 opacity-30">
         <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke={color === "#e0e7ef" ? "#94a3b8" : "#6b7280"} strokeWidth="1.5">
           <rect x="2" y="6" width="20" height="12" rx="2" />
@@ -252,6 +284,7 @@ function ProductPlaceholder({ color = "#e5e7eb" }: { color?: string }) {
           Ảnh sản phẩm
         </span>
       </div>
+      )}
     </div>
   );
 }
@@ -789,7 +822,7 @@ export default function LinhKienIndex() {
           pointerEvents: "none",
         }} />
 
-        <div className="max-w-[1600px] mx-auto px-4 md:px-8 lg:px-10 xl:px-12 2xl:px-16 relative z-10">
+        <div className="max-w-[1700px] mx-auto px-4 md:px-8 lg:px-10 xl:px-12 2xl:px-16 relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center" style={{ minHeight: "calc(100vh - 96px)" }}>
 
             {/* Left */}
@@ -799,8 +832,8 @@ export default function LinhKienIndex() {
                   Linh kiện chính hãng
                 </span>
               </motion.div>
-              <motion.h1 variants={heroItem} className="text-[3.2rem] md:text-[4.2rem] lg:text-[5rem] font-bold tracking-tight text-zinc-900 leading-[1.08] mb-6">
-                Linh kiện PC<br />cho mọi cấu hình.
+              <motion.h1 variants={heroItem} className="text-[3.1rem] md:text-[4.2rem] lg:text-[4.35rem] font-bold tracking-tight text-zinc-900 leading-[1.08] mb-6">
+                Linh kiện PC<br /><span className="whitespace-nowrap">cho mọi cấu hình.</span>
               </motion.h1>
               <motion.p variants={heroItem} className="text-[17px] text-zinc-500 leading-relaxed mb-10">
                 Đa dạng linh kiện chính hãng, chất lượng cao.<br />
@@ -833,12 +866,12 @@ export default function LinhKienIndex() {
               </motion.div>
             </motion.div>
 
-            {/* Right — PC case placeholder */}
+            {/* Right — components hero image */}
             <motion.div
               initial={{ opacity: 0, x: 40, scale: 0.96 }}
               animate={{ opacity: 1, x: 0, scale: 1 }}
               transition={{ duration: 1, ease: [0.25, 1, 0.5, 1], delay: 0.2 }}
-              className="relative hidden lg:flex items-end justify-center"
+              className="relative hidden lg:flex items-center justify-center"
               style={{ alignSelf: "stretch" }}
             >
               {/* Blue glow behind PC */}
@@ -846,7 +879,7 @@ export default function LinhKienIndex() {
                 position: "absolute",
                 width: 600, height: 600,
                 background: "radial-gradient(circle, rgba(147,197,253,0.3) 0%, rgba(165,180,252,0.1) 50%, transparent 70%)",
-                bottom: "0%", left: "50%", transform: "translateX(-48%)",
+                top: "50%", left: "50%", transform: "translate(-48%, -50%)",
                 pointerEvents: "none",
                 zIndex: 0,
               }} />
@@ -856,25 +889,19 @@ export default function LinhKienIndex() {
                 position: "absolute",
                 width: 500, height: 60,
                 background: "radial-gradient(ellipse, rgba(120,170,250,0.2) 0%, transparent 70%)",
-                bottom: "0%", left: "50%", transform: "translateX(-48%)",
+                bottom: "18%", left: "50%", transform: "translateX(-48%)",
                 pointerEvents: "none",
                 zIndex: 1,
               }} />
 
-              {/* PC Case hero placeholder */}
-              <div className="relative z-10 flex flex-col items-center justify-center w-[400px] h-[360px] rounded-3xl border-2 border-zinc-200/60 bg-white/40 backdrop-blur shadow-2xl mb-12">
-                <div className="flex flex-col items-center gap-3 opacity-40">
-                  <svg width="80" height="80" viewBox="0 0 64 64" fill="none" stroke="#64748b" strokeWidth="1.5">
-                    <rect x="12" y="4" width="40" height="56" rx="4" />
-                    <rect x="18" y="10" width="28" height="18" rx="2" />
-                    <circle cx="32" cy="40" r="6" />
-                    <circle cx="32" cy="40" r="2" />
-                    <line x1="12" y1="32" x2="7" y2="32" />
-                    <line x1="52" y1="32" x2="57" y2="32" />
-                  </svg>
-                  <span className="text-[13px] font-semibold text-zinc-500">Ảnh case PC</span>
-                </div>
-              </div>
+              <motion.img
+                src={componentsHeroImage}
+                alt="Linh kiện PC"
+                initial={{ opacity: 0, y: 32, scale: 1 }}
+                animate={{ opacity: 1, y: 0, scale:1.5 }}
+                transition={{ type: "spring", stiffness: 150, damping: 14, delay: 0.38 }}
+                className="relative z-10 w-[720px] max-w-[112%] object-contain drop-shadow-2xl"
+              />
             </motion.div>
 
           </div>
@@ -1084,19 +1111,30 @@ export default function LinhKienIndex() {
                       >
                         <Heart className={`w-3.5 h-3.5 transition-colors ${liked.has(p.name) ? "fill-red-500 text-red-500" : "text-zinc-300"}`} />
                       </button>
-                      {/* Image placeholder */}
-                      <ProductPlaceholder color={p.color} />
+                      <ProductImage src={p.image} alt={p.name} color={p.color} />
                       {/* Info */}
                       <div className="mt-3 flex flex-col flex-1">
                         <h3 className="text-[13px] font-bold text-zinc-900 leading-tight mb-1 line-clamp-2">{p.name}</h3>
                         <p className="text-[11.5px] text-zinc-400 mb-3 flex-1">{p.specs}</p>
-                        <p className="text-[14px] font-extrabold text-zinc-900">{p.price}</p>
+                        <div className="flex items-center justify-between gap-3">
+                          <p className="text-[14px] font-extrabold text-zinc-900">{p.price}</p>
+                          <AddToCartButton
+                            product={{
+                              id: `component-${p.category || "linh-kien"}-${p.name}`,
+                              name: p.name,
+                              specs: p.specs,
+                              price: p.price,
+                              image: p.image,
+                              category: p.category || "Linh kiện",
+                            }}
+                          />
+                        </div>
                       </div>
                     </div>
                   ) : (
                     <div key={i} className="group bg-white rounded-xl border border-zinc-100 p-3 shadow-sm hover:shadow-md transition-all duration-300 flex items-center gap-4 relative">
                       <div className="w-20 h-16 shrink-0">
-                        <ProductPlaceholder color={p.color} />
+                        <ProductImage src={p.image} alt={p.name} color={p.color} />
                       </div>
                       {p.badge && (
                         <span className="absolute top-3 left-2.5 px-2 py-0.5 text-[10px] font-bold text-white rounded-full" style={{ background: p.badgeColor }}>{p.badge}</span>
@@ -1108,6 +1146,16 @@ export default function LinhKienIndex() {
                       <div className="text-right shrink-0">
                         <p className="text-[14px] font-extrabold text-zinc-900">{p.price}</p>
                       </div>
+                      <AddToCartButton
+                        product={{
+                          id: `component-${p.category || "linh-kien"}-${p.name}`,
+                          name: p.name,
+                          specs: p.specs,
+                          price: p.price,
+                          image: p.image,
+                          category: p.category || "Linh kiện",
+                        }}
+                      />
                       <button onClick={() => toggleLike(p.name)} className="w-7 h-7 flex items-center justify-center rounded-full bg-zinc-50 hover:bg-zinc-100 transition-colors cursor-pointer shrink-0">
                         <Heart className={`w-3.5 h-3.5 transition-colors ${liked.has(p.name) ? "fill-red-500 text-red-500" : "text-zinc-300"}`} />
                       </button>

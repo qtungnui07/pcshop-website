@@ -1,0 +1,29 @@
+[
+  {
+    "id": "ORD-1781204245228",
+    "userId": "acc-1001",
+    "email": "admin@qtitpc.dev",
+    "customerName": "Quản trị viên",
+    "phone": "123123123123",
+    "address": "123123",
+    "note": "123123",
+    "items": [
+      {
+        "id": "laptop-2",
+        "name": "MacBook Air M3 13 inch",
+        "specs": "Apple M3 / 16GB / 512GB SSD /\n13.6\" Liquid Retina",
+        "price": 24990000,
+        "image": "https://encrypted-tbn2.gstatic.com/shopping?q=tbn:ANd9GcTbxAi_Z_ijMzLLuRoihWYPcUOv3JxvRrQJ-AYjHRQXAPHoMcG3FbvvOMWTRuCrT4q_1clKx0wEt7jFLUri1Qa_VTazzEh9-PLM9zGCBwmzn-ZmYIsMeDqhtlI",
+        "category": "Laptop",
+        "quantity": 1
+      }
+    ],
+    "totalItems": 1,
+    "totalPrice": 24990000,
+    "paymentMethod": "QR_FAKE",
+    "paymentStatus": "success",
+    "status": "processing",
+    "createdAt": "2026-06-11T18:57:25.228Z",
+    "updatedAt": "2026-06-11T18:57:25.228Z"
+  }
+]

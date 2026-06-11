@@ -31,10 +31,15 @@ export const heroSlides = [
 ];
 
 export const pcCategories = [
-  { name: 'PC Gaming',            from: '#D9F9DF', to: '#AEE2FF' },
-  { name: 'PC Workstation',       from: '#AEE2FF', to: '#B5BAFF' },
-  { name: 'PC Văn phòng',         from: '#FFF7AE', to: '#D9F9DF' },
-  { name: 'AI / Machine Learning',from: '#B5BAFF', to: '#9FA1FF' },
+  { name: 'PC Gaming',            imgName: "cat-gaming.png"},
+  { name: 'PC Workstation',       imgName: "cat-workstation.png" },
+  { name: 'PC Văn phòng',         imgName: "cat-vanphong.png" },
+  {
+    name: 'AI / Machine Learning',
+    image: 'https://site-cdn.core.nytro.ai/static/media/9d5d66c2-e0b8-4f07-8dcb-f21069887c36.png',
+    from: '#B5BAFF',
+    to: '#9FA1FF'
+  },
 ];
 
 export const featuredProducts = [

@@ -8,6 +8,8 @@ const DB_DIR = "./backend/db";
 const rateLimits = new Map<string, { count: number; resetTime: number }>();
 const resetTokens = new Map<string, { email: string; expiresAt: number }>();
 
+const defaultOrders: any[] = [];
+
 function getClientIP(req: Request): string {
   const cfConnectingIP = req.headers.get("cf-connecting-ip");
   if (cfConnectingIP) return cfConnectingIP.trim();
@@ -363,6 +365,7 @@ async function readData() {
   const accessories = await readCollection("accessories", oldDb?.accessories ?? defaultAccessories);
   const tickets = await readCollection("tickets", oldDb?.tickets ?? defaultTickets);
   const accounts = await readCollection("accounts", oldDb?.accounts ?? defaultAccounts);
+  const orders = await readCollection("orders", oldDb?.orders ?? defaultOrders);
 
   // Auto-migrate image URLs to subfolders if they aren't migrated yet
   let pcsChanged = false;
@@ -397,6 +400,7 @@ async function readData() {
     await writeCollection("accessories", accessories);
     await writeCollection("tickets", tickets);
     await writeCollection("accounts", accounts);
+    await writeCollection("orders", orders);
     
     try {
       await rename("./backend/data.json", "./backend/data.json.bak");
@@ -406,7 +410,7 @@ async function readData() {
     }
   }
 
-  return { pcs, components, laptops, accessories, tickets, accounts };
+  return { pcs, components, laptops, accessories, tickets, accounts, orders };
 }
 
 async function writeData(db: any) {
@@ -416,6 +420,7 @@ async function writeData(db: any) {
   if (db.accessories) await writeCollection("accessories", db.accessories);
   if (db.tickets) await writeCollection("tickets", db.tickets);
   if (db.accounts) await writeCollection("accounts", db.accounts);
+  if (db.orders) await writeCollection("orders", db.orders);
 }
 
 function verifyAdmin(req: Request, db: any): boolean {
@@ -586,6 +591,70 @@ serve({
         const body = await req.json(); // { id, status }
         const db = await readData();
         db.tickets = db.tickets.map((t: any) => t.id === body.id ? { ...t, ...body } : t);
+        await writeData(db);
+        return Response.json({ success: true }, { headers });
+      } catch (err) {
+        return Response.json({ error: "Invalid JSON body or missing id" }, { status: 400, headers });
+      }
+    }
+
+    // GET & POST Orders
+    if (url.pathname === "/api/orders") {
+      const db = await readData();
+
+      if (req.method === "POST") {
+        try {
+          const body = await req.json();
+          if (!body.userId || !body.email || !Array.isArray(body.items) || body.items.length === 0) {
+            return Response.json({ error: "Thông tin đơn hàng không hợp lệ" }, { status: 400, headers });
+          }
+
+          const now = new Date().toISOString();
+          const order = {
+            id: `ORD-${Date.now()}`,
+            userId: body.userId,
+            email: String(body.email).toLowerCase().trim(),
+            customerName: body.customerName || "",
+            phone: body.phone || "",
+            address: body.address || "",
+            note: body.note || "",
+            items: body.items,
+            totalItems: body.totalItems || 0,
+            totalPrice: body.totalPrice || 0,
+            paymentMethod: body.paymentMethod || "QR_FAKE",
+            paymentStatus: "success",
+            status: "processing",
+            createdAt: now,
+            updatedAt: now
+          };
+
+          db.orders = [order, ...(db.orders || [])];
+          await writeData(db);
+          return Response.json({ success: true, order }, { headers });
+        } catch (err) {
+          return Response.json({ error: "Invalid JSON body" }, { status: 400, headers });
+        }
+      }
+
+      const userId = url.searchParams.get("userId");
+      const email = url.searchParams.get("email")?.toLowerCase().trim();
+      let orders = db.orders || [];
+      if (userId || email) {
+        orders = orders.filter((order: any) =>
+          (userId && order.userId === userId) || (email && order.email === email)
+        );
+      }
+      return Response.json(orders, { headers });
+    }
+
+    // POST Update order status
+    if (url.pathname === "/api/orders/update" && req.method === "POST") {
+      try {
+        const body = await req.json();
+        const db = await readData();
+        db.orders = (db.orders || []).map((order: any) =>
+          order.id === body.id ? { ...order, ...body, updatedAt: new Date().toISOString() } : order
+        );
         await writeData(db);
         return Response.json({ success: true }, { headers });
       } catch (err) {

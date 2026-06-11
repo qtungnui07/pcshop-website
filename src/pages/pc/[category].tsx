@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { pcProducts, type PCProduct } from '../../constants/pcData';
+import AddToCartButton from '../../components/AddToCartButton';
 
 const API_BASE =
   typeof window !== "undefined"
@@ -757,6 +758,17 @@ export default function PCCategoryPage() {
                       <div className="text-[14px] font-bold text-zinc-900 mt-auto">
                         {p.priceStr}
                       </div>
+                      <AddToCartButton
+                        className="absolute bottom-4 right-4"
+                        product={{
+                          id: `pc-${p.id}`,
+                          name: p.name,
+                          specs: p.specs,
+                          price: p.price,
+                          image: p.img,
+                          category: "PC",
+                        }}
+                      />
                     </div>
 
                   </div>
@@ -819,6 +831,17 @@ export default function PCCategoryPage() {
                       <button className="px-5 py-2 bg-[#1d1d1f] hover:bg-zinc-800 text-white text-[12px] font-bold rounded-full transition-colors active:scale-95 cursor-pointer shadow-sm">
                         Mua ngay
                       </button>
+                      <AddToCartButton
+                        label="Thêm"
+                        product={{
+                          id: `pc-${p.id}`,
+                          name: p.name,
+                          specs: p.specs,
+                          price: p.price,
+                          image: p.img,
+                          category: "PC",
+                        }}
+                      />
                     </div>
 
                   </div>

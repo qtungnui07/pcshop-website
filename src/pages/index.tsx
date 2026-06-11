@@ -1,6 +1,5 @@
 import HeroSection from './marketing-page/HeroSection';
 import CategoriesSection from './marketing-page/CategoriesSection';
-import FeaturedProductsSection from './marketing-page/FeaturedProductsSection';
 import TrustBadgesSection from './marketing-page/TrustBadgesSection';
 import BrandSection from './marketing-page/BrandSection';
 
@@ -13,8 +12,6 @@ export default function Home() {
       {/* ══════════════════ CATEGORIES ══════════════════ */}
       <CategoriesSection />
 
-      {/* ══════════════════ FEATURED PRODUCTS ══════════════════ */}
-      <FeaturedProductsSection />
 
       {/* ══════════════════ TRUST BADGES ══════════════════ */}
       <TrustBadgesSection />

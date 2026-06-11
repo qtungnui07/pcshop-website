@@ -5,6 +5,7 @@
     "price": "2.890.000đ",
     "badge": "Mới",
     "badgeColor": "#22c55e",
+    "image": "https://cdn-files.hacom.vn/hacom/cdn/web/12022026/DDR5.jpg",
     "color": "#e0e7ef",
     "category": "RAM"
   },
@@ -14,6 +15,7 @@
     "price": "2.290.000đ",
     "badge": "Bán chạy",
     "badgeColor": "#f97316",
+    "image": "https://anphat.com.vn/media/product/45518_ram_corsair_vengeance_rgb_96gb__2_.jpg",
     "color": "#1a1a2e",
     "category": "RAM"
   },
@@ -21,6 +23,9 @@
     "name": "Kingston Fury Beast DDR4",
     "specs": "16GB (2x8GB) DDR4 3200MHz",
     "price": "990.000đ",
+    "badge": "",
+    "badgeColor": "#1d1d1f",
+    "image": "https://hanoicomputercdn.com/media/product/60334_ram_desktop_kingston_fury_kf432c16bb1_16_16gb_1x16gb_ddr4_3200mhz.jpg",
     "color": "#1a1a2e",
     "category": "RAM"
   },
@@ -28,6 +33,9 @@
     "name": "G.Skill Ripjaws V DDR4",
     "specs": "16GB (2x8GB) DDR4 3600MHz",
     "price": "1.290.000đ",
+    "badge": "",
+    "badgeColor": "#1d1d1f",
+    "image": "https://phucanhcdn.com/media/product/50065_ram_desktop_g_skill_ripjaws_v_16gb_2x8gb_ddr4_3600mhz_2.jpg",
     "color": "#2d2d2d",
     "category": "RAM"
   },
@@ -35,6 +43,9 @@
     "name": "Corsair Dominator Platinum",
     "specs": "32GB (2x16GB) DDR5 6000MHz",
     "price": "5.990.000đ",
+    "badge": "",
+    "badgeColor": "#1d1d1f",
+    "image": "https://product.hstatic.net/200000722513/product/-platinum-32gb-2x16gb-rgb-6000-ddr5-1_a308ab7282c548528c4e82aab55fd665_4a55904a44454127aad4c004abcb4e69_master.jpg",
     "color": "#c8d0dc",
     "category": "RAM"
   },
@@ -42,6 +53,9 @@
     "name": "Kingston Fury Beast DDR5",
     "specs": "32GB (2x16GB) DDR5 6000MHz",
     "price": "4.290.000đ",
+    "badge": "",
+    "badgeColor": "#1d1d1f",
+    "image": "https://product.hstatic.net/200000420363/product/_new_-anh-sp-web_855ac47148114a1fa5b30d00978d742e.png",
     "color": "#1a1a2e",
     "category": "RAM"
   },
@@ -51,6 +65,7 @@
     "price": "7.890.000đ",
     "badge": "Bán chạy",
     "badgeColor": "#2563eb",
+    "image": "https://product.hstatic.net/200000420363/product/_new_-anh-sp-web_0229438098674c899bd2c5675e1559c0_master.jpg",
     "color": "#1a1a2e",
     "category": "CPU"
   },
@@ -60,6 +75,7 @@
     "price": "10.490.000đ",
     "badge": "Hot",
     "badgeColor": "#dc2626",
+    "image": "https://hanoicomputercdn.com/media/product/77008_cpu_intel_core_i7_14700k.jpg",
     "color": "#1a1a2e",
     "category": "CPU"
   },
@@ -67,6 +83,9 @@
     "name": "Intel Core i9-14900K",
     "specs": "24 Cores / 32 Threads up to 6.0GHz LGA1700",
     "price": "15.990.000đ",
+    "badge": "",
+    "badgeColor": "#1d1d1f",
+    "image": "https://hanoicomputercdn.com/media/product/77007_cpu_intel_core_i9_14900k.jpg",
     "color": "#1a1a2e",
     "category": "CPU"
   },
@@ -74,6 +93,9 @@
     "name": "AMD Ryzen 5 7600X",
     "specs": "6 Cores / 12 Threads up to 5.3GHz AM5",
     "price": "5.890.000đ",
+    "badge": "",
+    "badgeColor": "#1d1d1f",
+    "image": "https://anphat.com.vn/media/product/43215_cpu_amd_ryzen_5_7600x_anphat90.jpg",
     "color": "#1f2937",
     "category": "CPU"
   },
@@ -83,6 +105,7 @@
     "price": "10.890.000đ",
     "badge": "Cực hot",
     "badgeColor": "#8b5cf6",
+    "image": "https://hanoicomputercdn.com/media/product/87667_7800x3d_tray.jpg",
     "color": "#1f2937",
     "category": "CPU"
   },
@@ -90,6 +113,9 @@
     "name": "AMD Ryzen 9 7900X",
     "specs": "12 Cores / 24 Threads up to 5.6GHz AM5",
     "price": "11.490.000đ",
+    "badge": "",
+    "badgeColor": "#1d1d1f",
+    "image": "https://anphat.com.vn/media/product/43217_cpu_amd_ryzen_9_7900x_anphat90.jpg",
     "color": "#1f2937",
     "category": "CPU"
   },
@@ -99,6 +125,7 @@
     "price": "8.490.000đ",
     "badge": "Mới",
     "badgeColor": "#10b981",
+    "image": "https://ttcenter.com.vn/uploads/product/rwmxyt9k-1567-card-man-hinh-asus-dual-geforce-rtx-4060-8gb-gddr6-2-fan-oc-white-dual-rtx4060-o8g-white.webp",
     "color": "#e0e7ef",
     "category": "VGA"
   },
@@ -108,6 +135,7 @@
     "price": "8.590.000đ",
     "badge": "Bán chạy",
     "badgeColor": "#f97316",
+    "image": "https://product.hstatic.net/200000722513/product/rtx_4060_ventus_2x_black_8g_oc_c34ea8c824fb4afb9f1241cec761e799.png",
     "color": "#111",
     "category": "VGA"
   },
@@ -115,6 +143,9 @@
     "name": "Gigabyte RTX 4070 SUPER EAGLE",
     "specs": "12GB GDDR6X / 192-bit / 3 Fan",
     "price": "19.490.000đ",
+    "badge": "",
+    "badgeColor": "#1d1d1f",
+    "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRWoEp55Qb3ktD28V2LNAG4kAy92cAB5AtUcA&s",
     "color": "#c8d0dc",
     "category": "VGA"
   },
@@ -122,6 +153,9 @@
     "name": "ASUS ROG Strix RTX 4080 SUPER",
     "specs": "16GB GDDR6X / 256-bit / RGB",
     "price": "34.990.000đ",
+    "badge": "",
+    "badgeColor": "#1d1d1f",
+    "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTiB5ObkqwzCfEwB_WWfcKKS9aOGIy35dbYRg&s",
     "color": "#2d2d2d",
     "category": "VGA"
   },
@@ -129,6 +163,9 @@
     "name": "MSI GeForce RTX 4090 SUPRIM X",
     "specs": "24GB GDDR6X / 384-bit / Premium Design",
     "price": "64.990.000đ",
+    "badge": "",
+    "badgeColor": "#1d1d1f",
+    "image": "https://product.hstatic.net/200000722513/product/1024_db714ed2cb1e4e6fa1d6ebec4cd92fb9_af81e6f9d5294638a9587f509a69c660_master.jpg",
     "color": "#cbd5e1",
     "category": "VGA"
   },
@@ -136,6 +173,9 @@
     "name": "ASUS TUF GAMING B760M-PLUS",
     "specs": "LGA1700 / DDR5 / Intel B760 Micro-ATX",
     "price": "4.490.000đ",
+    "badge": "",
+    "badgeColor": "#1d1d1f",
+    "image": "https://hanoicomputercdn.com/media/product/69817_12646_12646_asus_tuf_gaming_b760m_plus_wifi_d4_df.jpg",
     "color": "#1f2937",
     "category": "Mainboard"
   },
@@ -143,6 +183,9 @@
     "name": "ASUS ROG STRIX B760-F GAMING",
     "specs": "LGA1700 / DDR5 / Intel Chipset B760 ATX",
     "price": "5.490.000đ",
+    "badge": "",
+    "badgeColor": "#1d1d1f",
+    "image": "https://phucanhcdn.com/media/product/50304_bo_mach_chu_asus_rog_strix_b760_f_gaming_wifi_ddr5_6.jpg",
     "color": "#2d2d2d",
     "category": "Mainboard"
   },
@@ -152,6 +195,7 @@
     "price": "7.990.000đ",
     "badge": "Cao cấp",
     "badgeColor": "#d97706",
+    "image": "https://cdn.hstatic.net/products/200000420363/z790_aorus_elite_ax-01_4dc676fb3_copy_a191af2dcdfa43a583a97268ef763a34_master.jpg",
     "color": "#374151",
     "category": "Mainboard"
   },
@@ -159,6 +203,9 @@
     "name": "MSI MAG B650 TOMAHAWK WIFI",
     "specs": "Socket AM5 / DDR5 / AMD Chipset B650 ATX",
     "price": "5.890.000đ",
+    "badge": "",
+    "badgeColor": "#1d1d1f",
+    "image": "https://songphuong.vn/Content/uploads/2022/10/Mainboard-MSI-MAG-B650-TOMAHAWK-WIFI-4-songphuong.vn_.jpg",
     "color": "#1a1a2e",
     "category": "Mainboard"
   },
@@ -166,6 +213,9 @@
     "name": "ASUS ROG CROSSHAIR X670E HERO",
     "specs": "Socket AM5 / DDR5 / AMD Chipset X670E ATX",
     "price": "18.990.000đ",
+    "badge": "",
+    "badgeColor": "#1d1d1f",
+    "image": "https://anphat.com.vn/media/lib/07-10-2022/mainboard-asus-rog-crosshair-x670e-hero-ddr5-3.jpg",
     "color": "#2d2d2d",
     "category": "Mainboard"
   },
@@ -175,6 +225,7 @@
     "price": "2.990.000đ",
     "badge": "Cực nhanh",
     "badgeColor": "#2563eb",
+    "image": "https://bizweb.dktcdn.net/thumb/grande/100/329/122/products/ssd-samsung-990-pro-pcie-gen-4-0-x4-nvme-v-nand-m-2-2280-1tb-mz-v9p1t0bw-2.jpg?v=1751994033067",
     "color": "#1e40af",
     "category": "SSD"
   },
@@ -182,6 +233,9 @@
     "name": "Crucial P3 Plus 2TB NVMe",
     "specs": "PCIe Gen 4.0 x4 M.2 2280 up to 5000MB/s",
     "price": "3.290.000đ",
+    "badge": "",
+    "badgeColor": "#1d1d1f",
+    "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQpkSZSeXsnz2jPqThneQvqzdPkn6vpCjM95w&s",
     "color": "#38bdf8",
     "category": "SSD"
   },
@@ -189,6 +243,9 @@
     "name": "Kingston NV2 500GB NVMe",
     "specs": "PCIe Gen 4.0 x4 M.2 2280 up to 3500MB/s",
     "price": "1.190.000đ",
+    "badge": "",
+    "badgeColor": "#1d1d1f",
+    "image": "https://product.hstatic.net/200000420363/product/ktc-product-ssd-snv2s-500g-3-zm-lg_7677688264ac40b5807c389205d7107a.jpg",
     "color": "#111827",
     "category": "SSD"
   },
@@ -196,6 +253,9 @@
     "name": "Samsung 980 500GB NVMe",
     "specs": "PCIe Gen 3.0 x4 M.2 2280 up to 3100MB/s",
     "price": "1.490.000đ",
+    "badge": "",
+    "badgeColor": "#1d1d1f",
+    "image": "https://product.hstatic.net/200000420363/product/1_3e729d26c1e94897b885ab41015c03bb_master.jpg",
     "color": "#1e40af",
     "category": "SSD"
   },
@@ -203,6 +263,9 @@
     "name": "Western Digital Blue 1TB SATA III",
     "specs": "2.5\" SSD read up to 560MB/s",
     "price": "1.990.000đ",
+    "badge": "",
+    "badgeColor": "#1d1d1f",
+    "image": "https://phucanhcdn.com/media/product/48271_o_ssd_western_blue_sa510_1tb__2.jpg",
     "color": "#1f2937",
     "category": "SSD"
   },
@@ -210,6 +273,9 @@
     "name": "Seagate Barracuda 2TB HDD",
     "specs": "3.5\" SATA 3 7200RPM 256MB Cache",
     "price": "1.590.000đ",
+    "badge": "",
+    "badgeColor": "#1d1d1f",
+    "image": "https://hanoicomputercdn.com/media/product/90223_hdd_seagate_barracuda_2tb.jpg",
     "color": "#374151",
     "category": "HDD"
   },
@@ -217,6 +283,9 @@
     "name": "Western Digital Blue 1TB HDD",
     "specs": "3.5\" SATA 3 7200RPM 64MB Cache",
     "price": "1.190.000đ",
+    "badge": "",
+    "badgeColor": "#1d1d1f",
+    "image": "https://anphat.com.vn/media/product/11238_wd10ezex_3.jpg",
     "color": "#1f2937",
     "category": "HDD"
   },
@@ -226,6 +295,7 @@
     "price": "3.490.000đ",
     "badge": "Dành cho NAS",
     "badgeColor": "#2563eb",
+    "image": "https://phucanhcdn.com/media/product/48562_o_cung_seagate_ironwolf_st4000vn006_4tb_4.jpg",
     "color": "#374151",
     "category": "HDD"
   },
@@ -233,6 +303,9 @@
     "name": "Western Digital Red Pro 8TB NAS",
     "specs": "3.5\" SATA 3 7200RPM 256MB Cache",
     "price": "7.290.000đ",
+    "badge": "",
+    "badgeColor": "#1d1d1f",
+    "image": "https://phucanhcdn.com/media/product/47651_wd8003ffbx_ha1.jpg",
     "color": "#1f2937",
     "category": "HDD"
   },
@@ -242,6 +315,7 @@
     "price": "2.890.000đ",
     "badge": "Bán chạy",
     "badgeColor": "#f97316",
+    "image": "https://hanoicomputercdn.com/media/product/72142_corsair_rm750e_atx_3__4_.jpg",
     "color": "#78350f",
     "category": "PSU"
   },
@@ -249,6 +323,9 @@
     "name": "MSI MAG A650BN 650W",
     "specs": "650 Watt / 80 Plus Bronze / Non-Modular",
     "price": "1.390.000đ",
+    "badge": "",
+    "badgeColor": "#1d1d1f",
+    "image": "https://product.hstatic.net/200000722513/product/5_4d67ef41b5be4844bf28bef01c7978da_d4651ee4e4894ca8a935f2ca58efd1af.jpg",
     "color": "#1a1a2e",
     "category": "PSU"
   },
@@ -258,6 +335,7 @@
     "price": "6.490.000đ",
     "badge": "Cao cấp",
     "badgeColor": "#8b5cf6",
+    "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRtEGDANnWZ-3WO4GA4XZLLh6NTe8LAR86C4w&s",
     "color": "#2d2d2d",
     "category": "PSU"
   },
@@ -265,6 +343,9 @@
     "name": "Corsair RM1000x 1000W",
     "specs": "1000 Watt / 80 Plus Gold / Full Modular",
     "price": "4.890.000đ",
+    "badge": "",
+    "badgeColor": "#1d1d1f",
+    "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRG6re3okakaoZ47C1udGSaNpRAf8X--7GFtQ&s",
     "color": "#78350f",
     "category": "PSU"
   },
@@ -272,6 +353,9 @@
     "name": "Thermalright Peerless Assassin 120",
     "specs": "Dual Fan Air Cooler / 6 Heatpipes / Black",
     "price": "990.000đ",
+    "badge": "",
+    "badgeColor": "#1d1d1f",
+    "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR5MkyMeBGcalUAZfeUVeFOR8u0bMT26uT1gg&s",
     "color": "#164e63",
     "category": "Cooling"
   },
@@ -281,6 +365,7 @@
     "price": "5.490.000đ",
     "badge": "ARGB",
     "badgeColor": "#ec4899",
+    "image": "https://product.hstatic.net/200000722513/product/icue_link_h150i_rgb_white_render_01_8a6e9f0327c14091acc42d5e33bb56e3_master.png",
     "color": "#e0e7ef",
     "category": "Cooling"
   },
@@ -288,6 +373,9 @@
     "name": "Lian Li Galahad II Trinity 360",
     "specs": "360mm AIO Liquid Cooler / ARGB / Black",
     "price": "4.190.000đ",
+    "badge": "",
+    "badgeColor": "#1d1d1f",
+    "image": "https://product.hstatic.net/200000722513/product/360inf_b_9848fca1b1d743b7ace73399e8140572_grande.jpg",
     "color": "#1c1917",
     "category": "Cooling"
   },
@@ -295,6 +383,9 @@
     "name": "Noctua NH-D15",
     "specs": "Premium Dual-Tower Air Cooler / Quiet / Brown",
     "price": "2.890.000đ",
+    "badge": "",
+    "badgeColor": "#1d1d1f",
+    "image": "https://m.media-amazon.com/images/I/91Hw1zcAIjL.jpg",
     "color": "#78350f",
     "category": "Cooling"
   },
@@ -304,6 +395,7 @@
     "price": "4.290.000đ",
     "badge": "Hot",
     "badgeColor": "#8b5cf6",
+    "image": "https://dgt.net.vn/upload/product/o11d-evo-600-01w.jpg",
     "color": "#e0e7ef",
     "category": "Case"
   },
@@ -311,6 +403,9 @@
     "name": "Corsair 4000D Airflow",
     "specs": "Mid Tower Case / High-Airflow / Black",
     "price": "2.190.000đ",
+    "badge": "",
+    "badgeColor": "#1d1d1f",
+    "image": "https://product.hstatic.net/1000333506/product/arvn-case-corsair-4000d-airflow-black_e2fb5769dc9f4deeafa5804392dc7081_788c20be049940beab3d91ce083468f8.png",
     "color": "#111",
     "category": "Case"
   },
@@ -318,6 +413,9 @@
     "name": "NZXT H9 Flow",
     "specs": "Dual-Chamber Mid Tower / Glass Panel / Black",
     "price": "4.490.000đ",
+    "badge": "",
+    "badgeColor": "#1d1d1f",
+    "image": "https://m.media-amazon.com/images/I/51ctt49bfIL.jpg",
     "color": "#1c1917",
     "category": "Case"
   },
@@ -325,6 +423,9 @@
     "name": "ASUS ROG Hyperion GR701",
     "specs": "Flagship Full Tower / E-ATX / RGB / Black",
     "price": "10.990.000đ",
+    "badge": "",
+    "badgeColor": "#1d1d1f",
+    "image": "https://product.hstatic.net/200000420363/product/thung-may-case-asus-rog-hyperion-gr701-7_98baf13bd4c349ec85840fa789f9eaea_master.jpg",
     "color": "#2d2d2d",
     "category": "Case"
   },
@@ -332,6 +433,9 @@
     "name": "G.Skill Ripjaws S5",
     "specs": "32GB (2x16GB) DDR5 5600MHz",
     "price": "3.490.000đ",
+    "badge": "",
+    "badgeColor": "#1d1d1f",
+    "image": "https://product.hstatic.net/200000722513/product/new_project_1afb6613aadc45fea01e5bba383a2d37_b5d07ceaef0a47f1ad23a9635ca397ac_master.png",
     "color": "#2d2d2d",
     "category": "RAM"
   },
@@ -341,6 +445,7 @@
     "price": "4.990.000đ",
     "badge": "Mới",
     "badgeColor": "#22c55e",
+    "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTz1C3EAgHVVozL1a3VmZ6tFlD6A8A1uH66wA&s",
     "color": "#1a1a2e",
     "category": "RAM"
   },
@@ -348,6 +453,9 @@
     "name": "Intel Core i3-14100",
     "specs": "4 Cores / 8 Threads up to 4.7GHz LGA1700",
     "price": "3.290.000đ",
+    "badge": "",
+    "badgeColor": "#1d1d1f",
+    "image": "https://product.hstatic.net/200000420363/product/i3-14th_6ea5868c881c4514b2dcee37c87e32d0_master.jpg",
     "color": "#1a1a2e",
     "category": "CPU"
   },
@@ -355,6 +463,9 @@
     "name": "AMD Ryzen 5 7600",
     "specs": "6 Cores / 12 Threads up to 5.1GHz AM5",
     "price": "5.290.000đ",
+    "badge": "",
+    "badgeColor": "#1d1d1f",
+    "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSiReejDWZ_l2KqPFlcaYWe3_-5vH2kFFtEiw&s",
     "color": "#1f2937",
     "category": "CPU"
   },
@@ -364,6 +475,7 @@
     "price": "24.990.000đ",
     "badge": "Cao cấp",
     "badgeColor": "#d97706",
+    "image": "https://anphat.com.vn/media/product/47581_vga_asus_tuf_gaming_geforce_rtx_4070_ti_super_16gb_gddr6x_oc_edition___3_.jpg",
     "color": "#2d2d2d",
     "category": "VGA"
   },
@@ -371,6 +483,9 @@
     "name": "Gigabyte RX 7600 XT GAMING OC",
     "specs": "16GB GDDR6 / 128-bit / 3 Fan",
     "price": "9.990.000đ",
+    "badge": "",
+    "badgeColor": "#1d1d1f",
+    "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTCag3lyB-tpKpxO53ZgoEOjsAvmF-56G-b2g&s",
     "color": "#c8d0dc",
     "category": "VGA"
   },
@@ -378,6 +493,9 @@
     "name": "MSI PRO Z790-P WIFI",
     "specs": "LGA1700 / DDR5 / Intel Chipset Z790 ATX",
     "price": "6.290.000đ",
+    "badge": "",
+    "badgeColor": "#1d1d1f",
+    "image": "https://product.hstatic.net/200000420363/product/mainboard-msi-pro-z790-p-wifi-3_fa0892fa21d54a0ca3188fc4668ffd59_master.jpg",
     "color": "#1a1a2e",
     "category": "Mainboard"
   },
@@ -385,6 +503,9 @@
     "name": "Gigabyte B650M AORUS ELITE AX",
     "specs": "Socket AM5 / DDR5 / AMD Chipset B650 Micro-ATX",
     "price": "5.190.000đ",
+    "badge": "",
+    "badgeColor": "#1d1d1f",
+    "image": "https://anphat.com.vn/media/product/51794_mainboard_gigabyte_b650m_aorus_elite_ax__1_.jpg",
     "color": "#374151",
     "category": "Mainboard"
   },
@@ -394,6 +515,7 @@
     "price": "4.590.000đ",
     "badge": "Bán chạy",
     "badgeColor": "#f97316",
+    "image": "https://phucanhcdn.com/media/product/43623_mz_v8p2t0bw_ha2.jpg",
     "color": "#1e40af",
     "category": "SSD"
   },
@@ -401,6 +523,9 @@
     "name": "Kingston NV2 2TB NVMe",
     "specs": "PCIe Gen 4.0 x4 M.2 2280 up to 3500MB/s",
     "price": "3.390.000đ",
+    "badge": "",
+    "badgeColor": "#1d1d1f",
+    "image": "https://bizweb.dktcdn.net/thumb/1024x1024/100/329/122/products/ssd-kingston-nv2-m-2-pcie-gen4-x4-nvme-2tb-3.jpg?v=1691209024557",
     "color": "#111827",
     "category": "SSD"
   },
@@ -408,6 +533,9 @@
     "name": "Western Digital Purple 4TB",
     "specs": "3.5\" SATA 3 5400RPM 64MB Cache",
     "price": "2.990.000đ",
+    "badge": "",
+    "badgeColor": "#1d1d1f",
+    "image": "https://tanphat.com.vn/media/product/5641_51836_o_cung_western_digital_purple_4tb_1.jpg",
     "color": "#1f2937",
     "category": "HDD"
   },
@@ -415,6 +543,9 @@
     "name": "Seagate IronWolf Pro 12TB NAS",
     "specs": "3.5\" SATA 3 7200RPM 256MB Cache",
     "price": "9.490.000đ",
+    "badge": "",
+    "badgeColor": "#1d1d1f",
+    "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTv57RdkhYA7i7dyJ6RPqMIJ1sYigxijP7kJg&s",
     "color": "#374151",
     "category": "HDD"
   },
@@ -422,6 +553,9 @@
     "name": "ASUS ROG Strix 750W Gold",
     "specs": "750 Watt / 80 Plus Gold / Full Modular",
     "price": "3.290.000đ",
+    "badge": "",
+    "badgeColor": "#1d1d1f",
+    "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRDNzEGybraPJPhqeUQIFzJ5CVLA-bDSaRwrA&s",
     "color": "#2d2d2d",
     "category": "PSU"
   },
@@ -429,6 +563,9 @@
     "name": "MSI MAG A850GL 850W",
     "specs": "850 Watt / 80 Plus Gold / Full Modular / ATX 3.0",
     "price": "3.390.000đ",
+    "badge": "",
+    "badgeColor": "#1d1d1f",
+    "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSdD6c29WT9giQ6iUblSG6VwYzxUw2sp-lPLg&s",
     "color": "#1a1a2e",
     "category": "PSU"
   },
@@ -436,6 +573,9 @@
     "name": "Deepcool AK400 Digital",
     "specs": "Single Fan Air Cooler / Digital Screen / Black",
     "price": "850.000đ",
+    "badge": "",
+    "badgeColor": "#1d1d1f",
+    "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTQRNb0PYR5PE_mr43lPAWQVih_bW9jLgwqew&s",
     "color": "#164e63",
     "category": "Cooling"
   },
@@ -445,6 +585,7 @@
     "price": "6.290.000đ",
     "badge": "Màn hình LCD",
     "badgeColor": "#8b5cf6",
+    "image": "https://tandoanh.vn/wp-content/uploads/2023/07/NZXT-Kraken-360-RGB-Black-H1.jpg",
     "color": "#1c1917",
     "category": "Cooling"
   },
@@ -452,6 +593,9 @@
     "name": "NZXT H5 Flow",
     "specs": "Compact Mid Tower / High-Airflow / Black",
     "price": "2.390.000đ",
+    "badge": "",
+    "badgeColor": "#1d1d1f",
+    "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS8YMzX4xDcaqgK9D2jFfQmqLrCvcWEVtwfnA&s",
     "color": "#1c1917",
     "category": "Case"
   },
@@ -459,6 +603,9 @@
     "name": "Corsair 3000D RGB Airflow White",
     "specs": "Mid Tower Case / 3x ARGB Fans / White",
     "price": "2.290.000đ",
+    "badge": "",
+    "badgeColor": "#1d1d1f",
+    "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS9iir6-y085CPDWI_lDsA_SVDjXNXnQtFXYg&s",
     "color": "#e0e7ef",
     "category": "Case"
   },
@@ -466,6 +613,9 @@
     "name": "Corsair Vengeance LPX DDR4 8G",
     "specs": "8GB DDR4 3200MHz Black",
     "price": "550.000đ",
+    "badge": "",
+    "badgeColor": "#1d1d1f",
+    "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT79y-wS-845Sw1XIZFajAVxefeM659sD_9Hw&s",
     "color": "#111",
     "category": "RAM"
   },
@@ -473,6 +623,9 @@
     "name": "Corsair Vengeance LPX DDR4 16G",
     "specs": "16GB (2x8GB) DDR4 3200MHz Black",
     "price": "1.090.000đ",
+    "badge": "",
+    "badgeColor": "#1d1d1f",
+    "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSmoaQeh4spEn-o9R9Db5RhiSrr-z9_QkrO2Q&s",
     "color": "#111",
     "category": "RAM"
   },
@@ -480,6 +633,9 @@
     "name": "Kingston Fury Beast RGB DDR4",
     "specs": "16GB (2x8GB) DDR4 3600MHz RGB",
     "price": "1.390.000đ",
+    "badge": "",
+    "badgeColor": "#1d1d1f",
+    "image": "https://phucanhcdn.com/media/product/44713_beast_f.jpg",
     "color": "#1a1a2e",
     "category": "RAM"
   },
@@ -489,6 +645,7 @@
     "price": "2.490.000đ",
     "badge": "Premium",
     "badgeColor": "#f59e0b",
+    "image": "https://tinhocantoan.com/wp-content/uploads/2024/02/trident-z-royal-gold-ddr4-02-eb530971-842b-48f8-a431-be30e6afb046.webp",
     "color": "#fca5a5",
     "category": "RAM"
   },
@@ -498,6 +655,7 @@
     "price": "3.990.000đ",
     "badge": "Premium",
     "badgeColor": "#64748b",
+    "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTJURMi7z3sSBb0rTFr4lE_hlA76v320h_61g&s",
     "color": "#e2e8f0",
     "category": "RAM"
   },
@@ -505,6 +663,9 @@
     "name": "TeamGroup T-Force Delta DDR5 16G",
     "specs": "16GB (2x8GB) DDR5 5200MHz RGB",
     "price": "1.990.000đ",
+    "badge": "",
+    "badgeColor": "#1d1d1f",
+    "image": "https://product.hstatic.net/200000420363/product/ram-teamgroup-t-force-delta-rgb-16gb-2_512fa6643a044d488cb0ba1e72f360bf_1024x1024.jpg",
     "color": "#111827",
     "category": "RAM"
   },
@@ -512,6 +673,9 @@
     "name": "TeamGroup T-Force Delta DDR5 32G",
     "specs": "32GB (2x16GB) DDR5 6000MHz RGB",
     "price": "3.790.000đ",
+    "badge": "",
+    "badgeColor": "#1d1d1f",
+    "image": "https://product.hstatic.net/200000420363/product/ram-ddr5-teamgroup-32g_6000-den_10347fc7c3704fe7957ec5b6e3f5eb53_master.jpg",
     "color": "#111827",
     "category": "RAM"
   },
@@ -519,6 +683,9 @@
     "name": "Crucial Pro DDR5",
     "specs": "32GB (2x16GB) DDR5 5600MHz Black",
     "price": "2.690.000đ",
+    "badge": "",
+    "badgeColor": "#1d1d1f",
+    "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS5NujgUHyDRkddgGuU04WMc5Ewlu7CKZKVuQ&s",
     "color": "#1f2937",
     "category": "RAM"
   },
@@ -528,6 +695,7 @@
     "price": "6.990.000đ",
     "badge": "Siêu cấp",
     "badgeColor": "#dc2626",
+    "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSHxjwks3dB-tK0Xicfz6zBjBxvQxatVcln_Q&s",
     "color": "#e0e7ef",
     "category": "RAM"
   },
@@ -535,6 +703,9 @@
     "name": "G.Skill Trident Z5 Neo",
     "specs": "64GB (2x32GB) DDR5 6000MHz RGB",
     "price": "6.490.000đ",
+    "badge": "",
+    "badgeColor": "#1d1d1f",
+    "image": "https://anphat.com.vn/media/product/52143_ram_pc_gskill_trident_z5_neo_rgb_64gb__1_.jpg",
     "color": "#2d2d2d",
     "category": "RAM"
   },
@@ -542,6 +713,9 @@
     "name": "Intel Core i3-12100F",
     "specs": "4 Cores / 8 Threads up to 4.3GHz LGA1700",
     "price": "1.990.000đ",
+    "badge": "",
+    "badgeColor": "#1d1d1f",
+    "image": "https://anphat.com.vn/media/product/40620_cpu_intel_core_i3_12100f__anphat81.jpg",
     "color": "#1a1a2e",
     "category": "CPU"
   },
@@ -551,6 +725,7 @@
     "price": "3.490.000đ",
     "badge": "Bán chạy",
     "badgeColor": "#f97316",
+    "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTyulhtDH5z6YMHOQfilfCian_RuXfabEnuUA&s",
     "color": "#1a1a2e",
     "category": "CPU"
   },
@@ -558,6 +733,9 @@
     "name": "Intel Core i5-13400F",
     "specs": "10 Cores / 16 Threads up to 4.6GHz LGA1700",
     "price": "4.990.000đ",
+    "badge": "",
+    "badgeColor": "#1d1d1f",
+    "image": "https://product.hstatic.net/200000420363/product/1_7b091d94e9074dfc933f5750d1af8e93_master.jpg",
     "color": "#1a1a2e",
     "category": "CPU"
   },
@@ -565,6 +743,9 @@
     "name": "Intel Core i7-13700K",
     "specs": "16 Cores / 24 Threads up to 5.4GHz LGA1700",
     "price": "8.990.000đ",
+    "badge": "",
+    "badgeColor": "#1d1d1f",
+    "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTElNMafJAryYt8t8jxB1W5zfyGfd0V8rALXg&s",
     "color": "#1a1a2e",
     "category": "CPU"
   },
@@ -572,6 +753,9 @@
     "name": "AMD Ryzen 5 5600X",
     "specs": "6 Cores / 12 Threads up to 4.6GHz AM4",
     "price": "3.890.000đ",
+    "badge": "",
+    "badgeColor": "#1d1d1f",
+    "image": "https://product.hstatic.net/200000420363/product/-5-5600x-_3.7ghz-up-to-4.6ghz_-am4_-6-cores-12-threads_-box-chinh-hang_4b1a8df1391e4eb0b0cc7a32677cc9ff_master.jpg",
     "color": "#1f2937",
     "category": "CPU"
   },
@@ -579,6 +763,9 @@
     "name": "AMD Ryzen 5 7600X",
     "specs": "6 Cores / 12 Threads up to 5.3GHz AM5",
     "price": "5.790.000đ",
+    "badge": "",
+    "badgeColor": "#1d1d1f",
+    "image": "https://hoanglongcomputer.vn/media/product/5069-t_i_xu_ng_-_2023-01-02t221507-270.png",
     "color": "#1f2937",
     "category": "CPU"
   },
@@ -586,6 +773,9 @@
     "name": "AMD Ryzen 7 5700X",
     "specs": "8 Cores / 16 Threads up to 4.6GHz AM4",
     "price": "4.890.000đ",
+    "badge": "",
+    "badgeColor": "#1d1d1f",
+    "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSlWj4WQcDXOw2GfcoX4KYG7gCM_2bzMkwLzQ&s",
     "color": "#1f2937",
     "category": "CPU"
   },
@@ -595,6 +785,7 @@
     "price": "14.990.000đ",
     "badge": "Flagship",
     "badgeColor": "#8b5cf6",
+    "image": "https://phucanhcdn.com/media/lib/03-12-2022/cpu-amd-ryzen-9-7950x-up-to-57ghz-2.png",
     "color": "#1f2937",
     "category": "CPU"
   },
@@ -602,6 +793,9 @@
     "name": "MSI GTX 1650 D6 VENTUS XS",
     "specs": "4GB GDDR6 / 128-bit / 2 Fan",
     "price": "3.690.000đ",
+    "badge": "",
+    "badgeColor": "#1d1d1f",
+    "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSfXtT9rvYZFuJ68YGvrDbKY6I7mEcHoFjUkQ&s",
     "color": "#111",
     "category": "VGA"
   },
@@ -609,6 +803,9 @@
     "name": "ASUS Dual Radeon RX 6600",
     "specs": "8GB GDDR6 / 128-bit / 2 Fan",
     "price": "5.990.000đ",
+    "badge": "",
+    "badgeColor": "#1d1d1f",
+    "image": "https://anphat.com.vn/media/product/39339_vga_asus_dual_radeon_rx_6600_8gb_v2_gddr6__dual_rx6600_8g_v2___1_.jpg",
     "color": "#2d2d2d",
     "category": "VGA"
   },
@@ -616,6 +813,9 @@
     "name": "Gigabyte RTX 3060 WINDFORCE",
     "specs": "12GB GDDR6 / 192-bit / 2 Fan",
     "price": "7.990.000đ",
+    "badge": "",
+    "badgeColor": "#1d1d1f",
+    "image": "https://phucanhcdn.com/media/product/51980_card_do_hoa_gigabyte_3060_windforce_oc_12g_6.jpg",
     "color": "#c8d0dc",
     "category": "VGA"
   },
@@ -625,6 +825,7 @@
     "price": "11.490.000đ",
     "badge": "RGB",
     "badgeColor": "#22c55e",
+    "image": "https://product.hstatic.net/200000722513/product/thiet_ke_chua_co_ten_effa462e95fd496bb683d84a187fc912_d262614fbf804c82b7360566c236a9c7_master.png",
     "color": "#111",
     "category": "VGA"
   },
@@ -632,6 +833,9 @@
     "name": "Gigabyte RTX 4070 WINDFORCE",
     "specs": "12GB GDDR6X / 192-bit / 3 Fan",
     "price": "16.990.000đ",
+    "badge": "",
+    "badgeColor": "#1d1d1f",
+    "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRjukzW0QTTfupDKgdrD_NknbzSt6vvcG3eTg&s",
     "color": "#c8d0dc",
     "category": "VGA"
   },
@@ -639,6 +843,9 @@
     "name": "ASUS TUF RTX 4070 Ti SUPER OC",
     "specs": "16GB GDDR6X / 256-bit / 3 Fan",
     "price": "25.990.000đ",
+    "badge": "",
+    "badgeColor": "#1d1d1f",
+    "image": "https://anphat.com.vn/media/product/47581_vga_asus_tuf_gaming_geforce_rtx_4070_ti_super_16gb_gddr6x_oc_edition___3_.jpg",
     "color": "#2d2d2d",
     "category": "VGA"
   },
@@ -648,6 +855,7 @@
     "price": "69.990.000đ",
     "badge": "Khủng",
     "badgeColor": "#dc2626",
+    "image": "https://hoanghapc.vn/media/product/3625_asus_rog_strix_rtx4090_24g_gaming_1.jpg",
     "color": "#cbd5e1",
     "category": "VGA"
   },
@@ -655,6 +863,9 @@
     "name": "PowerColor Hellhound RX 7800 XT",
     "specs": "16GB GDDR6 / 256-bit / Led Ice Blue",
     "price": "14.490.000đ",
+    "badge": "",
+    "badgeColor": "#1d1d1f",
+    "image": "https://bizweb.dktcdn.net/thumb/grande/100/329/122/products/345dfgfu.png?v=1728354888280",
     "color": "#1c1917",
     "category": "VGA"
   }

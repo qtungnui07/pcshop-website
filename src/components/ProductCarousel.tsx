@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { ChevronRight, ChevronLeft } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { latestProducts, containerVariants, itemVariants } from '../constants/data';
+import AddToCartButton from './AddToCartButton';
 
 export default function ProductCarousel() {
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -85,7 +86,15 @@ export default function ProductCarousel() {
                 <p className="text-sm md:text-base font-medium">
                   {product.price}
                 </p>
-                {/* Bạn có thể đặt thẻ <img> ở đây bằng absolute để ảnh nằm góc phải dưới */}
+                <AddToCartButton
+                  product={{
+                    id: `latest-${product.title}`,
+                    name: product.title,
+                    specs: product.description,
+                    price: product.price,
+                    category: "Cửa hàng",
+                  }}
+                />
               </div>
             </motion.div>
           ))}

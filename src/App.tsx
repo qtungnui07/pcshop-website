@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import MainLayout from './layouts/MainLayout';
+import { CartProvider } from './context/CartContext';
 import type { ComponentType } from 'react';
 import { useEffect } from 'react';
 
@@ -32,12 +33,14 @@ const routes = Object.keys(modules).map((path) => {
 }).filter(Boolean) as { path: string, Component: ComponentType }[];
 
 function ScrollToTop() {
-  const { pathname, search } = useLocation();
+  const { pathname, search, hash } = useLocation();
 
   useEffect(() => {
     const isPCCategory = pathname.startsWith('/pc/') && pathname !== '/pc';
     const searchParams = new URLSearchParams(search);
     const hasAccessoryCategory = pathname === '/phu-kien' && searchParams.get('category');
+    const hasComponentCategory = pathname === '/linh-kien' && searchParams.get('category');
+    const shouldScrollToComponentCategories = hasComponentCategory && hash === '#danh-muc-linh-kien';
 
     if (isPCCategory) {
       const timer = setTimeout(() => {
@@ -59,10 +62,20 @@ function ScrollToTop() {
         }
       }, 100);
       return () => clearTimeout(timer);
+    } else if (shouldScrollToComponentCategories) {
+      const timer = setTimeout(() => {
+        const element = document.getElementById("danh-muc-linh-kien");
+        if (element) {
+          element.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+      }, 100);
+      return () => clearTimeout(timer);
+    } else if (hasComponentCategory) {
+      return;
     } else {
       window.scrollTo({ top: 0, behavior: 'instant' as any });
     }
-  }, [pathname, search]);
+  }, [pathname, search, hash]);
 
   return null;
 }
@@ -70,17 +83,19 @@ function ScrollToTop() {
 function App() {
   return (
     <BrowserRouter>
-      <ScrollToTop />
-      <Routes>
-        <Route element={<MainLayout />}>
-          {routes.map((route) => {
-            if (route.path === '/') {
-              return <Route key={route.path} index element={<route.Component />} />;
-            }
-            return <Route key={route.path} path={route.path} element={<route.Component />} />;
-          })}
-        </Route>
-      </Routes>
+      <CartProvider>
+        <ScrollToTop />
+        <Routes>
+          <Route element={<MainLayout />}>
+            {routes.map((route) => {
+              if (route.path === '/') {
+                return <Route key={route.path} index element={<route.Component />} />;
+              }
+              return <Route key={route.path} path={route.path} element={<route.Component />} />;
+            })}
+          </Route>
+        </Routes>
+      </CartProvider>
     </BrowserRouter>
   );
 }

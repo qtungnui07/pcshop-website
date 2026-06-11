@@ -23,6 +23,7 @@ import {
 import { useEffect, useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
+import AddToCartButton from "../../components/AddToCartButton";
 
 /*
   src/pages/phu-kien/index.tsx
@@ -1113,7 +1114,8 @@ export default function PhuKienIndex() {
                           {formatPrice(product.price)}
                         </p>
 
-                        <div className="flex gap-1.5">
+                        <div className="flex items-center justify-between gap-3">
+                          <div className="flex gap-1.5">
                           {product.colors.slice(0, 4).map((color) => (
                             <span
                               key={color}
@@ -1124,6 +1126,17 @@ export default function PhuKienIndex() {
                               )}`}
                             />
                           ))}
+                          </div>
+                          <AddToCartButton
+                            product={{
+                              id: `accessory-${product.id}`,
+                              name: product.name,
+                              specs: product.brand,
+                              price: product.price,
+                              image: product.image,
+                              category: product.category,
+                            }}
+                          />
                         </div>
                       </div>
                     </article>
