@@ -153,10 +153,10 @@ export default function HoTroIndex() {
     setSerialNumber("");
     setPurchaseDate("");
     setPurchaseLocation("");
-    setContactName("");
-    setContactPhone("");
-    setContactEmail("");
-    setContactAddress("");
+    setContactName(user.name || "");
+    setContactPhone(user.phone || "");
+    setContactEmail(user.email || "");
+    setContactAddress(user.address || "");
     setTicketTitle("");
     setTicketDescription("");
     setActiveFiles([]);
