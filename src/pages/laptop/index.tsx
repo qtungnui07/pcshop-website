@@ -3,7 +3,7 @@ import {
   ChevronRight, Heart, Grid, List, RotateCcw,
   ShieldCheck, Truck, CheckCircle2, ChevronDown
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 
 const categories = [
@@ -15,7 +15,7 @@ const categories = [
   { icon: BatteryFull, title: "Pin lâu", desc: "Làm việc cả ngày\nkhông lo hết pin" },
 ];
 
-const products = [
+const defaultProducts = [
   { brand: "ASUS", name: "ASUS ROG Zephyrus G14 2024", specs: "Ryzen 9 8945HS / 16GB /\n1TB SSD / RTX 4060 / 14\" OLED", price: "28.990.000 đ", img: "https://dlcdnwebimgs.asus.com/gain/97f4b8da-e77d-418c-8515-3850123533be/w800" },
   { brand: "Apple", name: "MacBook Air M3 13 inch", specs: "Apple M3 / 16GB / 512GB SSD /\n13.6\" Liquid Retina", price: "24.990.000 đ", img: "https://store.storeimages.cdn-apple.com/8756/as-images.apple.com/is/mba13-midnight-select-202402?wid=904&hei=840&fmt=jpeg&qlt=90&.v=1708367688034" },
   { brand: "Dell", name: "Dell XPS 13 Plus 9320", specs: "Intel Core i7-1360P / 16GB /\n512GB SSD / 13.4\" FHD+", price: "27.490.000 đ", img: "https://i.dell.com/is/image/DellContent/content/dam/ss2/product-images/dell-client-products/notebooks/xps-notebooks/xps-13-9320/media-gallery/xs9320nt-cnb-00000ff090-gy.psd?fmt=png-alpha&pscan=auto&scl=1&hei=402&wid=555&qlt=100,1&resMode=sharp2&size=555,402&chrss=full" },
@@ -96,6 +96,14 @@ function FilterSection({ title, options, defaultChecked = [] }: { title: string,
 
 export default function LaptopIndex() {
   const [liked, setLiked] = useState<Set<number>>(new Set());
+  const [products, setProducts] = useState(defaultProducts);
+
+  useEffect(() => {
+    fetch("http://localhost:3001/api/laptops")
+      .then((res) => res.json())
+      .then((data) => setProducts(data))
+      .catch((err) => console.error("Error fetching laptops:", err));
+  }, []);
 
   const toggleLike = (i: number) => {
     setLiked(p => { const n = new Set(p); n.has(i) ? n.delete(i) : n.add(i); return n; });

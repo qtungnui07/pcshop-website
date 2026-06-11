@@ -100,13 +100,21 @@ export default function HoTroIndex() {
 
   // Load tickets on mount
   useEffect(() => {
-    const localData = localStorage.getItem("pcstore_tickets");
-    if (localData) {
-      setTickets(JSON.parse(localData));
-    } else {
-      setTickets(INITIAL_MOCK_TICKETS);
-      localStorage.setItem("pcstore_tickets", JSON.stringify(INITIAL_MOCK_TICKETS));
-    }
+    fetch("http://localhost:3001/api/tickets")
+      .then((res) => res.json())
+      .then((data) => {
+        setTickets(data);
+      })
+      .catch((err) => {
+        console.error("Failed to fetch tickets from backend, falling back to localStorage:", err);
+        const localData = localStorage.getItem("pcstore_tickets");
+        if (localData) {
+          setTickets(JSON.parse(localData));
+        } else {
+          setTickets(INITIAL_MOCK_TICKETS);
+          localStorage.setItem("pcstore_tickets", JSON.stringify(INITIAL_MOCK_TICKETS));
+        }
+      });
   }, []);
 
   const saveTickets = (updated: Ticket[]) => {
@@ -226,6 +234,13 @@ export default function HoTroIndex() {
 
     const updatedList = [newTicket, ...tickets];
     saveTickets(updatedList);
+
+    fetch("http://localhost:3001/api/tickets", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(newTicket)
+    }).catch(err => console.error("Error submitting ticket to backend:", err));
+
     showToast(`Yêu cầu ${newTicketId} của bạn đã được gửi thành công!`);
 
     setTimeout(() => {
@@ -237,6 +252,13 @@ export default function HoTroIndex() {
     if (confirm(`Bạn có chắc chắn muốn hủy bỏ yêu cầu hỗ trợ #${ticketId}?`)) {
       const updated = tickets.map(t => t.id === ticketId ? { ...t, status: "cancelled" } : t);
       saveTickets(updated);
+
+      fetch("http://localhost:3001/api/tickets/update", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: ticketId, status: "cancelled" })
+      }).catch(err => console.error("Error updating ticket on backend:", err));
+
       showToast(`Đã hủy yêu cầu #${ticketId}`);
       setIsModalOpen(false);
     }

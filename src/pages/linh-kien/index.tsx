@@ -3,7 +3,7 @@ import {
   ChevronRight, Heart, Grid, List, RotateCcw,
   ChevronDown, ChevronLeft,
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 
 /* ── TYPES ─────────────────────────────────────────────────────────── */
@@ -29,7 +29,7 @@ const componentCategories = [
   { id: "case",     icon: "🖥",  label: "Case\nVỏ Máy Tính" },
 ];
 
-const products: Product[] = [
+const defaultProducts: Product[] = [
   { name: "G.Skill Trident Z5 RGB",      specs: "18GB (2x8GB) DDR5 6000MHz",  price: "2.890.000đ", badge: "Mới",     badgeColor: "#22c55e", color: "#e0e7ef" },
   { name: "Corsair Vengeance RGB",        specs: "16GB (2x8GB) DDR5 5600MHz",  price: "2.290.000đ", badge: "Bán chạy",badgeColor: "#f97316", color: "#1a1a2e" },
   { name: "Kingston Fury Beast",          specs: "16GB (2x8GB) DDR4 3200MHz",  price: "990.000đ",   color: "#1a1a2e" },
@@ -146,6 +146,14 @@ export default function LinhKienIndex() {
   const [liked, setLiked] = useState<Set<number>>(new Set());
   const [activeCategory, setActiveCategory] = useState("ram");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [products, setProducts] = useState<Product[]>(defaultProducts);
+
+  useEffect(() => {
+    fetch("http://localhost:3001/api/components")
+      .then((res) => res.json())
+      .then((data) => setProducts(data))
+      .catch((err) => console.error("Error fetching components:", err));
+  }, []);
 
   const toggleLike = (i: number) => {
     setLiked(p => { const n = new Set(p); n.has(i) ? n.delete(i) : n.add(i); return n; });

@@ -20,7 +20,7 @@ import {
   X,
   Speaker,
 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { motion } from "framer-motion";
 
 /*
@@ -52,7 +52,18 @@ type AccessoryProduct = {
   badge?: string;
   colors: ProductColor[];
   image: string;
-  fallbackIcon: React.ElementType;
+  fallbackIcon: React.ElementType | string;
+};
+
+const ICON_MAP: Record<string, React.ElementType> = {
+  Headphones,
+  Keyboard,
+  Mouse,
+  Grid3X3,
+  Speaker,
+  Webcam,
+  Monitor,
+  Cable
 };
 
 const REAL_IMAGES = {
@@ -101,7 +112,7 @@ const colorOptions: { name: ProductColor; className: string }[] = [
   { name: "Tím", className: "bg-violet-500" },
 ];
 
-const products: AccessoryProduct[] = [
+const defaultProducts: AccessoryProduct[] = [
   {
     id: 1,
     name: "Logitech G Pro X 2",
@@ -339,6 +350,15 @@ function FilterCheckbox({
 }
 
 export default function PhuKienIndex() {
+  const [products, setProducts] = useState<AccessoryProduct[]>(defaultProducts);
+
+  useEffect(() => {
+    fetch("http://localhost:3001/api/accessories")
+      .then((res) => res.json())
+      .then((data) => setProducts(data))
+      .catch((err) => console.error("Error fetching accessories:", err));
+  }, []);
+
   const [selectedCategories, setSelectedCategories] = useState<Set<AccessoryCategory>>(new Set());
   const [selectedBrands, setSelectedBrands] = useState<Set<string>>(new Set());
   const [selectedColors, setSelectedColors] = useState<Set<ProductColor>>(new Set());
@@ -733,7 +753,7 @@ export default function PhuKienIndex() {
               >
                 {filteredProducts.map((product) => {
                   const isLiked = liked.has(product.id);
-                  const Icon = product.fallbackIcon;
+                  const Icon = typeof product.fallbackIcon === "string" ? (ICON_MAP[product.fallbackIcon] || Headphones) : product.fallbackIcon;
 
                   return (
                     <article
