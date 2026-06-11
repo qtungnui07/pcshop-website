@@ -328,8 +328,8 @@ export default function LinhKienIndex() {
                   Linh kiện chính hãng
                 </span>
               </motion.div>
-              <motion.h1 variants={heroItem} className="text-[2.4rem] md:text-[3rem] lg:text-[3.4rem] font-extrabold text-zinc-900 leading-[1.1] tracking-tight mb-5">
-                Hiệu năng mạnh mẽ,<br />xây dựng theo cách của bạn.
+              <motion.h1 variants={heroItem} className="text-[3.2rem] md:text-[4.2rem] lg:text-[5rem] font-bold tracking-tight text-zinc-900 leading-[1.08] mb-6">
+                Linh kiện PC<br />cho mọi cấu hình.
               </motion.h1>
               <motion.p variants={heroItem} className="text-[16px] text-zinc-500 leading-relaxed mb-8">
                 Đa dạng linh kiện chính hãng, chất lượng cao.<br />

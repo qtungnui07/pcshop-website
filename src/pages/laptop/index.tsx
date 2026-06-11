@@ -286,17 +286,31 @@ export default function LaptopIndex() {
   return (
     <div className="bg-[#fafafa] min-h-screen pb-16">
       {/* ══ 1. HERO ═════════════════════════════════════════════════════ */}
-      <div className="bg-gradient-to-br from-zinc-100 via-zinc-50 to-white pt-10 pb-16 md:pt-16 md:pb-24 overflow-hidden relative">
-        <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-zinc-200/40 via-transparent to-transparent pointer-events-none" />
-        <div className="max-w-[1700px] mx-auto px-4 md:px-8 lg:px-10 xl:px-12 2xl:px-16 relative">
+      <div 
+        className="pt-10 pb-16 md:pt-16 md:pb-24 overflow-hidden relative"
+        style={{ background: "linear-gradient(135deg, #ffffff 0%, #f0f6ff 40%, #e3effe 70%, #dceafd 100%)" }}
+      >
+        {/* Top-right blue glow */}
+        <div style={{
+          position: "absolute", top: "-10%", right: "-5%",
+          width: 800, height: 800,
+          background: "radial-gradient(circle, rgba(147,197,253,0.35) 0%, rgba(165,180,252,0.15) 40%, transparent 70%)",
+          pointerEvents: "none",
+        }} />
+        {/* Bottom left soft white fade */}
+        <div style={{
+          position: "absolute", bottom: 0, left: 0,
+          width: 600, height: 400,
+          background: "radial-gradient(ellipse at 0% 100%, rgba(255,255,255,0.9) 0%, transparent 70%)",
+          pointerEvents: "none",
+        }} />
+        
+        <div className="max-w-[1700px] mx-auto px-4 md:px-8 lg:px-10 xl:px-12 2xl:px-16 relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
-            <motion.div variants={heroContainer} initial="hidden" animate="show" className="max-w-xl">
-              <motion.h1 variants={heroItem} className="text-5xl md:text-6xl lg:text-7xl font-extrabold tracking-tight text-zinc-900 leading-[1.1] mb-4">
-                LAPTOP
+            <motion.div variants={heroContainer} initial="hidden" animate="show" className="max-w-2xl relative z-10">
+              <motion.h1 variants={heroItem} className="text-[3rem] md:text-[4rem] lg:text-[4.5rem] font-bold tracking-tight text-zinc-900 leading-[1.08] mb-6 whitespace-nowrap">
+                Laptop đỉnh cao<br />cho mọi tác vụ.
               </motion.h1>
-              <motion.h2 variants={heroItem} className="text-2xl md:text-3xl font-semibold text-zinc-800 mb-6">
-                Sức mạnh trong mọi chuyển động.
-              </motion.h2>
               <motion.p variants={heroItem} className="text-[17px] text-zinc-500 mb-10 leading-relaxed max-w-md">
                 Từ học tập, làm việc đến sáng tạo,<br />
                 luôn có một chiếc laptop phù hợp với bạn.
