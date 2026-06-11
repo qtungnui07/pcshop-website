@@ -21,7 +21,7 @@ import {
   Speaker,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 
 /*
@@ -73,6 +73,37 @@ const API_BASE =
     : "http://localhost:3001";
 
 const DEFAULT_MAX_PRICE = 10_900_000;
+const CATEGORY_PREVIEW_LIMIT = 8;
+const PRODUCTS_PER_PAGE = 15;
+const BRAND_PREVIEW_LIMIT = 5;
+
+const baseBrandOptions = [
+  "Logitech",
+  "Razer",
+  "Corsair",
+  "SteelSeries",
+  "HyperX",
+  "Keychron",
+  "ASUS",
+  "MSI",
+  "LG",
+  "Dell",
+  "Samsung",
+  "AOC",
+  "BenQ",
+  "ViewSonic",
+  "Acer",
+  "Gigabyte",
+  "Sony",
+  "JBL",
+  "Harman Kardon",
+  "Edifier",
+  "UGREEN",
+  "Baseus",
+  "Anker",
+  "Belkin",
+  "TP-Link",
+];
 
 const ICON_MAP: Record<string, React.ElementType> = {
   Headphones,
@@ -88,16 +119,26 @@ const ICON_MAP: Record<string, React.ElementType> = {
 const REAL_IMAGES = {
   hero:
     "https://images.unsplash.com/photo-1707858004668-d33b9a1d1956?auto=format&fit=crop&w=1600&q=85",
-  setupDark:
-    "https://images.unsplash.com/photo-1707858057802-ab1227691ed5?auto=format&fit=crop&w=1200&q=85",
+  monitor:
+    "https://source.unsplash.com/1200x900/?computer-monitor,desk-setup",
   keyboardWhite:
     "https://images.unsplash.com/photo-1632078965632-575bd4061be4?auto=format&fit=crop&w=1200&q=85",
+  mouse:
+    "https://source.unsplash.com/1200x900/?gaming-mouse,computer-mouse",
+  mousePad:
+    "https://source.unsplash.com/1200x900/?mouse-pad,gaming-desk",
   headphonesWhite:
     "https://images.unsplash.com/photo-1713926304458-b8e00dfa9911?auto=format&fit=crop&w=1200&q=85",
-  webcam:
-    "https://images.unsplash.com/photo-1670278458296-00ff8a63141e?auto=format&fit=crop&w=1200&q=85",
   speaker:
     "https://images.unsplash.com/photo-1715321835688-831f4767cf93?auto=format&fit=crop&w=1200&q=85",
+  webcam:
+    "https://images.unsplash.com/photo-1670278458296-00ff8a63141e?auto=format&fit=crop&w=1200&q=85",
+  cableHub:
+    "https://source.unsplash.com/1200x900/?usb-c-hub,cable",
+  monitorStand:
+    "https://source.unsplash.com/1200x900/?monitor-stand,desk-accessory",
+  setupDark:
+    "https://images.unsplash.com/photo-1707858057802-ab1227691ed5?auto=format&fit=crop&w=1200&q=85",
 };
 
 const HERO_ACCESSORIES_IMAGE = "/accessories/hero-phu-kien.png";
@@ -107,14 +148,15 @@ const baseCategories: {
   image: string;
   Icon: React.ElementType;
 }[] = [
-    { name: "Tai nghe", image: REAL_IMAGES.headphonesWhite, Icon: Headphones },
+    { name: "Màn hình", image: REAL_IMAGES.monitor, Icon: Monitor },
     { name: "Bàn phím", image: REAL_IMAGES.keyboardWhite, Icon: Keyboard },
-    { name: "Chuột", image: REAL_IMAGES.hero, Icon: Mouse },
-    { name: "Lót chuột", image: REAL_IMAGES.setupDark, Icon: Grid3X3 },
+    { name: "Chuột", image: REAL_IMAGES.mouse, Icon: Mouse },
+    { name: "Tai nghe", image: REAL_IMAGES.headphonesWhite, Icon: Headphones },
     { name: "Loa", image: REAL_IMAGES.speaker, Icon: Speaker },
     { name: "Webcam", image: REAL_IMAGES.webcam, Icon: Webcam },
-    { name: "Giá đỡ", image: REAL_IMAGES.setupDark, Icon: Monitor },
-    { name: "Cáp & Hub", image: REAL_IMAGES.setupDark, Icon: Cable },
+    { name: "Lót chuột", image: REAL_IMAGES.mousePad, Icon: Grid3X3 },
+    { name: "Cáp & Hub", image: REAL_IMAGES.cableHub, Icon: Cable },
+    { name: "Giá đỡ", image: REAL_IMAGES.monitorStand, Icon: Monitor },
   ];
 
 const baseColorOptions: { name: string; className: string }[] = [
@@ -173,7 +215,7 @@ const comboItems = [
   },
   {
     title: "Combo Phụ kiện cao cấp",
-    desc: "Tai nghe + Giá đỡ +\nHub chuyển đổi",
+    desc: "Tai nghe + Màn hình +\nHub chuyển đổi",
     save: "Tiết kiệm 20%",
     image: REAL_IMAGES.headphonesWhite,
     Icon: Headphones,
@@ -193,6 +235,18 @@ function toNumberPrice(value: number | string | undefined) {
   }
 
   return 0;
+}
+
+function generateSlug(text: string) {
+  return text
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/đ/g, "d")
+    .replace(/[^a-z0-9\s-]/g, "")
+    .trim()
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-");
 }
 
 function normalizeColors(value: string[] | string | undefined) {
@@ -321,7 +375,33 @@ function FilterCheckbox({
   );
 }
 
+function getPaginationItems(currentPage: number, totalPages: number) {
+  if (totalPages <= 5) {
+    return Array.from({ length: totalPages }, (_, index) => index + 1);
+  }
+
+  const items: Array<number | string> = [1];
+  const startPage = Math.max(2, currentPage - 1);
+  const endPage = Math.min(totalPages - 1, currentPage + 1);
+
+  if (startPage > 2) {
+    items.push("ellipsis-start");
+  }
+
+  for (let page = startPage; page <= endPage; page += 1) {
+    items.push(page);
+  }
+
+  if (endPage < totalPages - 1) {
+    items.push("ellipsis-end");
+  }
+
+  items.push(totalPages);
+  return items;
+}
+
 export default function PhuKienIndex() {
+  const [searchParams] = useSearchParams();
   const [products, setProducts] = useState<AccessoryProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState("");
@@ -336,6 +416,28 @@ export default function PhuKienIndex() {
   const [maxPrice, setMaxPrice] = useState(DEFAULT_MAX_PRICE);
   const [activeInput, setActiveInput] = useState<'min' | 'max'>('min');
   const [showMobileFilter, setShowMobileFilter] = useState(false);
+  const [showAllCategories, setShowAllCategories] = useState(false);
+  const [showAllBrands, setShowAllBrands] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+
+  useEffect(() => {
+    const categoryParam = searchParams.get("category");
+
+    if (!categoryParam) {
+      setSelectedCategories(new Set());
+      return;
+    }
+
+    const matchedCategory = baseCategories.find(
+      (category) => generateSlug(category.name) === categoryParam
+    );
+
+    if (matchedCategory) {
+      setSelectedCategories(new Set([matchedCategory.name]));
+
+      setShowAllCategories(true);
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     setLoading(true);
@@ -394,9 +496,24 @@ export default function PhuKienIndex() {
     }));
   }, [products]);
 
+  const visibleCategories = useMemo(() => {
+    return showAllCategories
+      ? categories
+      : categories.slice(0, CATEGORY_PREVIEW_LIMIT);
+  }, [categories, showAllCategories]);
+
   const brands = useMemo(() => {
-    return [...new Set(products.map((product) => product.brand).filter(Boolean))];
+    const productBrands = products.map((product) => product.brand).filter(Boolean);
+
+    return [
+      ...baseBrandOptions,
+      ...productBrands.filter((brand) => !baseBrandOptions.includes(brand)),
+    ];
   }, [products]);
+
+  const visibleBrands = useMemo(() => {
+    return showAllBrands ? brands : brands.slice(0, BRAND_PREVIEW_LIMIT);
+  }, [brands, showAllBrands]);
 
   const colorOptions = useMemo(() => {
     const productColors = [
@@ -457,12 +574,34 @@ export default function PhuKienIndex() {
     return result;
   }, [products, selectedCategories, selectedBrands, selectedColors, sortBy, minPrice, maxPrice]);
 
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [selectedCategories, selectedBrands, selectedColors, sortBy, minPrice, maxPrice]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredProducts.length / PRODUCTS_PER_PAGE));
+
+  const paginatedProducts = useMemo(() => {
+    const startIndex = (currentPage - 1) * PRODUCTS_PER_PAGE;
+    return filteredProducts.slice(startIndex, startIndex + PRODUCTS_PER_PAGE);
+  }, [filteredProducts, currentPage]);
+
+  const paginationItems = useMemo(() => {
+    return getPaginationItems(currentPage, totalPages);
+  }, [currentPage, totalPages]);
+
+  useEffect(() => {
+    if (currentPage > totalPages) {
+      setCurrentPage(totalPages);
+    }
+  }, [currentPage, totalPages]);
+
   const resetFilters = () => {
     setSelectedCategories(new Set());
     setSelectedBrands(new Set());
     setSelectedColors(new Set());
     setMinPrice(100000);
     setMaxPrice(highestPrice);
+    setShowAllBrands(false);
   };
 
   return (
@@ -500,15 +639,26 @@ export default function PhuKienIndex() {
             </p>
 
             <div className="flex flex-wrap items-center gap-3">
-              <button className="inline-flex items-center gap-2 rounded-full bg-zinc-950 px-7 py-3.5 text-[13px] font-bold text-white shadow-[0_14px_30px_rgba(0,0,0,0.18)] transition hover:-translate-y-0.5 hover:bg-zinc-800 active:scale-95">
+              <button
+                type="button"
+                onClick={() => {
+                  document
+                    .getElementById("accessories-products")
+                    ?.scrollIntoView({ behavior: "smooth", block: "start" });
+                }}
+                className="inline-flex items-center gap-2 rounded-full bg-zinc-950 px-7 py-3.5 text-[13px] font-bold text-white shadow-[0_14px_30px_rgba(0,0,0,0.18)] transition hover:-translate-y-0.5 hover:bg-zinc-800 active:scale-95"
+              >
                 Khám phá ngay
                 <ChevronRight className="h-4 w-4" />
               </button>
 
-              <button className="inline-flex items-center gap-2 rounded-full border border-zinc-200 bg-white/80 px-7 py-3.5 text-[13px] font-bold text-zinc-900 shadow-sm transition hover:-translate-y-0.5 hover:bg-white active:scale-95">
-                Xem phụ kiện
+              <Link
+                to="/ho-tro"
+                className="inline-flex items-center gap-2 rounded-full border border-zinc-200 bg-white/80 px-7 py-3.5 text-[13px] font-bold text-zinc-900 shadow-sm transition hover:-translate-y-0.5 hover:bg-white active:scale-95"
+              >
+                Tư vấn phụ kiện
                 <ChevronRight className="h-4 w-4" />
-              </button>
+              </Link>
             </div>
 
             <div className="mt-12 grid max-w-[650px] grid-cols-2 gap-x-7 gap-y-5 border-t border-zinc-200/80 pt-7 lg:grid-cols-4">
@@ -555,17 +705,24 @@ export default function PhuKienIndex() {
               Danh mục phụ kiện
             </h2>
 
-            <a
-              href="#"
-              className="flex items-center gap-1 text-[13px] font-medium text-zinc-700 transition hover:text-zinc-950"
-            >
-              Xem tất cả
-              <ChevronRight className="h-4 w-4" />
-            </a>
+            {categories.length > CATEGORY_PREVIEW_LIMIT && (
+              <button
+                type="button"
+                onClick={() => setShowAllCategories((prev) => !prev)}
+                className="flex items-center gap-1 text-[13px] font-medium text-zinc-700 transition hover:text-zinc-950"
+              >
+                {showAllCategories ? "Thu gọn" : "Xem tất cả"}
+                {showAllCategories ? (
+                  <ChevronDown className="h-4 w-4" />
+                ) : (
+                  <ChevronRight className="h-4 w-4" />
+                )}
+              </button>
+            )}
           </div>
 
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-4 lg:grid-cols-8">
-            {categories.map(({ name, image, Icon }) => (
+            {visibleCategories.map(({ name, image, Icon }) => (
               <button
                 key={name}
                 type="button"
@@ -613,7 +770,10 @@ export default function PhuKienIndex() {
         </section>
 
         {/* PRODUCT AREA */}
-        <section className="grid grid-cols-1 gap-8 lg:grid-cols-[245px_1fr]">
+        <section
+          id="accessories-products"
+          className="scroll-mt-28 grid grid-cols-1 gap-8 lg:grid-cols-[245px_1fr]"
+        >
           {/* FILTER SIDEBAR */}
           <aside
             className={`fixed inset-y-0 left-0 z-50 w-[300px] overflow-y-auto bg-white p-5 shadow-2xl transition-transform lg:sticky lg:top-24 lg:z-auto lg:h-fit lg:w-auto lg:translate-x-0 lg:rounded-[20px] lg:border lg:border-zinc-100 lg:shadow-[0_6px_22px_rgba(0,0,0,0.05)] ${showMobileFilter ? "translate-x-0" : "-translate-x-full"
@@ -642,7 +802,7 @@ export default function PhuKienIndex() {
             <div className="space-y-6">
               <div>
                 <h4 className="mb-3 text-[13px] font-semibold text-zinc-900">Danh mục</h4>
-                {categories.slice(0, 8).map((cat) => (
+                {categories.map((cat) => (
                   <FilterCheckbox
                     key={cat.name}
                     label={cat.name}
@@ -654,12 +814,6 @@ export default function PhuKienIndex() {
                   />
                 ))}
 
-                {categories.length > 8 && (
-                  <button className="mt-2 flex items-center gap-1 text-[12px] font-medium text-zinc-600">
-                    Hiển thị thêm
-                    <ChevronDown className="h-3.5 w-3.5" />
-                  </button>
-                )}
               </div>
 
               <div className="border-t border-zinc-100 pt-5">
@@ -675,7 +829,7 @@ export default function PhuKienIndex() {
                   </div>
                 </div>
 
-                <div 
+                <div
                   className="h-1 bg-zinc-200 rounded-full mb-6 relative mt-4 cursor-pointer"
                   onMouseMove={e => {
                     const rect = e.currentTarget.getBoundingClientRect();
@@ -738,24 +892,26 @@ export default function PhuKienIndex() {
               <div className="border-t border-zinc-100 pt-5">
                 <h4 className="mb-3 text-[13px] font-semibold text-zinc-900">Thương hiệu</h4>
 
-                {brands.length === 0 ? (
-                  <p className="text-[12px] text-zinc-400">Chưa có thương hiệu</p>
-                ) : (
-                  brands.slice(0, 5).map((brand) => (
-                    <FilterCheckbox
-                      key={brand}
-                      label={brand}
-                      count={products.filter((p) => p.brand === brand).length}
-                      checked={selectedBrands.has(brand)}
-                      onChange={() => setSelectedBrands((prev) => toggleSetValue(prev, brand))}
-                    />
-                  ))
-                )}
+                {visibleBrands.map((brand) => (
+                  <FilterCheckbox
+                    key={brand}
+                    label={brand}
+                    count={products.filter((p) => p.brand === brand).length}
+                    checked={selectedBrands.has(brand)}
+                    onChange={() => setSelectedBrands((prev) => toggleSetValue(prev, brand))}
+                  />
+                ))}
 
-                {brands.length > 5 && (
-                  <button className="mt-2 flex items-center gap-1 text-[12px] font-medium text-zinc-600">
-                    Hiển thị thêm
-                    <ChevronDown className="h-3.5 w-3.5" />
+                {brands.length > BRAND_PREVIEW_LIMIT && (
+                  <button
+                    type="button"
+                    onClick={() => setShowAllBrands((prev) => !prev)}
+                    className="mt-2 flex items-center gap-1 text-[12px] font-medium text-zinc-600 transition hover:text-zinc-950"
+                  >
+                    {showAllBrands ? "Thu gọn" : "Hiển thị thêm"}
+                    <ChevronDown
+                      className={`h-3.5 w-3.5 transition ${showAllBrands ? "rotate-180" : ""}`}
+                    />
                   </button>
                 )}
               </div>
@@ -895,7 +1051,7 @@ export default function PhuKienIndex() {
                     : "grid grid-cols-1 gap-4"
                 }
               >
-                {filteredProducts.map((product) => {
+                {paginatedProducts.map((product) => {
                   const isLiked = liked.has(product.id);
                   const Icon =
                     typeof product.fallbackIcon === "string"
@@ -965,6 +1121,51 @@ export default function PhuKienIndex() {
                     </article>
                   );
                 })}
+              </div>
+            )}
+
+            {!loading && !fetchError && filteredProducts.length > PRODUCTS_PER_PAGE && (
+              <div className="mt-10 flex items-center justify-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}
+                  disabled={currentPage === 1}
+                  className="flex h-9 w-9 items-center justify-center rounded-lg border border-zinc-200 bg-white text-zinc-500 shadow-sm transition hover:border-zinc-300 hover:text-zinc-950 disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  <ChevronRight className="h-4 w-4 rotate-180" />
+                </button>
+
+                {paginationItems.map((item, index) =>
+                  typeof item === "number" ? (
+                    <button
+                      key={item}
+                      type="button"
+                      onClick={() => setCurrentPage(item)}
+                      className={`flex h-9 min-w-9 items-center justify-center rounded-lg px-3 text-[13px] font-semibold transition ${currentPage === item
+                        ? "bg-zinc-950 text-white shadow-sm"
+                        : "border border-zinc-200 bg-white text-zinc-700 hover:border-zinc-300 hover:text-zinc-950"
+                        }`}
+                    >
+                      {item}
+                    </button>
+                  ) : (
+                    <span
+                      key={`${item}-${index}`}
+                      className="flex h-9 min-w-9 items-center justify-center text-sm text-zinc-400"
+                    >
+                      ...
+                    </span>
+                  )
+                )}
+
+                <button
+                  type="button"
+                  onClick={() => setCurrentPage((page) => Math.min(totalPages, page + 1))}
+                  disabled={currentPage === totalPages}
+                  className="flex h-9 w-9 items-center justify-center rounded-lg border border-zinc-200 bg-white text-zinc-500 shadow-sm transition hover:border-zinc-300 hover:text-zinc-950 disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </button>
               </div>
             )}
           </div>

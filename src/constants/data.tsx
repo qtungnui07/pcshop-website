@@ -43,13 +43,23 @@ export const navItems = [
       { name: 'Mức Giá', title: 'Phân Khúc Giá', links: ['Dưới 20 Triệu', '20 - 25 Triệu', '25 - 30 Triệu', '30 - 40 Triệu', 'Trên 40 Triệu (Hi-End)'] }
     ]
   },
-  { name: 'Phụ kiện', dropdown: [
-    {
-      title: 'Danh mục phụ kiện', 
-      links: ['Màn hình', 'Bàn Phím', 'Chuột', 'Tai nghe', 'Webcam', 'Mic', 'Loa']
-    }
-  ]
-  },  
+  {
+    name: 'Phụ kiện',
+    dropdown: [
+      {
+        title: 'Thiết bị chính',
+        links: ['Màn hình', 'Bàn phím', 'Chuột']
+      },
+      {
+        title: 'Âm thanh & ghi hình',
+        links: ['Tai nghe', 'Loa', 'Webcam']
+      },
+      {
+        title: 'Phụ trợ setup',
+        links: ['Lót chuột', 'Cáp & Hub', 'Giá đỡ']
+      }
+    ]
+  },
   { name: 'Hỗ trợ', dropdown: null },
 ];
 
