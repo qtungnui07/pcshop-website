@@ -154,7 +154,9 @@ export default function LinhKienIndex() {
   const [selCapacities, setSelCapacities] = useState<Set<string>>(new Set());
   const [selTypes, setSelTypes] = useState<Set<string>>(new Set());
   const [selBuses, setSelBuses] = useState<Set<string>>(new Set());
+  const [minPrice,   setMinPrice]   = useState(MIN_PRICE);
   const [maxPrice,   setMaxPrice]   = useState(MAX_PRICE);
+  const [activeInput, setActiveInput] = useState<'min' | 'max'>('min');
 
   useEffect(() => {
     fetch(`${API_BASE}/api/components`)
@@ -169,13 +171,14 @@ export default function LinhKienIndex() {
 
   const hasActiveFilter =
     selBrands.size > 0 || selCapacities.size > 0 || selTypes.size > 0 ||
-    selBuses.size > 0 || maxPrice < MAX_PRICE;
+    selBuses.size > 0 || minPrice > MIN_PRICE || maxPrice < MAX_PRICE;
 
   const resetFilters = () => {
     setSelBrands(new Set());
     setSelCapacities(new Set());
     setSelTypes(new Set());
     setSelBuses(new Set());
+    setMinPrice(MIN_PRICE);
     setMaxPrice(MAX_PRICE);
   };
 
@@ -183,7 +186,7 @@ export default function LinhKienIndex() {
   const filteredProducts = useMemo(() => {
     let result = products.filter(p => {
       const priceNum = parsePrice(p.price);
-      if (priceNum > maxPrice) return false;
+      if (priceNum < minPrice || priceNum > maxPrice) return false;
 
       if (selBrands.size > 0) {
         if (!Array.from(selBrands).some(b => p.name.toLowerCase().includes(b.toLowerCase()))) return false;
@@ -208,7 +211,7 @@ export default function LinhKienIndex() {
     if (sortBy === "price-desc") result = [...result].sort((a, b) => parsePrice(b.price) - parsePrice(a.price));
     if (sortBy === "name")       result = [...result].sort((a, b) => a.name.localeCompare(b.name));
     return result;
-  }, [products, selBrands, selCapacities, selTypes, selBuses, maxPrice, sortBy]);
+  }, [products, selBrands, selCapacities, selTypes, selBuses, minPrice, maxPrice, sortBy]);
 
   const heroContainer = {
     hidden: {},
@@ -219,31 +222,81 @@ export default function LinhKienIndex() {
     show: { opacity: 1, y: 0, transition: { duration: 0.55, ease: [0.25, 1, 0.5, 1] as const } },
   };
 
+  const percentMin = ((minPrice - MIN_PRICE) / (MAX_PRICE - MIN_PRICE)) * 100;
+  const percentMax = ((maxPrice - MIN_PRICE) / (MAX_PRICE - MIN_PRICE)) * 100;
+
   /* Sidebar JSX — reused for both desktop + mobile */
   const sidebarContent = (
     <div className="space-y-0">
       {/* Price */}
       <div className="pb-4">
         <h4 className="text-[13px] font-semibold text-zinc-900 mb-3">Giá</h4>
-        <p className="mb-2 text-center text-[11px] text-zinc-500">
-          {formatPrice(MIN_PRICE)} – {formatPrice(maxPrice)}
-        </p>
-        <input
-          type="range"
-          min={MIN_PRICE}
-          max={MAX_PRICE}
-          step={500000}
-          value={maxPrice}
-          onChange={e => setMaxPrice(Number(e.target.value))}
-          className="w-full accent-zinc-950"
-        />
-        <div className="mt-2 grid grid-cols-2 gap-2">
-          <div className="rounded-md border border-zinc-200 bg-zinc-50 px-2 py-1.5 text-center text-[11px] text-zinc-600">
-            {formatPrice(MIN_PRICE)}
+        <div className="flex items-center gap-2 mb-4">
+          <div className="flex-1 bg-zinc-50 border border-zinc-200 rounded px-2 py-1.5 text-[11px] text-zinc-700 text-center">
+            {formatPrice(minPrice)}
           </div>
-          <div className="rounded-md border border-zinc-200 bg-zinc-50 px-2 py-1.5 text-center text-[11px] text-zinc-600">
+          <span className="text-zinc-400">-</span>
+          <div className="flex-1 bg-zinc-50 border border-zinc-200 rounded px-2 py-1.5 text-[11px] text-zinc-700 text-center">
             {formatPrice(maxPrice)}
           </div>
+        </div>
+        <div 
+          className="h-1 bg-zinc-200 rounded-full mb-6 relative mt-4 cursor-pointer"
+          onMouseMove={e => {
+            const rect = e.currentTarget.getBoundingClientRect();
+            const percent = (e.clientX - rect.left) / rect.width;
+            const value = MIN_PRICE + percent * (MAX_PRICE - MIN_PRICE);
+            if (Math.abs(value - minPrice) < Math.abs(value - maxPrice)) {
+              setActiveInput('min');
+            } else {
+              setActiveInput('max');
+            }
+          }}
+          onTouchStart={e => {
+            const rect = e.currentTarget.getBoundingClientRect();
+            const touch = e.touches[0];
+            const percent = (touch.clientX - rect.left) / rect.width;
+            const value = MIN_PRICE + percent * (MAX_PRICE - MIN_PRICE);
+            if (Math.abs(value - minPrice) < Math.abs(value - maxPrice)) {
+              setActiveInput('min');
+            } else {
+              setActiveInput('max');
+            }
+          }}
+        >
+          <div
+            className="absolute h-full bg-zinc-950 rounded-full"
+            style={{
+              left: `${percentMin}%`,
+              right: `${100 - percentMax}%`,
+            }}
+          />
+          <input
+            type="range"
+            min={MIN_PRICE}
+            max={MAX_PRICE}
+            step={500000}
+            value={minPrice}
+            onChange={e => {
+              const val = Math.min(Number(e.target.value), maxPrice - 500000);
+              setMinPrice(val);
+            }}
+            className="dual-range-slider"
+            style={{ zIndex: activeInput === 'min' ? 10 : 3 }}
+          />
+          <input
+            type="range"
+            min={MIN_PRICE}
+            max={MAX_PRICE}
+            step={500000}
+            value={maxPrice}
+            onChange={e => {
+              const val = Math.max(Number(e.target.value), minPrice + 500000);
+              setMaxPrice(val);
+            }}
+            className="dual-range-slider"
+            style={{ zIndex: activeInput === 'max' ? 10 : 3 }}
+          />
         </div>
       </div>
 
@@ -443,7 +496,7 @@ export default function LinhKienIndex() {
             className="inline-flex items-center gap-2 rounded-xl border border-zinc-200 bg-white px-4 py-3 text-sm font-semibold text-zinc-800 shadow-sm"
           >
             <SlidersHorizontal className="h-4 w-4" />
-            Bộ lọc {hasActiveFilter && <span className="ml-1 inline-flex h-4 w-4 items-center justify-center rounded-full bg-zinc-900 text-[9px] font-bold text-white">{[selBrands, selCapacities, selTypes, selBuses].filter(s => s.size > 0).length + (maxPrice < MAX_PRICE ? 1 : 0)}</span>}
+            Bộ lọc {hasActiveFilter && <span className="ml-1 inline-flex h-4 w-4 items-center justify-center rounded-full bg-zinc-900 text-[9px] font-bold text-white">{[selBrands, selCapacities, selTypes, selBuses].filter(s => s.size > 0).length + (minPrice > MIN_PRICE || maxPrice < MAX_PRICE ? 1 : 0)}</span>}
           </button>
           <select
             value={sortBy}
