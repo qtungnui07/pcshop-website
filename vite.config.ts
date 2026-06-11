@@ -16,7 +16,8 @@ export default defineConfig({
     port: 5173,
     allowedHosts: ["pc.qtitpc.dev", "localhost"],
     watch: {
-      usePolling: true
+      usePolling: true,
+      ignored: ["**/backend/db/**", "**/backend/data.json*"]
     }
   }
 })

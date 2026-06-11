@@ -1,0 +1,186 @@
+[
+  {
+    "id": "PAY-1781205692535-KK3VA1",
+    "status": "paid",
+    "orderId": "ORD-1781205740595",
+    "paymentMethod": "MOMO_FAKE",
+    "orderPayload": {
+      "userId": "acc-1001",
+      "email": "admin@qtitpc.dev",
+      "customerName": "Quản trị viên",
+      "phone": "21",
+      "address": "3123",
+      "note": "123",
+      "items": [
+        {
+          "id": "latest-Màn hình 4K",
+          "name": "Màn hình 4K",
+          "specs": "Độ phân giải siêu nét cho đồ họa.",
+          "price": "Từ 8.490.000đ",
+          "category": "Cửa hàng",
+          "quantity": 1
+        }
+      ],
+      "totalItems": 1,
+      "totalPrice": 8490000,
+      "paymentMethod": "MOMO_FAKE"
+    },
+    "createdAt": "2026-06-11T19:21:32.535Z",
+    "expiresAt": "2026-06-11T19:26:32.535Z",
+    "paidAt": "2026-06-11T19:22:20.595Z"
+  },
+  {
+    "id": "PAY-1781205495786-D9WE95",
+    "status": "pending",
+    "orderId": "",
+    "paymentMethod": "MOMO_FAKE",
+    "orderPayload": {
+      "userId": "acc-1001",
+      "email": "admin@qtitpc.dev",
+      "customerName": "Quản trị viên",
+      "phone": "213",
+      "address": "123",
+      "note": "12",
+      "items": [
+        {
+          "id": "latest-Màn hình 4K",
+          "name": "Màn hình 4K",
+          "specs": "Độ phân giải siêu nét cho đồ họa.",
+          "price": "Từ 8.490.000đ",
+          "category": "Cửa hàng",
+          "quantity": 1
+        }
+      ],
+      "totalItems": 1,
+      "totalPrice": 8490000,
+      "paymentMethod": "MOMO_FAKE"
+    },
+    "createdAt": "2026-06-11T19:18:15.786Z",
+    "expiresAt": "2026-06-11T19:23:15.786Z",
+    "paidAt": ""
+  },
+  {
+    "id": "PAY-1781205479317-C36M0J",
+    "status": "pending",
+    "orderId": "",
+    "paymentMethod": "MOMO_FAKE",
+    "orderPayload": {
+      "userId": "acc-1001",
+      "email": "admin@qtitpc.dev",
+      "customerName": "Quản trị viên",
+      "phone": "345",
+      "address": "345",
+      "note": "435",
+      "items": [
+        {
+          "id": "component-CPU-Intel Core i5-14600K",
+          "name": "Intel Core i5-14600K",
+          "specs": "14 Cores / 20 Threads up to 5.3GHz LGA1700",
+          "price": "7.890.000đ",
+          "image": "https://product.hstatic.net/200000420363/product/_new_-anh-sp-web_0229438098674c899bd2c5675e1559c0_master.jpg",
+          "category": "CPU",
+          "quantity": 1
+        }
+      ],
+      "totalItems": 1,
+      "totalPrice": 7890000,
+      "paymentMethod": "MOMO_FAKE"
+    },
+    "createdAt": "2026-06-11T19:17:59.317Z",
+    "expiresAt": "2026-06-11T19:22:59.317Z",
+    "paidAt": ""
+  },
+  {
+    "id": "PAY-1781205313646-KA4FYK",
+    "status": "pending",
+    "orderId": "",
+    "paymentMethod": "BANK_QR_FAKE",
+    "orderPayload": {
+      "userId": "acc-1001",
+      "email": "admin@qtitpc.dev",
+      "customerName": "Quản trị viên",
+      "phone": "123",
+      "address": "123",
+      "note": "213",
+      "items": [
+        {
+          "id": "component-CPU-Intel Core i5-14600K",
+          "name": "Intel Core i5-14600K",
+          "specs": "14 Cores / 20 Threads up to 5.3GHz LGA1700",
+          "price": "7.890.000đ",
+          "image": "https://product.hstatic.net/200000420363/product/_new_-anh-sp-web_0229438098674c899bd2c5675e1559c0_master.jpg",
+          "category": "CPU",
+          "quantity": 1
+        }
+      ],
+      "totalItems": 1,
+      "totalPrice": 7890000,
+      "paymentMethod": "BANK_QR_FAKE"
+    },
+    "createdAt": "2026-06-11T19:15:13.646Z",
+    "expiresAt": "2026-06-11T19:20:13.646Z",
+    "paidAt": ""
+  },
+  {
+    "id": "PAY-1781205281765-EBT1B6",
+    "status": "pending",
+    "orderId": "",
+    "paymentMethod": "MOMO_FAKE",
+    "orderPayload": {
+      "userId": "acc-1001",
+      "email": "admin@qtitpc.dev",
+      "customerName": "Quản trị viên12",
+      "phone": "312",
+      "address": "123",
+      "note": "123",
+      "items": [
+        {
+          "id": "component-CPU-Intel Core i5-14600K",
+          "name": "Intel Core i5-14600K",
+          "specs": "14 Cores / 20 Threads up to 5.3GHz LGA1700",
+          "price": "7.890.000đ",
+          "image": "https://product.hstatic.net/200000420363/product/_new_-anh-sp-web_0229438098674c899bd2c5675e1559c0_master.jpg",
+          "category": "CPU",
+          "quantity": 1
+        }
+      ],
+      "totalItems": 1,
+      "totalPrice": 7890000,
+      "paymentMethod": "MOMO_FAKE"
+    },
+    "createdAt": "2026-06-11T19:14:41.765Z",
+    "expiresAt": "2026-06-11T19:19:41.765Z",
+    "paidAt": ""
+  },
+  {
+    "id": "PAY-1781205267398-E1ABG6",
+    "status": "pending",
+    "orderId": "",
+    "paymentMethod": "MOMO_FAKE",
+    "orderPayload": {
+      "userId": "acc-1001",
+      "email": "admin@qtitpc.dev",
+      "customerName": "Quản trị viên",
+      "phone": "123",
+      "address": "123",
+      "note": "123",
+      "items": [
+        {
+          "id": "component-CPU-Intel Core i5-14600K",
+          "name": "Intel Core i5-14600K",
+          "specs": "14 Cores / 20 Threads up to 5.3GHz LGA1700",
+          "price": "7.890.000đ",
+          "image": "https://product.hstatic.net/200000420363/product/_new_-anh-sp-web_0229438098674c899bd2c5675e1559c0_master.jpg",
+          "category": "CPU",
+          "quantity": 1
+        }
+      ],
+      "totalItems": 1,
+      "totalPrice": 7890000,
+      "paymentMethod": "MOMO_FAKE"
+    },
+    "createdAt": "2026-06-11T19:14:27.398Z",
+    "expiresAt": "2026-06-11T19:19:27.398Z",
+    "paidAt": ""
+  }
+]

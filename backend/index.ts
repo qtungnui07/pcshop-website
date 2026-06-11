@@ -9,6 +9,7 @@ const rateLimits = new Map<string, { count: number; resetTime: number }>();
 const resetTokens = new Map<string, { email: string; expiresAt: number }>();
 
 const defaultOrders: any[] = [];
+const defaultPayments: any[] = [];
 
 function getClientIP(req: Request): string {
   const cfConnectingIP = req.headers.get("cf-connecting-ip");
@@ -366,6 +367,7 @@ async function readData() {
   const tickets = await readCollection("tickets", oldDb?.tickets ?? defaultTickets);
   const accounts = await readCollection("accounts", oldDb?.accounts ?? defaultAccounts);
   const orders = await readCollection("orders", oldDb?.orders ?? defaultOrders);
+  const payments = await readCollection("payments", oldDb?.payments ?? defaultPayments);
 
   // Auto-migrate image URLs to subfolders if they aren't migrated yet
   let pcsChanged = false;
@@ -401,6 +403,7 @@ async function readData() {
     await writeCollection("tickets", tickets);
     await writeCollection("accounts", accounts);
     await writeCollection("orders", orders);
+    await writeCollection("payments", payments);
     
     try {
       await rename("./backend/data.json", "./backend/data.json.bak");
@@ -410,7 +413,7 @@ async function readData() {
     }
   }
 
-  return { pcs, components, laptops, accessories, tickets, accounts, orders };
+  return { pcs, components, laptops, accessories, tickets, accounts, orders, payments };
 }
 
 async function writeData(db: any) {
@@ -421,6 +424,7 @@ async function writeData(db: any) {
   if (db.tickets) await writeCollection("tickets", db.tickets);
   if (db.accounts) await writeCollection("accounts", db.accounts);
   if (db.orders) await writeCollection("orders", db.orders);
+  if (db.payments) await writeCollection("payments", db.payments);
 }
 
 function verifyAdmin(req: Request, db: any): boolean {
@@ -659,6 +663,97 @@ serve({
         return Response.json({ success: true }, { headers });
       } catch (err) {
         return Response.json({ error: "Invalid JSON body or missing id" }, { status: 400, headers });
+      }
+    }
+
+    // POST /api/payments - create a 5-minute fake QR payment session
+    if (url.pathname === "/api/payments" && req.method === "POST") {
+      try {
+        const body = await req.json();
+        const orderPayload = body.orderPayload;
+        if (!orderPayload?.userId || !orderPayload?.email || !Array.isArray(orderPayload?.items) || orderPayload.items.length === 0) {
+          return Response.json({ error: "Thông tin thanh toán không hợp lệ" }, { status: 400, headers });
+        }
+
+        const now = Date.now();
+        const session = {
+          id: `PAY-${now}-${Math.random().toString(36).slice(2, 8).toUpperCase()}`,
+          status: "pending",
+          orderId: "",
+          paymentMethod: body.paymentMethod || "MOMO_FAKE",
+          orderPayload,
+          createdAt: new Date(now).toISOString(),
+          expiresAt: new Date(now + 5 * 60 * 1000).toISOString(),
+          paidAt: ""
+        };
+
+        const db = await readData();
+        db.payments = [session, ...(db.payments || [])];
+        await writeData(db);
+        return Response.json({ success: true, session }, { headers });
+      } catch (err) {
+        return Response.json({ error: "Invalid JSON body" }, { status: 400, headers });
+      }
+    }
+
+    if (url.pathname.startsWith("/api/payments/")) {
+      const parts = url.pathname.split("/").filter(Boolean);
+      const paymentId = parts[2];
+      const action = parts[3];
+      const db = await readData();
+      const payment = (db.payments || []).find((item: any) => item.id === paymentId);
+
+      if (!payment) {
+        return Response.json({ error: "Không tìm thấy phiên thanh toán" }, { status: 404, headers });
+      }
+
+      if (new Date(payment.expiresAt).getTime() < Date.now() && payment.status === "pending") {
+        payment.status = "expired";
+        db.payments = (db.payments || []).map((item: any) => item.id === payment.id ? payment : item);
+        await writeData(db);
+      }
+
+      if (!action && req.method === "GET") {
+        return Response.json({ success: true, session: payment }, { headers });
+      }
+
+      if (action === "confirm" && req.method === "POST") {
+        if (payment.status === "expired") {
+          return Response.json({ error: "Mã QR đã hết hạn" }, { status: 400, headers });
+        }
+
+        if (payment.status === "paid") {
+          const existingOrder = (db.orders || []).find((order: any) => order.id === payment.orderId);
+          return Response.json({ success: true, session: payment, order: existingOrder }, { headers });
+        }
+
+        const now = new Date().toISOString();
+        const payload = payment.orderPayload;
+        const order = {
+          id: `ORD-${Date.now()}`,
+          userId: payload.userId,
+          email: String(payload.email).toLowerCase().trim(),
+          customerName: payload.customerName || "",
+          phone: payload.phone || "",
+          address: payload.address || "",
+          note: payload.note || "",
+          items: payload.items,
+          totalItems: payload.totalItems || 0,
+          totalPrice: payload.totalPrice || 0,
+          paymentMethod: payment.paymentMethod || payload.paymentMethod || "MOMO_FAKE",
+          paymentStatus: "success",
+          status: "processing",
+          createdAt: now,
+          updatedAt: now
+        };
+
+        payment.status = "paid";
+        payment.orderId = order.id;
+        payment.paidAt = now;
+        db.orders = [order, ...(db.orders || [])];
+        db.payments = (db.payments || []).map((item: any) => item.id === payment.id ? payment : item);
+        await writeData(db);
+        return Response.json({ success: true, session: payment, order }, { headers });
       }
     }
 

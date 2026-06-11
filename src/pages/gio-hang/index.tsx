@@ -1,8 +1,19 @@
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { CheckCircle2, CreditCard, Loader2, Minus, Plus, QrCode, ShoppingBag, Smartphone, Trash2 } from "lucide-react";
+import QRCode from "qrcode";
 import { useCart, formatCartPrice, parseCartPrice } from "../../context/CartContext";
 import { API_BASE, useAuth } from "../../context/AuthContext";
+
+type PaymentSession = {
+  id: string;
+  status: "pending" | "paid" | "expired";
+  orderId?: string;
+  paymentMethod: "MOMO_FAKE" | "BANK_QR_FAKE";
+  expiresAt: string;
+};
+
+const getPendingPaymentKey = (userId: string) => `pcshop_pending_payment_${userId}`;
 
 export default function CartPage() {
   const { items, totalItems, totalPrice, updateQuantity, removeItem, clearCart } = useCart();
@@ -14,6 +25,9 @@ export default function CartPage() {
   const [address, setAddress] = useState("");
   const [note, setNote] = useState("");
   const [paymentMethod, setPaymentMethod] = useState<"MOMO_FAKE" | "BANK_QR_FAKE">("MOMO_FAKE");
+  const [paymentSession, setPaymentSession] = useState<PaymentSession | null>(null);
+  const [qrDataUrl, setQrDataUrl] = useState("");
+  const [remainingSeconds, setRemainingSeconds] = useState(0);
   const [submitting, setSubmitting] = useState(false);
   const [checkoutError, setCheckoutError] = useState("");
 
@@ -24,8 +38,106 @@ export default function CartPage() {
     setAddress(user.address || "");
   }, [user]);
 
-  const handleCheckout = async (event: FormEvent) => {
-    event.preventDefault();
+  useEffect(() => {
+    if (!user) return;
+
+    const rawPendingPayment = localStorage.getItem(getPendingPaymentKey(user.id));
+    if (!rawPendingPayment) return;
+
+    try {
+      const saved = JSON.parse(rawPendingPayment) as {
+        session: PaymentSession;
+        paymentMethod: "MOMO_FAKE" | "BANK_QR_FAKE";
+        customerName?: string;
+        phone?: string;
+        address?: string;
+        note?: string;
+      };
+
+      if (!saved.session || saved.session.status !== "pending") return;
+      if (new Date(saved.session.expiresAt).getTime() <= Date.now()) {
+        localStorage.removeItem(getPendingPaymentKey(user.id));
+        return;
+      }
+
+      const qrUrl = `${window.location.origin}/thanh-toan-ao/${saved.session.id}`;
+      QRCode.toDataURL(qrUrl, {
+        width: 420,
+        margin: 1,
+        color: {
+          dark: saved.paymentMethod === "MOMO_FAKE" ? "#a50064" : "#09090b",
+          light: "#ffffff",
+        },
+      }).then((image) => {
+        setCheckoutOpen(true);
+        setPaymentMethod(saved.paymentMethod);
+        setPaymentSession(saved.session);
+        setQrDataUrl(image);
+        setCustomerName(saved.customerName || user.name || "");
+        setPhone(saved.phone || user.phone || "");
+        setAddress(saved.address || user.address || "");
+        setNote(saved.note || "");
+      });
+    } catch {
+      localStorage.removeItem(getPendingPaymentKey(user.id));
+    }
+  }, [user]);
+
+  useEffect(() => {
+    if (!paymentSession) return;
+
+    const updateCountdown = () => {
+      const remaining = Math.max(0, Math.ceil((new Date(paymentSession.expiresAt).getTime() - Date.now()) / 1000));
+      setRemainingSeconds(remaining);
+    };
+
+    updateCountdown();
+    const timer = window.setInterval(updateCountdown, 1000);
+    return () => window.clearInterval(timer);
+  }, [paymentSession]);
+
+  useEffect(() => {
+    if (!paymentSession || paymentSession.status !== "pending") return;
+
+    const poll = async () => {
+      try {
+        const response = await fetch(`${API_BASE}/api/payments/${paymentSession.id}`);
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || "Không thể kiểm tra thanh toán.");
+
+        const session = data.session as PaymentSession;
+        setPaymentSession(session);
+
+        if (session.status === "paid") {
+          if (user) {
+            localStorage.removeItem(getPendingPaymentKey(user.id));
+          }
+          clearCart();
+          navigate("/don-hang");
+        }
+
+        if (session.status === "expired") {
+          if (user) {
+            localStorage.removeItem(getPendingPaymentKey(user.id));
+          }
+          setCheckoutError("Mã QR đã hết hạn. Vui lòng tạo mã mới.");
+        }
+      } catch (error: any) {
+        setCheckoutError(error.message || "Không thể kiểm tra trạng thái thanh toán.");
+      }
+    };
+
+    const interval = window.setInterval(poll, 2000);
+    return () => window.clearInterval(interval);
+  }, [paymentSession, clearCart, navigate]);
+
+  const paymentUrl = paymentSession
+    ? `${window.location.origin}/thanh-toan-ao/${paymentSession.id}`
+    : "";
+
+  const formattedCountdown = `${Math.floor(remainingSeconds / 60)}:${String(remainingSeconds % 60).padStart(2, "0")}`;
+
+  const handleCheckout = async () => {
     setCheckoutError("");
 
     if (!user) {
@@ -41,32 +153,58 @@ export default function CartPage() {
     setSubmitting(true);
 
     try {
-      await new Promise((resolve) => setTimeout(resolve, 900));
-      const response = await fetch(`${API_BASE}/api/orders`, {
+      const orderPayload = {
+        userId: user.id,
+        email: user.email,
+        customerName: customerName.trim(),
+        phone: phone.trim(),
+        address: address.trim(),
+        note: note.trim(),
+        items,
+        totalItems,
+        totalPrice,
+        paymentMethod,
+      };
+
+      const response = await fetch(`${API_BASE}/api/payments`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          userId: user.id,
-          email: user.email,
-          customerName: customerName.trim(),
-          phone: phone.trim(),
-          address: address.trim(),
-          note: note.trim(),
-          items,
-          totalItems,
-          totalPrice,
           paymentMethod,
+          orderPayload,
         }),
       });
       const data = await response.json();
       if (!response.ok) {
-        throw new Error(data.error || "Không thể tạo đơn hàng.");
+        throw new Error(data.error || "Không thể tạo phiên thanh toán.");
       }
 
-      clearCart();
-      navigate("/don-hang");
+      const session = data.session as PaymentSession;
+      const qrUrl = `${window.location.origin}/thanh-toan-ao/${session.id}`;
+      const image = await QRCode.toDataURL(qrUrl, {
+        width: 420,
+        margin: 1,
+        color: {
+          dark: paymentMethod === "MOMO_FAKE" ? "#a50064" : "#09090b",
+          light: "#ffffff",
+        },
+      });
+
+      setPaymentSession(session);
+      setQrDataUrl(image);
+      localStorage.setItem(
+        getPendingPaymentKey(user.id),
+        JSON.stringify({
+          session,
+          paymentMethod,
+          customerName: customerName.trim(),
+          phone: phone.trim(),
+          address: address.trim(),
+          note: note.trim(),
+        })
+      );
     } catch (error: any) {
-      setCheckoutError(error.message || "Thanh toán thất bại. Vui lòng thử lại.");
+      setCheckoutError(error.message || "Không thể tạo mã QR. Vui lòng thử lại.");
     } finally {
       setSubmitting(false);
     }
@@ -210,8 +348,7 @@ export default function CartPage() {
         )}
 
         {items.length > 0 && checkoutOpen && (
-          <form
-            onSubmit={handleCheckout}
+          <div
             className="mt-6 grid gap-6 rounded-[28px] border border-zinc-200 bg-white p-5 shadow-sm lg:grid-cols-[1fr_360px]"
           >
             <section>
@@ -224,7 +361,15 @@ export default function CartPage() {
                 </div>
                 <button
                   type="button"
-                  onClick={() => setCheckoutOpen(false)}
+                  onClick={() => {
+                    setCheckoutOpen(false);
+                    setPaymentSession(null);
+                    setQrDataUrl("");
+                    setCheckoutError("");
+                    if (user) {
+                      localStorage.removeItem(getPendingPaymentKey(user.id));
+                    }
+                  }}
                   className="rounded-full border border-zinc-200 px-4 py-2 text-xs font-bold text-zinc-500 transition hover:bg-zinc-50 cursor-pointer"
                 >
                   Đóng
@@ -288,7 +433,14 @@ export default function CartPage() {
               <div className="mt-5 grid grid-cols-2 gap-2 rounded-2xl bg-white/10 p-1">
                 <button
                   type="button"
-                  onClick={() => setPaymentMethod("MOMO_FAKE")}
+                  onClick={() => {
+                    setPaymentMethod("MOMO_FAKE");
+                    setPaymentSession(null);
+                    setQrDataUrl("");
+                    if (user) {
+                      localStorage.removeItem(getPendingPaymentKey(user.id));
+                    }
+                  }}
                   className={`flex h-10 items-center justify-center gap-2 rounded-xl text-xs font-extrabold transition cursor-pointer ${
                     paymentMethod === "MOMO_FAKE" ? "bg-white text-[#a50064]" : "text-white/75 hover:bg-white/10"
                   }`}
@@ -298,7 +450,14 @@ export default function CartPage() {
                 </button>
                 <button
                   type="button"
-                  onClick={() => setPaymentMethod("BANK_QR_FAKE")}
+                  onClick={() => {
+                    setPaymentMethod("BANK_QR_FAKE");
+                    setPaymentSession(null);
+                    setQrDataUrl("");
+                    if (user) {
+                      localStorage.removeItem(getPendingPaymentKey(user.id));
+                    }
+                  }}
                   className={`flex h-10 items-center justify-center gap-2 rounded-xl text-xs font-extrabold transition cursor-pointer ${
                     paymentMethod === "BANK_QR_FAKE" ? "bg-white text-zinc-950" : "text-white/75 hover:bg-white/10"
                   }`}
@@ -320,31 +479,17 @@ export default function CartPage() {
                     </div>
                   </div>
                 )}
-                <div className="relative grid aspect-square grid-cols-9 gap-1 overflow-hidden rounded-xl bg-white p-1">
-                  {Array.from({ length: 81 }).map((_, index) => {
-                    const active =
-                      index % 2 === 0 ||
-                      index % 7 === 0 ||
-                      index === 40 ||
-                      (paymentMethod === "MOMO_FAKE" && (index % 11 === 0 || index === 22 || index === 58));
-
-                    return (
-                      <span
-                        key={index}
-                        className={`rounded-[3px] ${
-                          active
-                            ? paymentMethod === "MOMO_FAKE"
-                              ? "bg-[#a50064]"
-                              : "bg-zinc-950"
-                            : "bg-zinc-100"
-                        }`}
-                      />
-                    );
-                  })}
-                  <div className={`absolute left-3 top-3 h-10 w-10 rounded-md border-[6px] ${paymentMethod === "MOMO_FAKE" ? "border-[#a50064]" : "border-zinc-950"} bg-white`} />
-                  <div className={`absolute right-3 top-3 h-10 w-10 rounded-md border-[6px] ${paymentMethod === "MOMO_FAKE" ? "border-[#a50064]" : "border-zinc-950"} bg-white`} />
-                  <div className={`absolute bottom-3 left-3 h-10 w-10 rounded-md border-[6px] ${paymentMethod === "MOMO_FAKE" ? "border-[#a50064]" : "border-zinc-950"} bg-white`} />
-                </div>
+                {qrDataUrl ? (
+                  <img src={qrDataUrl} alt="Mã QR thanh toán giả lập" className="aspect-square w-full rounded-xl bg-white" />
+                ) : (
+                  <div className="flex aspect-square flex-col items-center justify-center rounded-xl bg-zinc-50 text-center">
+                    <QrCode className="mb-3 h-12 w-12 text-zinc-300" />
+                    <p className="text-sm font-extrabold text-zinc-950">Bấm tạo mã QR</p>
+                    <p className="mt-1 max-w-[180px] text-xs font-semibold leading-5 text-zinc-400">
+                      QR sẽ tồn tại trong 5 phút và mở trang thanh toán ảo.
+                    </p>
+                  </div>
+                )}
               </div>
 
               <div className="mt-5 space-y-2 text-sm">
@@ -354,17 +499,34 @@ export default function CartPage() {
                 </div>
                 <div className="flex justify-between gap-4 text-zinc-300">
                   <span>Nội dung</span>
-                  <span className="font-bold text-white">PCSTORE-{user?.id?.slice(-5) || "ORDER"}</span>
+                  <span className="font-bold text-white">{paymentSession?.id || `PCSTORE-${user?.id?.slice(-5) || "ORDER"}`}</span>
                 </div>
                 <div className="flex justify-between gap-4 text-zinc-300">
                   <span>Số tiền</span>
                   <span className="font-extrabold text-white">{formatCartPrice(totalPrice)}</span>
                 </div>
+                {paymentSession && (
+                  <>
+                    <div className="flex justify-between gap-4 text-zinc-300">
+                      <span>Thời gian còn lại</span>
+                      <span className="font-extrabold text-white">{formattedCountdown}</span>
+                    </div>
+                    <a
+                      href={paymentUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="block truncate rounded-xl bg-white/10 px-3 py-2 text-[11px] font-bold text-white/80 transition hover:bg-white/15"
+                    >
+                      {paymentUrl}
+                    </a>
+                  </>
+                )}
               </div>
 
               <button
-                type="submit"
-                disabled={submitting}
+                type="button"
+                onClick={handleCheckout}
+                disabled={submitting || paymentSession?.status === "pending"}
                 className="mt-6 flex h-12 w-full items-center justify-center gap-2 rounded-full bg-white text-sm font-extrabold text-zinc-950 transition hover:bg-zinc-100 disabled:cursor-not-allowed disabled:opacity-70 cursor-pointer"
               >
                 {submitting ? (
@@ -372,18 +534,23 @@ export default function CartPage() {
                     <Loader2 className="h-4 w-4 animate-spin" />
                     Đang xác nhận...
                   </>
+                ) : paymentSession?.status === "pending" ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Đang chờ điện thoại xác nhận
+                  </>
                 ) : (
                   <>
                     <CheckCircle2 className="h-4 w-4" />
-                    Tôi đã thanh toán
+                    Tạo mã QR 5 phút
                   </>
                 )}
               </button>
               <p className="mt-3 text-center text-[11px] font-semibold leading-5 text-zinc-400">
-                Đây là thanh toán giả lập: không trừ tiền, bấm xác nhận là hệ thống tự tạo đơn thành công.
+                Quét QR bằng điện thoại, bấm xác nhận trên trang mở ra. Web này sẽ tự nhận thành công.
               </p>
             </aside>
-          </form>
+          </div>
         )}
       </div>
     </div>

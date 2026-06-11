@@ -1,5 +1,58 @@
 [
   {
+    "id": "ORD-1781205740595",
+    "userId": "acc-1001",
+    "email": "admin@qtitpc.dev",
+    "customerName": "Quản trị viên",
+    "phone": "21",
+    "address": "3123",
+    "note": "123",
+    "items": [
+      {
+        "id": "latest-Màn hình 4K",
+        "name": "Màn hình 4K",
+        "specs": "Độ phân giải siêu nét cho đồ họa.",
+        "price": "Từ 8.490.000đ",
+        "category": "Cửa hàng",
+        "quantity": 1
+      }
+    ],
+    "totalItems": 1,
+    "totalPrice": 8490000,
+    "paymentMethod": "MOMO_FAKE",
+    "paymentStatus": "success",
+    "status": "processing",
+    "createdAt": "2026-06-11T19:22:20.595Z",
+    "updatedAt": "2026-06-11T19:22:20.595Z"
+  },
+  {
+    "id": "ORD-1781204807908",
+    "userId": "acc-1001",
+    "email": "admin@qtitpc.dev",
+    "customerName": "Quản trị viên",
+    "phone": "123123",
+    "address": "123",
+    "note": "123",
+    "items": [
+      {
+        "id": "component-VGA-ASUS Dual GeForce RTX 4060 White",
+        "name": "ASUS Dual GeForce RTX 4060 White",
+        "specs": "8GB GDDR6 / 128-bit / 2 Fan / White",
+        "price": "8.490.000đ",
+        "image": "https://ttcenter.com.vn/uploads/product/rwmxyt9k-1567-card-man-hinh-asus-dual-geforce-rtx-4060-8gb-gddr6-2-fan-oc-white-dual-rtx4060-o8g-white.webp",
+        "category": "VGA",
+        "quantity": 1
+      }
+    ],
+    "totalItems": 1,
+    "totalPrice": 8490000,
+    "paymentMethod": "BANK_QR_FAKE",
+    "paymentStatus": "success",
+    "status": "processing",
+    "createdAt": "2026-06-11T19:06:47.908Z",
+    "updatedAt": "2026-06-11T19:06:47.908Z"
+  },
+  {
     "id": "ORD-1781204245228",
     "userId": "acc-1001",
     "email": "admin@qtitpc.dev",
