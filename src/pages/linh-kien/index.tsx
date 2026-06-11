@@ -18,15 +18,15 @@ interface Product {
 
 /* ── DATA ──────────────────────────────────────────────────────────── */
 const componentCategories = [
-  { id: "ram",      icon: "💾", label: "RAM" },
-  { id: "cpu",      icon: "🔲", label: "CPU\nVi Xử Lý" },
-  { id: "vga",      icon: "🖥",  label: "VGA\nCard Màn Hình" },
-  { id: "mainboard",icon: "📋", label: "Mainboard\nBo Mạch Chủ" },
-  { id: "ssd",      icon: "💿", label: "SSD\nỔ Cứng SSD" },
-  { id: "hdd",      icon: "🗄",  label: "HDD\nỔ Cứng HDD" },
-  { id: "psu",      icon: "🔌", label: "PSU\nNguồn" },
-  { id: "cooling",  icon: "❄",  label: "Tản Nhiệt" },
-  { id: "case",     icon: "🖥",  label: "Case\nVỏ Máy Tính" },
+  { id: "ram",       label: "RAM",              from: "#7c3aed", to: "#a78bfa", glow: "rgba(167,139,250,0.35)" },
+  { id: "cpu",       label: "CPU / Vi Xử Lý",  from: "#0f172a", to: "#1e3a5f", glow: "rgba(56,189,248,0.25)" },
+  { id: "vga",       label: "VGA / Card Màn",   from: "#dc2626", to: "#f97316", glow: "rgba(249,115,22,0.30)" },
+  { id: "mainboard", label: "Mainboard",         from: "#065f46", to: "#059669", glow: "rgba(5,150,105,0.30)" },
+  { id: "ssd",       label: "SSD / Ổ Cứng SSD", from: "#1e40af", to: "#38bdf8", glow: "rgba(56,189,248,0.30)" },
+  { id: "hdd",       label: "HDD / Ổ Cứng HDD", from: "#374151", to: "#6b7280", glow: "rgba(107,114,128,0.25)" },
+  { id: "psu",       label: "PSU / Nguồn",       from: "#78350f", to: "#d97706", glow: "rgba(217,119,6,0.30)" },
+  { id: "cooling",   label: "Tản Nhiệt",         from: "#164e63", to: "#06b6d4", glow: "rgba(6,182,212,0.30)" },
+  { id: "case",      label: "Case / Vỏ Máy",     from: "#1c1917", to: "#44403c", glow: "rgba(68,64,60,0.40)" },
 ];
 
 const products: Product[] = [
@@ -249,18 +249,42 @@ export default function LinhKienIndex() {
               Xem tất cả <ChevronRight className="w-4 h-4" />
             </a>
           </div>
-          <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
+          <div className="grid grid-cols-3 sm:grid-cols-5 md:grid-cols-9 gap-3 md:gap-4">
             {componentCategories.map(cat => (
               <button
                 key={cat.id}
                 onClick={() => setActiveCategory(cat.id)}
-                className={`flex flex-col items-center gap-2 px-5 py-4 rounded-2xl border transition-all duration-200 shrink-0 min-w-[80px] cursor-pointer
+                className={`group cursor-pointer bg-white rounded-2xl border shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 overflow-hidden text-left
                   ${activeCategory === cat.id
-                    ? "bg-zinc-900 border-zinc-900 text-white shadow-lg shadow-zinc-900/20"
-                    : "bg-white border-zinc-100 text-zinc-600 hover:border-zinc-300 hover:shadow-sm"}`}
+                    ? "border-zinc-900 ring-2 ring-zinc-900/10"
+                    : "border-zinc-100"}`}
               >
-                <span className="text-xl leading-none">{cat.icon}</span>
-                <span className="text-[11px] font-semibold leading-tight text-center whitespace-pre-line">{cat.label}</span>
+                {/* Gradient block */}
+                <div
+                  className="w-full aspect-[4/3] relative"
+                  style={{
+                    background: `linear-gradient(135deg, ${cat.from} 0%, ${cat.to} 100%)`,
+                    overflow: "hidden",
+                  }}
+                >
+                  <div style={{
+                    position: "absolute", inset: 0,
+                    background: `radial-gradient(circle at 30% 30%, ${cat.glow} 0%, transparent 65%)`,
+                    pointerEvents: "none",
+                  }} />
+                  {activeCategory === cat.id && (
+                    <div className="absolute inset-0 ring-2 ring-inset ring-white/20" />
+                  )}
+                </div>
+                {/* Label row */}
+                <div className="flex items-center justify-between px-3 py-2.5">
+                  <span className={`text-[12px] font-semibold leading-tight transition-colors
+                    ${activeCategory === cat.id ? "text-zinc-950" : "text-zinc-800 group-hover:text-zinc-950"}`}>
+                    {cat.label}
+                  </span>
+                  <ChevronRight className={`w-3.5 h-3.5 transition-all duration-200
+                    ${activeCategory === cat.id ? "text-zinc-700 translate-x-0.5" : "text-zinc-400 group-hover:text-zinc-700 group-hover:translate-x-0.5"}`} />
+                </div>
               </button>
             ))}
           </div>

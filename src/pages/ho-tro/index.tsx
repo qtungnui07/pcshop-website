@@ -254,8 +254,8 @@ export default function HoTroIndex() {
   const activeCount = tickets.filter(t => t.status !== "cancelled" && t.status !== "completed").length;
 
   return (
-    <div className="w-full bg-[#f8fafc] min-h-screen py-6 font-sans">
-      <main className="main-content">
+    <div className="w-full font-sans">
+      <main className="main-content max-w-[1200px] mx-auto px-4 md:px-6">
         
         {/* ═════════════════════════════════════════════════════════════════ */}
         {/* VIEW 1: SUPPORT HOME                                              */}

@@ -383,22 +383,13 @@ body {
     margin-bottom: 20px;
 }
 
-/* Color theme mappings */
-.red-theme {
-    background-color: var(--color-theme-red-light);
-    color: var(--color-theme-red);
-}
-.orange-theme {
-    background-color: var(--color-theme-orange-light);
-    color: var(--color-theme-orange);
-}
-.blue-theme {
-    background-color: var(--color-theme-blue-light);
-    color: var(--color-theme-blue);
-}
+/* Color theme mappings (Updated to black per request) */
+.red-theme,
+.orange-theme,
+.blue-theme,
 .green-theme {
-    background-color: var(--color-theme-green-light);
-    color: var(--color-theme-green);
+    background-color: var(--color-bg-primary);
+    color: var(--color-text-primary);
 }
 
 .card-title {
