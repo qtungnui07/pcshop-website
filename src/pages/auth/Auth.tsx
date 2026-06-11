@@ -1,7 +1,8 @@
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Mail, Lock, User, ArrowRight, Check } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
 
 function RequirementItem({ satisfied, label }: { satisfied: boolean; label: string }) {
   return (
@@ -36,6 +37,8 @@ function RequirementItem({ satisfied, label }: { satisfied: boolean; label: stri
 }
 
 export default function Auth() {
+  const { login, register, loginWithGoogle } = useAuth();
+  const navigate = useNavigate();
   const [isLogin, setIsLogin] = useState(true);
 
   // Form states
@@ -43,6 +46,7 @@ export default function Auth() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errors, setErrors] = useState<{ name?: string; email?: string; password?: string }>({});
+  const [generalError, setGeneralError] = useState<string | null>(null);
 
   // Password requirement formulas
   const hasMinLength = password.length >= 8;
@@ -50,16 +54,38 @@ export default function Auth() {
   const hasLowercase = /[a-z]/.test(password);
   const hasSpecial = /[^A-Za-z0-9]/.test(password);
 
+  // Redirect if user is already logged in
+  const { user } = useAuth();
+  useEffect(() => {
+    if (user) {
+      if (user.role === "admin") {
+        navigate("/admin");
+      } else {
+        navigate("/");
+      }
+    }
+  }, [user, navigate]);
+
   const handleTabChange = (login: boolean) => {
     setIsLogin(login);
     setName('');
     setEmail('');
     setPassword('');
     setErrors({});
+    setGeneralError(null);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleGoogleClick = async () => {
+    setGeneralError(null);
+    const result = await loginWithGoogle();
+    if (!result.success) {
+      setGeneralError(result.error || "Đăng nhập bằng Google thất bại");
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setGeneralError(null);
     const newErrors: { name?: string; email?: string; password?: string } = {};
 
     // Name check
@@ -88,7 +114,31 @@ export default function Auth() {
       return;
     }
 
-    alert(isLogin ? 'Đăng nhập thành công!' : 'Đăng ký tài khoản thành công!');
+    if (isLogin) {
+      const result = await login(email, password);
+      if (result.success) {
+        const savedUser = localStorage.getItem("pcshop_user");
+        if (savedUser) {
+          const parsed = JSON.parse(savedUser);
+          if (parsed.role === "admin") {
+            navigate("/admin");
+          } else {
+            navigate("/");
+          }
+        } else {
+          navigate("/");
+        }
+      } else {
+        setGeneralError(result.error || "Đăng nhập thất bại");
+      }
+    } else {
+      const result = await register(name, email, password);
+      if (result.success) {
+        navigate("/");
+      } else {
+        setGeneralError(result.error || "Đăng ký thất bại");
+      }
+    }
   };
 
   return (
@@ -138,6 +188,15 @@ export default function Auth() {
             transition={{ duration: 0.3, ease: "easeInOut" }}
           >
             <form className="space-y-4" onSubmit={handleSubmit}>
+              {generalError && (
+                <motion.div
+                  initial={{ opacity: 0, y: -5 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="bg-red-50 border border-red-200 text-red-600 text-xs font-semibold px-4 py-2.5 rounded-xl text-center"
+                >
+                  {generalError}
+                </motion.div>
+              )}
               {!isLogin && (
                 <div className="space-y-1.5">
                   <label className="text-sm font-medium text-gray-700">Họ và tên</label>
@@ -157,6 +216,7 @@ export default function Auth() {
                           ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
                           : 'border-gray-200 focus:ring-blue-500 focus:border-blue-500'
                       }`}
+                      style={{ paddingLeft: '40px' }}
                       placeholder="Nguyễn Văn A"
                     />
                   </div>
@@ -190,6 +250,7 @@ export default function Auth() {
                         ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
                         : 'border-gray-200 focus:ring-blue-500 focus:border-blue-500'
                     }`}
+                    style={{ paddingLeft: '40px' }}
                     placeholder="you@example.com"
                   />
                 </div>
@@ -227,6 +288,7 @@ export default function Auth() {
                         ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
                         : 'border-gray-200 focus:ring-blue-500 focus:border-blue-500'
                     }`}
+                    style={{ paddingLeft: '40px' }}
                     placeholder="••••••••"
                   />
                 </div>
@@ -274,7 +336,11 @@ export default function Auth() {
             <span className="text-xs text-gray-400 font-medium tracking-wide uppercase">Hoặc</span>
           </div>
           <div className="grid grid-cols-1 gap-4">
-            <button className="flex items-center justify-center py-2.5 border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors gap-2 text-sm font-medium text-gray-700">
+            <button
+              type="button"
+              onClick={handleGoogleClick}
+              className="flex items-center justify-center py-2.5 border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors gap-2 text-sm font-medium text-gray-700 cursor-pointer w-full"
+            >
               <div 
                 className="w-5 h-5" 
                 style={{

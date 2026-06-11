@@ -6,6 +6,11 @@ import tailwindcss from '@tailwindcss/vite'
 export default defineConfig({
   plugins: [react() , tailwindcss()],
   server: {
-    allowedHosts: ["pc.qtitpc.dev", "localhost"]
+    host: "0.0.0.0",
+    port: 5173,
+    allowedHosts: ["pc.qtitpc.dev", "localhost"],
+    watch: {
+      usePolling: true
+    }
   }
 })

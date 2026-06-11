@@ -83,6 +83,7 @@ export default function ForgotPassword() {
                         ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
                         : 'border-gray-200 focus:ring-blue-500 focus:border-blue-500'
                     }`}
+                    style={{ paddingLeft: '40px' }}
                     placeholder="you@example.com"
                     disabled={isLoading}
                   />

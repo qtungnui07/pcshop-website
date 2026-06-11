@@ -424,5 +424,34 @@
       "status": "completed",
       "createdAt": "2026-06-05T14:15:00.000Z"
     }
+  ],
+  "accounts": [
+    {
+      "id": "acc-1001",
+      "name": "Quản trị viên",
+      "email": "admin@qtitpc.dev",
+      "password": "admin123",
+      "role": "admin",
+      "avatar": "",
+      "provider": "local"
+    },
+    {
+      "id": "acc-1002",
+      "name": "Nguyễn Hoàng Long",
+      "email": "long.nh@gmail.com",
+      "password": "user123",
+      "role": "user",
+      "avatar": "",
+      "provider": "local"
+    },
+    {
+      "id": "acc-1781172670725",
+      "name": "Đinh Quang Tùng",
+      "email": "qtung.07.dt@gmail.com",
+      "password": "Dinhquangtung@",
+      "role": "user",
+      "avatar": "",
+      "provider": "local"
+    }
   ]
 }

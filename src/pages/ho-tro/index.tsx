@@ -63,9 +63,11 @@ const INITIAL_MOCK_TICKETS: Ticket[] = [
   }
 ];
 
-const API_BASE = typeof window !== "undefined" && (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1")
-  ? "http://localhost:3001"
-  : "https://api-pc.qtitpc.dev";
+const API_BASE = typeof window !== "undefined"
+  ? (window.location.hostname.includes("qtitpc.dev")
+    ? "https://api-pc.qtitpc.dev"
+    : `${window.location.protocol}//${window.location.hostname}:3001`)
+  : "http://localhost:3001";
 
 export default function HoTroIndex() {
   const [tickets, setTickets] = useState<Ticket[]>([]);

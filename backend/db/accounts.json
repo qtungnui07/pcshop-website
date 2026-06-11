@@ -1,0 +1,49 @@
+[
+  {
+    "id": "acc-1001",
+    "name": "Quản trị viên",
+    "email": "admin@qtitpc.dev",
+    "password": "admin123",
+    "role": "admin",
+    "avatar": "",
+    "provider": "local"
+  },
+  {
+    "id": "acc-1002",
+    "name": "Nguyễn Hoàng Long",
+    "email": "long.nh@gmail.com",
+    "password": "user123",
+    "role": "user",
+    "avatar": "",
+    "provider": "local"
+  },
+  {
+    "id": "acc-1781172670725",
+    "name": "Đinh Quang Tùng",
+    "email": "qtung.07.dt@gmail.com",
+    "password": "Dinhquangtung@",
+    "role": "user",
+    "avatar": "https://api-pc.qtitpc.dev/images/users/avatar-1781175842456-42v6mkx.png",
+    "provider": "local",
+    "phone": "",
+    "address": ""
+  },
+  {
+    "id": "acc-1781174867102",
+    "name": "Đinh Quang Tùng",
+    "email": "tungproxtv2007yt@gmail.com",
+    "password": "",
+    "role": "user",
+    "avatar": "https://img.clerk.com/eyJ0eXBlIjoicHJveHkiLCJzcmMiOiJodHRwczovL2ltYWdlcy5jbGVyay5kZXYvb2F1dGhfZ29vZ2xlL2ltZ18zRXpJRkRmbTc1aW5sVVZ4bTg5ajJsSVdoVVEifQ",
+    "provider": "google"
+  },
+  {
+    "id": "acc-1781177364659",
+    "name": "jasdolhasd1082",
+    "email": "asdasdjo2q12@asasdkj.com",
+    "password": "jqoldh821045@jasdA",
+    "role": "user",
+    "avatar": "",
+    "provider": "local"
+  }
+]

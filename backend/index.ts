@@ -1,7 +1,17 @@
 import { serve } from "bun";
+import { mkdir, rename } from "node:fs/promises";
 
 const PORT = 3001;
-const DATA_FILE = "./backend/data.json";
+const DB_DIR = "./backend/db";
+
+try {
+  await mkdir(DB_DIR, { recursive: true });
+  await mkdir("./backend/public/images", { recursive: true });
+} catch (e: any) {
+  if (e.code !== "EEXIST") {
+    console.error("Failed creating directory:", e);
+  }
+}
 
 // Default data initialized if data.json doesn't exist
 const defaultPCs = [
@@ -13,7 +23,7 @@ const defaultPCs = [
     price: "28.990.000đ",
     from: "#7c3aed",
     to: "#ec4899",
-    image: `http://localhost:${PORT}/images/pc-infinity.png`
+    image: `http://localhost:${PORT}/images/pcs/pc-infinity.png`
   },
   {
     badge: "Mới",
@@ -23,7 +33,7 @@ const defaultPCs = [
     price: "32.990.000đ",
     from: "#1d4ed8",
     to: "#38bdf8",
-    image: `http://localhost:${PORT}/images/pc-frost.png`
+    image: `http://localhost:${PORT}/images/pcs/pc-frost.png`
   },
   {
     badge: "Hot",
@@ -33,7 +43,7 @@ const defaultPCs = [
     price: "45.990.000đ",
     from: "#0f172a",
     to: "#1e40af",
-    image: `http://localhost:${PORT}/images/pc-nebula.png`
+    image: `http://localhost:${PORT}/images/pcs/pc-nebula.png`
   },
   {
     badge: "",
@@ -43,7 +53,7 @@ const defaultPCs = [
     price: "89.990.000đ",
     from: "#18181b",
     to: "#3f3f46",
-    image: `http://localhost:${PORT}/images/pc-workstation.png`
+    image: `http://localhost:${PORT}/images/pcs/pc-workstation.png`
   },
   {
     badge: "",
@@ -53,7 +63,7 @@ const defaultPCs = [
     price: "18.990.000đ",
     from: "#e2e8f0",
     to: "#f1f5f9",
-    image: `http://localhost:${PORT}/images/pc-mini.png`
+    image: `http://localhost:${PORT}/images/pcs/pc-mini.png`
   },
   {
     badge: "Sale",
@@ -63,7 +73,7 @@ const defaultPCs = [
     price: "24.500.000đ",
     from: "#f59e0b",
     to: "#e11d48",
-    image: `http://localhost:${PORT}/images/pc-infinity.png`
+    image: `http://localhost:${PORT}/images/pcs/pc-infinity.png`
   },
   {
     badge: "Mới",
@@ -73,7 +83,7 @@ const defaultPCs = [
     price: "38.990.000đ",
     from: "#06b6d4",
     to: "#3b82f6",
-    image: `http://localhost:${PORT}/images/pc-frost.png`
+    image: `http://localhost:${PORT}/images/pcs/pc-frost.png`
   },
   {
     badge: "",
@@ -83,7 +93,7 @@ const defaultPCs = [
     price: "27.800.000đ",
     from: "#4b5563",
     to: "#1f2937",
-    image: `http://localhost:${PORT}/images/pc-workstation.png`
+    image: `http://localhost:${PORT}/images/pcs/pc-workstation.png`
   },
   {
     badge: "",
@@ -93,7 +103,7 @@ const defaultPCs = [
     price: "29.990.000đ",
     from: "#374151",
     to: "#111827",
-    image: `http://localhost:${PORT}/images/pc-mini.png`
+    image: `http://localhost:${PORT}/images/pcs/pc-mini.png`
   },
   {
     badge: "Hot",
@@ -103,7 +113,7 @@ const defaultPCs = [
     price: "39.990.000đ",
     from: "#4338ca",
     to: "#6d28d9",
-    image: `http://localhost:${PORT}/images/pc-nebula.png`
+    image: `http://localhost:${PORT}/images/pcs/pc-nebula.png`
   }
 ];
 
@@ -279,44 +289,124 @@ const defaultTickets = [
   }
 ];
 
-async function readData() {
-  const file = Bun.file(DATA_FILE);
-  let db: any = null;
+const defaultAccounts = [
+  {
+    id: "acc-1001",
+    name: "Quản trị viên",
+    email: "admin@qtitpc.dev",
+    password: "admin123",
+    role: "admin",
+    avatar: "",
+    provider: "local"
+  },
+  {
+    id: "acc-1002",
+    name: "Nguyễn Hoàng Long",
+    email: "long.nh@gmail.com",
+    password: "user123",
+    role: "user",
+    avatar: "",
+    provider: "local"
+  }
+];
+
+async function readCollection(name: string, defaultValue: any) {
+  const file = Bun.file(`${DB_DIR}/${name}.json`);
   if (await file.exists()) {
     try {
-      db = await file.json();
+      return await file.json();
     } catch (e) {
-      console.error("Failed parsing data.json, resetting to defaults", e);
+      console.error(`Failed parsing ${name}.json, resetting to default`, e);
     }
   }
-
-  // Handle migration from old Array format to new Object format
-  if (!db || Array.isArray(db)) {
-    db = {
-      pcs: Array.isArray(db) ? db : defaultPCs,
-      components: defaultComponents,
-      laptops: defaultLaptops,
-      accessories: defaultAccessories,
-      tickets: defaultTickets
-    };
-    await writeData(db);
-  } else {
-    // Fill in missing sections just in case
-    let modified = false;
-    if (!db.pcs) { db.pcs = defaultPCs; modified = true; }
-    if (!db.components) { db.components = defaultComponents; modified = true; }
-    if (!db.laptops) { db.laptops = defaultLaptops; modified = true; }
-    if (!db.accessories) { db.accessories = defaultAccessories; modified = true; }
-    if (!db.tickets) { db.tickets = defaultTickets; modified = true; }
-    if (modified) {
-      await writeData(db);
-    }
-  }
-  return db;
+  await writeCollection(name, defaultValue);
+  return defaultValue;
 }
 
-async function writeData(data: any) {
-  await Bun.write(DATA_FILE, JSON.stringify(data, null, 2));
+async function writeCollection(name: string, data: any) {
+  await Bun.write(`${DB_DIR}/${name}.json`, JSON.stringify(data, null, 2));
+}
+
+async function readData() {
+  // Check if we need to migrate from old data.json
+  const oldFile = Bun.file("./backend/data.json");
+  let oldDb: any = null;
+  if (await oldFile.exists()) {
+    try {
+      oldDb = await oldFile.json();
+      console.log("[Migration] Found old data.json, migrating to separate collection files...");
+    } catch (e) {
+      console.error("[Migration] Failed parsing old data.json", e);
+    }
+  }
+
+  const pcs = await readCollection("pcs", oldDb?.pcs ?? defaultPCs);
+  const components = await readCollection("components", oldDb?.components ?? defaultComponents);
+  const laptops = await readCollection("laptops", oldDb?.laptops ?? defaultLaptops);
+  const accessories = await readCollection("accessories", oldDb?.accessories ?? defaultAccessories);
+  const tickets = await readCollection("tickets", oldDb?.tickets ?? defaultTickets);
+  const accounts = await readCollection("accounts", oldDb?.accounts ?? defaultAccounts);
+
+  // Auto-migrate image URLs to subfolders if they aren't migrated yet
+  let pcsChanged = false;
+  const migratedPcs = pcs.map((pc: any) => {
+    if (pc.image && pc.image.includes("/images/pc-") && !pc.image.includes("/images/pcs/pc-")) {
+      pcsChanged = true;
+      return { ...pc, image: pc.image.replace("/images/pc-", "/images/pcs/pc-") };
+    }
+    return pc;
+  });
+  if (pcsChanged) {
+    await writeCollection("pcs", migratedPcs);
+  }
+
+  let accountsChanged = false;
+  const migratedAccounts = accounts.map((acc: any) => {
+    if (acc.avatar && acc.avatar.includes("/images/avatar-") && !acc.avatar.includes("/images/users/avatar-")) {
+      accountsChanged = true;
+      return { ...acc, avatar: acc.avatar.replace("/images/avatar-", "/images/users/avatar-") };
+    }
+    return acc;
+  });
+  if (accountsChanged) {
+    await writeCollection("accounts", migratedAccounts);
+  }
+
+  // If old file existed, write them out and backup/remove the old file
+  if (oldDb) {
+    await writeCollection("pcs", pcs);
+    await writeCollection("components", components);
+    await writeCollection("laptops", laptops);
+    await writeCollection("accessories", accessories);
+    await writeCollection("tickets", tickets);
+    await writeCollection("accounts", accounts);
+    
+    try {
+      await rename("./backend/data.json", "./backend/data.json.bak");
+      console.log("[Migration] Successfully migrated data.json to backend/db/*.json. Backup saved to backend/data.json.bak");
+    } catch (err) {
+      console.error("[Migration] Failed to rename old data.json:", err);
+    }
+  }
+
+  return { pcs, components, laptops, accessories, tickets, accounts };
+}
+
+async function writeData(db: any) {
+  if (db.pcs) await writeCollection("pcs", db.pcs);
+  if (db.components) await writeCollection("components", db.components);
+  if (db.laptops) await writeCollection("laptops", db.laptops);
+  if (db.accessories) await writeCollection("accessories", db.accessories);
+  if (db.tickets) await writeCollection("tickets", db.tickets);
+  if (db.accounts) await writeCollection("accounts", db.accounts);
+}
+
+function verifyAdmin(req: Request, db: any): boolean {
+  const authHeader = req.headers.get("Authorization");
+  if (!authHeader || !authHeader.startsWith("Bearer ")) return false;
+  const email = authHeader.replace("Bearer ", "").trim();
+  const user = db.accounts?.find((u: any) => u.email === email);
+  return user && user.role === "admin";
 }
 
 serve({
@@ -327,7 +417,7 @@ serve({
     const headers = {
       "Access-Control-Allow-Origin": "*",
       "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-      "Access-Control-Allow-Headers": "Content-Type",
+      "Access-Control-Allow-Headers": "Content-Type, Authorization",
     };
 
     if (req.method === "OPTIONS") {
@@ -357,7 +447,12 @@ serve({
       }
       // Default GET
       const db = await readData();
-      return Response.json(db.pcs, { headers });
+      const origin = `${req.headers.get("x-forwarded-proto") || "http"}://${req.headers.get("x-forwarded-host") || req.headers.get("host") || `localhost:${PORT}`}`;
+      const pcsWithOrigin = db.pcs.map((pc: any) => ({
+        ...pc,
+        image: pc.image ? pc.image.replace(/^https?:\/\/[^\/]+/g, origin) : pc.image
+      }));
+      return Response.json(pcsWithOrigin, { headers });
     }
 
     // GET & POST Components
@@ -439,6 +534,219 @@ serve({
         return Response.json({ success: true }, { headers });
       } catch (err) {
         return Response.json({ error: "Invalid JSON body or missing id" }, { status: 400, headers });
+      }
+    }
+
+    // ── AUTHENTICATION ENDPOINTS ──────────────────────────────────────
+
+    // POST /api/auth/register
+    if (url.pathname === "/api/auth/register" && req.method === "POST") {
+      try {
+        const { name, email, password } = await req.json();
+        if (!name || !email || !password) {
+          return Response.json({ error: "Vui lòng nhập đầy đủ thông tin" }, { status: 400, headers });
+        }
+        const db = await readData();
+        const existing = db.accounts?.find((u: any) => u.email.toLowerCase() === email.toLowerCase());
+        if (existing) {
+          return Response.json({ error: "Email này đã được sử dụng" }, { status: 400, headers });
+        }
+
+        const newUser = {
+          id: `acc-${Date.now()}`,
+          name: name.trim(),
+          email: email.toLowerCase().trim(),
+          password: password,
+          role: "user",
+          avatar: "",
+          provider: "local"
+        };
+
+        db.accounts = [...(db.accounts || []), newUser];
+        await writeData(db);
+
+        // Don't send password back
+        const { password: _, ...userWithoutPassword } = newUser;
+        return Response.json({ success: true, user: userWithoutPassword }, { headers });
+      } catch (err) {
+        return Response.json({ error: "Đã xảy ra lỗi hệ thống" }, { status: 500, headers });
+      }
+    }
+
+    // POST /api/auth/login
+    if (url.pathname === "/api/auth/login" && req.method === "POST") {
+      try {
+        const { email, password } = await req.json();
+        if (!email || !password) {
+          return Response.json({ error: "Vui lòng nhập email và mật khẩu" }, { status: 400, headers });
+        }
+        const db = await readData();
+        const user = db.accounts?.find(
+          (u: any) => u.email.toLowerCase() === email.toLowerCase() && u.password === password
+        );
+        if (!user) {
+          return Response.json({ error: "Email hoặc mật khẩu không chính xác" }, { status: 400, headers });
+        }
+
+        const { password: _, ...userWithoutPassword } = user;
+        return Response.json({ success: true, user: userWithoutPassword }, { headers });
+      } catch (err) {
+        return Response.json({ error: "Đã xảy ra lỗi hệ thống" }, { status: 500, headers });
+      }
+    }
+
+    // POST /api/auth/google-login
+    if (url.pathname === "/api/auth/google-login" && req.method === "POST") {
+      try {
+        const { email, name, avatar } = await req.json();
+        if (!email || !name) {
+          return Response.json({ error: "Thông tin Google không hợp lệ" }, { status: 400, headers });
+        }
+        const db = await readData();
+        let user = db.accounts?.find((u: any) => u.email.toLowerCase() === email.toLowerCase());
+
+        if (user) {
+          // If local user exists, let them log in and associate Google avatar if empty
+          let updated = false;
+          if (!user.avatar && avatar) {
+            user.avatar = avatar;
+            updated = true;
+          }
+          if (user.provider !== "google" && user.provider !== "local") {
+            user.provider = "google";
+            updated = true;
+          }
+          if (updated) {
+            db.accounts = db.accounts.map((u: any) => u.id === user.id ? user : u);
+            await writeData(db);
+          }
+        } else {
+          // Create new user for google auth
+          user = {
+            id: `acc-${Date.now()}`,
+            name: name.trim(),
+            email: email.toLowerCase().trim(),
+            password: "", // Google accounts don't have local passwords
+            role: email.toLowerCase().trim() === "admin@qtitpc.dev" ? "admin" : "user",
+            avatar: avatar || "",
+            provider: "google"
+          };
+          db.accounts = [...(db.accounts || []), user];
+          await writeData(db);
+        }
+
+        const { password: _, ...userWithoutPassword } = user;
+        return Response.json({ success: true, user: userWithoutPassword }, { headers });
+      } catch (err) {
+        return Response.json({ error: "Đã xảy ra lỗi hệ thống" }, { status: 500, headers });
+      }
+    }
+
+    // POST /api/upload
+    if (url.pathname === "/api/upload" && req.method === "POST") {
+      try {
+        const formData = await req.formData();
+        const file = formData.get("file") as File;
+        if (!file) {
+          return Response.json({ error: "Không tìm thấy tệp tin gửi lên" }, { status: 400, headers });
+        }
+
+        const allowedTypes = ["users", "pcs", "laptops", "phu-kien", "linh-kien"];
+        const type = (formData.get("type") as string || "users").toLowerCase().trim();
+        const subfolder = allowedTypes.includes(type) ? type : "users";
+
+        const allowedExtensions = ["png", "jpg", "jpeg", "gif", "webp"];
+        const extension = file.name.split(".").pop()?.toLowerCase() || "png";
+        if (!allowedExtensions.includes(extension)) {
+          return Response.json({ error: "Định dạng ảnh không hợp lệ (chỉ chấp nhận PNG, JPG, JPEG, GIF, WEBP)" }, { status: 400, headers });
+        }
+
+        const prefix = subfolder === "users" ? "avatar" : "img";
+        const filename = `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 9)}.${extension}`;
+        const targetDir = `./backend/public/images/${subfolder}`;
+        try {
+          await mkdir(targetDir, { recursive: true });
+        } catch (e: any) {
+          if (e.code !== "EEXIST") throw e;
+        }
+        const filePath = `${targetDir}/${filename}`;
+
+        const arrayBuffer = await file.arrayBuffer();
+        await Bun.write(filePath, arrayBuffer);
+
+        const origin = `${req.headers.get("x-forwarded-proto") || "http"}://${req.headers.get("x-forwarded-host") || req.headers.get("host") || `localhost:${PORT}`}`;
+        const imageUrl = `${origin}/images/${subfolder}/${filename}`;
+
+        return Response.json({ success: true, url: imageUrl }, { headers });
+      } catch (err) {
+        console.error("Upload error:", err);
+        return Response.json({ error: "Không thể tải tệp tin lên máy chủ" }, { status: 500, headers });
+      }
+    }
+
+    // POST /api/auth/update-profile
+    if (url.pathname === "/api/auth/update-profile" && req.method === "POST") {
+      try {
+        const body = await req.json();
+        const { email, name, phone, address, avatar, newPassword } = body;
+        
+        if (!email) {
+          return Response.json({ error: "Email không được để trống" }, { status: 400, headers });
+        }
+
+        const db = await readData();
+        const userIndex = db.accounts.findIndex((u: any) => u.email.toLowerCase() === email.toLowerCase());
+        if (userIndex === -1) {
+          return Response.json({ error: "Không tìm thấy người dùng" }, { status: 404, headers });
+        }
+
+        const user = db.accounts[userIndex];
+        
+        // Update fields
+        user.name = name ? name.trim() : user.name;
+        if (phone !== undefined) user.phone = phone.trim();
+        if (address !== undefined) user.address = address.trim();
+        if (avatar !== undefined) user.avatar = avatar;
+        if (newPassword) user.password = newPassword;
+
+        // Save
+        db.accounts[userIndex] = user;
+        await writeData(db);
+
+        // Remove password before returning
+        const { password, ...safeUser } = user;
+
+        return Response.json({ success: true, user: safeUser }, { headers });
+      } catch (err) {
+        console.error("Update profile error:", err);
+        return Response.json({ error: "Không thể lưu thay đổi thông tin cá nhân" }, { status: 500, headers });
+      }
+    }
+
+    // ── ACCOUNTS MANAGEMENT ENDPOINTS (ADMIN ONLY) ───────────────────
+
+    // GET /api/accounts
+    if (url.pathname === "/api/accounts" && req.method === "GET") {
+      const db = await readData();
+      if (!verifyAdmin(req, db)) {
+        return Response.json({ error: "Từ chối truy cập. Chỉ dành cho admin." }, { status: 403, headers });
+      }
+      return Response.json(db.accounts || [], { headers });
+    }
+
+    // POST /api/accounts
+    if (url.pathname === "/api/accounts" && req.method === "POST") {
+      try {
+        const db = await readData();
+        if (!verifyAdmin(req, db)) {
+          return Response.json({ error: "Từ chối truy cập. Chỉ dành cho admin." }, { status: 403, headers });
+        }
+        const body = await req.json();
+        db.accounts = body;
+        await writeData(db);
+        return Response.json({ success: true }, { headers });
+      } catch (err) {
+        return Response.json({ error: "Invalid JSON body" }, { status: 400, headers });
       }
     }
 

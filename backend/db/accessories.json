@@ -1,0 +1,145 @@
+[
+  {
+    "id": 1,
+    "name": "Logitech G Pro X 2",
+    "brand": "Logitech",
+    "category": "Tai nghe",
+    "price": 3990000,
+    "badge": "Mới",
+    "colors": [
+      "Đen",
+      "Trắng"
+    ],
+    "image": "https://images.unsplash.com/photo-1713926304458-b8e00dfa9911?auto=format&fit=crop&w=1200&q=85",
+    "fallbackIcon": "Headphones"
+  },
+  {
+    "id": 2,
+    "name": "Razer BlackWidow V4",
+    "brand": "Razer",
+    "category": "Bàn phím",
+    "price": 4290000,
+    "badge": "Bán chạy",
+    "colors": [
+      "Đen"
+    ],
+    "image": "https://images.unsplash.com/photo-1661588756719-8c7bd8bdc72d?auto=format&fit=crop&w=1200&q=85",
+    "fallbackIcon": "Keyboard"
+  },
+  {
+    "id": 3,
+    "name": "Logitech G Pro X Superlight 2",
+    "brand": "Logitech",
+    "category": "Chuột",
+    "price": 2690000,
+    "colors": [
+      "Trắng",
+      "Đen",
+      "Hồng"
+    ],
+    "image": "https://images.unsplash.com/photo-1707858004668-d33b9a1d1956?auto=format&fit=crop&w=1600&q=85",
+    "fallbackIcon": "Mouse"
+  },
+  {
+    "id": 4,
+    "name": "Razer Gigantus V2 Large",
+    "brand": "Razer",
+    "category": "Lót chuột",
+    "price": 490000,
+    "colors": [
+      "Đen"
+    ],
+    "image": "https://images.unsplash.com/photo-1707858057802-ab1227691ed5?auto=format&fit=crop&w=1200&q=85",
+    "fallbackIcon": "Grid3X3"
+  },
+  {
+    "id": 5,
+    "name": "Harman Kardon Onyx Studio 8",
+    "brand": "Harman Kardon",
+    "category": "Loa",
+    "price": 5490000,
+    "colors": [
+      "Đen",
+      "Trắng"
+    ],
+    "image": "https://images.unsplash.com/photo-1715321835688-831f4767cf93?auto=format&fit=crop&w=1200&q=85",
+    "fallbackIcon": "Speaker"
+  },
+  {
+    "id": 6,
+    "name": "Logitech Brio 4K",
+    "brand": "Logitech",
+    "category": "Webcam",
+    "price": 4690000,
+    "colors": [
+      "Đen"
+    ],
+    "image": "https://images.unsplash.com/photo-1670278458296-00ff8a63141e?auto=format&fit=crop&w=1200&q=85",
+    "fallbackIcon": "Webcam"
+  },
+  {
+    "id": 7,
+    "name": "Razer Base Station V2 Chroma",
+    "brand": "Razer",
+    "category": "Giá đỡ",
+    "price": 1590000,
+    "colors": [
+      "Đen"
+    ],
+    "image": "https://images.unsplash.com/photo-1707858057802-ab1227691ed5?auto=format&fit=crop&w=1200&q=85",
+    "fallbackIcon": "Monitor"
+  },
+  {
+    "id": 8,
+    "name": "UGREEN USB-C Hub 7-in-1",
+    "brand": "UGREEN",
+    "category": "Cáp & Hub",
+    "price": 890000,
+    "colors": [
+      "Đen",
+      "Trắng"
+    ],
+    "image": "https://images.unsplash.com/photo-1707858057802-ab1227691ed5?auto=format&fit=crop&w=1200&q=85",
+    "fallbackIcon": "Cable"
+  },
+  {
+    "id": 9,
+    "name": "Keychron K8 Pro",
+    "brand": "Keychron",
+    "category": "Bàn phím",
+    "price": 3190000,
+    "colors": [
+      "Đen",
+      "Xanh dương"
+    ],
+    "image": "https://images.unsplash.com/photo-1636858508196-d4043dad51fd?auto=format&fit=crop&w=1200&q=85",
+    "fallbackIcon": "Keyboard"
+  },
+  {
+    "id": 10,
+    "name": "HyperX Pulsefire Haste 2",
+    "brand": "HyperX",
+    "category": "Chuột",
+    "price": 1290000,
+    "colors": [
+      "Trắng",
+      "Đen",
+      "Hồng"
+    ],
+    "image": "https://images.unsplash.com/photo-1707858004668-d33b9a1d1956?auto=format&fit=crop&w=1600&q=85",
+    "fallbackIcon": "Mouse"
+  },
+  {
+    "id": 906,
+    "name": "Lê Tiến Hưng",
+    "brand": "Logitech",
+    "category": "Cáp & Hub",
+    "price": 1000,
+    "badge": "Không ai mua",
+    "colors": [
+      "Hồng"
+    ],
+    "image": "http://localhost:3001/images/demo-product.jpg",
+    "fallbackIcon": "Cable"
+  }
+]

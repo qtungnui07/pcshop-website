@@ -8,9 +8,10 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "backend": "bun backend/index.ts"
+    "backend": "bun --watch backend/index.ts"
   },
   "dependencies": {
+    "@clerk/clerk-react": "^5.61.3",
     "framer-motion": "^12.40.0",
     "lucide-react": "^1.17.0",
     "react": "^19.2.6",

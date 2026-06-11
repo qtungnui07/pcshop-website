@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  frontend:
+    image: node:22-slim
+    container_name: pcshop-frontend
+    working_dir: /app
+    volumes:
+      - .:/app
+    ports:
+      - "5174:5173"
+    environment:
+      - NODE_ENV=development
+    command: npm run dev -- --host 0.0.0.0 --port 5173
+    restart: always
+
+  backend:
+    image: oven/bun:1.1-slim
+    container_name: pcshop-backend
+    working_dir: /app
+    volumes:
+      - .:/app
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=development
+    command: bun run backend
+    restart: always
+
+  tunnel:
+    image: cloudflare/cloudflared:latest
+    container_name: pcshop-tunnel
+    user: "1000:1000"
+    volumes:
+      - /home/q/.cloudflared:/home/q/.cloudflared
+    command: tunnel --config /home/q/.cloudflared/pc-shop.yml run
+    restart: always
+    depends_on:
+      - frontend
+      - backend

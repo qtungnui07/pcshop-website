@@ -1,0 +1,78 @@
+[
+  {
+    "name": "G.Skill Trident Z5 RGB",
+    "specs": "18GB (2x8GB) DDR5 6000MHz",
+    "price": "2.890.000đ",
+    "badge": "Mới",
+    "badgeColor": "#22c55e",
+    "color": "#e0e7ef"
+  },
+  {
+    "name": "Corsair Vengeance RGB",
+    "specs": "16GB (2x8GB) DDR5 5600MHz",
+    "price": "2.290.000đ",
+    "badge": "Bán chạy",
+    "badgeColor": "#f97316",
+    "color": "#1a1a2e"
+  },
+  {
+    "name": "Kingston Fury Beast",
+    "specs": "16GB (2x8GB) DDR4 3200MHz",
+    "price": "990.000đ",
+    "color": "#1a1a2e"
+  },
+  {
+    "name": "G.Skill Ripjaws V",
+    "specs": "16GB (2x8GB) DDR4 3600MHz",
+    "price": "1.290.000đ",
+    "color": "#2d2d2d"
+  },
+  {
+    "name": "Corsair Dominator Platinum",
+    "specs": "32GB (2x16GB) DDR5 6000MHz",
+    "price": "5.990.000đ",
+    "color": "#c8d0dc"
+  },
+  {
+    "name": "TeamGroup T-Force Delta RGB",
+    "specs": "32GB (2x16GB) DDR5 6000MHz",
+    "price": "4.490.000đ",
+    "color": "#111827"
+  },
+  {
+    "name": "Crucial Pro",
+    "specs": "32GB (2x16GB) DDR5 4800MHz",
+    "price": "1.690.000đ",
+    "color": "#1f2937"
+  },
+  {
+    "name": "Kingston Fury Beast",
+    "specs": "32GB (2x16GB) DDR5 6000MHz",
+    "price": "4.290.000đ",
+    "color": "#1a1a2e"
+  },
+  {
+    "name": "G.Skill Trident Z5 RGB",
+    "specs": "32GB (2x16GB) DDR5 6400MHz",
+    "price": "5.490.000đ",
+    "color": "#e0e7ef"
+  },
+  {
+    "name": "Corsair Vengeance LPX",
+    "specs": "16GB (2x8GB) DDR4 3200MHz",
+    "price": "1.190.000đ",
+    "color": "#111"
+  },
+  {
+    "name": "Apacer PANTHER",
+    "specs": "16GB (2x8GB) DDR4 3600MHz",
+    "price": "1.090.000đ",
+    "color": "#f59e0b"
+  },
+  {
+    "name": "TeamGroup T-Force Vulcan Z",
+    "specs": "16GB (2x8GB) DDR4 3200MHz",
+    "price": "890.000đ",
+    "color": "#dc2626"
+  }
+]

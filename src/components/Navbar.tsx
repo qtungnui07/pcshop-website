@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, ShoppingBag, Monitor, User } from 'lucide-react';
+import { Search, ShoppingBag, Monitor, User, LogOut, Shield, UserCheck } from 'lucide-react';
 import { navItems, containerVariants, itemVariants } from '../constants/data';
+import { useAuth } from '../context/AuthContext';
 
 const generateSlug = (text: string) => {
   return text.toLowerCase()
@@ -20,9 +21,31 @@ const getMenuSlug = (name: string) => {
 };
 
 export default function Navbar() {
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
   const [activeSplitCategory, setActiveSplitCategory] = useState<string | null>(null);
   const hoverTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const [accountMenuOpen, setAccountMenuOpen] = useState(false);
+  const accountMenuRef = useRef<HTMLLIElement>(null);
+
+  // Click outside to close user menu
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (accountMenuRef.current && !accountMenuRef.current.contains(event.target as Node)) {
+        setAccountMenuOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const handleLogout = () => {
+    logout();
+    setAccountMenuOpen(false);
+    navigate("/");
+  };
 
   const handleMouseEnter = (menuName: string) => {
     if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
@@ -94,7 +117,111 @@ export default function Navbar() {
 
             <li><a href="#" className="hover:text-black transition-colors"><Search className="w-5 h-5" /></a></li>
             <li><a href="#" className="hover:text-black transition-colors"><ShoppingBag className="w-5 h-5" /></a></li>
-            <li><Link to="/auth" className="hover:text-black transition-colors"><User className="w-5 h-5" /></Link></li>
+            <li className="relative flex items-center" ref={accountMenuRef}>
+              {user ? (
+                <button
+                  onClick={() => setAccountMenuOpen(!accountMenuOpen)}
+                  className="hover:text-black transition-colors focus:outline-none flex items-center cursor-pointer h-full"
+                >
+                  {user.avatar ? (
+                    <img
+                      src={user.avatar}
+                      alt={user.name}
+                      className="w-6 h-6 rounded-full object-cover border border-gray-200"
+                    />
+                  ) : (
+                    <div className="w-6 h-6 rounded-full bg-zinc-950 text-white flex items-center justify-center text-[10px] font-bold">
+                      {user.name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2)}
+                    </div>
+                  )}
+                </button>
+              ) : (
+                <Link to="/auth" className="hover:text-black transition-colors flex items-center">
+                  <User className="w-5 h-5" />
+                </Link>
+              )}
+
+              {/* Account Dropdown Menu */}
+              <AnimatePresence>
+                {user && accountMenuOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 15 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 10 }}
+                    transition={{ duration: 0.2, ease: "easeOut" }}
+                    className="absolute right-0 top-full mt-2 w-72 bg-white/95 backdrop-blur-xl border border-gray-100 rounded-2xl shadow-xl py-4 z-50 overflow-hidden"
+                  >
+                    {/* User Profile Summary */}
+                    <div className="px-5 pb-3 border-b border-gray-100">
+                      <div className="flex items-center gap-3">
+                        {user.avatar ? (
+                          <img
+                            src={user.avatar}
+                            alt={user.name}
+                            className="w-10 h-10 rounded-full object-cover border border-gray-200 animate-fade-in"
+                          />
+                        ) : (
+                          <div className="w-10 h-10 rounded-full bg-zinc-950 text-white flex items-center justify-center text-sm font-bold">
+                            {user.name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2)}
+                          </div>
+                        )}
+                        <div className="min-w-0">
+                          <p className="text-sm font-bold text-gray-900 truncate">{user.name}</p>
+                          <p className="text-xs text-gray-500 truncate">{user.email}</p>
+                        </div>
+                      </div>
+                      <div className="mt-2.5 flex items-center gap-1.5">
+                        {user.role === "admin" ? (
+                          <span className="bg-red-50 text-red-600 text-[10px] font-bold px-2 py-0.5 rounded-full border border-red-100 flex items-center gap-1">
+                            <Shield className="w-3 h-3 animate-pulse" /> Quản trị viên
+                          </span>
+                        ) : (
+                          <span className="bg-blue-50 text-blue-600 text-[10px] font-bold px-2 py-0.5 rounded-full border border-blue-100 flex items-center gap-1">
+                            <UserCheck className="w-3 h-3" /> Thành viên
+                          </span>
+                        )}
+                        {user.provider === "google" && (
+                          <span className="bg-gray-50 text-gray-600 text-[10px] font-bold px-2 py-0.5 rounded-full border border-gray-100">
+                            Google
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Menu Options */}
+                    <div className="pt-2">
+                      {user.role === "admin" && (
+                        <Link
+                          to="/admin"
+                          onClick={() => setAccountMenuOpen(false)}
+                          className="flex items-center gap-2.5 px-5 py-2.5 text-sm text-gray-700 hover:bg-gray-50 font-semibold transition-colors"
+                        >
+                          <Shield className="w-4 h-4 text-red-500" />
+                          Trang quản trị (Admin)
+                        </Link>
+                      )}
+
+                      <Link
+                        to="/profile"
+                        onClick={() => setAccountMenuOpen(false)}
+                        className="flex items-center gap-2.5 px-5 py-2.5 text-sm text-gray-700 hover:bg-gray-50 font-semibold transition-colors"
+                      >
+                        <User className="w-4 h-4 text-blue-500" />
+                        Thông tin cá nhân
+                      </Link>
+                      
+                      <button
+                        onClick={handleLogout}
+                        className="w-full flex items-center gap-2.5 px-5 py-2.5 text-sm text-red-600 hover:bg-red-50 font-semibold transition-colors text-left border-t border-gray-50 mt-2 cursor-pointer"
+                      >
+                        <LogOut className="w-4 h-4" />
+                        Đăng xuất
+                      </button>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </li>
           </ul>
         </div>
         <AnimatePresence>

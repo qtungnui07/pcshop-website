@@ -22,9 +22,12 @@ import {
   Grid3X3,
   Cable,
   HelpCircle,
-  Headphones
+  Headphones,
+  Users,
+  Lock
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useAuth } from "../../context/AuthContext";
 
 interface PCItem {
   badge?: string;
@@ -68,17 +71,19 @@ interface AccessoryItem {
 }
 
 const PORT = 3001;
-const API_BASE = typeof window !== "undefined" && (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1")
-  ? `http://localhost:${PORT}`
-  : "https://api-pc.qtitpc.dev";
+const API_BASE = typeof window !== "undefined"
+  ? (window.location.hostname.includes("qtitpc.dev")
+    ? "https://api-pc.qtitpc.dev"
+    : `${window.location.protocol}//${window.location.hostname}:${PORT}`)
+  : `http://localhost:${PORT}`;
 
 // Image templates served by backend for PCs
 const PC_IMAGE_TEMPLATES = [
-  { name: "Infinity RGB (Purple/Pink)", filename: "pc-infinity.png", url: `http://localhost:${PORT}/images/pc-infinity.png` },
-  { name: "Frost RGB (White/Cyan)", filename: "pc-frost.png", url: `http://localhost:${PORT}/images/pc-frost.png` },
-  { name: "Nebula RGB (Space/Dark)", filename: "pc-nebula.png", url: `http://localhost:${PORT}/images/pc-nebula.png` },
-  { name: "Workstation Pro (Black/Clean)", filename: "pc-workstation.png", url: `http://localhost:${PORT}/images/pc-workstation.png` },
-  { name: "Mini White (Compact ITX)", filename: "pc-mini.png", url: `http://localhost:${PORT}/images/pc-mini.png` }
+  { name: "Infinity RGB (Purple/Pink)", filename: "pc-infinity.png", url: `${API_BASE}/images/pc-infinity.png` },
+  { name: "Frost RGB (White/Cyan)", filename: "pc-frost.png", url: `${API_BASE}/images/pc-frost.png` },
+  { name: "Nebula RGB (Space/Dark)", filename: "pc-nebula.png", url: `${API_BASE}/images/pc-nebula.png` },
+  { name: "Workstation Pro (Black/Clean)", filename: "pc-workstation.png", url: `${API_BASE}/images/pc-workstation.png` },
+  { name: "Mini White (Compact ITX)", filename: "pc-mini.png", url: `${API_BASE}/images/pc-mini.png` }
 ];
 
 // Gradient color presets
@@ -97,7 +102,8 @@ const CATEGORIES = [
   { id: "pc", name: "Máy tính để bàn (PC)", icon: Monitor, color: "text-purple-600 bg-purple-50 border-purple-200" },
   { id: "laptop", name: "Laptop / Notebook", icon: Laptop, color: "text-blue-600 bg-blue-50 border-blue-200" },
   { id: "linh-kien", name: "Linh kiện PC", icon: Cpu, color: "text-emerald-600 bg-emerald-50 border-emerald-200" },
-  { id: "phu-kien", name: "Phụ kiện Gaming", icon: Keyboard, color: "text-orange-600 bg-orange-50 border-orange-200" }
+  { id: "phu-kien", name: "Phụ kiện Gaming", icon: Keyboard, color: "text-orange-600 bg-orange-50 border-orange-200" },
+  { id: "accounts", name: "Quản lý Tài khoản", icon: Users, color: "text-red-600 bg-red-50 border-red-200" }
 ];
 
 // Icon mapping for accessory icons
@@ -252,6 +258,7 @@ const AUTOFILL_TEMPLATES: Record<string, any[]> = {
 };
 
 export default function AdminIndex() {
+  const { user, loading: authLoading } = useAuth();
   const [activeCategory, setActiveCategory] = useState<string>("pc");
   
   // Database arrays
@@ -259,13 +266,15 @@ export default function AdminIndex() {
   const [laptops, setLaptops] = useState<LaptopItem[]>([]);
   const [components, setComponents] = useState<ComponentItem[]>([]);
   const [accessories, setAccessories] = useState<AccessoryItem[]>([]);
+  const [accounts, setAccounts] = useState<any[]>([]);
 
   // Dirty state tracking per category
   const [dirty, setDirty] = useState<Record<string, boolean>>({
     pc: false,
     laptop: false,
     "linh-kien": false,
-    "phu-kien": false
+    "phu-kien": false,
+    accounts: false
   });
 
   // UI States
@@ -286,6 +295,12 @@ export default function AdminIndex() {
   const [formImage, setFormImage] = useState("");
   const [isCustomImage, setIsCustomImage] = useState(false);
   const [customImageUrl, setCustomImageUrl] = useState("");
+
+  // Account specific inputs
+  const [accountName, setAccountName] = useState("");
+  const [accountEmail, setAccountEmail] = useState("");
+  const [accountPassword, setAccountPassword] = useState("");
+  const [accountRole, setAccountRole] = useState<"admin" | "user">("user");
 
   // PC specific inputs
   const [formFrom, setFormFrom] = useState("#7c3aed");
@@ -308,21 +323,25 @@ export default function AdminIndex() {
 
   // Fetch all databases on mount
   const fetchData = async () => {
+    if (!user || user.role !== "admin") return;
     setLoading(true);
     try {
-      const [pcsRes, laptopsRes, componentsRes, accessoriesRes] = await Promise.all([
+      const authHeader = { "Authorization": `Bearer ${user.email}` };
+      const [pcsRes, laptopsRes, componentsRes, accessoriesRes, accountsRes] = await Promise.all([
         fetch(`${API_BASE}/api/featured-pcs`).then(r => r.json()),
         fetch(`${API_BASE}/api/laptops`).then(r => r.json()),
         fetch(`${API_BASE}/api/components`).then(r => r.json()),
-        fetch(`${API_BASE}/api/accessories`).then(r => r.json())
+        fetch(`${API_BASE}/api/accessories`).then(r => r.json()),
+        fetch(`${API_BASE}/api/accounts`, { headers: authHeader }).then(r => r.ok ? r.json() : [])
       ]);
       
       setPcs(pcsRes);
       setLaptops(laptopsRes);
       setComponents(componentsRes);
       setAccessories(accessoriesRes);
+      setAccounts(accountsRes);
       
-      setDirty({ pc: false, laptop: false, "linh-kien": false, "phu-kien": false });
+      setDirty({ pc: false, laptop: false, "linh-kien": false, "phu-kien": false, accounts: false });
       setEditingIndex(null);
     } catch (err) {
       console.error("Error loading products in admin:", err);
@@ -332,15 +351,18 @@ export default function AdminIndex() {
   };
 
   useEffect(() => {
-    fetchData();
-  }, []);
+    if (user?.role === "admin") {
+      fetchData();
+    }
+  }, [user]);
 
   // Determine current active list
   const getActiveList = () => {
     if (activeCategory === "pc") return pcs;
     if (activeCategory === "laptop") return laptops;
     if (activeCategory === "linh-kien") return components;
-    return accessories;
+    if (activeCategory === "phu-kien") return accessories;
+    return accounts;
   };
 
   const getFilteredList = () => {
@@ -353,7 +375,10 @@ export default function AdminIndex() {
       const matchSpecs = item.specs?.toLowerCase().includes(q);
       const matchBrand = item.brand?.toLowerCase().includes(q);
       const matchCategory = item.category?.toLowerCase().includes(q);
-      return matchName || matchSpecs || matchBrand || matchCategory;
+      const matchEmail = item.email?.toLowerCase().includes(q);
+      const matchRole = item.role?.toLowerCase().includes(q);
+      const matchProvider = item.provider?.toLowerCase().includes(q);
+      return matchName || matchSpecs || matchBrand || matchCategory || matchEmail || matchRole || matchProvider;
     });
   };
 
@@ -394,7 +419,8 @@ export default function AdminIndex() {
     if (activeCategory === "pc") setPcs(newList);
     else if (activeCategory === "laptop") setLaptops(newList);
     else if (activeCategory === "linh-kien") setComponents(newList);
-    else setAccessories(newList);
+    else if (activeCategory === "phu-kien") setAccessories(newList);
+    else setAccounts(newList);
   };
 
   // Delete item
@@ -403,6 +429,11 @@ export default function AdminIndex() {
     const activeList = getActiveList();
     const item = filteredList[indexInFilteredList];
     
+    if (activeCategory === "accounts" && user && item.email === user.email) {
+      alert("Bạn không thể tự xóa tài khoản của chính mình!");
+      return;
+    }
+
     if (!confirm(`Bạn có chắc chắn muốn xóa "${item.name}" khỏi danh sách?`)) return;
 
     const newList = activeList.filter(x => x !== item);
@@ -428,7 +459,12 @@ export default function AdminIndex() {
     setCustomImageUrl("");
     setIsCustomImage(false);
 
-    if (activeCategory === "pc") {
+    if (activeCategory === "accounts") {
+      setAccountName("");
+      setAccountEmail("");
+      setAccountPassword("");
+      setAccountRole("user");
+    } else if (activeCategory === "pc") {
       setFormImage(PC_IMAGE_TEMPLATES[0].url);
       setFormFrom("#7c3aed");
       setFormTo("#ec4899");
@@ -460,38 +496,45 @@ export default function AdminIndex() {
     setEditingIndex(originalIndex);
     setFormErrors({});
 
-    // Populate fields
-    setFormName(item.name);
-    setFormSpecs(item.specs || "");
-    setFormPrice(String(item.price || ""));
-    setFormBadge(item.badge || "");
-    setFormBadgeColor(item.badgeColor || "#1d1d1f");
-
-    if (activeCategory === "pc") {
-      setFormFrom(item.from || "#7c3aed");
-      setFormTo(item.to || "#ec4899");
-      const isTemplate = PC_IMAGE_TEMPLATES.some(t => t.url === item.image);
-      if (isTemplate) {
-        setFormImage(item.image || PC_IMAGE_TEMPLATES[0].url);
-        setIsCustomImage(false);
-      } else {
-        setFormImage("custom");
-        setIsCustomImage(true);
-        setCustomImageUrl(item.image || "");
-      }
-    } else if (activeCategory === "laptop") {
-      setFormBrand(item.brand || "");
-      setFormImage(item.img || item.image || "");
-    } else if (activeCategory === "linh-kien") {
-      setFormLinhKienColor(item.color || "#e0e7ef");
-      // Derive category if not stored explicitly
-      setFormLinhKienCategory(item.category || "RAM");
+    if (activeCategory === "accounts") {
+      setAccountName(item.name || "");
+      setAccountEmail(item.email || "");
+      setAccountPassword(""); // clear password input for editing (empty means keep current)
+      setAccountRole(item.role || "user");
     } else {
-      setFormBrand(item.brand || "");
-      setFormPhuKienCategory(item.category || "Chuột");
-      setFormPhuKienColors(item.colors || []);
-      setFormPhuKienFallbackIcon(item.fallbackIcon || "Mouse");
-      setFormImage(item.image || "");
+      // Populate fields
+      setFormName(item.name);
+      setFormSpecs(item.specs || "");
+      setFormPrice(String(item.price || ""));
+      setFormBadge(item.badge || "");
+      setFormBadgeColor(item.badgeColor || "#1d1d1f");
+
+      if (activeCategory === "pc") {
+        setFormFrom(item.from || "#7c3aed");
+        setFormTo(item.to || "#ec4899");
+        const isTemplate = PC_IMAGE_TEMPLATES.some(t => t.url === item.image);
+        if (isTemplate) {
+          setFormImage(item.image || PC_IMAGE_TEMPLATES[0].url);
+          setIsCustomImage(false);
+        } else {
+          setFormImage("custom");
+          setIsCustomImage(true);
+          setCustomImageUrl(item.image || "");
+        }
+      } else if (activeCategory === "laptop") {
+        setFormBrand(item.brand || "");
+        setFormImage(item.img || item.image || "");
+      } else if (activeCategory === "linh-kien") {
+        setFormLinhKienColor(item.color || "#e0e7ef");
+        // Derive category if not stored explicitly
+        setFormLinhKienCategory(item.category || "RAM");
+      } else {
+        setFormBrand(item.brand || "");
+        setFormPhuKienCategory(item.category || "Chuột");
+        setFormPhuKienColors(item.colors || []);
+        setFormPhuKienFallbackIcon(item.fallbackIcon || "Mouse");
+        setFormImage(item.image || "");
+      }
     }
   };
 
@@ -525,16 +568,23 @@ export default function AdminIndex() {
   // Validation rules before submitting
   const validateForm = () => {
     const errors: Record<string, string> = {};
-    if (!formName.trim()) errors.name = "Tên sản phẩm không được trống.";
-    if (!formPrice.trim() && typeof formPrice !== "number") errors.price = "Giá hiển thị không được trống.";
+    if (activeCategory === "accounts") {
+      if (!accountName.trim()) errors.name = "Họ và tên không được trống.";
+      if (!accountEmail.trim()) errors.email = "Email không được trống.";
+      else if (!/\S+@\S+\.\S+/.test(accountEmail)) errors.email = "Email không đúng định dạng.";
+      if (editingIndex === -1 && !accountPassword.trim()) errors.password = "Mật khẩu không được trống.";
+    } else {
+      if (!formName.trim()) errors.name = "Tên sản phẩm không được trống.";
+      if (!formPrice.trim() && typeof formPrice !== "number") errors.price = "Giá hiển thị không được trống.";
 
-    if (activeCategory === "laptop" && !formBrand.trim()) {
-      errors.brand = "Thương hiệu không được để trống.";
-    }
+      if (activeCategory === "laptop" && !formBrand.trim()) {
+        errors.brand = "Thương hiệu không được để trống.";
+      }
 
-    if (activeCategory === "phu-kien") {
-      if (!formBrand.trim()) errors.brand = "Thương hiệu không được trống.";
-      if (formPhuKienColors.length === 0) errors.colors = "Vui lòng chọn ít nhất một màu sắc.";
+      if (activeCategory === "phu-kien") {
+        if (!formBrand.trim()) errors.brand = "Thương hiệu không được trống.";
+        if (formPhuKienColors.length === 0) errors.colors = "Vui lòng chọn ít nhất một màu sắc.";
+      }
     }
 
     setFormErrors(errors);
@@ -549,7 +599,19 @@ export default function AdminIndex() {
     let newItem: any = {};
     const originalList = [...getActiveList()];
 
-    if (activeCategory === "pc") {
+    if (activeCategory === "accounts") {
+      const isNew = editingIndex === -1;
+      const existing = isNew ? null : (originalList[editingIndex!] as any);
+      newItem = {
+        id: isNew ? `acc-${Date.now()}` : existing.id,
+        name: accountName.trim(),
+        email: accountEmail.toLowerCase().trim(),
+        password: accountPassword ? accountPassword : (isNew ? "" : existing.password || ""),
+        role: accountRole,
+        avatar: isNew ? `https://api.dicebear.com/7.x/pixel-art/svg?seed=${encodeURIComponent(accountName)}` : existing.avatar || "",
+        provider: isNew ? "local" : existing.provider || "local"
+      };
+    } else if (activeCategory === "pc") {
       const imgUrl = isCustomImage ? customImageUrl : formImage;
       const pcItem: PCItem = {
         name: formName.trim(),
@@ -614,6 +676,7 @@ export default function AdminIndex() {
 
   // Submit list to backend JSON database
   const handleSaveToDatabase = async () => {
+    if (!user || user.role !== "admin") return;
     setSaving(true);
     let url = "";
     let payload: any = [];
@@ -627,15 +690,21 @@ export default function AdminIndex() {
     } else if (activeCategory === "linh-kien") {
       url = `${API_BASE}/api/components`;
       payload = components;
-    } else {
+    } else if (activeCategory === "phu-kien") {
       url = `${API_BASE}/api/accessories`;
       payload = accessories;
+    } else {
+      url = `${API_BASE}/api/accounts`;
+      payload = accounts;
     }
 
     try {
       const res = await fetch(url, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${user.email}`
+        },
         body: JSON.stringify(payload)
       });
       if (!res.ok) throw new Error("API responded with error code");
@@ -665,6 +734,53 @@ export default function AdminIndex() {
     if (isNaN(num)) return "0đ";
     return new Intl.NumberFormat("vi-VN").format(num) + "đ";
   };
+
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-[#fafafa] flex items-center justify-center font-sans">
+        <div className="text-center">
+          <div className="w-10 h-10 border-4 border-gray-200 border-t-zinc-950 rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-sm text-gray-500 font-semibold">Đang xác thực thông tin...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user || user.role !== "admin") {
+    return (
+      <div className="min-h-screen bg-[#fafafa] flex items-center justify-center p-4 font-sans">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.3 }}
+          className="w-full max-w-md bg-white border border-gray-100 rounded-3xl shadow-xl p-10 flex flex-col items-center text-center"
+        >
+          <div className="w-16 h-16 rounded-full bg-red-50 border border-red-100 flex items-center justify-center text-red-500 mb-6 animate-pulse">
+            <Lock className="w-8 h-8" />
+          </div>
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">Từ chối truy cập</h1>
+          <p className="text-sm text-gray-500 mb-8 leading-relaxed">
+            Tài khoản của bạn không có quyền truy cập vào bảng điều khiển Admin. 
+            Vui lòng đăng nhập bằng tài khoản Quản trị viên để tiếp tục.
+          </p>
+          <div className="flex flex-col gap-3 w-full">
+            <a
+              href="/auth"
+              className="w-full bg-zinc-950 hover:bg-zinc-900 text-white text-sm font-bold py-3 rounded-xl shadow-lg shadow-zinc-950/10 transition-colors flex items-center justify-center gap-2"
+            >
+              Đăng nhập Admin
+            </a>
+            <a
+              href="/"
+              className="w-full bg-gray-50 hover:bg-gray-100 text-gray-700 text-sm font-semibold py-3 rounded-xl border border-gray-200 transition-colors"
+            >
+              Quay về trang chủ
+            </a>
+          </div>
+        </motion.div>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full max-w-[1450px] mx-auto px-4 md:px-8 py-6 text-zinc-800 font-sans">
@@ -720,7 +836,7 @@ export default function AdminIndex() {
       </div>
 
       {/* ── CATEGORY SWITCHER TABS ───────────────────────────────────── */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3.5 mb-8">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-3.5 mb-8">
         {CATEGORIES.map((cat) => {
           const CatIcon = cat.icon;
           const isActive = activeCategory === cat.id;
@@ -778,7 +894,7 @@ export default function AdminIndex() {
                 onClick={handleStartCreate}
                 className="flex items-center justify-center gap-1.5 px-4 py-2 bg-zinc-900 hover:bg-zinc-950 text-white text-xs font-bold rounded-xl transition-colors cursor-pointer active:scale-95"
               >
-                <Plus className="w-4 h-4" /> Thêm sản phẩm mới
+                <Plus className="w-4 h-4" /> {activeCategory === "accounts" ? "Tạo tài khoản mới" : "Thêm sản phẩm mới"}
               </button>
             </div>
 
@@ -858,67 +974,106 @@ export default function AdminIndex() {
                             )}
                           </div>
                         )}
+                        {activeCategory === "accounts" && (
+                          <div className="w-16 h-16 rounded-xl flex items-center justify-center p-1 border border-zinc-200 relative overflow-hidden bg-zinc-50 flex-shrink-0">
+                            {item.avatar ? (
+                              <img src={item.avatar} alt={item.name} className="w-12 h-12 object-contain" />
+                            ) : (
+                              <Users className="w-7 h-7 text-zinc-400" />
+                            )}
+                          </div>
+                        )}
 
                         {/* Title and Specs */}
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center gap-1.5 mb-0.5">
-                            {item.brand && (
-                              <span className="bg-zinc-100 text-zinc-700 text-[9px] font-bold px-1.5 py-0.5 rounded">
-                                {item.brand}
-                              </span>
+                            {activeCategory === "accounts" ? (
+                              <>
+                                <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded uppercase ${
+                                  item.role === "admin" ? "bg-red-100 text-red-700" : "bg-zinc-100 text-zinc-700"
+                                }`}>
+                                  {item.role}
+                                </span>
+                                <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded uppercase ${
+                                  item.provider === "google" ? "bg-blue-100 text-blue-700" : "bg-zinc-100 text-zinc-500"
+                                }`}>
+                                  {item.provider}
+                                </span>
+                                <h3 className="text-sm font-bold text-zinc-900 truncate">
+                                  {item.name}
+                                </h3>
+                              </>
+                            ) : (
+                              <>
+                                {item.brand && (
+                                  <span className="bg-zinc-100 text-zinc-700 text-[9px] font-bold px-1.5 py-0.5 rounded">
+                                    {item.brand}
+                                  </span>
+                                )}
+                                <h3 className="text-sm font-bold text-zinc-900 truncate">
+                                  {item.name}
+                                </h3>
+                              </>
                             )}
-                            <h3 className="text-sm font-bold text-zinc-900 truncate">
-                              {item.name}
-                            </h3>
                           </div>
                           
-                          <p className="text-[11px] text-zinc-400 font-medium whitespace-pre-line leading-relaxed truncate max-w-[450px]">
-                            {item.specs ? item.specs.replace(/\n/g, ' • ') : ''}
-                          </p>
+                          {activeCategory === "accounts" ? (
+                            <p className="text-[11px] text-zinc-400 font-medium leading-relaxed truncate max-w-[450px]">
+                              {item.email}
+                            </p>
+                          ) : (
+                            <p className="text-[11px] text-zinc-400 font-medium whitespace-pre-line leading-relaxed truncate max-w-[450px]">
+                              {item.specs ? item.specs.replace(/\n/g, ' • ') : ''}
+                            </p>
+                          )}
 
-                          <div className="flex items-center gap-2 mt-1">
-                            <span className="text-xs font-bold text-zinc-800">
-                              {activeCategory === "phu-kien" ? formatAccessoryPrice(item.price) : item.price}
-                            </span>
-                            {activeCategory === "phu-kien" && item.colors && (
-                              <div className="flex gap-1">
-                                {item.colors.map((c: string) => (
-                                  <span key={c} className="text-[8px] font-bold px-1 bg-zinc-100 rounded text-zinc-500">
-                                    {c}
-                                  </span>
-                                ))}
-                              </div>
-                            )}
-                          </div>
+                          {activeCategory !== "accounts" && (
+                            <div className="flex items-center gap-2 mt-1">
+                              <span className="text-xs font-bold text-zinc-800">
+                                {activeCategory === "phu-kien" ? formatAccessoryPrice(item.price) : item.price}
+                              </span>
+                              {activeCategory === "phu-kien" && item.colors && (
+                                <div className="flex gap-1">
+                                  {item.colors.map((c: string) => (
+                                    <span key={c} className="text-[8px] font-bold px-1 bg-zinc-100 rounded text-zinc-500">
+                                      {c}
+                                    </span>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                          )}
                         </div>
 
                       </div>
 
                       {/* Reorder and Action Tools */}
                       <div className="flex items-center gap-1.5 ml-4 flex-shrink-0">
-                        <div className="flex flex-col">
-                          <button
-                            onClick={() => handleMove(idx, "up")}
-                            disabled={idx === 0}
-                            className="p-1 hover:bg-zinc-100 disabled:opacity-30 rounded transition-colors cursor-pointer"
-                            title="Di chuyển lên"
-                          >
-                            <ChevronUp className="w-4 h-4 text-zinc-500" />
-                          </button>
-                          <button
-                            onClick={() => handleMove(idx, "down")}
-                            disabled={idx === getFilteredList().length - 1}
-                            className="p-1 hover:bg-zinc-100 disabled:opacity-30 rounded transition-colors cursor-pointer"
-                            title="Di chuyển xuống"
-                          >
-                            <ChevronDown className="w-4 h-4 text-zinc-500" />
-                          </button>
-                        </div>
+                        {activeCategory !== "accounts" && (
+                          <div className="flex flex-col">
+                            <button
+                              onClick={() => handleMove(idx, "up")}
+                              disabled={idx === 0}
+                              className="p-1 hover:bg-zinc-100 disabled:opacity-30 rounded transition-colors cursor-pointer"
+                              title="Di chuyển lên"
+                            >
+                              <ChevronUp className="w-4 h-4 text-zinc-500" />
+                            </button>
+                            <button
+                              onClick={() => handleMove(idx, "down")}
+                              disabled={idx === getFilteredList().length - 1}
+                              className="p-1 hover:bg-zinc-100 disabled:opacity-30 rounded transition-colors cursor-pointer"
+                              title="Di chuyển xuống"
+                            >
+                              <ChevronDown className="w-4 h-4 text-zinc-500" />
+                            </button>
+                          </div>
+                        )}
 
                         <button
                           onClick={() => handleStartEdit(idx)}
                           className="p-2 text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900 rounded-xl transition-all cursor-pointer"
-                          title="Chỉnh sửa sản phẩm"
+                          title={activeCategory === "accounts" ? "Chỉnh sửa tài khoản" : "Chỉnh sửa sản phẩm"}
                         >
                           <Edit3 className="w-4.5 h-4.5" />
                         </button>
@@ -926,7 +1081,7 @@ export default function AdminIndex() {
                         <button
                           onClick={() => handleDelete(idx)}
                           className="p-2 text-red-500 hover:bg-red-50 hover:text-red-700 rounded-xl transition-all cursor-pointer"
-                          title="Xóa cấu hình"
+                          title={activeCategory === "accounts" ? "Xóa tài khoản" : "Xóa cấu hình"}
                         >
                           <Trash2 className="w-4.5 h-4.5" />
                         </button>
@@ -953,39 +1108,44 @@ export default function AdminIndex() {
                 >
                   <h2 className="text-sm font-extrabold text-zinc-900 mb-4 flex items-center gap-1.5 border-b border-zinc-100 pb-3">
                     <Sparkles className="w-5 h-5 text-zinc-950" />
-                    {editingIndex === -1 ? 'Thêm sản phẩm mới' : `Chỉnh sửa #${editingIndex + 1}`}
+                    {activeCategory === "accounts"
+                      ? (editingIndex === -1 ? 'Tạo tài khoản mới' : `Chỉnh sửa tài khoản #${editingIndex + 1}`)
+                      : (editingIndex === -1 ? 'Thêm sản phẩm mới' : `Chỉnh sửa #${editingIndex + 1}`)}
                   </h2>
 
                   {/* SMART TEMPLATE DROPDOWN */}
-                  <div className="mb-4 bg-zinc-50 border border-zinc-200 rounded-xl p-3">
-                    <label className="block mb-1 text-[10px] font-bold text-zinc-500 uppercase tracking-widest">
-                      ⚡️ Chọn cấu hình nhanh (Autofill Template)
-                    </label>
-                    <select
-                      onChange={(e) => {
-                        const val = e.target.value;
-                        if (val) {
-                          const templates = AUTOFILL_TEMPLATES[activeCategory] || [];
-                          const t = templates.find((x: any) => x.templateName === val);
-                          if (t) handleAutofill(t);
-                        }
-                      }}
-                      className="w-full px-2 py-1.5 bg-white border border-zinc-200 rounded-lg text-xs font-semibold focus:border-zinc-800 outline-none cursor-pointer"
-                      defaultValue=""
-                    >
-                      <option value="" disabled>-- Chọn mẫu có sẵn --</option>
-                      {(AUTOFILL_TEMPLATES[activeCategory] || []).map((t: any) => (
-                        <option key={t.templateName} value={t.templateName}>
-                          {t.templateName}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
+                  {activeCategory !== "accounts" && (
+                    <div className="mb-4 bg-zinc-50 border border-zinc-200 rounded-xl p-3">
+                      <label className="block mb-1 text-[10px] font-bold text-zinc-500 uppercase tracking-widest">
+                        ⚡️ Chọn cấu hình nhanh (Autofill Template)
+                      </label>
+                      <select
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          if (val) {
+                            const templates = AUTOFILL_TEMPLATES[activeCategory] || [];
+                            const t = templates.find((x: any) => x.templateName === val);
+                            if (t) handleAutofill(t);
+                          }
+                        }}
+                        className="w-full px-2 py-1.5 bg-white border border-zinc-200 rounded-lg text-xs font-semibold focus:border-zinc-800 outline-none cursor-pointer"
+                        defaultValue=""
+                      >
+                        <option value="" disabled>-- Chọn mẫu có sẵn --</option>
+                        {(AUTOFILL_TEMPLATES[activeCategory] || []).map((t: any) => (
+                          <option key={t.templateName} value={t.templateName}>
+                            {t.templateName}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
 
                   {/* FORM FIELDS (DYNAMIC BASED ON CATEGORY) */}
                   <div className="space-y-4 text-xs font-semibold text-zinc-600">
-                    
-                    {/* Brand field for Laptop / Accessory */}
+                    {activeCategory !== "accounts" ? (
+                      <>
+                        {/* Brand field for Laptop / Accessory */}
                     {(activeCategory === "laptop" || activeCategory === "phu-kien") && (
                       <div>
                         <label className="block mb-1 text-zinc-700">Thương hiệu</label>
@@ -1313,6 +1473,79 @@ export default function AdminIndex() {
                         />
                       </div>
                     )}
+                      </>
+                    ) : (
+                      <div className="space-y-4">
+                        {/* Name */}
+                        <div>
+                          <label className="block mb-1 text-zinc-700">Họ và tên</label>
+                          <input
+                            type="text"
+                            required
+                            value={accountName}
+                            onChange={(e) => {
+                              setAccountName(e.target.value);
+                              setFormErrors({ ...formErrors, name: "" });
+                            }}
+                            placeholder="Nhập họ và tên..."
+                            className={`w-full px-3 py-2 border rounded-lg text-sm font-medium outline-none transition-all ${
+                              formErrors.name ? 'border-red-500 focus:ring-red-500/10' : 'border-zinc-200 focus:border-zinc-900'
+                            }`}
+                          />
+                          {formErrors.name && <span className="text-[10px] text-red-500 mt-1 block font-bold">{formErrors.name}</span>}
+                        </div>
+
+                        {/* Email */}
+                        <div>
+                          <label className="block mb-1 text-zinc-700">Địa chỉ Email</label>
+                          <input
+                            type="email"
+                            required
+                            value={accountEmail}
+                            onChange={(e) => {
+                              setAccountEmail(e.target.value);
+                              setFormErrors({ ...formErrors, email: "" });
+                            }}
+                            placeholder="username@qtitpc.dev..."
+                            className={`w-full px-3 py-2 border rounded-lg text-sm font-medium outline-none transition-all ${
+                              formErrors.email ? 'border-red-500 focus:ring-red-500/10' : 'border-zinc-200 focus:border-zinc-900'
+                            }`}
+                          />
+                          {formErrors.email && <span className="text-[10px] text-red-500 mt-1 block font-bold">{formErrors.email}</span>}
+                        </div>
+
+                        {/* Password */}
+                        <div>
+                          <label className="block mb-1 text-zinc-700">Mật khẩu {editingIndex !== -1 && "(Để trống nếu không đổi)"}</label>
+                          <input
+                            type="password"
+                            value={accountPassword}
+                            onChange={(e) => {
+                              setAccountPassword(e.target.value);
+                              setFormErrors({ ...formErrors, password: "" });
+                            }}
+                            placeholder={editingIndex === -1 ? "Nhập mật khẩu..." : "••••••••"}
+                            className={`w-full px-3 py-2 border rounded-lg text-sm font-medium outline-none transition-all ${
+                              formErrors.password ? 'border-red-500 focus:ring-red-500/10' : 'border-zinc-200 focus:border-zinc-900'
+                            }`}
+                          />
+                          {formErrors.password && <span className="text-[10px] text-red-500 mt-1 block font-bold">{formErrors.password}</span>}
+                        </div>
+
+                        {/* Role selector */}
+                        <div>
+                          <label className="block mb-1 text-zinc-700">Vai trò (Role)</label>
+                          <select
+                            value={accountRole}
+                            onChange={(e) => setAccountRole(e.target.value as "admin" | "user")}
+                            className="w-full px-3 py-2 border border-zinc-200 rounded-lg text-sm font-medium focus:border-zinc-900 outline-none"
+                          >
+                            <option value="user">Thành viên (User)</option>
+                            <option value="admin">Quản trị viên (Admin)</option>
+                          </select>
+                        </div>
+                      </div>
+                    )}
 
                   </div>
 
@@ -1338,7 +1571,7 @@ export default function AdminIndex() {
                   <Sparkles className="w-8 h-8 text-zinc-300 animate-pulse" />
                   <p className="text-xs font-bold text-zinc-500">Chưa chọn cấu hình</p>
                   <p className="text-[10px] leading-relaxed max-w-[210px]">
-                    Hãy nhấn nút "Chỉnh sửa" trên một card sản phẩm hoặc nút "Thêm sản phẩm mới" để bắt đầu chỉnh sửa.
+                    Hãy nhấn nút "Chỉnh sửa" trên một card {activeCategory === "accounts" ? "tài khoản" : "sản phẩm"} hoặc nút "{activeCategory === "accounts" ? "Tạo tài khoản mới" : "Thêm sản phẩm mới"}" để bắt đầu chỉnh sửa.
                   </p>
                 </div>
               )}

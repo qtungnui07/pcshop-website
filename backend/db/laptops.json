@@ -1,0 +1,58 @@
+[
+  {
+    "brand": "ASUS",
+    "name": "ASUS ROG Zephyrus G14 2024",
+    "specs": "Ryzen 9 8945HS / 16GB /\n1TB SSD / RTX 4060 / 14\" OLED",
+    "price": "28.990.000 đ",
+    "img": "https://dlcdnwebimgs.asus.com/gain/97f4b8da-e77d-418c-8515-3850123533be/w800"
+  },
+  {
+    "brand": "Apple",
+    "name": "MacBook Air M3 13 inch",
+    "specs": "Apple M3 / 16GB / 512GB SSD /\n13.6\" Liquid Retina",
+    "price": "24.990.000 đ",
+    "img": "https://store.storeimages.cdn-apple.com/8756/as-images.apple.com/is/mba13-midnight-select-202402?wid=904&hei=840&fmt=jpeg&qlt=90&.v=1708367688034"
+  },
+  {
+    "brand": "Dell",
+    "name": "Dell XPS 13 Plus 9320",
+    "specs": "Intel Core i7-1360P / 16GB /\n512GB SSD / 13.4\" FHD+",
+    "price": "27.490.000 đ",
+    "img": "https://i.dell.com/is/image/DellContent/content/dam/ss2/product-images/dell-client-products/notebooks/xps-notebooks/xps-13-9320/media-gallery/xs9320nt-cnb-00000ff090-gy.psd?fmt=png-alpha&pscan=auto&scl=1&hei=402&wid=555&qlt=100,1&resMode=sharp2&size=555,402&chrss=full"
+  },
+  {
+    "brand": "Lenovo",
+    "name": "Lenovo Yoga Slim 7i Pro",
+    "specs": "Intel Core i7-13700H / 16GB /\n1TB SSD / 14.5\" 3K",
+    "price": "24.490.000 đ",
+    "img": "https://p1-ofp.static.pub/fes/cms/2022/07/12/3og7y6a14mve0h7m99a4zcwf47u10v359190.png"
+  },
+  {
+    "brand": "HP",
+    "name": "HP Spectre x360 14",
+    "specs": "Intel Core i7-1355U / 16GB /\n1TB SSD / 14\" 2.8K OLED",
+    "price": "26.990.000 đ",
+    "img": "https://ssl-product-images.www8-hp.com/digmedialib/prodimg/lowres/c08404555.png"
+  },
+  {
+    "brand": "Acer",
+    "name": "Acer Swift Go 14 OLED",
+    "specs": "Intel Core Ultra 5 125H / 16GB /\n512GB SSD / 14\" 2.8K OLED",
+    "price": "20.990.000 đ",
+    "img": "https://images.acer.com/is/image/acer/swift-go-14-sfg14-72-sfg14-73-glare-silver-ui-01?$Product-Cards-XL$"
+  },
+  {
+    "brand": "ASUS",
+    "name": "ASUS TUF Gaming A15",
+    "specs": "AMD Ryzen 7 7735HS / 16GB /\n512GB SSD / RTX 4060 / 15.6\" FHD 144Hz",
+    "price": "24.490.000 đ",
+    "img": "https://dlcdnwebimgs.asus.com/gain/d3ad557c-864a-4d7a-8f4b-2d7c58ed00ee/w800"
+  },
+  {
+    "brand": "MSI",
+    "name": "MSI Stealth 16 Studio",
+    "specs": "Intel Core i7-13700H / 32GB /\n1TB SSD / RTX 4070 / 16\" 16:10",
+    "price": "37.990.000 đ",
+    "img": "https://asset.msi.com/resize/image/global/product/product_1672728476839352c3c97db317e0b510ed9c882193.png62405b38c58fe0f07fcef2367d8a9ba1/1024.png"
+  }
+]
