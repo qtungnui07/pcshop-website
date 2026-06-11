@@ -1,9 +1,9 @@
 import {
   ShieldCheck, Wrench, Truck, CheckCircle2,
   ChevronRight, Heart, Grid, List, RotateCcw,
-  ChevronDown, ChevronLeft,
+  ChevronDown, ChevronLeft, SlidersHorizontal, X, Search
 } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { motion } from "framer-motion";
 
 /* ── TYPES ─────────────────────────────────────────────────────────── */
@@ -44,24 +44,13 @@ const defaultProducts: Product[] = [
   { name: "TeamGroup T-Force Vulcan Z",  specs: "16GB (2x8GB) DDR4 3200MHz",  price: "890.000đ",   color: "#dc2626" },
 ];
 
-const brandFilters = [
-  { label: "Corsair", count: 32 }, { label: "G.Skill", count: 28 }, { label: "Kingston", count: 18 },
-  { label: "TeamGroup", count: 14 }, { label: "Crucial", count: 12 },
-];
+const BRANDS = ["Corsair", "G.Skill", "Kingston", "TeamGroup", "Crucial", "Apacer"];
+const CAPACITIES = ["8GB", "16GB", "32GB", "64GB", "128GB"];
+const TYPES = ["DDR4", "DDR5"];
+const BUSES = ["2666MHz", "3200MHz", "3600MHz", "4800MHz", "5600MHz", "6000MHz", "6400MHz"];
 
-const capacityFilters = [
-  { label: "8GB", count: 18 }, { label: "16GB", count: 45 }, { label: "32GB", count: 38 },
-  { label: "64GB", count: 12 }, { label: "128GB", count: 3 },
-];
-
-const typeFilters = [
-  { label: "DDR4", count: 33 }, { label: "DDR5", count: 82 },
-];
-
-const busFilters = [
-  { label: "2666MHz", count: 8 }, { label: "3200MHz", count: 18 }, { label: "3600MHz", count: 23 },
-  { label: "5600MHz", count: 25 }, { label: "6000MHz+", count: 22 },
-];
+const MAX_PRICE = 20_000_000;
+const MIN_PRICE = 100_000;
 
 const perks = [
   { icon: ShieldCheck, title: "Bảo hành lên đến 36 tháng" },
@@ -70,52 +59,57 @@ const perks = [
   { icon: CheckCircle2,title: "Cam kết chính hãng 100%" },
 ];
 
-/* ── FILTER SECTION ─────────────────────────────────────────────────── */
-function FilterSection({
-  title, options, defaultChecked = [], showMore = false,
-}: {
-  title: string;
-  options: { label: string; count: number }[];
-  defaultChecked?: string[];
-  showMore?: boolean;
-}) {
-  const [open, setOpen] = useState(true);
-  const [expanded, setExpanded] = useState(false);
-  const visible = expanded || !showMore ? options : options.slice(0, 4);
+/* ── HELPERS ────────────────────────────────────────────────────────── */
+function parsePrice(priceStr: string) {
+  return parseInt(priceStr.replace(/\\D/g, ''), 10) || 0;
+}
 
+function formatPrice(p: number) {
+  return new Intl.NumberFormat("vi-VN").format(p) + " đ";
+}
+
+function toggleSet<T>(set: Set<T>, value: T): Set<T> {
+  const next = new Set(set);
+  next.has(value) ? next.delete(value) : next.add(value);
+  return next;
+}
+
+/* ── FilterCheckbox ─────────────────────────────────────────────────── */
+function FilterCheckbox({
+  checked, label, count, onChange,
+}: {
+  checked: boolean; label: string; count?: number; onChange: () => void;
+}) {
   return (
-    <div className="border-b border-zinc-100 py-4">
+    <button
+      type="button"
+      onClick={onChange}
+      className="flex w-full items-center justify-between gap-3 py-1.5 text-left"
+    >
+      <span className="flex items-center gap-2 text-[12px] text-zinc-600 group-hover:text-zinc-900">
+        <span className={`h-3.5 w-3.5 rounded-[3px] border transition ${checked ? "border-zinc-950 bg-zinc-950" : "border-zinc-300 bg-white"}`} />
+        {label}
+      </span>
+      {typeof count === "number" && (
+        <span className="text-[11px] text-zinc-400">({count})</span>
+      )}
+    </button>
+  );
+}
+
+/* ── FilterGroup ────────────────────────────────────────────────────── */
+function FilterGroup({ title, children }: { title: string; children: React.ReactNode }) {
+  const [open, setOpen] = useState(true);
+  return (
+    <div className="border-t border-zinc-100 pt-4 pb-1">
       <button
         onClick={() => setOpen(o => !o)}
         className="w-full flex items-center justify-between mb-3 group"
       >
-        <span className="text-[13px] font-semibold text-zinc-800">{title}</span>
+        <h4 className="text-[13px] font-semibold text-zinc-900">{title}</h4>
         <ChevronDown className={`w-4 h-4 text-zinc-400 transition-transform duration-200 ${open ? "rotate-180" : ""}`} />
       </button>
-      {open && (
-        <div className="space-y-2.5">
-          {visible.map(opt => (
-            <label key={opt.label} className="flex items-center gap-2.5 cursor-pointer group">
-              <input
-                type="checkbox"
-                defaultChecked={defaultChecked.includes(opt.label)}
-                className="w-3.5 h-3.5 rounded border-zinc-300 accent-zinc-900 cursor-pointer"
-              />
-              <span className="text-[12.5px] text-zinc-600 group-hover:text-zinc-900 flex-1">{opt.label}</span>
-              <span className="text-[11px] text-zinc-400">({opt.count})</span>
-            </label>
-          ))}
-          {showMore && options.length > 4 && (
-            <button
-              onClick={() => setExpanded(e => !e)}
-              className="text-[12px] text-zinc-500 hover:text-zinc-800 flex items-center gap-1 mt-1"
-            >
-              {expanded ? "Thu gọn" : `Xem thêm ${options.length - 4}`}
-              <ChevronDown className={`w-3 h-3 transition-transform ${expanded ? "rotate-180" : ""}`} />
-            </button>
-          )}
-        </div>
-      )}
+      {open && <div className="space-y-0.5">{children}</div>}
     </div>
   );
 }
@@ -152,6 +146,16 @@ export default function LinhKienIndex() {
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [products, setProducts] = useState<Product[]>(defaultProducts);
 
+  const [sortBy, setSortBy] = useState("newest");
+  const [showMobileFilter, setShowMobileFilter] = useState(false);
+
+  /* Filter state */
+  const [selBrands,  setSelBrands]  = useState<Set<string>>(new Set());
+  const [selCapacities, setSelCapacities] = useState<Set<string>>(new Set());
+  const [selTypes, setSelTypes] = useState<Set<string>>(new Set());
+  const [selBuses, setSelBuses] = useState<Set<string>>(new Set());
+  const [maxPrice,   setMaxPrice]   = useState(MAX_PRICE);
+
   useEffect(() => {
     fetch(`${API_BASE}/api/components`)
       .then((res) => res.json())
@@ -160,8 +164,51 @@ export default function LinhKienIndex() {
   }, []);
 
   const toggleLike = (i: number) => {
-    setLiked(p => { const n = new Set(p); n.has(i) ? n.delete(i) : n.add(i); return n; });
+    setLiked(p => toggleSet(p, i));
   };
+
+  const hasActiveFilter =
+    selBrands.size > 0 || selCapacities.size > 0 || selTypes.size > 0 ||
+    selBuses.size > 0 || maxPrice < MAX_PRICE;
+
+  const resetFilters = () => {
+    setSelBrands(new Set());
+    setSelCapacities(new Set());
+    setSelTypes(new Set());
+    setSelBuses(new Set());
+    setMaxPrice(MAX_PRICE);
+  };
+
+  /* Derived filtered + sorted list */
+  const filteredProducts = useMemo(() => {
+    let result = products.filter(p => {
+      const priceNum = parsePrice(p.price);
+      if (priceNum > maxPrice) return false;
+
+      if (selBrands.size > 0) {
+        if (!Array.from(selBrands).some(b => p.name.toLowerCase().includes(b.toLowerCase()))) return false;
+      }
+      
+      if (selCapacities.size > 0) {
+        if (!Array.from(selCapacities).some(c => p.specs.includes(c))) return false;
+      }
+
+      if (selTypes.size > 0) {
+        if (!Array.from(selTypes).some(t => p.specs.includes(t))) return false;
+      }
+
+      if (selBuses.size > 0) {
+        if (!Array.from(selBuses).some(b => p.specs.includes(b.replace('MHz', '')))) return false;
+      }
+
+      return true;
+    });
+
+    if (sortBy === "price-asc")  result = [...result].sort((a, b) => parsePrice(a.price) - parsePrice(b.price));
+    if (sortBy === "price-desc") result = [...result].sort((a, b) => parsePrice(b.price) - parsePrice(a.price));
+    if (sortBy === "name")       result = [...result].sort((a, b) => a.name.localeCompare(b.name));
+    return result;
+  }, [products, selBrands, selCapacities, selTypes, selBuses, maxPrice, sortBy]);
 
   const heroContainer = {
     hidden: {},
@@ -171,6 +218,93 @@ export default function LinhKienIndex() {
     hidden: { opacity: 0, y: 24 },
     show: { opacity: 1, y: 0, transition: { duration: 0.55, ease: [0.25, 1, 0.5, 1] as const } },
   };
+
+  /* Sidebar JSX — reused for both desktop + mobile */
+  const sidebarContent = (
+    <div className="space-y-0">
+      {/* Price */}
+      <div className="pb-4">
+        <h4 className="text-[13px] font-semibold text-zinc-900 mb-3">Giá</h4>
+        <p className="mb-2 text-center text-[11px] text-zinc-500">
+          {formatPrice(MIN_PRICE)} – {formatPrice(maxPrice)}
+        </p>
+        <input
+          type="range"
+          min={MIN_PRICE}
+          max={MAX_PRICE}
+          step={500000}
+          value={maxPrice}
+          onChange={e => setMaxPrice(Number(e.target.value))}
+          className="w-full accent-zinc-950"
+        />
+        <div className="mt-2 grid grid-cols-2 gap-2">
+          <div className="rounded-md border border-zinc-200 bg-zinc-50 px-2 py-1.5 text-center text-[11px] text-zinc-600">
+            {formatPrice(MIN_PRICE)}
+          </div>
+          <div className="rounded-md border border-zinc-200 bg-zinc-50 px-2 py-1.5 text-center text-[11px] text-zinc-600">
+            {formatPrice(maxPrice)}
+          </div>
+        </div>
+      </div>
+
+      <FilterGroup title="Thương hiệu">
+        {BRANDS.map(b => (
+          <FilterCheckbox
+            key={b}
+            label={b}
+            count={products.filter(p => p.name.toLowerCase().includes(b.toLowerCase())).length}
+            checked={selBrands.has(b)}
+            onChange={() => setSelBrands(prev => toggleSet(prev, b))}
+          />
+        ))}
+      </FilterGroup>
+
+      <FilterGroup title="Dung lượng">
+        {CAPACITIES.map(c => (
+          <FilterCheckbox
+            key={c}
+            label={c}
+            count={products.filter(p => p.specs.includes(c)).length}
+            checked={selCapacities.has(c)}
+            onChange={() => setSelCapacities(prev => toggleSet(prev, c))}
+          />
+        ))}
+      </FilterGroup>
+
+      <FilterGroup title="Loại RAM">
+        {TYPES.map(t => (
+          <FilterCheckbox
+            key={t}
+            label={t}
+            count={products.filter(p => p.specs.includes(t)).length}
+            checked={selTypes.has(t)}
+            onChange={() => setSelTypes(prev => toggleSet(prev, t))}
+          />
+        ))}
+      </FilterGroup>
+
+      <FilterGroup title="Tốc độ Bus">
+        {BUSES.map(b => (
+          <FilterCheckbox
+            key={b}
+            label={b}
+            count={products.filter(p => p.specs.includes(b.replace('MHz', ''))).length}
+            checked={selBuses.has(b)}
+            onChange={() => setSelBuses(prev => toggleSet(prev, b))}
+          />
+        ))}
+      </FilterGroup>
+
+      {hasActiveFilter && (
+        <button
+          onClick={resetFilters}
+          className="mt-4 w-full py-2.5 flex items-center justify-center gap-2 bg-zinc-50 hover:bg-zinc-100 border border-zinc-200 text-zinc-700 text-[13px] font-medium rounded-lg transition-colors cursor-pointer"
+        >
+          <RotateCcw className="w-4 h-4" /> Xóa bộ lọc
+        </button>
+      )}
+    </div>
+  );
 
   return (
     <div className="bg-[#fafafa] min-h-screen pb-16">
@@ -302,59 +436,97 @@ export default function LinhKienIndex() {
           </div>
         </section>
 
-        {/* ══ 3. FILTER + GRID ══════════════════════════════════════════ */}
+        {/* ══ 3. MOBILE TOOLBAR ══════════════════════════════════════════ */}
+        <section className="mb-4 flex items-center justify-between gap-3 lg:hidden">
+          <button
+            onClick={() => setShowMobileFilter(true)}
+            className="inline-flex items-center gap-2 rounded-xl border border-zinc-200 bg-white px-4 py-3 text-sm font-semibold text-zinc-800 shadow-sm"
+          >
+            <SlidersHorizontal className="h-4 w-4" />
+            Bộ lọc {hasActiveFilter && <span className="ml-1 inline-flex h-4 w-4 items-center justify-center rounded-full bg-zinc-900 text-[9px] font-bold text-white">{[selBrands, selCapacities, selTypes, selBuses].filter(s => s.size > 0).length + (maxPrice < MAX_PRICE ? 1 : 0)}</span>}
+          </button>
+          <select
+            value={sortBy}
+            onChange={e => setSortBy(e.target.value)}
+            className="rounded-xl border border-zinc-200 bg-white px-4 py-3 text-sm font-semibold text-zinc-700 shadow-sm outline-none"
+          >
+            <option value="newest">Mới nhất</option>
+            <option value="price-asc">Giá thấp đến cao</option>
+            <option value="price-desc">Giá cao đến thấp</option>
+            <option value="name">Tên A-Z</option>
+          </select>
+        </section>
+
+        {/* ══ 4. FILTER + GRID ══════════════════════════════════════════ */}
         <div className="flex flex-col lg:flex-row gap-7 lg:gap-8">
 
-          {/* Sidebar */}
-          <aside className="w-full lg:w-[220px] shrink-0">
-            <div className="bg-white rounded-2xl border border-zinc-100 shadow-sm p-4">
-              <div className="flex items-center justify-between mb-2">
-                <h3 className="text-[13px] font-bold text-zinc-900">Bộ lọc</h3>
-                <button className="text-[12px] text-zinc-400 hover:text-zinc-700 flex items-center gap-1 transition-colors">
-                  Xóa tất cả
-                </button>
+          {/* Desktop Sidebar */}
+          <aside className="hidden lg:block w-[260px] shrink-0">
+            <div className="bg-white rounded-2xl p-5 border border-zinc-100 shadow-sm sticky top-24">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-[15px] font-bold text-zinc-950">Bộ lọc</h3>
+                {hasActiveFilter && (
+                  <button
+                    onClick={resetFilters}
+                    className="flex items-center gap-1 text-xs font-medium text-zinc-500 hover:text-zinc-950 transition-colors cursor-pointer"
+                  >
+                    <RotateCcw className="h-3.5 w-3.5" /> Xóa tất cả
+                  </button>
+                )}
               </div>
-
-              {/* Price */}
-              <div className="border-b border-zinc-100 py-4">
-                <button className="w-full flex items-center justify-between mb-3">
-                  <span className="text-[13px] font-semibold text-zinc-800">Giá</span>
-                  <ChevronDown className="w-4 h-4 text-zinc-400 rotate-180" />
-                </button>
-                <div className="h-1 bg-zinc-200 rounded-full mb-4 relative">
-                  <div className="absolute left-[5%] right-[5%] h-full bg-zinc-900 rounded-full" />
-                  <div className="absolute left-[5%] top-1/2 -translate-y-1/2 w-3.5 h-3.5 bg-white border-2 border-zinc-900 rounded-full shadow cursor-grab" />
-                  <div className="absolute right-[5%] top-1/2 -translate-y-1/2 w-3.5 h-3.5 bg-white border-2 border-zinc-900 rounded-full shadow cursor-grab" />
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="flex-1 bg-zinc-50 border border-zinc-200 rounded-lg px-2 py-1.5 text-[11px] text-zinc-600 text-center">100.000đ</div>
-                  <div className="text-zinc-300 text-xs">—</div>
-                  <div className="flex-1 bg-zinc-50 border border-zinc-200 rounded-lg px-2 py-1.5 text-[11px] text-zinc-600 text-center">20.000.000đ</div>
-                </div>
-              </div>
-
-              <FilterSection title="Thương hiệu" options={brandFilters} showMore />
-              <FilterSection title="Dung lượng" options={capacityFilters} />
-              <FilterSection title="Loại RAM" options={typeFilters} />
-              <FilterSection title="Tốc độ Bus" options={busFilters} />
-
-              <button className="w-full mt-4 py-2 flex items-center justify-center gap-2 bg-zinc-50 hover:bg-zinc-100 border border-zinc-200 text-zinc-600 text-[12.5px] font-medium rounded-lg transition-colors">
-                <RotateCcw className="w-3.5 h-3.5" /> Xóa bộ lọc
-              </button>
+              {sidebarContent}
             </div>
           </aside>
+
+          {/* Mobile Sidebar Drawer */}
+          <aside
+            className={`fixed inset-y-0 left-0 z-50 w-[300px] overflow-y-auto bg-white p-5 shadow-2xl transition-transform lg:hidden ${showMobileFilter ? "translate-x-0" : "-translate-x-full"}`}
+          >
+            <div className="flex items-center justify-between mb-5">
+              <h3 className="text-[15px] font-bold text-zinc-950">Bộ lọc</h3>
+              <div className="flex items-center gap-3">
+                {hasActiveFilter && (
+                  <button onClick={resetFilters} className="flex items-center gap-1 text-xs font-medium text-zinc-500 hover:text-zinc-950">
+                    <RotateCcw className="h-3.5 w-3.5" /> Xóa
+                  </button>
+                )}
+                <button onClick={() => setShowMobileFilter(false)}>
+                  <X className="h-5 w-5 text-zinc-600" />
+                </button>
+              </div>
+            </div>
+            {sidebarContent}
+          </aside>
+
+          {showMobileFilter && (
+            <button
+              className="fixed inset-0 z-40 bg-black/30 lg:hidden cursor-default"
+              onClick={() => setShowMobileFilter(false)}
+            />
+          )}
 
           {/* Products */}
           <main className="flex-1 min-w-0">
             {/* Toolbar */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
-              <p className="text-[13px] text-zinc-500 font-medium">124 sản phẩm</p>
+            <div className="hidden lg:flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
+              <p className="text-[13px] text-zinc-500 font-medium">
+                <span className="font-semibold text-zinc-900">{filteredProducts.length}</span> sản phẩm
+              </p>
               <div className="flex items-center gap-3">
-                <div className="flex items-center gap-2 bg-white border border-zinc-200 rounded-lg px-3 py-2 text-[12.5px] text-zinc-700 cursor-pointer hover:bg-zinc-50 transition-colors">
-                  <span className="font-semibold text-zinc-500">Sắp xếp:</span> Mới nhất
-                  <ChevronDown className="w-3.5 h-3.5 ml-1" />
+                <div className="relative">
+                  <select
+                    value={sortBy}
+                    onChange={e => setSortBy(e.target.value)}
+                    className="appearance-none rounded-lg border border-zinc-200 bg-white py-2.5 pl-4 pr-10 text-[13px] font-medium text-zinc-700 shadow-sm outline-none cursor-pointer"
+                  >
+                    <option value="newest">Sắp xếp: Mới nhất</option>
+                    <option value="price-asc">Giá thấp đến cao</option>
+                    <option value="price-desc">Giá cao đến thấp</option>
+                    <option value="name">Tên A-Z</option>
+                  </select>
+                  <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
                 </div>
-                <div className="flex items-center bg-white border border-zinc-200 rounded-lg p-1">
+                <div className="flex items-center bg-white border border-zinc-200 rounded-lg p-1 shadow-sm">
                   <button
                     onClick={() => setViewMode("grid")}
                     className={`p-1.5 rounded transition-colors cursor-pointer ${viewMode === "grid" ? "bg-zinc-900 text-white" : "text-zinc-400 hover:text-zinc-600"}`}
@@ -371,84 +543,100 @@ export default function LinhKienIndex() {
               </div>
             </div>
 
-            {/* Grid */}
-            <div className={viewMode === "grid"
-              ? "grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-3.5"
-              : "flex flex-col gap-3"
-            }>
-              {products.map((p, i) => (
-                viewMode === "grid" ? (
-                  <div key={i} className="group bg-white rounded-2xl border border-zinc-100 p-3.5 shadow-sm hover:shadow-md hover:border-zinc-200 transition-all duration-300 flex flex-col relative">
-                    {/* Badge */}
-                    {p.badge && (
-                      <span
-                        className="absolute top-3 left-3 z-10 px-2 py-0.5 text-[10px] font-bold text-white rounded-full"
-                        style={{ background: p.badgeColor }}
+            {/* Empty state */}
+            {filteredProducts.length === 0 ? (
+              <div className="flex min-h-[420px] flex-col items-center justify-center rounded-2xl bg-white border border-zinc-100 shadow-sm text-center">
+                <Search className="mb-4 h-10 w-10 text-zinc-300" />
+                <h3 className="text-lg font-bold text-zinc-900">Không tìm thấy sản phẩm phù hợp</h3>
+                <p className="mt-2 text-sm text-zinc-500">Thử xóa bớt bộ lọc hoặc điều chỉnh mức giá.</p>
+                <button
+                  onClick={resetFilters}
+                  className="mt-5 rounded-full bg-zinc-950 px-5 py-2.5 text-sm font-semibold text-white hover:bg-zinc-800 transition-colors cursor-pointer"
+                >
+                  Xóa bộ lọc
+                </button>
+              </div>
+            ) : (
+              <div className={viewMode === "grid"
+                ? "grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-3.5"
+                : "flex flex-col gap-3"
+              }>
+                {filteredProducts.map((p, i) => (
+                  viewMode === "grid" ? (
+                    <div key={i} className="group bg-white rounded-2xl border border-zinc-100 p-3.5 shadow-sm hover:shadow-md hover:border-zinc-200 transition-all duration-300 flex flex-col relative">
+                      {/* Badge */}
+                      {p.badge && (
+                        <span
+                          className="absolute top-3 left-3 z-10 px-2 py-0.5 text-[10px] font-bold text-white rounded-full"
+                          style={{ background: p.badgeColor }}
+                        >
+                          {p.badge}
+                        </span>
+                      )}
+                      {/* Like */}
+                      <button
+                        onClick={() => toggleLike(i)}
+                        className="absolute top-3 right-3 z-10 w-7 h-7 flex items-center justify-center rounded-full bg-white border border-zinc-100 shadow-sm hover:bg-zinc-50 transition-colors cursor-pointer"
                       >
-                        {p.badge}
-                      </span>
-                    )}
-                    {/* Like */}
-                    <button
-                      onClick={() => toggleLike(i)}
-                      className="absolute top-3 right-3 z-10 w-7 h-7 flex items-center justify-center rounded-full bg-white border border-zinc-100 shadow-sm hover:bg-zinc-50 transition-colors cursor-pointer"
-                    >
-                      <Heart className={`w-3.5 h-3.5 transition-colors ${liked.has(i) ? "fill-red-500 text-red-500" : "text-zinc-300"}`} />
-                    </button>
-                    {/* Image placeholder */}
-                    <ProductPlaceholder color={p.color} />
-                    {/* Info */}
-                    <div className="mt-3 flex flex-col flex-1">
-                      <h3 className="text-[13px] font-bold text-zinc-900 leading-tight mb-1 line-clamp-2">{p.name}</h3>
-                      <p className="text-[11.5px] text-zinc-400 mb-3 flex-1">{p.specs}</p>
-                      <p className="text-[14px] font-extrabold text-zinc-900">{p.price}</p>
-                    </div>
-                  </div>
-                ) : (
-                  <div key={i} className="group bg-white rounded-xl border border-zinc-100 p-3 shadow-sm hover:shadow-md transition-all duration-300 flex items-center gap-4 relative">
-                    <div className="w-20 h-16 shrink-0">
+                        <Heart className={`w-3.5 h-3.5 transition-colors ${liked.has(i) ? "fill-red-500 text-red-500" : "text-zinc-300"}`} />
+                      </button>
+                      {/* Image placeholder */}
                       <ProductPlaceholder color={p.color} />
+                      {/* Info */}
+                      <div className="mt-3 flex flex-col flex-1">
+                        <h3 className="text-[13px] font-bold text-zinc-900 leading-tight mb-1 line-clamp-2">{p.name}</h3>
+                        <p className="text-[11.5px] text-zinc-400 mb-3 flex-1">{p.specs}</p>
+                        <p className="text-[14px] font-extrabold text-zinc-900">{p.price}</p>
+                      </div>
                     </div>
-                    {p.badge && (
-                      <span className="absolute top-3 left-2.5 px-2 py-0.5 text-[10px] font-bold text-white rounded-full" style={{ background: p.badgeColor }}>{p.badge}</span>
-                    )}
-                    <div className="flex-1 min-w-0">
-                      <h3 className="text-[13px] font-bold text-zinc-900 leading-tight mb-0.5">{p.name}</h3>
-                      <p className="text-[11.5px] text-zinc-400">{p.specs}</p>
+                  ) : (
+                    <div key={i} className="group bg-white rounded-xl border border-zinc-100 p-3 shadow-sm hover:shadow-md transition-all duration-300 flex items-center gap-4 relative">
+                      <div className="w-20 h-16 shrink-0">
+                        <ProductPlaceholder color={p.color} />
+                      </div>
+                      {p.badge && (
+                        <span className="absolute top-3 left-2.5 px-2 py-0.5 text-[10px] font-bold text-white rounded-full" style={{ background: p.badgeColor }}>{p.badge}</span>
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <h3 className="text-[13px] font-bold text-zinc-900 leading-tight mb-0.5">{p.name}</h3>
+                        <p className="text-[11.5px] text-zinc-400">{p.specs}</p>
+                      </div>
+                      <div className="text-right shrink-0">
+                        <p className="text-[14px] font-extrabold text-zinc-900">{p.price}</p>
+                      </div>
+                      <button onClick={() => toggleLike(i)} className="w-7 h-7 flex items-center justify-center rounded-full bg-zinc-50 hover:bg-zinc-100 transition-colors cursor-pointer shrink-0">
+                        <Heart className={`w-3.5 h-3.5 transition-colors ${liked.has(i) ? "fill-red-500 text-red-500" : "text-zinc-300"}`} />
+                      </button>
                     </div>
-                    <div className="text-right shrink-0">
-                      <p className="text-[14px] font-extrabold text-zinc-900">{p.price}</p>
-                    </div>
-                    <button onClick={() => toggleLike(i)} className="w-7 h-7 flex items-center justify-center rounded-full bg-zinc-50 hover:bg-zinc-100 transition-colors cursor-pointer shrink-0">
-                      <Heart className={`w-3.5 h-3.5 transition-colors ${liked.has(i) ? "fill-red-500 text-red-500" : "text-zinc-300"}`} />
-                    </button>
-                  </div>
-                )
-              ))}
-            </div>
+                  )
+                ))}
+              </div>
+            )}
 
             {/* Pagination */}
-            <div className="flex items-center justify-center gap-1.5 mt-10">
-              <button className="w-8 h-8 flex items-center justify-center rounded-lg border border-zinc-200 text-zinc-400 hover:bg-zinc-50 transition-colors cursor-pointer">
-                <ChevronLeft className="w-4 h-4" />
-              </button>
-              {[1, 2, 3].map(n => (
-                <button
-                  key={n}
-                  className={`w-8 h-8 flex items-center justify-center rounded-lg text-[13px] font-medium transition-colors cursor-pointer
-                    ${n === 1 ? "bg-zinc-900 text-white" : "border border-zinc-200 text-zinc-600 hover:bg-zinc-50"}`}
-                >
-                  {n}
+            {filteredProducts.length > 0 && (
+              <div className="flex items-center justify-center gap-1.5 mt-10">
+                <button className="w-8 h-8 flex items-center justify-center rounded-lg border border-zinc-200 text-zinc-400 hover:bg-zinc-50 transition-colors cursor-pointer">
+                  <ChevronLeft className="w-4 h-4" />
                 </button>
-              ))}
-              <span className="px-1 text-zinc-400 text-[13px]">...</span>
-              <button className="w-8 h-8 flex items-center justify-center rounded-lg border border-zinc-200 text-zinc-600 hover:bg-zinc-50 text-[13px] font-medium transition-colors cursor-pointer">
-                7
-              </button>
-              <button className="w-8 h-8 flex items-center justify-center rounded-lg border border-zinc-200 text-zinc-400 hover:bg-zinc-50 transition-colors cursor-pointer">
-                <ChevronRight className="w-4 h-4" />
-              </button>
-            </div>
+                {[1, 2, 3].map(n => (
+                  <button
+                    key={n}
+                    className={`w-8 h-8 flex items-center justify-center rounded-lg text-[13px] font-medium transition-colors cursor-pointer
+                      ${n === 1 ? "bg-zinc-900 text-white" : "border border-zinc-200 text-zinc-600 hover:bg-zinc-50"}`}
+                  >
+                    {n}
+                  </button>
+                ))}
+                <span className="px-1 text-zinc-400 text-[13px]">...</span>
+                <button className="w-8 h-8 flex items-center justify-center rounded-lg border border-zinc-200 text-zinc-600 hover:bg-zinc-50 text-[13px] font-medium transition-colors cursor-pointer">
+                  7
+                </button>
+                <button className="w-8 h-8 flex items-center justify-center rounded-lg border border-zinc-200 text-zinc-400 hover:bg-zinc-50 transition-colors cursor-pointer">
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              </div>
+            )}
           </main>
 
         </div>
