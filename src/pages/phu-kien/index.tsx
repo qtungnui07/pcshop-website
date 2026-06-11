@@ -332,7 +332,9 @@ export default function PhuKienIndex() {
   const [liked, setLiked] = useState<Set<string>>(new Set());
   const [sortBy, setSortBy] = useState("newest");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [minPrice, setMinPrice] = useState(100000);
   const [maxPrice, setMaxPrice] = useState(DEFAULT_MAX_PRICE);
+  const [activeInput, setActiveInput] = useState<'min' | 'max'>('min');
   const [showMobileFilter, setShowMobileFilter] = useState(false);
 
   useEffect(() => {
@@ -412,6 +414,7 @@ export default function PhuKienIndex() {
     selectedCategories.size > 0 ||
     selectedBrands.size > 0 ||
     selectedColors.size > 0 ||
+    minPrice > 100000 ||
     maxPrice < highestPrice;
 
   const filteredProducts = useMemo(() => {
@@ -426,7 +429,7 @@ export default function PhuKienIndex() {
         selectedColors.size === 0 ||
         product.colors.some((color) => selectedColors.has(color));
 
-      const matchPrice = product.price <= maxPrice;
+      const matchPrice = product.price >= minPrice && product.price <= maxPrice;
 
       return matchCategory && matchBrand && matchColor && matchPrice;
     });
@@ -452,12 +455,13 @@ export default function PhuKienIndex() {
     }
 
     return result;
-  }, [products, selectedCategories, selectedBrands, selectedColors, sortBy, maxPrice]);
+  }, [products, selectedCategories, selectedBrands, selectedColors, sortBy, minPrice, maxPrice]);
 
   const resetFilters = () => {
     setSelectedCategories(new Set());
     setSelectedBrands(new Set());
     setSelectedColors(new Set());
+    setMinPrice(100000);
     setMaxPrice(highestPrice);
   };
 
@@ -661,27 +665,73 @@ export default function PhuKienIndex() {
               <div className="border-t border-zinc-100 pt-5">
                 <h4 className="mb-3 text-[13px] font-semibold text-zinc-900">Giá</h4>
 
-                <p className="mb-3 text-center text-[11px] text-zinc-500">
-                  100.000đ - {formatPrice(maxPrice)}
-                </p>
-
-                <input
-                  type="range"
-                  min={100000}
-                  max={highestPrice}
-                  step={100000}
-                  value={maxPrice}
-                  onChange={(e) => setMaxPrice(Number(e.target.value))}
-                  className="w-full accent-zinc-950"
-                />
-
-                <div className="mt-3 grid grid-cols-2 gap-2">
-                  <div className="rounded-md border border-zinc-200 bg-white px-2 py-2 text-center text-[11px] text-zinc-600">
-                    100.000đ
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="flex-1 bg-zinc-50 border border-zinc-200 rounded px-2 py-1.5 text-[11px] text-zinc-700 text-center">
+                    {formatPrice(minPrice)}
                   </div>
-                  <div className="rounded-md border border-zinc-200 bg-white px-2 py-2 text-center text-[11px] text-zinc-600">
+                  <span className="text-zinc-400">-</span>
+                  <div className="flex-1 bg-zinc-50 border border-zinc-200 rounded px-2 py-1.5 text-[11px] text-zinc-700 text-center">
                     {formatPrice(maxPrice)}
                   </div>
+                </div>
+
+                <div 
+                  className="h-1 bg-zinc-200 rounded-full mb-6 relative mt-4 cursor-pointer"
+                  onMouseMove={e => {
+                    const rect = e.currentTarget.getBoundingClientRect();
+                    const percent = (e.clientX - rect.left) / rect.width;
+                    const value = 100000 + percent * (highestPrice - 100000);
+                    if (Math.abs(value - minPrice) < Math.abs(value - maxPrice)) {
+                      setActiveInput('min');
+                    } else {
+                      setActiveInput('max');
+                    }
+                  }}
+                  onTouchStart={e => {
+                    const rect = e.currentTarget.getBoundingClientRect();
+                    const touch = e.touches[0];
+                    const percent = (touch.clientX - rect.left) / rect.width;
+                    const value = 100000 + percent * (highestPrice - 100000);
+                    if (Math.abs(value - minPrice) < Math.abs(value - maxPrice)) {
+                      setActiveInput('min');
+                    } else {
+                      setActiveInput('max');
+                    }
+                  }}
+                >
+                  <div
+                    className="absolute h-full bg-zinc-950 rounded-full"
+                    style={{
+                      left: `${((minPrice - 100000) / (highestPrice - 100000)) * 100}%`,
+                      right: `${100 - ((maxPrice - 100000) / (highestPrice - 100000)) * 100}%`,
+                    }}
+                  />
+                  <input
+                    type="range"
+                    min={100000}
+                    max={highestPrice}
+                    step={100000}
+                    value={minPrice}
+                    onChange={(e) => {
+                      const val = Math.min(Number(e.target.value), maxPrice - 100000);
+                      setMinPrice(val);
+                    }}
+                    className="dual-range-slider"
+                    style={{ zIndex: activeInput === 'min' ? 10 : 3 }}
+                  />
+                  <input
+                    type="range"
+                    min={100000}
+                    max={highestPrice}
+                    step={100000}
+                    value={maxPrice}
+                    onChange={(e) => {
+                      const val = Math.max(Number(e.target.value), minPrice + 100000);
+                      setMaxPrice(val);
+                    }}
+                    className="dual-range-slider"
+                    style={{ zIndex: activeInput === 'max' ? 10 : 3 }}
+                  />
                 </div>
               </div>
 

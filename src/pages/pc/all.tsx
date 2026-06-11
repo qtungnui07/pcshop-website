@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { 
   ChevronRight, 
@@ -9,6 +9,10 @@ import {
   ChevronDown 
 } from "lucide-react";
 import { pcProducts } from "../../constants/pcData";
+
+function formatPrice(p: number) {
+  return new Intl.NumberFormat("vi-VN").format(p) + " đ";
+}
 
 const filterData = [
   {
@@ -70,11 +74,23 @@ function FilterSection({ title, options, defaultChecked = [] }: { title: string,
 }
 
 export default function AllPCsPage() {
-  const [liked, setLiked] = useState<Set<number>>(new Set());
+  const MIN_PRICE = 5_000_000;
+  const MAX_PRICE = 100_000_000;
+  const [minPrice, setMinPrice] = useState(MIN_PRICE);
+  const [maxPrice, setMaxPrice] = useState(MAX_PRICE);
+  const [activeInput, setActiveInput] = useState<'min' | 'max'>('min');
+  const [liked, setLiked] = useState<Set<string>>(new Set());
 
-  const toggleLike = (i: number) => {
-    setLiked(p => { const n = new Set(p); n.has(i) ? n.delete(i) : n.add(i); return n; });
+  const toggleLike = (id: string) => {
+    setLiked(p => { const n = new Set(p); n.has(id) ? n.delete(id) : n.add(id); return n; });
   };
+
+  const filteredProducts = useMemo(() => {
+    return pcProducts.filter(p => p.price >= minPrice && p.price <= maxPrice);
+  }, [minPrice, maxPrice]);
+
+  const percentMin = ((minPrice - MIN_PRICE) / (MAX_PRICE - MIN_PRICE)) * 100;
+  const percentMax = ((maxPrice - MIN_PRICE) / (MAX_PRICE - MIN_PRICE)) * 100;
 
   return (
     <div className="bg-[#fafafa] min-h-screen pb-16 pt-20">
@@ -106,18 +122,71 @@ export default function AllPCsPage() {
                 <h4 className="text-[13px] font-bold text-zinc-900 mb-4">Giá</h4>
                 <div className="flex items-center gap-2 mb-4">
                   <div className="flex-1 bg-zinc-50 border border-zinc-200 rounded px-3 py-2 text-[12px] text-zinc-700 text-center">
-                    10.000.000đ
+                    {formatPrice(minPrice)}
                   </div>
                   <span className="text-zinc-400">-</span>
                   <div className="flex-1 bg-zinc-50 border border-zinc-200 rounded px-3 py-2 text-[12px] text-zinc-700 text-center">
-                    50.000.000đ
+                    {formatPrice(maxPrice)}
                   </div>
                 </div>
-                {/* Fake slider */}
-                <div className="h-1 bg-zinc-200 rounded-full mb-6 relative">
-                  <div className="absolute left-[20%] right-[30%] h-full bg-zinc-900 rounded-full"></div>
-                  <div className="absolute left-[20%] top-1/2 -translate-y-1/2 w-4 h-4 bg-white border-2 border-zinc-900 rounded-full shadow cursor-grab"></div>
-                  <div className="absolute right-[30%] top-1/2 -translate-y-1/2 w-4 h-4 bg-white border-2 border-zinc-900 rounded-full shadow cursor-grab"></div>
+                {/* Dual range slider */}
+                <div 
+                  className="h-1 bg-zinc-200 rounded-full mb-6 relative mt-4 cursor-pointer"
+                  onMouseMove={e => {
+                    const rect = e.currentTarget.getBoundingClientRect();
+                    const percent = (e.clientX - rect.left) / rect.width;
+                    const value = MIN_PRICE + percent * (MAX_PRICE - MIN_PRICE);
+                    if (Math.abs(value - minPrice) < Math.abs(value - maxPrice)) {
+                      setActiveInput('min');
+                    } else {
+                      setActiveInput('max');
+                    }
+                  }}
+                  onTouchStart={e => {
+                    const rect = e.currentTarget.getBoundingClientRect();
+                    const touch = e.touches[0];
+                    const percent = (touch.clientX - rect.left) / rect.width;
+                    const value = MIN_PRICE + percent * (MAX_PRICE - MIN_PRICE);
+                    if (Math.abs(value - minPrice) < Math.abs(value - maxPrice)) {
+                      setActiveInput('min');
+                    } else {
+                      setActiveInput('max');
+                    }
+                  }}
+                >
+                  <div
+                    className="absolute h-full bg-zinc-900 rounded-full"
+                    style={{
+                      left: `${percentMin}%`,
+                      right: `${100 - percentMax}%`,
+                    }}
+                  />
+                  <input
+                    type="range"
+                    min={MIN_PRICE}
+                    max={MAX_PRICE}
+                    step={1000000}
+                    value={minPrice}
+                    onChange={e => {
+                      const val = Math.min(Number(e.target.value), maxPrice - 1000000);
+                      setMinPrice(val);
+                    }}
+                    className="dual-range-slider"
+                    style={{ zIndex: activeInput === 'min' ? 10 : 3 }}
+                  />
+                  <input
+                    type="range"
+                    min={MIN_PRICE}
+                    max={MAX_PRICE}
+                    step={1000000}
+                    value={maxPrice}
+                    onChange={e => {
+                      const val = Math.max(Number(e.target.value), minPrice + 1000000);
+                      setMaxPrice(val);
+                    }}
+                    className="dual-range-slider"
+                    style={{ zIndex: activeInput === 'max' ? 10 : 3 }}
+                  />
                 </div>
               </div>
 
@@ -126,7 +195,13 @@ export default function AllPCsPage() {
               ))}
 
               <div className="pt-6">
-                <button className="w-full py-2.5 flex items-center justify-center gap-2 bg-zinc-50 hover:bg-zinc-100 border border-zinc-200 text-zinc-700 text-[13px] font-medium rounded-lg transition-colors cursor-pointer">
+                <button
+                  onClick={() => {
+                    setMinPrice(MIN_PRICE);
+                    setMaxPrice(MAX_PRICE);
+                  }}
+                  className="w-full py-2.5 flex items-center justify-center gap-2 bg-zinc-50 hover:bg-zinc-100 border border-zinc-200 text-zinc-700 text-[13px] font-medium rounded-lg transition-colors cursor-pointer"
+                >
                   <RotateCcw className="w-4 h-4" /> Xóa bộ lọc
                 </button>
               </div>
@@ -136,7 +211,7 @@ export default function AllPCsPage() {
           {/* Product Grid Column */}
           <main className="flex-1">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4">
-              <h2 className="text-[15px] font-medium text-zinc-500">{pcProducts.length} sản phẩm</h2>
+              <h2 className="text-[15px] font-medium text-zinc-500">{filteredProducts.length} sản phẩm</h2>
               <div className="flex items-center gap-4">
                 <div className="flex items-center gap-2 bg-white border border-zinc-200 rounded-lg px-3 py-2 text-[13px] text-zinc-700 cursor-pointer hover:bg-zinc-50">
                   <span className="font-medium">Sắp xếp:</span> Mới nhất <ChevronDown className="w-4 h-4 ml-1" />
@@ -150,10 +225,10 @@ export default function AllPCsPage() {
 
             {/* Product Cards Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-              {pcProducts.map((p, i) => (
+              {filteredProducts.map((p, i) => (
                 <div key={i} className="group bg-white rounded-2xl border border-zinc-100 p-4 shadow-sm hover:shadow-md hover:border-zinc-200 transition-all duration-300 flex flex-col relative">
-                  <button onClick={() => toggleLike(i)} className="absolute top-4 right-4 z-10 w-8 h-8 flex items-center justify-center rounded-full bg-white/80 backdrop-blur border border-zinc-100 shadow-sm hover:bg-white transition-colors cursor-pointer">
-                    <Heart className={`w-4 h-4 transition-colors ${liked.has(i) ? "fill-red-500 text-red-500" : "text-zinc-400"}`} />
+                  <button onClick={() => toggleLike(p.id)} className="absolute top-4 right-4 z-10 w-8 h-8 flex items-center justify-center rounded-full bg-white/80 backdrop-blur border border-zinc-100 shadow-sm hover:bg-white transition-colors cursor-pointer">
+                    <Heart className={`w-4 h-4 transition-colors ${liked.has(p.id) ? "fill-red-500 text-red-500" : "text-zinc-400"}`} />
                   </button>
                   
                   {p.badge && (
@@ -165,8 +240,17 @@ export default function AllPCsPage() {
                     </span>
                   )}
 
-                  <div className="aspect-[4/3] flex items-center justify-center mb-4 p-4">
-                    <img src={p.img} alt={p.name} className="max-w-full max-h-full object-contain group-hover:scale-105 transition-transform duration-500" />
+                  <div className={`aspect-[4/3] flex items-center justify-center mb-4 overflow-hidden rounded-xl ${
+                    p.img.includes('/images/') ? 'bg-zinc-900' : 'p-4 bg-zinc-50/50'
+                  }`}>
+                    <img
+                      src={p.img}
+                      alt={p.name}
+                      className={p.img.includes('/images/')
+                        ? "w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        : "max-w-full max-h-full object-contain group-hover:scale-105 transition-transform duration-500"
+                      }
+                    />
                   </div>
                   <div className="flex flex-col flex-1">
                     <h3 className="text-[14px] font-bold text-zinc-900 leading-tight mb-2 line-clamp-2 min-h-[40px]">{p.name}</h3>

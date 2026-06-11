@@ -133,14 +133,16 @@ export default function LaptopIndex() {
   const [selCPUs,    setSelCPUs]    = useState<Set<LaptopCPU>>(new Set());
   const [selScreens, setSelScreens] = useState<Set<LaptopScreen>>(new Set());
   const [selGPUs,    setSelGPUs]    = useState<Set<LaptopGPU>>(new Set());
+  const [minPrice,   setMinPrice]   = useState(MIN_PRICE);
   const [maxPrice,   setMaxPrice]   = useState(MAX_PRICE);
+  const [activeInput, setActiveInput] = useState<'min' | 'max'>('min');
 
   const toggleLike = (id: number) =>
     setLiked(p => toggleSet(p, id));
 
   const hasActiveFilter =
     selBrands.size > 0 || selRAMs.size > 0 || selCPUs.size > 0 ||
-    selScreens.size > 0 || selGPUs.size > 0 || maxPrice < MAX_PRICE;
+    selScreens.size > 0 || selGPUs.size > 0 || minPrice > MIN_PRICE || maxPrice < MAX_PRICE;
 
   const resetFilters = () => {
     setSelBrands(new Set());
@@ -148,6 +150,7 @@ export default function LaptopIndex() {
     setSelCPUs(new Set());
     setSelScreens(new Set());
     setSelGPUs(new Set());
+    setMinPrice(MIN_PRICE);
     setMaxPrice(MAX_PRICE);
   };
 
@@ -159,7 +162,7 @@ export default function LaptopIndex() {
       if (selCPUs.size    > 0 && !selCPUs.has(p.cpu))        return false;
       if (selScreens.size > 0 && !selScreens.has(p.screen))  return false;
       if (selGPUs.size    > 0 && !selGPUs.has(p.gpu as LaptopGPU)) return false;
-      if (p.price > maxPrice) return false;
+      if (p.price < minPrice || p.price > maxPrice) return false;
       return true;
     });
 
@@ -167,7 +170,7 @@ export default function LaptopIndex() {
     if (sortBy === "price-desc") result = [...result].sort((a, b) => b.price - a.price);
     if (sortBy === "name")       result = [...result].sort((a, b) => a.name.localeCompare(b.name));
     return result;
-  }, [selBrands, selRAMs, selCPUs, selScreens, selGPUs, maxPrice, sortBy]);
+  }, [selBrands, selRAMs, selCPUs, selScreens, selGPUs, minPrice, maxPrice, sortBy]);
 
   const heroContainer = {
     hidden: {},
@@ -178,31 +181,81 @@ export default function LaptopIndex() {
     show: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.25, 1, 0.5, 1] as const } },
   };
 
+  const percentMin = ((minPrice - MIN_PRICE) / (MAX_PRICE - MIN_PRICE)) * 100;
+  const percentMax = ((maxPrice - MIN_PRICE) / (MAX_PRICE - MIN_PRICE)) * 100;
+
   /* Sidebar JSX — reused for both desktop + mobile */
   const sidebarContent = (
     <div className="space-y-0">
       {/* Price */}
       <div className="pb-4">
         <h4 className="text-[13px] font-semibold text-zinc-900 mb-3">Giá</h4>
-        <p className="mb-2 text-center text-[11px] text-zinc-500">
-          {formatPrice(MIN_PRICE)} – {formatPrice(maxPrice)}
-        </p>
-        <input
-          type="range"
-          min={MIN_PRICE}
-          max={MAX_PRICE}
-          step={500000}
-          value={maxPrice}
-          onChange={e => setMaxPrice(Number(e.target.value))}
-          className="w-full accent-zinc-950"
-        />
-        <div className="mt-2 grid grid-cols-2 gap-2">
-          <div className="rounded-md border border-zinc-200 bg-zinc-50 px-2 py-1.5 text-center text-[11px] text-zinc-600">
-            {formatPrice(MIN_PRICE)}
+        <div className="flex items-center gap-2 mb-4">
+          <div className="flex-1 bg-zinc-50 border border-zinc-200 rounded px-2 py-1.5 text-[11px] text-zinc-700 text-center">
+            {formatPrice(minPrice)}
           </div>
-          <div className="rounded-md border border-zinc-200 bg-zinc-50 px-2 py-1.5 text-center text-[11px] text-zinc-600">
+          <span className="text-zinc-400">-</span>
+          <div className="flex-1 bg-zinc-50 border border-zinc-200 rounded px-2 py-1.5 text-[11px] text-zinc-700 text-center">
             {formatPrice(maxPrice)}
           </div>
+        </div>
+        <div 
+          className="h-1 bg-zinc-200 rounded-full mb-6 relative mt-4 cursor-pointer"
+          onMouseMove={e => {
+            const rect = e.currentTarget.getBoundingClientRect();
+            const percent = (e.clientX - rect.left) / rect.width;
+            const value = MIN_PRICE + percent * (MAX_PRICE - MIN_PRICE);
+            if (Math.abs(value - minPrice) < Math.abs(value - maxPrice)) {
+              setActiveInput('min');
+            } else {
+              setActiveInput('max');
+            }
+          }}
+          onTouchStart={e => {
+            const rect = e.currentTarget.getBoundingClientRect();
+            const touch = e.touches[0];
+            const percent = (touch.clientX - rect.left) / rect.width;
+            const value = MIN_PRICE + percent * (MAX_PRICE - MIN_PRICE);
+            if (Math.abs(value - minPrice) < Math.abs(value - maxPrice)) {
+              setActiveInput('min');
+            } else {
+              setActiveInput('max');
+            }
+          }}
+        >
+          <div
+            className="absolute h-full bg-zinc-950 rounded-full"
+            style={{
+              left: `${percentMin}%`,
+              right: `${100 - percentMax}%`,
+            }}
+          />
+          <input
+            type="range"
+            min={MIN_PRICE}
+            max={MAX_PRICE}
+            step={500000}
+            value={minPrice}
+            onChange={e => {
+              const val = Math.min(Number(e.target.value), maxPrice - 500000);
+              setMinPrice(val);
+            }}
+            className="dual-range-slider"
+            style={{ zIndex: activeInput === 'min' ? 10 : 3 }}
+          />
+          <input
+            type="range"
+            min={MIN_PRICE}
+            max={MAX_PRICE}
+            step={500000}
+            value={maxPrice}
+            onChange={e => {
+              const val = Math.max(Number(e.target.value), minPrice + 500000);
+              setMaxPrice(val);
+            }}
+            className="dual-range-slider"
+            style={{ zIndex: activeInput === 'max' ? 10 : 3 }}
+          />
         </div>
       </div>
 
@@ -381,7 +434,7 @@ export default function LaptopIndex() {
             className="inline-flex items-center gap-2 rounded-xl border border-zinc-200 bg-white px-4 py-3 text-sm font-semibold text-zinc-800 shadow-sm"
           >
             <SlidersHorizontal className="h-4 w-4" />
-            Bộ lọc {hasActiveFilter && <span className="ml-1 inline-flex h-4 w-4 items-center justify-center rounded-full bg-zinc-900 text-[9px] font-bold text-white">{[selBrands, selRAMs, selCPUs, selScreens, selGPUs].filter(s => s.size > 0).length + (maxPrice < MAX_PRICE ? 1 : 0)}</span>}
+            Bộ lọc {hasActiveFilter && <span className="ml-1 inline-flex h-4 w-4 items-center justify-center rounded-full bg-zinc-900 text-[9px] font-bold text-white">{[selBrands, selRAMs, selCPUs, selScreens, selGPUs].filter(s => s.size > 0).length + (minPrice > MIN_PRICE || maxPrice < MAX_PRICE ? 1 : 0)}</span>}
           </button>
           <select
             value={sortBy}

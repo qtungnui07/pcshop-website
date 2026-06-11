@@ -1,4 +1,7 @@
-import { ShieldCheck, Truck, CheckCircle2, Wrench, CreditCard, ChevronRight, Heart, ArrowRight } from "lucide-react";
+import { 
+  ShieldCheck, Truck, CheckCircle2, Wrench, CreditCard, ChevronRight, Heart, ArrowRight,
+  Gamepad2, Palette, Clock, Cpu, Box 
+} from "lucide-react";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
@@ -12,24 +15,25 @@ interface PCItem {
   from: string;
   to: string;
   image?: string;
+  imgName?: string;
 }
 
 /* ── DATA ─────────────────────────────────────────────────────────── */
 
 const pcCategories = [
-  { name: "PC Gaming",     from: "#a78bfa", to: "#ec4899", glow: "rgba(236,72,153,0.3)" },
-  { name: "PC Đồ Họa",    from: "#38bdf8", to: "#6366f1", glow: "rgba(99,102,241,0.3)" },
-  { name: "PC Văn Phòng",  from: "#d4d4d8", to: "#a1a1aa", glow: "rgba(113,113,122,0.2)" },
-  { name: "PC Workstation",from: "#1e293b", to: "#334155", glow: "rgba(51,65,85,0.4)" },
-  { name: "PC Mini",       from: "#e2e8f0", to: "#cbd5e1", glow: "rgba(148,163,184,0.25)" },
+  { name: "PC Gaming",     imgName: "cat-gaming.png",      Icon: Gamepad2 },
+  { name: "PC Đồ Họa",    imgName: "cat-dohoa.png",       Icon: Palette },
+  { name: "PC Văn Phòng",  imgName: "cat-vanphong.png",    Icon: Clock },
+  { name: "PC Workstation",imgName: "cat-workstation.png",  Icon: Cpu },
+  { name: "PC Mini",       imgName: "cat-mini.png",        Icon: Box },
 ];
 
 const featuredPCs = [
-  { badge: "Bán chạy", badgeColor: "#1d1d1f", name: "PC Gaming Infinity",   specs: "i7-14700K • RTX 4070 SUPER\n32GB RAM • 1TB SSD",          price: "28.990.000đ", from: "#7c3aed", to: "#ec4899" },
-  { badge: "Mới",      badgeColor: "#2563eb", name: "PC Gaming Frost",       specs: "Ryzen 7 7800X3D • RTX 4070 Ti\n32GB RAM • 1TB SSD",       price: "32.990.000đ", from: "#1d4ed8", to: "#38bdf8" },
-  { badge: "Hot",      badgeColor: "#dc2626", name: "PC Gaming Nebula",      specs: "i9-14900K • RTX 4080 SUPER\n32GB RAM • 2TB SSD",          price: "45.990.000đ", from: "#0f172a", to: "#1e40af" },
-  { badge: "",         badgeColor: "",        name: "PC Workstation Pro",    specs: "Threadripper 7970X • RTX 4090\n64GB RAM • 2TB SSD",       price: "89.990.000đ", from: "#18181b", to: "#3f3f46" },
-  { badge: "",         badgeColor: "",        name: "PC Mini White",         specs: "Ryzen 5 7600 • RTX 4060\n16GB RAM • 1TB SSD",             price: "18.990.000đ", from: "#e2e8f0", to: "#f1f5f9" },
+  { badge: "Bán chạy", badgeColor: "#1d1d1f", name: "PC Gaming Infinity",   specs: "i7-14700K • RTX 4070 SUPER\n32GB RAM • 1TB SSD",          price: "28.990.000đ", from: "#7c3aed", to: "#ec4899", imgName: "pc-infinity.png" },
+  { badge: "Mới",      badgeColor: "#2563eb", name: "PC Gaming Frost",       specs: "Ryzen 7 7800X3D • RTX 4070 Ti\n32GB RAM • 1TB SSD",       price: "32.990.000đ", from: "#1d4ed8", to: "#38bdf8", imgName: "pc-frost.png" },
+  { badge: "Hot",      badgeColor: "#dc2626", name: "PC Gaming Nebula",      specs: "i9-14900K • RTX 4080 SUPER\n32GB RAM • 2TB SSD",          price: "45.990.000đ", from: "#0f172a", to: "#1e40af", imgName: "pc-nebula.png" },
+  { badge: "",         badgeColor: "",        name: "PC Workstation Pro",    specs: "Threadripper 7970X • RTX 4090\n64GB RAM • 2TB SSD",       price: "89.990.000đ", from: "#18181b", to: "#3f3f46", imgName: "pc-workstation.png" },
+  { badge: "",         badgeColor: "",        name: "PC Mini White",         specs: "Ryzen 5 7600 • RTX 4060\n16GB RAM • 1TB SSD",             price: "18.990.000đ", from: "#e2e8f0", to: "#f1f5f9", imgName: "pc-mini.png" },
 ];
 
 const brands = [
@@ -91,12 +95,32 @@ const API_BASE = typeof window !== "undefined"
 /* ── PAGE ─────────────────────────────────────────────────────────── */
 export default function PCIndex() {
   const [liked, setLiked] = useState<Set<number>>(new Set());
-  const [pcs, setPcs] = useState<PCItem[]>(featuredPCs);
+  const [pcs, setPcs] = useState<PCItem[]>(() =>
+    featuredPCs.map(pc => ({
+      ...pc,
+      image: `/images/${pc.imgName}`
+    }))
+  );
 
   useEffect(() => {
     fetch(`${API_BASE}/api/featured-pcs`)
       .then((res) => res.json())
-      .then((data) => setPcs(data))
+      .then((data) => {
+        if (Array.isArray(data)) {
+          const normalized = data.map((pc: any) => {
+            let localImg = pc.image;
+            if (pc.image && pc.image.includes('/images/')) {
+              const fileName = pc.image.substring(pc.image.lastIndexOf('/') + 1);
+              localImg = `/images/${fileName}`;
+            }
+            return {
+              ...pc,
+              image: localImg
+            };
+          });
+          setPcs(normalized);
+        }
+      })
       .catch((err) => console.error("Error fetching featured PCs from backend:", err));
   }, []);
 
@@ -250,9 +274,22 @@ export default function PCIndex() {
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 md:gap-4">
             {pcCategories.map((cat, i) => (
               <Link to={`/pc/${getCategorySlug(cat.name)}`} key={i} className="group cursor-pointer bg-white rounded-2xl border border-zinc-100 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 overflow-hidden block">
-                <Grad from={cat.from} to={cat.to} glow={cat.glow} className="w-full aspect-[4/3]" />
-                <div className="flex items-center justify-between px-3 py-3">
-                  <span className="text-[13px] font-semibold text-zinc-800 group-hover:text-zinc-950 transition-colors">{cat.name}</span>
+                <div className="w-full aspect-[4/3] relative overflow-hidden bg-zinc-50">
+                  <img 
+                    src={`/images/${cat.imgName}`} 
+                    alt={cat.name} 
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" 
+                  />
+                  <div className="absolute top-3 left-3 w-9 h-9 rounded-xl bg-white/80 backdrop-blur flex items-center justify-center border border-white/20 shadow-sm">
+                    {cat.name === "PC Workstation" ? (
+                      <span className="text-[11px] font-black text-zinc-500">Ai</span>
+                    ) : (
+                      <cat.Icon className="w-4.5 h-4.5 text-zinc-500" strokeWidth={1.8} />
+                    )}
+                  </div>
+                </div>
+                <div className="flex items-center justify-between px-3.5 py-3">
+                  <span className="text-[13px] font-bold text-zinc-800 group-hover:text-zinc-950 transition-colors">{cat.name}</span>
                   <ChevronRight className="w-4 h-4 text-zinc-400 group-hover:text-zinc-700 group-hover:translate-x-0.5 transition-all duration-200" />
                 </div>
               </Link>
@@ -273,11 +310,11 @@ export default function PCIndex() {
               <div key={i} className="w-full bg-white rounded-2xl border border-zinc-100 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 overflow-hidden group/card">
                 <div className="relative">
                   {pc.image ? (
-                    <div className="w-full aspect-[4/3.5] bg-[#0c0c0e] flex items-center justify-center p-3.5 overflow-hidden">
+                    <div className="w-full aspect-[4/3.5] relative overflow-hidden bg-zinc-900">
                       <img
                         src={pc.image}
                         alt={pc.name}
-                        className="max-h-full max-w-full object-contain drop-shadow-[0_8px_20px_rgba(255,255,255,0.08)] transition-transform duration-300 group-hover/card:scale-105"
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover/card:scale-105"
                       />
                     </div>
                   ) : (
