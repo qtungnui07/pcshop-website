@@ -541,6 +541,19 @@ serve({
       return Response.json(db.tickets, { headers });
     }
 
+    // POST /api/tickets/bulk to overwrite tickets array (for Admin panel)
+    if (url.pathname === "/api/tickets/bulk" && req.method === "POST") {
+      try {
+        const body = await req.json();
+        const db = await readData();
+        db.tickets = body;
+        await writeData(db);
+        return Response.json({ success: true }, { headers });
+      } catch (err) {
+        return Response.json({ error: "Invalid JSON body" }, { status: 400, headers });
+      }
+    }
+
     // POST Update support ticket (e.g. status)
     if (url.pathname === "/api/tickets/update" && req.method === "POST") {
       try {

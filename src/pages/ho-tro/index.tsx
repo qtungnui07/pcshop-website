@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import "./style.css";
 import pcBanner from "./pc_banner.png";
+import { useAuth } from "../../context/AuthContext";
 
 interface Ticket {
   id: string;
@@ -70,6 +71,7 @@ const API_BASE = typeof window !== "undefined"
   : "http://localhost:3001";
 
 export default function HoTroIndex() {
+  const { user } = useAuth();
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [currentView, setCurrentView] = useState<"home" | "create">("home");
   const [activeFilter, setActiveFilter] = useState<string>("all");
@@ -141,6 +143,10 @@ export default function HoTroIndex() {
   };
 
   const openCreateForm = (cat: string) => {
+    if (!user) {
+      alert("Vui lòng đăng nhập để tạo ticket hỗ trợ.");
+      return;
+    }
     setRequestType(cat);
     setProductCategory("");
     setProductName("");
@@ -271,7 +277,8 @@ export default function HoTroIndex() {
   };
 
   // Filter & Sort dynamic data
-  const filteredTickets = tickets
+  const userTickets = user ? tickets.filter(t => t.contactEmail === user.email) : [];
+  const filteredTickets = userTickets
     .filter(t => activeFilter === "all" || t.status === activeFilter)
     .sort((a, b) => {
       const timeA = new Date(a.createdAt).getTime();
@@ -279,7 +286,7 @@ export default function HoTroIndex() {
       return activeSort === "newest" ? timeB - timeA : timeA - timeB;
     });
 
-  const activeCount = tickets.filter(t => t.status !== "cancelled" && t.status !== "completed").length;
+  const activeCount = userTickets.filter(t => t.status !== "cancelled" && t.status !== "completed").length;
 
   return (
     <div className="w-full font-sans ho-tro-scope">
@@ -305,7 +312,7 @@ export default function HoTroIndex() {
                     <line x1="16" y1="17" x2="8" y2="17"></line>
                     <polyline points="10 9 9 9 8 9"></polyline>
                   </svg>
-                  <span>Bạn đang hiện có {activeCount} yêu cầu cần xử lý</span>
+                  <span>Hiện tại có {activeCount} ticket đang được xử lý</span>
                   <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" strokeWidth="2.5" fill="none"><polyline points="9 18 15 12 9 6"></polyline></svg>
                 </button>
               </div>
@@ -369,36 +376,50 @@ export default function HoTroIndex() {
             <div id="section-my-requests" className="my-requests-section">
               <div className="section-header-row">
                 <h2 className="section-title">Yêu cầu của bạn</h2>
-                <div className="filter-controls">
-                  {/* Status Tabs */}
-                  <div className="status-tabs">
-                    {["all", "pending", "processing", "completed", "cancelled"].map((status) => (
-                      <button
-                        key={status}
-                        onClick={() => setActiveFilter(status)}
-                        className={`tab-btn ${activeFilter === status ? "active" : ""}`}
+                {user && (
+                  <div className="filter-controls">
+                    {/* Status Tabs */}
+                    <div className="status-tabs">
+                      {["all", "pending", "processing", "completed", "cancelled"].map((status) => (
+                        <button
+                          key={status}
+                          onClick={() => setActiveFilter(status)}
+                          className={`tab-btn ${activeFilter === status ? "active" : ""}`}
+                        >
+                          {status === "all" ? "Tất cả" : status === "pending" ? "Chờ xử lý" : status === "processing" ? "Đang xử lý" : status === "completed" ? "Hoàn thành" : "Đã hủy"}
+                        </button>
+                      ))}
+                    </div>
+                    {/* Sort Select */}
+                    <div className="sort-wrapper">
+                      <select
+                        value={activeSort}
+                        onChange={(e) => setActiveSort(e.target.value)}
+                        className="sort-select outline-none"
                       >
-                        {status === "all" ? "Tất cả" : status === "pending" ? "Chờ xử lý" : status === "processing" ? "Đang xử lý" : status === "completed" ? "Hoàn thành" : "Đã hủy"}
-                      </button>
-                    ))}
+                        <option value="newest">Mới nhất</option>
+                        <option value="oldest">Cũ nhất</option>
+                      </select>
+                      <svg className="select-arrow" viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" strokeWidth="2" fill="none"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                    </div>
                   </div>
-                  {/* Sort Select */}
-                  <div className="sort-wrapper">
-                    <select
-                      value={activeSort}
-                      onChange={(e) => setActiveSort(e.target.value)}
-                      className="sort-select outline-none"
-                    >
-                      <option value="newest">Mới nhất</option>
-                      <option value="oldest">Cũ nhất</option>
-                    </select>
-                    <svg className="select-arrow" viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" strokeWidth="2" fill="none"><polyline points="6 9 12 15 18 9"></polyline></svg>
-                  </div>
-                </div>
+                )}
               </div>
 
               {/* Dynamic list */}
-              {filteredTickets.length === 0 ? (
+              {!user ? (
+                <div className="empty-requests-box">
+                  <div className="empty-icon-wrapper">
+                    <svg viewBox="0 0 24 24" width="72" height="72" stroke="currentColor" strokeWidth="1.2" fill="none">
+                      <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
+                      <polyline points="10 17 15 12 10 7"></polyline>
+                      <line x1="15" y1="12" x2="3" y2="12"></line>
+                    </svg>
+                  </div>
+                  <h4 className="empty-title">Cần đăng nhập</h4>
+                  <p className="empty-subtitle">Vui lòng đăng nhập để tạo ticket hoặc xem yêu cầu của bạn.</p>
+                </div>
+              ) : filteredTickets.length === 0 ? (
                 <div className="empty-requests-box">
                   <div className="empty-icon-wrapper">
                     <svg viewBox="0 0 24 24" width="72" height="72" stroke="currentColor" strokeWidth="1.2" fill="none">

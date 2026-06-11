@@ -103,6 +103,7 @@ const CATEGORIES = [
   { id: "laptop", name: "Laptop / Notebook", icon: Laptop, color: "text-blue-600 bg-blue-50 border-blue-200" },
   { id: "linh-kien", name: "Linh kiện PC", icon: Cpu, color: "text-emerald-600 bg-emerald-50 border-emerald-200" },
   { id: "phu-kien", name: "Phụ kiện Gaming", icon: Keyboard, color: "text-orange-600 bg-orange-50 border-orange-200" },
+  { id: "tickets", name: "Hỗ trợ (Tickets)", icon: HelpCircle, color: "text-teal-600 bg-teal-50 border-teal-200" },
   { id: "accounts", name: "Quản lý Tài khoản", icon: Users, color: "text-red-600 bg-red-50 border-red-200" }
 ];
 
@@ -266,6 +267,7 @@ export default function AdminIndex() {
   const [laptops, setLaptops] = useState<LaptopItem[]>([]);
   const [components, setComponents] = useState<ComponentItem[]>([]);
   const [accessories, setAccessories] = useState<AccessoryItem[]>([]);
+  const [tickets, setTickets] = useState<any[]>([]);
   const [accounts, setAccounts] = useState<any[]>([]);
 
   // Dirty state tracking per category
@@ -274,6 +276,7 @@ export default function AdminIndex() {
     laptop: false,
     "linh-kien": false,
     "phu-kien": false,
+    tickets: false,
     accounts: false
   });
 
@@ -302,6 +305,9 @@ export default function AdminIndex() {
   const [accountPassword, setAccountPassword] = useState("");
   const [accountRole, setAccountRole] = useState<"admin" | "user">("user");
 
+  // Ticket specific state
+  const [ticketStatus, setTicketStatus] = useState<string>("pending");
+
   // PC specific inputs
   const [formFrom, setFormFrom] = useState("#7c3aed");
   const [formTo, setFormTo] = useState("#ec4899");
@@ -327,11 +333,12 @@ export default function AdminIndex() {
     setLoading(true);
     try {
       const authHeader = { "Authorization": `Bearer ${user.email}` };
-      const [pcsRes, laptopsRes, componentsRes, accessoriesRes, accountsRes] = await Promise.all([
+      const [pcsRes, laptopsRes, componentsRes, accessoriesRes, ticketsRes, accountsRes] = await Promise.all([
         fetch(`${API_BASE}/api/featured-pcs`).then(r => r.json()),
         fetch(`${API_BASE}/api/laptops`).then(r => r.json()),
         fetch(`${API_BASE}/api/components`).then(r => r.json()),
         fetch(`${API_BASE}/api/accessories`).then(r => r.json()),
+        fetch(`${API_BASE}/api/tickets`, { headers: authHeader }).then(r => r.ok ? r.json() : []),
         fetch(`${API_BASE}/api/accounts`, { headers: authHeader }).then(r => r.ok ? r.json() : [])
       ]);
       
@@ -339,9 +346,10 @@ export default function AdminIndex() {
       setLaptops(laptopsRes);
       setComponents(componentsRes);
       setAccessories(accessoriesRes);
+      setTickets(ticketsRes);
       setAccounts(accountsRes);
       
-      setDirty({ pc: false, laptop: false, "linh-kien": false, "phu-kien": false, accounts: false });
+      setDirty({ pc: false, laptop: false, "linh-kien": false, "phu-kien": false, tickets: false, accounts: false });
       setEditingIndex(null);
     } catch (err) {
       console.error("Error loading products in admin:", err);
@@ -362,6 +370,7 @@ export default function AdminIndex() {
     if (activeCategory === "laptop") return laptops;
     if (activeCategory === "linh-kien") return components;
     if (activeCategory === "phu-kien") return accessories;
+    if (activeCategory === "tickets") return tickets;
     return accounts;
   };
 
@@ -378,7 +387,10 @@ export default function AdminIndex() {
       const matchEmail = item.email?.toLowerCase().includes(q);
       const matchRole = item.role?.toLowerCase().includes(q);
       const matchProvider = item.provider?.toLowerCase().includes(q);
-      return matchName || matchSpecs || matchBrand || matchCategory || matchEmail || matchRole || matchProvider;
+      const matchTicketTitle = item.title?.toLowerCase().includes(q);
+      const matchTicketStatus = item.status?.toLowerCase().includes(q);
+      const matchTicketId = item.id?.toLowerCase().includes(q);
+      return matchName || matchSpecs || matchBrand || matchCategory || matchEmail || matchRole || matchProvider || matchTicketTitle || matchTicketStatus || matchTicketId;
     });
   };
 
@@ -420,6 +432,7 @@ export default function AdminIndex() {
     else if (activeCategory === "laptop") setLaptops(newList);
     else if (activeCategory === "linh-kien") setComponents(newList);
     else if (activeCategory === "phu-kien") setAccessories(newList);
+    else if (activeCategory === "tickets") setTickets(newList);
     else setAccounts(newList);
   };
 
@@ -501,6 +514,8 @@ export default function AdminIndex() {
       setAccountEmail(item.email || "");
       setAccountPassword(""); // clear password input for editing (empty means keep current)
       setAccountRole(item.role || "user");
+    } else if (activeCategory === "tickets") {
+      setTicketStatus(item.status || "pending");
     } else {
       // Populate fields
       setFormName(item.name);
@@ -573,6 +588,8 @@ export default function AdminIndex() {
       if (!accountEmail.trim()) errors.email = "Email không được trống.";
       else if (!/\S+@\S+\.\S+/.test(accountEmail)) errors.email = "Email không đúng định dạng.";
       if (editingIndex === -1 && !accountPassword.trim()) errors.password = "Mật khẩu không được trống.";
+    } else if (activeCategory === "tickets") {
+      // Nothing to validate for tickets
     } else {
       if (!formName.trim()) errors.name = "Tên sản phẩm không được trống.";
       if (!formPrice.trim() && typeof formPrice !== "number") errors.price = "Giá hiển thị không được trống.";
@@ -611,6 +628,8 @@ export default function AdminIndex() {
         avatar: isNew ? `https://api.dicebear.com/7.x/pixel-art/svg?seed=${encodeURIComponent(accountName)}` : existing.avatar || "",
         provider: isNew ? "local" : existing.provider || "local"
       };
+    } else if (activeCategory === "tickets") {
+      newItem = { ...originalList[editingIndex!], status: ticketStatus };
     } else if (activeCategory === "pc") {
       const imgUrl = isCustomImage ? customImageUrl : formImage;
       const pcItem: PCItem = {
@@ -693,6 +712,9 @@ export default function AdminIndex() {
     } else if (activeCategory === "phu-kien") {
       url = `${API_BASE}/api/accessories`;
       payload = accessories;
+    } else if (activeCategory === "tickets") {
+      url = `${API_BASE}/api/tickets/bulk`;
+      payload = tickets;
     } else {
       url = `${API_BASE}/api/accounts`;
       payload = accounts;
@@ -892,7 +914,8 @@ export default function AdminIndex() {
               
               <button
                 onClick={handleStartCreate}
-                className="flex items-center justify-center gap-1.5 px-4 py-2 bg-zinc-900 hover:bg-zinc-950 text-white text-xs font-bold rounded-xl transition-colors cursor-pointer active:scale-95"
+                disabled={activeCategory === "tickets"}
+                className={`flex items-center justify-center gap-1.5 px-4 py-2 bg-zinc-900 hover:bg-zinc-950 text-white text-xs font-bold rounded-xl transition-colors cursor-pointer active:scale-95 ${activeCategory === "tickets" ? "hidden" : ""}`}
               >
                 <Plus className="w-4 h-4" /> {activeCategory === "accounts" ? "Tạo tài khoản mới" : "Thêm sản phẩm mới"}
               </button>
@@ -983,6 +1006,11 @@ export default function AdminIndex() {
                             )}
                           </div>
                         )}
+                        {activeCategory === "tickets" && (
+                          <div className="w-16 h-16 rounded-xl flex items-center justify-center p-1 border border-zinc-200 relative overflow-hidden bg-zinc-50 flex-shrink-0">
+                            <HelpCircle className="w-7 h-7 text-zinc-400" />
+                          </div>
+                        )}
 
                         {/* Title and Specs */}
                         <div className="min-w-0 flex-1">
@@ -1003,6 +1031,23 @@ export default function AdminIndex() {
                                   {item.name}
                                 </h3>
                               </>
+                            ) : activeCategory === "tickets" ? (
+                              <>
+                                <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded uppercase ${
+                                  item.status === 'completed' ? 'bg-emerald-100 text-emerald-700' :
+                                  item.status === 'processing' ? 'bg-blue-100 text-blue-700' :
+                                  item.status === 'cancelled' ? 'bg-red-100 text-red-700' :
+                                  'bg-orange-100 text-orange-700'
+                                }`}>
+                                  {item.status}
+                                </span>
+                                <span className="bg-zinc-100 text-zinc-700 text-[9px] font-bold px-1.5 py-0.5 rounded uppercase">
+                                  {item.categoryLabel}
+                                </span>
+                                <h3 className="text-sm font-bold text-zinc-900 truncate">
+                                  {item.title}
+                                </h3>
+                              </>
                             ) : (
                               <>
                                 {item.brand && (
@@ -1021,13 +1066,17 @@ export default function AdminIndex() {
                             <p className="text-[11px] text-zinc-400 font-medium leading-relaxed truncate max-w-[450px]">
                               {item.email}
                             </p>
+                          ) : activeCategory === "tickets" ? (
+                            <p className="text-[11px] text-zinc-400 font-medium leading-relaxed truncate max-w-[450px]">
+                              {item.contactEmail} • #{item.id}
+                            </p>
                           ) : (
                             <p className="text-[11px] text-zinc-400 font-medium whitespace-pre-line leading-relaxed truncate max-w-[450px]">
                               {item.specs ? item.specs.replace(/\n/g, ' • ') : ''}
                             </p>
                           )}
 
-                          {activeCategory !== "accounts" && (
+                          {activeCategory !== "accounts" && activeCategory !== "tickets" && (
                             <div className="flex items-center gap-2 mt-1">
                               <span className="text-xs font-bold text-zinc-800">
                                 {activeCategory === "phu-kien" ? formatAccessoryPrice(item.price) : item.price}
@@ -1049,7 +1098,7 @@ export default function AdminIndex() {
 
                       {/* Reorder and Action Tools */}
                       <div className="flex items-center gap-1.5 ml-4 flex-shrink-0">
-                        {activeCategory !== "accounts" && (
+                        {activeCategory !== "accounts" && activeCategory !== "tickets" && (
                           <div className="flex flex-col">
                             <button
                               onClick={() => handleMove(idx, "up")}
@@ -1073,7 +1122,7 @@ export default function AdminIndex() {
                         <button
                           onClick={() => handleStartEdit(idx)}
                           className="p-2 text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900 rounded-xl transition-all cursor-pointer"
-                          title={activeCategory === "accounts" ? "Chỉnh sửa tài khoản" : "Chỉnh sửa sản phẩm"}
+                          title={activeCategory === "accounts" ? "Chỉnh sửa tài khoản" : activeCategory === "tickets" ? "Cập nhật Ticket" : "Chỉnh sửa sản phẩm"}
                         >
                           <Edit3 className="w-4.5 h-4.5" />
                         </button>
@@ -1081,7 +1130,7 @@ export default function AdminIndex() {
                         <button
                           onClick={() => handleDelete(idx)}
                           className="p-2 text-red-500 hover:bg-red-50 hover:text-red-700 rounded-xl transition-all cursor-pointer"
-                          title={activeCategory === "accounts" ? "Xóa tài khoản" : "Xóa cấu hình"}
+                          title={activeCategory === "accounts" ? "Xóa tài khoản" : activeCategory === "tickets" ? "Xóa Ticket" : "Xóa cấu hình"}
                         >
                           <Trash2 className="w-4.5 h-4.5" />
                         </button>
@@ -1114,7 +1163,7 @@ export default function AdminIndex() {
                   </h2>
 
                   {/* SMART TEMPLATE DROPDOWN */}
-                  {activeCategory !== "accounts" && (
+                  {activeCategory !== "accounts" && activeCategory !== "tickets" && (
                     <div className="mb-4 bg-zinc-50 border border-zinc-200 rounded-xl p-3">
                       <label className="block mb-1 text-[10px] font-bold text-zinc-500 uppercase tracking-widest">
                         ⚡️ Chọn cấu hình nhanh (Autofill Template)
@@ -1143,7 +1192,29 @@ export default function AdminIndex() {
 
                   {/* FORM FIELDS (DYNAMIC BASED ON CATEGORY) */}
                   <div className="space-y-4 text-xs font-semibold text-zinc-600">
-                    {activeCategory !== "accounts" ? (
+                    {activeCategory === "tickets" ? (
+                      <div>
+                        <label className="block mb-1.5 text-zinc-700">Trạng thái Ticket</label>
+                        <select
+                          value={ticketStatus}
+                          onChange={(e) => setTicketStatus(e.target.value)}
+                          className="w-full px-3 py-2 border border-zinc-200 rounded-lg text-sm font-medium focus:border-zinc-900 outline-none"
+                        >
+                          <option value="pending">Chờ xử lý</option>
+                          <option value="processing">Đang xử lý</option>
+                          <option value="completed">Hoàn thành</option>
+                          <option value="cancelled">Đã hủy</option>
+                        </select>
+                        <div className="mt-4 p-3 bg-zinc-50 border border-zinc-200 rounded-lg space-y-2 text-sm leading-relaxed text-zinc-800">
+                           <p><span className="font-bold text-zinc-500">Khách hàng:</span> {getActiveList()[editingIndex!]?.contactName}</p>
+                           <p><span className="font-bold text-zinc-500">Email:</span> {getActiveList()[editingIndex!]?.contactEmail}</p>
+                           <p><span className="font-bold text-zinc-500">SĐT:</span> {getActiveList()[editingIndex!]?.contactPhone}</p>
+                           <p><span className="font-bold text-zinc-500">Địa chỉ:</span> {getActiveList()[editingIndex!]?.contactAddress}</p>
+                           <p><span className="font-bold text-zinc-500">Sản phẩm:</span> {getActiveList()[editingIndex!]?.productName} ({getActiveList()[editingIndex!]?.serialNumber})</p>
+                           <p><span className="font-bold text-zinc-500">Chi tiết vấn đề:</span> {getActiveList()[editingIndex!]?.description}</p>
+                        </div>
+                      </div>
+                    ) : activeCategory !== "accounts" ? (
                       <>
                         {/* Brand field for Laptop / Accessory */}
                     {(activeCategory === "laptop" || activeCategory === "phu-kien") && (
