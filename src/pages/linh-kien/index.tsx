@@ -120,7 +120,7 @@ const perks = [
 
 /* ── HELPERS ────────────────────────────────────────────────────────── */
 function parsePrice(priceStr: string) {
-  return parseInt(priceStr.replace(/\\D/g, ''), 10) || 0;
+  return parseInt(priceStr.replace(/\D/g, ''), 10) || 0;
 }
 
 function formatPrice(p: number) {
