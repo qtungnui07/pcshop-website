@@ -395,7 +395,7 @@ export default function AdminIndex() {
 
   // Editor states
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
-  const [editorOffsetTop, setEditorOffsetTop] = useState(0);
+  // const [editorOffsetTop, setEditorOffsetTop] = useState(0);
   
   // Shared Form inputs
   const [formName, setFormName] = useState("");
