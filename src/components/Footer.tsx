@@ -17,6 +17,19 @@ const getMenuSlug = (name: string) => {
   return generateSlug(name);
 };
 
+const getComponentCatId = (name: string) => {
+  if (name.includes('RAM')) return 'ram';
+  if (name.includes('CPU')) return 'cpu';
+  if (name.includes('VGA')) return 'vga';
+  if (name.includes('Mainboard')) return 'mainboard';
+  if (name.includes('SSD')) return 'ssd';
+  if (name.includes('HDD')) return 'hdd';
+  if (name.includes('Nguồn')) return 'psu';
+  if (name.includes('Tản Nhiệt')) return 'cooling';
+  if (name.includes('Case')) return 'case';
+  return generateSlug(name);
+};
+
 // Derive footer columns directly from navItems so Navbar & Footer stay in sync.
 // - Each nav item with a dropdown or isSplit becomes a column.
 function buildFooterColumns() {
@@ -26,10 +39,16 @@ function buildFooterColumns() {
       let links: { label: string; to: string }[] = [];
       const menuSlug = getMenuSlug(item.name);
       if (item.isSplit && item.splitData) {
-        links = item.splitData.map((d) => ({
-          label: d.name,
-          to: `/${menuSlug}/${generateSlug(d.name)}`
-        }));
+        links = item.splitData.map((d) => {
+          let to = `/${menuSlug}/${generateSlug(d.name)}`;
+          if (menuSlug === 'linh-kien') {
+            to = `/linh-kien?category=${getComponentCatId(d.name)}`;
+          }
+          return {
+            label: d.name,
+            to
+          };
+        });
       } else if (item.dropdown) {
         links = item.dropdown.flatMap((section) =>
           section.links.map((link) => {
