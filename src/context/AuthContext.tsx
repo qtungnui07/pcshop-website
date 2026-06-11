@@ -25,7 +25,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 const PORT = 3001;
-const API_BASE = typeof window !== "undefined"
+export const API_BASE = typeof window !== "undefined"
   ? (window.location.hostname.includes("qtitpc.dev")
     ? "https://api-pc.qtitpc.dev"
     : `${window.location.protocol}//${window.location.hostname}:${PORT}`)

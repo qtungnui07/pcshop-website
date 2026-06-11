@@ -4,6 +4,23 @@ import { mkdir, rename } from "node:fs/promises";
 const PORT = 3001;
 const DB_DIR = "./backend/db";
 
+// In-memory rate limiting and password reset token maps
+const rateLimits = new Map<string, { count: number; resetTime: number }>();
+const resetTokens = new Map<string, { email: string; expiresAt: number }>();
+
+function getClientIP(req: Request): string {
+  const cfConnectingIP = req.headers.get("cf-connecting-ip");
+  if (cfConnectingIP) return cfConnectingIP.trim();
+
+  const xForwardedFor = req.headers.get("x-forwarded-for");
+  if (xForwardedFor) {
+    const parts = xForwardedFor.split(",");
+    return parts[0].trim();
+  }
+
+  return "127.0.0.1";
+}
+
 try {
   await mkdir(DB_DIR, { recursive: true });
   await mkdir("./backend/public/images", { recursive: true });
@@ -638,6 +655,180 @@ serve({
         const { password: _, ...userWithoutPassword } = user;
         return Response.json({ success: true, user: userWithoutPassword }, { headers });
       } catch (err) {
+        return Response.json({ error: "Đã xảy ra lỗi hệ thống" }, { status: 500, headers });
+      }
+    }
+
+    // POST /api/auth/forgot-password
+    if (url.pathname === "/api/auth/forgot-password" && req.method === "POST") {
+      try {
+        const { email, turnstileToken } = await req.json();
+        if (!email) {
+          return Response.json({ error: "Vui lòng nhập email" }, { status: 400, headers });
+        }
+
+        const ip = getClientIP(req);
+        const now = Date.now();
+
+        // 1. IP Rate Limiting
+        const limitInfo = rateLimits.get(ip);
+        if (limitInfo && now < limitInfo.resetTime) {
+          if (limitInfo.count >= 3) {
+            const minutesLeft = Math.ceil((limitInfo.resetTime - now) / 60000);
+            return Response.json(
+              { error: `Bạn đã gửi yêu cầu quá nhanh. Vui lòng thử lại sau ${minutesLeft} phút.` },
+              { status: 429, headers }
+            );
+          }
+          limitInfo.count += 1;
+        } else {
+          rateLimits.set(ip, { count: 1, resetTime: now + 10 * 60 * 1000 }); // 10 minutes window
+        }
+
+        // 2. Cloudflare Turnstile verification
+        if (!turnstileToken) {
+          return Response.json({ error: "Xác thực Captcha không hợp lệ" }, { status: 400, headers });
+        }
+        const verifyRes = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded"
+          },
+          body: `secret=${encodeURIComponent(process.env.TURNSTILE_SECRET_KEY || Bun.env.TURNSTILE_SECRET_KEY || "1x00000000000000000000000000000000")}&response=${encodeURIComponent(turnstileToken)}&remoteip=${encodeURIComponent(ip)}`
+        });
+        const verifyData: any = await verifyRes.json();
+        if (!verifyData.success) {
+          return Response.json({ error: "Xác thực Captcha thất bại. Vui lòng thử lại." }, { status: 400, headers });
+        }
+
+        // 3. Check if email exists in DB
+        const db = await readData();
+        const user = db.accounts?.find((u: any) => u.email.toLowerCase() === email.toLowerCase());
+        if (!user) {
+          return Response.json({ error: "Email này không tồn tại trong hệ thống" }, { status: 400, headers });
+        }
+
+        // 4. Generate Reset Token
+        const token = crypto.randomUUID();
+        resetTokens.set(token, {
+          email: email.toLowerCase().trim(),
+          expiresAt: now + 60 * 60 * 1000 // 1 hour expiration
+        });
+
+        // 5. Send recovery email using Resend
+        const resetLink = `https://pc.qtitpc.dev/auth/reset-password?token=${token}`;
+        console.log(`[Forgot Password] Reset link for ${email}: ${resetLink}`);
+
+        const htmlContent = `
+<div style="font-family: 'Inter', -apple-system, sans-serif; background-color: #09090b; color: #f4f4f5; padding: 40px 20px; max-width: 600px; margin: 0 auto; border-radius: 24px; border: 1px solid #27272a;">
+  <div style="text-align: center; margin-bottom: 32px;">
+    <h1 style="color: #ffffff; font-size: 28px; font-weight: 800; letter-spacing: -0.05em; margin: 0;">PC SHOP</h1>
+    <p style="color: #a1a1aa; font-size: 14px; margin-top: 4px;">Premium Computer Systems & Gear</p>
+  </div>
+  
+  <div style="background-color: #18181b; border: 1px solid #27272a; padding: 32px; border-radius: 16px;">
+    <h2 style="color: #ffffff; font-size: 20px; font-weight: 600; margin-top: 0; margin-bottom: 16px;">Yêu cầu khôi phục mật khẩu</h2>
+    <p style="color: #d4d4d8; font-size: 15px; line-height: 1.6; margin-bottom: 24px;">
+      Chúng tôi nhận được yêu cầu khôi phục mật khẩu cho tài khoản PC Shop của bạn. Vui lòng nhấn vào nút bên dưới để thiết lập mật khẩu mới. Liên kết này sẽ hết hạn sau 1 giờ.
+    </p>
+    
+    <div style="text-align: center; margin: 32px 0;">
+      <a href="${resetLink}" style="background-color: #ffffff; color: #09090b; font-weight: 600; text-decoration: none; padding: 14px 28px; border-radius: 12px; font-size: 15px; display: inline-block; box-shadow: 0 4px 12px rgba(255,255,255,0.1);">
+        Đặt lại mật khẩu
+      </a>
+    </div>
+    
+    <p style="color: #71717a; font-size: 13px; line-height: 1.6; margin-top: 24px; margin-bottom: 0;">
+      Nếu nút trên không hoạt động, hãy sao chép và dán liên kết sau vào trình duyệt:<br>
+      <a href="${resetLink}" style="color: #3b82f6; text-decoration: none; word-break: break-all;">${resetLink}</a>
+    </p>
+  </div>
+  
+  <div style="text-align: center; margin-top: 32px; color: #71717a; font-size: 12px;">
+    <p style="margin: 0;">Nếu bạn không yêu cầu thay đổi này, hãy bỏ qua email này.</p>
+    <p style="margin: 8px 0 0;">© 2026 PC Shop. All rights reserved.</p>
+  </div>
+</div>
+        `;
+
+        const resendApiKey = process.env.RESEND_API_KEY || Bun.env.RESEND_API_KEY;
+        if (!resendApiKey) {
+          console.error("Missing RESEND_API_KEY env variable");
+          return Response.json({ error: "Cấu hình gửi mail chưa đúng. Vui lòng liên hệ Admin." }, { status: 500, headers });
+        }
+
+        const emailRes = await fetch("https://api.resend.com/emails", {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${resendApiKey}`,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            from: "PC Shop <no-reply@qtitpc.dev>",
+            to: [email.toLowerCase().trim()],
+            subject: "Khôi phục mật khẩu - PC Shop",
+            html: htmlContent
+          })
+        });
+
+        if (!emailRes.ok) {
+          const errBody = await emailRes.text();
+          console.error("Resend API error:", errBody);
+          return Response.json({ error: "Không thể gửi email khôi phục. Vui lòng thử lại sau." }, { status: 500, headers });
+        }
+
+        return Response.json({ success: true }, { headers });
+      } catch (err) {
+        console.error("Forgot password system error:", err);
+        return Response.json({ error: "Đã xảy ra lỗi hệ thống" }, { status: 500, headers });
+      }
+    }
+
+    // GET /api/auth/verify-reset-token
+    if (url.pathname === "/api/auth/verify-reset-token" && req.method === "GET") {
+      const token = url.searchParams.get("token");
+      if (!token) {
+        return Response.json({ valid: false, error: "Mã khôi phục không hợp lệ." }, { headers });
+      }
+
+      const tokenInfo = resetTokens.get(token);
+      if (!tokenInfo || Date.now() > tokenInfo.expiresAt) {
+        return Response.json({ valid: false, error: "Mã khôi phục đã hết hạn hoặc không tồn tại." }, { headers });
+      }
+
+      return Response.json({ valid: true, email: tokenInfo.email }, { headers });
+    }
+
+    // POST /api/auth/reset-password
+    if (url.pathname === "/api/auth/reset-password" && req.method === "POST") {
+      try {
+        const { token, password } = await req.json();
+        if (!token || !password) {
+          return Response.json({ error: "Thông tin không đầy đủ." }, { status: 400, headers });
+        }
+
+        const tokenInfo = resetTokens.get(token);
+        if (!tokenInfo || Date.now() > tokenInfo.expiresAt) {
+          return Response.json({ error: "Mã khôi phục đã hết hạn hoặc không tồn tại." }, { status: 400, headers });
+        }
+
+        const db = await readData();
+        const userIndex = db.accounts?.findIndex((u: any) => u.email.toLowerCase() === tokenInfo.email.toLowerCase());
+        
+        if (userIndex === -1) {
+          return Response.json({ error: "Không tìm thấy người dùng." }, { status: 400, headers });
+        }
+
+        // Update password
+        db.accounts[userIndex].password = password;
+        await writeData(db);
+
+        // Delete reset token so it cannot be reused
+        resetTokens.delete(token);
+
+        return Response.json({ success: true }, { headers });
+      } catch (err) {
+        console.error("Reset password error:", err);
         return Response.json({ error: "Đã xảy ra lỗi hệ thống" }, { status: 500, headers });
       }
     }

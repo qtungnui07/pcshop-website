@@ -47,6 +47,7 @@ export default function Auth() {
   const [password, setPassword] = useState('');
   const [errors, setErrors] = useState<{ name?: string; email?: string; password?: string }>({});
   const [generalError, setGeneralError] = useState<string | null>(null);
+  const [resetSuccessMessage, setResetSuccessMessage] = useState<string | null>(null);
 
   // Password requirement formulas
   const hasMinLength = password.length >= 8;
@@ -66,6 +67,14 @@ export default function Auth() {
     }
   }, [user, navigate]);
 
+  useEffect(() => {
+    const searchParams = new URLSearchParams(window.location.search);
+    if (searchParams.get('resetSuccess') === 'true') {
+      setResetSuccessMessage('Đặt lại mật khẩu thành công! Vui lòng đăng nhập bằng mật khẩu mới.');
+      navigate('/auth', { replace: true });
+    }
+  }, [navigate]);
+
   const handleTabChange = (login: boolean) => {
     setIsLogin(login);
     setName('');
@@ -73,6 +82,7 @@ export default function Auth() {
     setPassword('');
     setErrors({});
     setGeneralError(null);
+    setResetSuccessMessage(null);
   };
 
   const handleGoogleClick = async () => {
@@ -188,6 +198,18 @@ export default function Auth() {
             transition={{ duration: 0.3, ease: "easeInOut" }}
           >
             <form className="space-y-4" onSubmit={handleSubmit}>
+              {resetSuccessMessage && (
+                <motion.div
+                  initial={{ opacity: 0, y: -5 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="bg-green-50 border border-green-200 text-green-700 text-xs font-semibold px-4 py-3 rounded-xl text-center flex items-center justify-center gap-2"
+                >
+                  <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  {resetSuccessMessage}
+                </motion.div>
+              )}
               {generalError && (
                 <motion.div
                   initial={{ opacity: 0, y: -5 }}
