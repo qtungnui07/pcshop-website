@@ -32,18 +32,66 @@ const componentCategories = [
 ];
 
 const defaultProducts: Product[] = [
-  { name: "G.Skill Trident Z5 RGB",      specs: "18GB (2x8GB) DDR5 6000MHz",  price: "2.890.000đ", badge: "Mới",     badgeColor: "#22c55e", color: "#e0e7ef" },
-  { name: "Corsair Vengeance RGB",        specs: "16GB (2x8GB) DDR5 5600MHz",  price: "2.290.000đ", badge: "Bán chạy",badgeColor: "#f97316", color: "#1a1a2e" },
-  { name: "Kingston Fury Beast",          specs: "16GB (2x8GB) DDR4 3200MHz",  price: "990.000đ",   color: "#1a1a2e" },
-  { name: "G.Skill Ripjaws V",            specs: "16GB (2x8GB) DDR4 3600MHz",  price: "1.290.000đ", color: "#2d2d2d" },
-  { name: "Corsair Dominator Platinum",   specs: "32GB (2x16GB) DDR5 6000MHz", price: "5.990.000đ", color: "#c8d0dc" },
-  { name: "TeamGroup T-Force Delta RGB",  specs: "32GB (2x16GB) DDR5 6000MHz", price: "4.490.000đ", color: "#111827" },
-  { name: "Crucial Pro",                  specs: "32GB (2x16GB) DDR5 4800MHz", price: "1.690.000đ", color: "#1f2937" },
-  { name: "Kingston Fury Beast",          specs: "32GB (2x16GB) DDR5 6000MHz", price: "4.290.000đ", color: "#1a1a2e" },
-  { name: "G.Skill Trident Z5 RGB",      specs: "32GB (2x16GB) DDR5 6400MHz", price: "5.490.000đ", color: "#e0e7ef" },
-  { name: "Corsair Vengeance LPX",        specs: "16GB (2x8GB) DDR4 3200MHz",  price: "1.190.000đ", color: "#111" },
-  { name: "Apacer PANTHER",              specs: "16GB (2x8GB) DDR4 3600MHz",  price: "1.090.000đ", color: "#f59e0b" },
-  { name: "TeamGroup T-Force Vulcan Z",  specs: "16GB (2x8GB) DDR4 3200MHz",  price: "890.000đ",   color: "#dc2626" },
+  // --- RAM ---
+  { name: "G.Skill Trident Z5 RGB", specs: "16GB (2x8GB) DDR5 6000MHz", price: "2.890.000đ", badge: "Mới", badgeColor: "#22c55e", color: "#e0e7ef", category: "RAM" },
+  { name: "Corsair Vengeance RGB", specs: "16GB (2x8GB) DDR5 5600MHz", price: "2.290.000đ", badge: "Bán chạy", badgeColor: "#f97316", color: "#1a1a2e", category: "RAM" },
+  { name: "Kingston Fury Beast DDR4", specs: "16GB (2x8GB) DDR4 3200MHz", price: "990.000đ", color: "#1a1a2e", category: "RAM" },
+  { name: "G.Skill Ripjaws V DDR4", specs: "16GB (2x8GB) DDR4 3600MHz", price: "1.290.000đ", color: "#2d2d2d", category: "RAM" },
+  { name: "Corsair Dominator Platinum", specs: "32GB (2x16GB) DDR5 6000MHz", price: "5.990.000đ", color: "#c8d0dc", category: "RAM" },
+  { name: "Kingston Fury Beast DDR5", specs: "32GB (2x16GB) DDR5 6000MHz", price: "4.290.000đ", color: "#1a1a2e", category: "RAM" },
+
+  // --- CPU ---
+  { name: "Intel Core i5-14600K", specs: "14 Cores / 20 Threads up to 5.3GHz LGA1700", price: "7.890.000đ", badge: "Bán chạy", badgeColor: "#2563eb", color: "#1a1a2e", category: "CPU" },
+  { name: "Intel Core i7-14700K", specs: "20 Cores / 28 Threads up to 5.6GHz LGA1700", price: "10.490.000đ", badge: "Hot", badgeColor: "#dc2626", color: "#1a1a2e", category: "CPU" },
+  { name: "Intel Core i9-14900K", specs: "24 Cores / 32 Threads up to 6.0GHz LGA1700", price: "15.990.000đ", color: "#1a1a2e", category: "CPU" },
+  { name: "AMD Ryzen 5 7600X", specs: "6 Cores / 12 Threads up to 5.3GHz AM5", price: "5.890.000đ", color: "#1f2937", category: "CPU" },
+  { name: "AMD Ryzen 7 7800X3D", specs: "8 Cores / 16 Threads up to 5.0GHz 96MB AM5", price: "10.890.000đ", badge: "Cực hot", badgeColor: "#8b5cf6", color: "#1f2937", category: "CPU" },
+  { name: "AMD Ryzen 9 7900X", specs: "12 Cores / 24 Threads up to 5.6GHz AM5", price: "11.490.000đ", color: "#1f2937", category: "CPU" },
+
+  // --- VGA ---
+  { name: "ASUS Dual GeForce RTX 4060 White", specs: "8GB GDDR6 / 128-bit / 2 Fan / White", price: "8.490.000đ", badge: "Mới", badgeColor: "#10b981", color: "#e0e7ef", category: "VGA" },
+  { name: "MSI GeForce RTX 4060 VENTUS 2X", specs: "8GB GDDR6 / 128-bit / 2 Fan / Black", price: "8.590.000đ", badge: "Bán chạy", badgeColor: "#f97316", color: "#111", category: "VGA" },
+  { name: "Gigabyte RTX 4070 SUPER EAGLE", specs: "12GB GDDR6X / 192-bit / 3 Fan", price: "19.490.000đ", color: "#c8d0dc", category: "VGA" },
+  { name: "ASUS ROG Strix RTX 4080 SUPER", specs: "16GB GDDR6X / 256-bit / RGB", price: "34.990.000đ", color: "#2d2d2d", category: "VGA" },
+  { name: "MSI GeForce RTX 4090 SUPRIM X", specs: "24GB GDDR6X / 384-bit / Premium Design", price: "64.990.000đ", color: "#cbd5e1", category: "VGA" },
+
+  // --- Mainboard ---
+  { name: "ASUS TUF GAMING B760M-PLUS", specs: "LGA1700 / DDR5 / Intel B760 Micro-ATX", price: "4.490.000đ", color: "#1f2937", category: "Mainboard" },
+  { name: "ASUS ROG STRIX B760-F GAMING", specs: "LGA1700 / DDR5 / Intel Chipset B760 ATX", price: "5.490.000đ", color: "#2d2d2d", category: "Mainboard" },
+  { name: "Gigabyte Z790 AORUS ELITE AX", specs: "LGA1700 / DDR5 / Intel Chipset Z790 ATX", price: "7.990.000đ", badge: "Cao cấp", badgeColor: "#d97706", color: "#374151", category: "Mainboard" },
+  { name: "MSI MAG B650 TOMAHAWK WIFI", specs: "Socket AM5 / DDR5 / AMD Chipset B650 ATX", price: "5.890.000đ", color: "#1a1a2e", category: "Mainboard" },
+  { name: "ASUS ROG CROSSHAIR X670E HERO", specs: "Socket AM5 / DDR5 / AMD Chipset X670E ATX", price: "18.990.000đ", color: "#2d2d2d", category: "Mainboard" },
+
+  // --- SSD ---
+  { name: "Samsung 990 Pro 1TB NVMe", specs: "PCIe Gen 4.0 x4 M.2 2280 up to 7450MB/s", price: "2.990.000đ", badge: "Cực nhanh", badgeColor: "#2563eb", color: "#1e40af", category: "SSD" },
+  { name: "Crucial P3 Plus 2TB NVMe", specs: "PCIe Gen 4.0 x4 M.2 2280 up to 5000MB/s", price: "3.290.000đ", color: "#38bdf8", category: "SSD" },
+  { name: "Kingston NV2 500GB NVMe", specs: "PCIe Gen 4.0 x4 M.2 2280 up to 3500MB/s", price: "1.190.000đ", color: "#111827", category: "SSD" },
+  { name: "Samsung 980 500GB NVMe", specs: "PCIe Gen 3.0 x4 M.2 2280 up to 3100MB/s", price: "1.490.000đ", color: "#1e40af", category: "SSD" },
+  { name: "Western Digital Blue 1TB SATA III", specs: "2.5\" SSD read up to 560MB/s", price: "1.990.000đ", color: "#1f2937", category: "SSD" },
+
+  // --- HDD ---
+  { name: "Seagate Barracuda 2TB HDD", specs: "3.5\" SATA 3 7200RPM 256MB Cache", price: "1.590.000đ", color: "#374151", category: "HDD" },
+  { name: "Western Digital Blue 1TB HDD", specs: "3.5\" SATA 3 7200RPM 64MB Cache", price: "1.190.000đ", color: "#1f2937", category: "HDD" },
+  { name: "Seagate IronWolf 4TB NAS", specs: "3.5\" SATA 3 5900RPM 64MB Cache", price: "3.490.000đ", badge: "Dành cho NAS", badgeColor: "#2563eb", color: "#374151", category: "HDD" },
+  { name: "Western Digital Red Pro 8TB NAS", specs: "3.5\" SATA 3 7200RPM 256MB Cache", price: "7.290.000đ", color: "#1f2937", category: "HDD" },
+
+  // --- PSU ---
+  { name: "Corsair RM750e 750W", specs: "750 Watt / 80 Plus Gold / Full Modular / ATX", price: "2.890.000đ", badge: "Bán chạy", badgeColor: "#f97316", color: "#78350f", category: "PSU" },
+  { name: "MSI MAG A650BN 650W", specs: "650 Watt / 80 Plus Bronze / Non-Modular", price: "1.390.000đ", color: "#1a1a2e", category: "PSU" },
+  { name: "ASUS ROG THOR 850P 850W", specs: "850 Watt / 80 Plus Platinum / OLED Screen", price: "6.490.000đ", badge: "Cao cấp", badgeColor: "#8b5cf6", color: "#2d2d2d", category: "PSU" },
+  { name: "Corsair RM1000x 1000W", specs: "1000 Watt / 80 Plus Gold / Full Modular", price: "4.890.000đ", color: "#78350f", category: "PSU" },
+
+  // --- Cooling ---
+  { name: "Thermalright Peerless Assassin 120", specs: "Dual Fan Air Cooler / 6 Heatpipes / Black", price: "990.000đ", color: "#164e63", category: "Cooling" },
+  { name: "Corsair iCUE H150i Elite White", specs: "360mm AIO Liquid Cooler / White Design / ARGB", price: "5.490.000đ", badge: "ARGB", badgeColor: "#ec4899", color: "#e0e7ef", category: "Cooling" },
+  { name: "Lian Li Galahad II Trinity 360", specs: "360mm AIO Liquid Cooler / ARGB / Black", price: "4.190.000đ", color: "#1c1917", category: "Cooling" },
+  { name: "Noctua NH-D15", specs: "Premium Dual-Tower Air Cooler / Quiet / Brown", price: "2.890.000đ", color: "#78350f", category: "Cooling" },
+
+  // --- Case ---
+  { name: "Lian Li O11 Dynamic EVO", specs: "Mid Tower Case / Dual Chamber / White", price: "4.290.000đ", badge: "Hot", badgeColor: "#8b5cf6", color: "#e0e7ef", category: "Case" },
+  { name: "Corsair 4000D Airflow", specs: "Mid Tower Case / High-Airflow / Black", price: "2.190.000đ", color: "#111", category: "Case" },
+  { name: "NZXT H9 Flow", specs: "Dual-Chamber Mid Tower / Glass Panel / Black", price: "4.490.000đ", color: "#1c1917", category: "Case" },
+  { name: "ASUS ROG Hyperion GR701", specs: "Flagship Full Tower / E-ATX / RGB / Black", price: "10.990.000đ", color: "#2d2d2d", category: "Case" }
 ];
 
 
