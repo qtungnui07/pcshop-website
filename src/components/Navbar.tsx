@@ -288,7 +288,7 @@ export default function Navbar() {
                         <User className="w-4 h-4 text-blue-500" />
                         Thông tin cá nhân
                       </Link>
-                      
+
                       <button
                         onClick={handleLogout}
                         className="w-full flex items-center gap-2.5 px-5 py-2.5 text-sm text-red-600 hover:bg-red-50 font-semibold transition-colors text-left border-t border-gray-50 mt-2 cursor-pointer"
@@ -355,7 +355,7 @@ export default function Navbar() {
                           <div className="flex-1 pl-8">
                             {/* @ts-ignore */}
                             {currentMenu.splitData?.filter(cat => cat.name === activeSplitCategory).map((cat, idx) => (
-                              <motion.div 
+                              <motion.div
                                 key={cat.name}
                                 initial={{ opacity: 0, x: -10 }}
                                 animate={{ opacity: 1, x: 0 }}

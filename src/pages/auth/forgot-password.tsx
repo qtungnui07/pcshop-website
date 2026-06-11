@@ -1,15 +1,71 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { Mail, ArrowLeft, ArrowRight, CheckCircle2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { API_BASE } from '../../context/AuthContext';
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState('');
   const [error, setError] = useState<string | undefined>(undefined);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const turnstileRef = useRef<HTMLDivElement>(null);
+  const widgetIdRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    // Inject Turnstile script explicitly
+    if (!document.getElementById("cloudflare-turnstile-script")) {
+      const script = document.createElement("script");
+      script.id = "cloudflare-turnstile-script";
+      script.src = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
+      script.async = true;
+      script.defer = true;
+      document.head.appendChild(script);
+    }
+  }, []);
+
+  useEffect(() => {
+    let interval: any;
+    const renderWidget = () => {
+      if ((window as any).turnstile && turnstileRef.current && !widgetIdRef.current) {
+        clearInterval(interval);
+        try {
+          widgetIdRef.current = (window as any).turnstile.render(turnstileRef.current, {
+            sitekey: import.meta.env.VITE_TURNSTILE_SITE_KEY || "1x00000000000000000000AA",
+            callback: (token: string) => {
+              setTurnstileToken(token);
+              setError(undefined);
+            },
+            "expired-callback": () => {
+              setTurnstileToken(null);
+            },
+            "error-callback": () => {
+              setTurnstileToken(null);
+            }
+          });
+        } catch (e) {
+          console.error("Turnstile render error:", e);
+        }
+      }
+    };
+
+    interval = setInterval(renderWidget, 100);
+    return () => {
+      clearInterval(interval);
+      if (widgetIdRef.current && (window as any).turnstile) {
+        try {
+          (window as any).turnstile.remove(widgetIdRef.current);
+          widgetIdRef.current = null;
+        } catch (e) {
+          console.error("Turnstile cleanup error:", e);
+        }
+      }
+    };
+  }, [isSubmitted]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(undefined);
 
@@ -21,12 +77,42 @@ export default function ForgotPassword() {
       return;
     }
 
+    if (!turnstileToken) {
+      setError('Vui lòng hoàn thành xác thực Captcha');
+      return;
+    }
+
     setIsLoading(true);
-    // Simulate sending recovery email
-    setTimeout(() => {
-      setIsLoading(false);
+
+    try {
+      const response = await fetch(`${API_BASE}/api/auth/forgot-password`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, turnstileToken }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setError(data.error || 'Có lỗi xảy ra, vui lòng thử lại.');
+        // Reset Turnstile on error so user can try again
+        if ((window as any).turnstile && widgetIdRef.current) {
+          (window as any).turnstile.reset(widgetIdRef.current);
+        }
+        setTurnstileToken(null);
+        setIsLoading(false);
+        return;
+      }
+
       setIsSubmitted(true);
-    }, 1500);
+    } catch (err) {
+      console.error("Submit error:", err);
+      setError('Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối mạng.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -97,6 +183,11 @@ export default function ForgotPassword() {
                     {error}
                   </motion.p>
                 )}
+              </div>
+
+              {/* Turnstile Captcha */}
+              <div className="flex justify-center my-4 overflow-hidden min-h-[65px]">
+                <div ref={turnstileRef} className="mx-auto"></div>
               </div>
 
               <motion.button
