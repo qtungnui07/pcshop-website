@@ -7,7 +7,7 @@ import {
 import { useState, useEffect, useMemo } from "react";
 import { motion } from "framer-motion";
 import { useSearchParams } from "react-router-dom";
-import componentsHeroImage from "../../assets/Thiết kế chưa có tên (1).png";
+import componentsHeroImage from "../../assets/rtx_5090.png";
 import AddToCartButton from "../../components/AddToCartButton";
 
 /* ── TYPES ─────────────────────────────────────────────────────────── */
@@ -901,6 +901,7 @@ export default function LinhKienIndex() {
                 animate={{ opacity: 1, y: 0, scale:1.5 }}
                 transition={{ type: "spring", stiffness: 150, damping: 14, delay: 0.38 }}
                 className="relative z-10 w-[720px] max-w-[112%] object-contain drop-shadow-2xl"
+                style={{ mixBlendMode: "multiply" }}
               />
             </motion.div>
 
