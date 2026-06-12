@@ -4,10 +4,154 @@ import {
   ShieldCheck, Truck, CheckCircle2, ChevronDown,
   SlidersHorizontal, X, Search, ArrowRight,
 } from "lucide-react";
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import AddToCartButton from "../../components/AddToCartButton";
+import * as THREE from "three";
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
+
+const MACBOOK_NEO_MODEL = "/models/macbook-neo.glb";
+
+function MacBookNeoViewer() {
+  const mountRef = useRef<HTMLDivElement | null>(null);
+  const [loaded, setLoaded] = useState(false);
+  const [failed, setFailed] = useState(false);
+
+  useEffect(() => {
+    if (!mountRef.current) return;
+
+    let cancelled = false;
+    let frameId = 0;
+    const mount = mountRef.current;
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(34, 1, 0.1, 100);
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    const modelRoot = new THREE.Group();
+    const clock = new THREE.Clock();
+    const animationDuration = 3.2;
+
+    renderer.setClearColor(0x000000, 0);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
+    mount.appendChild(renderer.domElement);
+
+    camera.position.set(0.25, 1.05, 6.8);
+    camera.lookAt(0, 0, 0);
+    scene.add(modelRoot);
+    scene.add(new THREE.AmbientLight(0xffffff, 1.8));
+
+    const keyLight = new THREE.DirectionalLight(0xffffff, 3.4);
+    keyLight.position.set(3.2, 5, 4.5);
+    scene.add(keyLight);
+
+    const fillLight = new THREE.DirectionalLight(0x9fc5ff, 1.5);
+    fillLight.position.set(-4, 2.5, 3);
+    scene.add(fillLight);
+
+    const rimLight = new THREE.DirectionalLight(0xffffff, 1.2);
+    rimLight.position.set(0, 3, -4);
+    scene.add(rimLight);
+
+    const resize = () => {
+      const rect = mount.getBoundingClientRect();
+      const width = Math.max(rect.width, 1);
+      const height = Math.max(rect.height, 1);
+      camera.aspect = width / height;
+      camera.updateProjectionMatrix();
+      renderer.setSize(width, height, false);
+    };
+
+    const resizeObserver = new ResizeObserver(resize);
+    resizeObserver.observe(mount);
+    resize();
+
+    new GLTFLoader().load(
+      MACBOOK_NEO_MODEL,
+      (gltf) => {
+        if (cancelled) return;
+
+        const model = gltf.scene;
+        const fittedModel = new THREE.Group();
+        const box = new THREE.Box3().setFromObject(model);
+        const size = box.getSize(new THREE.Vector3());
+        const center = box.getCenter(new THREE.Vector3());
+        const maxAxis = Math.max(size.x, size.y, size.z) || 1;
+        const scale = 3.45 / maxAxis;
+
+        model.position.sub(center);
+        fittedModel.add(model);
+        fittedModel.scale.setScalar(scale);
+        fittedModel.rotation.set(-0.08, 0, 0);
+        modelRoot.add(fittedModel);
+        modelRoot.position.set(0.05, 0.05, 0);
+        setLoaded(true);
+
+        const animate = () => {
+          if (cancelled) return;
+
+          const elapsed = clock.getElapsedTime();
+          const t = Math.min(elapsed / animationDuration, 1);
+          const eased = 1 - Math.pow(1 - t, 3);
+          modelRoot.rotation.y = Math.PI * 2 * (1 - eased);
+
+          renderer.render(scene, camera);
+          if (t < 1) {
+            frameId = window.requestAnimationFrame(animate);
+          }
+        };
+
+        animate();
+      },
+      undefined,
+      () => {
+        if (!cancelled) setFailed(true);
+      }
+    );
+
+    return () => {
+      cancelled = true;
+      if (frameId) window.cancelAnimationFrame(frameId);
+      resizeObserver.disconnect();
+      renderer.dispose();
+      scene.traverse((object) => {
+        const mesh = object as THREE.Mesh;
+        if (mesh.geometry) mesh.geometry.dispose();
+        const materials = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
+        materials.forEach((material) => material?.dispose?.());
+      });
+      renderer.domElement.remove();
+    };
+  }, []);
+
+  return (
+    <div className="relative z-10 w-full h-[min(58vh,620px)] min-h-[440px] overflow-hidden">
+      {!loaded && !failed && (
+        <div className="absolute inset-0 z-20 flex items-center justify-center">
+          <div className="h-8 w-8 rounded-full border-2 border-zinc-300 border-t-zinc-900 animate-spin" />
+        </div>
+      )}
+      {failed && (
+        <div className="absolute inset-0 flex items-center justify-center text-sm font-medium text-zinc-500">
+          3D model unavailable
+        </div>
+      )}
+      <div
+        ref={mountRef}
+        aria-label="MacBook Neo 3D model"
+        className={`h-full w-full transition-opacity duration-500 ${loaded ? "opacity-100" : "opacity-0"}`}
+      />
+      <a
+        href="https://sketchfab.com/3d-models/macbook-neo-266970634d9a435fa4589efe326b25d6"
+        target="_blank"
+        rel="noreferrer"
+        className="absolute bottom-4 right-4 z-30 rounded-full bg-white/75 px-3 py-1 text-[11px] font-semibold text-zinc-500 shadow-sm backdrop-blur transition hover:bg-white hover:text-zinc-800"
+      >
+        MacBook Neo by rtql8d
+      </a>
+    </div>
+  );
+}
 
 /* ── TYPES ─────────────────────────────────────────────────────────── */
 type LaptopBrand = "ASUS" | "Apple" | "Dell" | "Lenovo" | "HP" | "Acer" | "MSI";
@@ -561,7 +705,7 @@ export default function LaptopIndex() {
               initial={{ opacity: 0, x: 50, scale: 0.95 }}
               animate={{ opacity: 1, x: 0, scale: 1 }}
               transition={{ duration: 1, ease: [0.25, 1, 0.5, 1], delay: 0.2 }}
-              className="relative hidden lg:flex items-end justify-center"
+              className="relative hidden lg:flex items-center justify-center"
               style={{ alignSelf: "stretch" }}
             >
               {/* Blue glow behind Laptop */}
@@ -569,7 +713,7 @@ export default function LaptopIndex() {
                 position: "absolute",
                 width: 600, height: 600,
                 background: "radial-gradient(circle, rgba(147,197,253,0.3) 0%, rgba(165,180,252,0.1) 50%, transparent 70%)",
-                bottom: "0%", left: "50%", transform: "translateX(-48%)",
+                bottom: "12%", left: "50%", transform: "translateX(-48%)",
                 pointerEvents: "none",
                 zIndex: 0,
               }} />
@@ -579,18 +723,13 @@ export default function LaptopIndex() {
                 position: "absolute",
                 width: 500, height: 60,
                 background: "radial-gradient(ellipse, rgba(120,170,250,0.2) 0%, transparent 70%)",
-                bottom: "0%", left: "50%", transform: "translateX(-48%)",
+                bottom: "14%", left: "50%", transform: "translateX(-48%)",
                 pointerEvents: "none",
                 zIndex: 1,
               }} />
 
-              <div className="relative z-10 w-full h-[450px] flex items-center justify-center overflow-hidden mb-12">
-                <img
-                  src="https://images.unsplash.com/photo-1611186871348-b1ce696e52c9?q=80&w=2070&auto=format&fit=crop"
-                  alt="Laptop display"
-                  className="max-h-[380px] w-auto relative z-10 object-contain rounded-xl shadow-2xl mix-blend-multiply"
-                  onError={e => { (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?q=80&w=2071&auto=format&fit=crop"; }}
-                />
+              <div className="relative z-10 w-full flex items-center justify-center overflow-hidden">
+                <MacBookNeoViewer />
               </div>
             </motion.div>
           </div>

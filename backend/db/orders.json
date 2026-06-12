@@ -1,5 +1,32 @@
 [
   {
+    "id": "ORD-1781225350667",
+    "userId": "acc-1001",
+    "email": "admin@qtitpc.dev",
+    "customerName": "Quản trị viên",
+    "phone": "78654",
+    "address": "675",
+    "note": "7",
+    "items": [
+      {
+        "id": "laptop-5",
+        "name": "HP Spectre x360 14",
+        "specs": "Intel Core i7-1355U / 16GB /\n1TB SSD / 14\" 2.8K OLED",
+        "price": 26990000,
+        "image": "https://anphat.com.vn/media/lib/06-09-2024/laptop-hp-spectre-x360-14-eu0051tu-a2nl3pa-3.jpg",
+        "category": "Laptop",
+        "quantity": 1
+      }
+    ],
+    "totalItems": 1,
+    "totalPrice": 26990000,
+    "paymentMethod": "MOMO_FAKE",
+    "paymentStatus": "success",
+    "status": "processing",
+    "createdAt": "2026-06-12T00:49:10.667Z",
+    "updatedAt": "2026-06-12T00:49:10.667Z"
+  },
+  {
     "id": "ORD-1781224685494",
     "userId": "acc-1001",
     "email": "admin@qtitpc.dev",
