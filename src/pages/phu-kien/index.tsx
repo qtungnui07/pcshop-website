@@ -23,6 +23,7 @@ import {
 import { useEffect, useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
+import AddToCartButton from "../../components/AddToCartButton";
 
 /*
   src/pages/phu-kien/index.tsx
@@ -65,6 +66,30 @@ type RawAccessoryProduct = {
   createdAt?: string;
 };
 
+type AccessoryCombo = {
+  id: string;
+  title: string;
+  desc: string;
+  productIds: string[];
+  discountPercent: number;
+  image: string;
+  isActive?: boolean;
+  createdAt?: string;
+};
+
+type RawAccessoryCombo = {
+  id?: string | number;
+  title?: string;
+  name?: string;
+  desc?: string;
+  specs?: string;
+  productIds?: Array<string | number>;
+  discountPercent?: number | string;
+  image?: string;
+  isActive?: boolean;
+  createdAt?: string;
+};
+
 const API_BASE =
   typeof window !== "undefined"
     ? (window.location.hostname.includes("qtitpc.dev")
@@ -76,6 +101,8 @@ const DEFAULT_MAX_PRICE = 10_900_000;
 const CATEGORY_PREVIEW_LIMIT = 8;
 const PRODUCTS_PER_PAGE = 15;
 const BRAND_PREVIEW_LIMIT = 5;
+const COLOR_PREVIEW_LIMIT = 6;
+const COMBO_PREVIEW_LIMIT = 3;
 
 const baseBrandOptions = [
   "Logitech",
@@ -152,10 +179,15 @@ const baseCategories: {
 const baseColorOptions: { name: string; className: string }[] = [
   { name: "Đen", className: "bg-black" },
   { name: "Trắng", className: "bg-white border border-zinc-300" },
+  { name: "Xám", className: "bg-zinc-400" },
+  { name: "Bạc", className: "bg-zinc-200 border border-zinc-300" },
   { name: "Hồng", className: "bg-pink-300" },
-  { name: "Xanh lá", className: "bg-emerald-400" },
-  { name: "Xanh dương", className: "bg-cyan-500" },
+  { name: "Xanh dương", className: "bg-sky-500" },
+  { name: "Đỏ", className: "bg-red-500" },
+  { name: "Xanh lá", className: "bg-emerald-500" },
   { name: "Tím", className: "bg-violet-500" },
+  { name: "Vàng", className: "bg-yellow-400" },
+  { name: "Cam", className: "bg-orange-400" },
 ];
 
 const heroBenefits = [
@@ -181,36 +213,6 @@ const heroBenefits = [
   },
 ];
 
-const comboItems = [
-  {
-    title: "Combo Gaming",
-    desc: "Tai nghe + Chuột +\nLót chuột",
-    save: "Tiết kiệm 15%",
-    image: REAL_IMAGES.setupDark,
-    Icon: Headphones,
-  },
-  {
-    title: "Combo Văn phòng",
-    desc: "Bàn phím + Chuột",
-    save: "Tiết kiệm 10%",
-    image: REAL_IMAGES.keyboardWhite,
-    Icon: Keyboard,
-  },
-  {
-    title: "Combo Streamer",
-    desc: "Webcam + Micro +\nĐèn LED",
-    save: "Tiết kiệm 15%",
-    image: REAL_IMAGES.webcam,
-    Icon: Webcam,
-  },
-  {
-    title: "Combo Phụ kiện cao cấp",
-    desc: "Tai nghe + Màn hình +\nHub chuyển đổi",
-    save: "Tiết kiệm 20%",
-    image: REAL_IMAGES.headphonesWhite,
-    Icon: Headphones,
-  },
-];
 
 function formatPrice(price: number) {
   return new Intl.NumberFormat("vi-VN").format(price || 0) + " đ";
@@ -278,6 +280,30 @@ function normalizeProducts(data: unknown): AccessoryProduct[] {
         createdAt: item.createdAt,
       };
     });
+}
+
+function normalizeCombos(data: unknown): AccessoryCombo[] {
+  if (!Array.isArray(data)) return [];
+
+  return data
+    .filter((item): item is RawAccessoryCombo => {
+      return Boolean(item && typeof item === "object" && item.isActive !== false);
+    })
+    .map((item, index) => ({
+      id: item.id ? String(item.id) : `combo-${index}`,
+      title: item.title?.trim() || item.name?.trim() || "Combo phụ kiện",
+      desc: item.desc?.trim() || item.specs?.trim() || "Bộ phụ kiện được ghép từ các sản phẩm đang bán.",
+      productIds: Array.isArray(item.productIds)
+        ? item.productIds.map((id) => String(id)).filter(Boolean)
+        : [],
+      discountPercent: Math.min(
+        90,
+        Math.max(0, Number(String(item.discountPercent ?? 0).replace(/[^\d]/g, "")) || 0)
+      ),
+      image: item.image?.trim() || "",
+      isActive: item.isActive !== false,
+      createdAt: item.createdAt,
+    }));
 }
 
 function toggleSetValue<T>(set: Set<T>, value: T) {
@@ -393,7 +419,9 @@ function getPaginationItems(currentPage: number, totalPages: number) {
 export default function PhuKienIndex() {
   const [searchParams] = useSearchParams();
   const [products, setProducts] = useState<AccessoryProduct[]>([]);
+  const [combos, setCombos] = useState<AccessoryCombo[]>([]);
   const [loading, setLoading] = useState(true);
+  const [comboLoading, setComboLoading] = useState(true);
   const [fetchError, setFetchError] = useState("");
 
   const [selectedCategories, setSelectedCategories] = useState<Set<string>>(new Set());
@@ -408,6 +436,8 @@ export default function PhuKienIndex() {
   const [showMobileFilter, setShowMobileFilter] = useState(false);
   const [showAllCategories, setShowAllCategories] = useState(false);
   const [showAllBrands, setShowAllBrands] = useState(false);
+  const [showAllColors, setShowAllColors] = useState(false);
+  const [showAllCombos, setShowAllCombos] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
@@ -458,6 +488,19 @@ export default function PhuKienIndex() {
         setFetchError("Không thể kết nối tới backend phụ kiện.");
       })
       .finally(() => setLoading(false));
+  }, []);
+
+  useEffect(() => {
+    setComboLoading(true);
+
+    fetch(`${API_BASE}/api/accessory-combos`)
+      .then((res) => (res.ok ? res.json() : []))
+      .then((data) => setCombos(normalizeCombos(data)))
+      .catch((err) => {
+        console.error("Error fetching accessory combos:", err);
+        setCombos([]);
+      })
+      .finally(() => setComboLoading(false));
   }, []);
 
   const highestPrice = useMemo(() => {
@@ -516,6 +559,40 @@ export default function PhuKienIndex() {
 
     return [...baseColorOptions, ...extraColors];
   }, [products]);
+
+  const visibleColorOptions = useMemo(() => {
+    return showAllColors
+      ? colorOptions
+      : colorOptions.slice(0, COLOR_PREVIEW_LIMIT);
+  }, [colorOptions, showAllColors]);
+
+  const comboDisplayItems = useMemo(() => {
+    return combos
+      .map((combo) => {
+        const comboProducts = combo.productIds
+          .map((id) => products.find((product) => String(product.id) === String(id)))
+          .filter((product): product is AccessoryProduct => Boolean(product));
+
+        const originalPrice = comboProducts.reduce((sum, product) => sum + product.price, 0);
+        const discountedPrice = Math.max(
+          0,
+          Math.round(originalPrice * (100 - combo.discountPercent) / 100)
+        );
+
+        return {
+          ...combo,
+          products: comboProducts,
+          originalPrice,
+          discountedPrice,
+          image: combo.image || comboProducts[0]?.image || REAL_IMAGES.setupDark,
+        };
+      })
+      .filter((combo) => combo.products.length > 0 && combo.originalPrice > 0);
+  }, [combos, products]);
+
+  const visibleCombos = useMemo(() => {
+    return showAllCombos ? comboDisplayItems : comboDisplayItems.slice(0, COMBO_PREVIEW_LIMIT);
+  }, [comboDisplayItems, showAllCombos]);
 
   const hasActiveFilter =
     selectedCategories.size > 0 ||
@@ -592,6 +669,7 @@ export default function PhuKienIndex() {
     setMinPrice(100000);
     setMaxPrice(highestPrice);
     setShowAllBrands(false);
+    setShowAllColors(false);
   };
 
   return (
@@ -910,7 +988,7 @@ export default function PhuKienIndex() {
                 <h4 className="mb-3 text-[13px] font-semibold text-zinc-900">Màu sắc</h4>
 
                 <div className="flex flex-wrap gap-3">
-                  {colorOptions.map((color) => (
+                  {visibleColorOptions.map((color) => (
                     <button
                       key={color.name}
                       title={color.name}
@@ -921,10 +999,16 @@ export default function PhuKienIndex() {
                   ))}
                 </div>
 
-                {colorOptions.length > 6 && (
-                  <button className="mt-4 flex items-center gap-1 text-[12px] font-medium text-zinc-600">
-                    Hiển thị thêm
-                    <ChevronDown className="h-3.5 w-3.5" />
+                {colorOptions.length > COLOR_PREVIEW_LIMIT && (
+                  <button
+                    type="button"
+                    onClick={() => setShowAllColors((prev) => !prev)}
+                    className="mt-4 flex items-center gap-1 text-[12px] font-medium text-zinc-600 transition hover:text-zinc-950"
+                  >
+                    {showAllColors ? "Thu gọn" : "Hiển thị thêm"}
+                    <ChevronDown
+                      className={`h-3.5 w-3.5 transition ${showAllColors ? "rotate-180" : ""}`}
+                    />
                   </button>
                 )}
               </div>
@@ -1091,9 +1175,24 @@ export default function PhuKienIndex() {
                           {product.brand}
                         </p>
 
-                        <p className="mb-3 text-[15px] font-bold text-zinc-950">
-                          {formatPrice(product.price)}
-                        </p>
+                        <div className="mb-3 flex items-center justify-between gap-3">
+                          <p className="text-[15px] font-bold text-zinc-950">
+                            {formatPrice(product.price)}
+                          </p>
+
+                          <AddToCartButton
+                            product={{
+                              id: `accessory-${product.id}`,
+                              name: product.name,
+                              specs: `${product.brand} • ${product.category}`,
+                              price: product.price,
+                              image: product.image,
+                              category: `Phụ kiện - ${product.category}`,
+                            }}
+                            label={viewMode === "list" ? "Thêm vào giỏ" : undefined}
+                            className={viewMode === "list" ? "shrink-0" : ""}
+                          />
+                        </div>
 
                         <div className="flex gap-1.5">
                           {product.colors.slice(0, 4).map((color) => (
@@ -1162,49 +1261,123 @@ export default function PhuKienIndex() {
         </section>
 
         {/* COMBOS */}
-        <section className="py-14 md:py-16">
-          <div className="mb-6 flex items-center justify-between">
-            <h2 className="text-[19px] font-bold tracking-tight text-zinc-950">
-              Có thể bạn sẽ cần
-            </h2>
+        <section className="py-14 md:py-16 lg:ml-[277px]">
+          <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <div className="mb-2 inline-flex rounded-full border border-zinc-200 bg-[#fbfbfd] px-3 py-1 text-[11px] font-bold uppercase tracking-[0.16em] text-zinc-500">
+                Combo phụ kiện
+              </div>
+              <h2 className="text-[22px] font-black tracking-[-0.03em] text-zinc-950">
+                Có thể bạn sẽ cần
+              </h2>
+              <p className="mt-1 max-w-[620px] text-[13px] leading-6 text-zinc-500">
+                Các bộ phụ kiện được ghép từ sản phẩm đang bán, mua theo combo sẽ có giá tốt hơn so với mua lẻ.
+              </p>
+            </div>
 
-            <a
-              href="#"
-              className="flex items-center gap-1 text-[13px] font-medium text-zinc-700 transition hover:text-zinc-950"
-            >
-              Xem tất cả
-              <ChevronRight className="h-4 w-4" />
-            </a>
-          </div>
-
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
-            {comboItems.map(({ title, desc, save, image, Icon }) => (
-              <article
-                key={title}
-                className="group grid min-h-[138px] grid-cols-[1fr_150px] overflow-hidden rounded-[20px] bg-[#fbfbfd] shadow-[0_4px_18px_rgba(0,0,0,0.04)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_14px_30px_rgba(0,0,0,0.07)]"
+            {comboDisplayItems.length > COMBO_PREVIEW_LIMIT && (
+              <button
+                type="button"
+                onClick={() => setShowAllCombos((prev) => !prev)}
+                className="inline-flex w-fit items-center gap-1 rounded-full border border-zinc-200 bg-white px-4 py-2 text-[13px] font-bold text-zinc-700 shadow-sm transition hover:border-zinc-300 hover:text-zinc-950"
               >
-                <div className="p-5">
-                  <h3 className="mb-2 text-[13px] font-bold text-zinc-950">
-                    {title}
-                  </h3>
-                  <p className="mb-3 whitespace-pre-line text-[12px] leading-relaxed text-zinc-500">
-                    {desc}
-                  </p>
-                  <p className="text-[12px] font-medium text-red-500">{save}</p>
-                </div>
-
-                <div className="flex items-center justify-center overflow-hidden bg-white p-0">
-                  <ImageWithFallback
-                    src={image}
-                    alt={title}
-                    Icon={Icon}
-                    className="h-full w-full object-cover object-center transition duration-300 group-hover:scale-105"
-                    iconClassName="h-16 w-16 text-zinc-900"
-                  />
-                </div>
-              </article>
-            ))}
+                {showAllCombos ? "Thu gọn" : "Xem tất cả combo"}
+                {showAllCombos ? (
+                  <ChevronDown className="h-4 w-4" />
+                ) : (
+                  <ChevronRight className="h-4 w-4" />
+                )}
+              </button>
+            )}
           </div>
+
+          {comboLoading ? (
+            <div className="rounded-[28px] border border-zinc-100 bg-[#fbfbfd] px-5 py-10 text-center text-[13px] font-semibold text-zinc-500 shadow-[0_4px_18px_rgba(0,0,0,0.03)]">
+              Đang tải combo phụ kiện...
+            </div>
+          ) : comboDisplayItems.length === 0 ? (
+            <div className="rounded-[28px] border border-dashed border-zinc-200 bg-[#fbfbfd] px-5 py-10 text-center shadow-[0_4px_18px_rgba(0,0,0,0.03)]">
+              <h3 className="text-[15px] font-bold text-zinc-900">Chưa có combo phụ kiện</h3>
+              <p className="mt-2 text-[13px] text-zinc-500">
+                Admin có thể tạo combo ngay trong mục Phụ kiện Gaming.
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 gap-5 md:grid-cols-2 2xl:grid-cols-3">
+              {visibleCombos.map((combo) => (
+                <article
+                  key={combo.id}
+                  className="group flex h-full flex-col overflow-hidden rounded-[28px] border border-zinc-100 bg-white shadow-[0_4px_18px_rgba(0,0,0,0.04)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_18px_38px_rgba(0,0,0,0.09)]"
+                >
+                  <div className="relative flex h-[185px] items-center justify-center overflow-hidden bg-[#fbfbfd]">
+                    <ImageWithFallback
+                      src={combo.image}
+                      alt={combo.title}
+                      Icon={PackageCheck}
+                      className="h-full w-full object-cover object-center transition duration-300 group-hover:scale-105"
+                      iconClassName="h-16 w-16 text-zinc-900"
+                    />
+
+                    <span className="absolute left-4 top-4 rounded-full bg-red-500 px-3 py-1.5 text-[11px] font-black text-white shadow-sm">
+                      -{combo.discountPercent}%
+                    </span>
+                  </div>
+
+                  <div className="flex flex-1 flex-col p-5">
+                    <h3 className="mb-2 text-[16px] font-black leading-snug tracking-[-0.02em] text-zinc-950">
+                      {combo.title}
+                    </h3>
+
+                    <p className="mb-4 line-clamp-2 text-[12px] leading-relaxed text-zinc-500">
+                      {combo.desc}
+                    </p>
+
+                    <div className="mb-4 rounded-2xl border border-zinc-100 bg-[#fbfbfd] p-3">
+                      <p className="mb-2 text-[11px] font-black uppercase tracking-[0.12em] text-zinc-400">
+                        Gồm {combo.products.length} sản phẩm
+                      </p>
+                      <div className="space-y-1.5">
+                        {combo.products.slice(0, 3).map((product) => (
+                          <p key={product.id} className="truncate text-[12px] font-semibold text-zinc-700">
+                            • {product.name}
+                          </p>
+                        ))}
+                        {combo.products.length > 3 && (
+                          <p className="text-[12px] font-semibold text-zinc-400">
+                            +{combo.products.length - 3} sản phẩm khác
+                          </p>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="mt-auto flex items-end justify-between gap-3 border-t border-zinc-100 pt-4">
+                      <div>
+                        <p className="text-[11px] font-medium text-zinc-400 line-through">
+                          {formatPrice(combo.originalPrice)}
+                        </p>
+                        <p className="text-[18px] font-black text-zinc-950">
+                          {formatPrice(combo.discountedPrice)}
+                        </p>
+                      </div>
+
+                      <AddToCartButton
+                        product={{
+                          id: `combo-${combo.id}`,
+                          name: combo.title,
+                          specs: `${combo.products.map((product) => product.name).join(" + ")} • Giảm ${combo.discountPercent}%`,
+                          price: combo.discountedPrice,
+                          image: combo.image,
+                          category: "Combo phụ kiện",
+                        }}
+                        label="Thêm"
+                        className="shrink-0"
+                      />
+                    </div>
+                  </div>
+                </article>
+              ))}
+            </div>
+          )}
         </section>
       </main>
     </div>
