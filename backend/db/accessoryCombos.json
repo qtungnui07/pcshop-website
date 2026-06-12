@@ -1,0 +1,44 @@
+[
+  {
+    "id": "combo-gaming-starter",
+    "title": "Combo Gaming Starter",
+    "desc": "Bộ phụ kiện cơ bản cho góc gaming: bàn phím, chuột và lót chuột.",
+    "productIds": [
+      2,
+      3,
+      4
+    ],
+    "discountPercent": 10,
+    "image": "",
+    "isActive": true,
+    "createdAt": "2026-06-12T08:00:00.000Z"
+  },
+  {
+    "id": "combo-work-clean",
+    "title": "Combo Góc Làm Việc Gọn Gàng",
+    "desc": "Màn hình, bàn phím và chuột cho setup học tập hoặc văn phòng.",
+    "productIds": [
+      1,
+      3,
+      9
+    ],
+    "discountPercent": 12,
+    "image": "",
+    "isActive": true,
+    "createdAt": "2026-06-12T08:05:00.000Z"
+  },
+  {
+    "id": "combo-streamer-basic",
+    "title": "Combo Streamer Basic",
+    "desc": "Webcam, tai nghe và hub chuyển đổi cho nhu cầu học online, họp và livestream.",
+    "productIds": [
+      1,
+      6,
+      8
+    ],
+    "discountPercent": 15,
+    "image": "",
+    "isActive": true,
+    "createdAt": "2026-06-12T08:10:00.000Z"
+  }
+]

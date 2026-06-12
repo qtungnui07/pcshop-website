@@ -138,18 +138,18 @@ const defaultPCs = [
 ];
 
 const defaultComponents = [
-  { name: "G.Skill Trident Z5 RGB",      specs: "18GB (2x8GB) DDR5 6000MHz",  price: "2.890.000đ", badge: "Mới",     badgeColor: "#22c55e", color: "#e0e7ef" },
-  { name: "Corsair Vengeance RGB",        specs: "16GB (2x8GB) DDR5 5600MHz",  price: "2.290.000đ", badge: "Bán chạy",badgeColor: "#f97316", color: "#1a1a2e" },
-  { name: "Kingston Fury Beast",          specs: "16GB (2x8GB) DDR4 3200MHz",  price: "990.000đ",   color: "#1a1a2e" },
-  { name: "G.Skill Ripjaws V",            specs: "16GB (2x8GB) DDR4 3600MHz",  price: "1.290.000đ", color: "#2d2d2d" },
-  { name: "Corsair Dominator Platinum",   specs: "32GB (2x16GB) DDR5 6000MHz", price: "5.990.000đ", color: "#c8d0dc" },
-  { name: "TeamGroup T-Force Delta RGB",  specs: "32GB (2x16GB) DDR5 6000MHz", price: "4.490.000đ", color: "#111827" },
-  { name: "Crucial Pro",                  specs: "32GB (2x16GB) DDR5 4800MHz", price: "1.690.000đ", color: "#1f2937" },
-  { name: "Kingston Fury Beast",          specs: "32GB (2x16GB) DDR5 6000MHz", price: "4.290.000đ", color: "#1a1a2e" },
-  { name: "G.Skill Trident Z5 RGB",      specs: "32GB (2x16GB) DDR5 6400MHz", price: "5.490.000đ", color: "#e0e7ef" },
-  { name: "Corsair Vengeance LPX",        specs: "16GB (2x8GB) DDR4 3200MHz",  price: "1.190.000đ", color: "#111" },
-  { name: "Apacer PANTHER",              specs: "16GB (2x8GB) DDR4 3600MHz",  price: "1.090.000đ", color: "#f59e0b" },
-  { name: "TeamGroup T-Force Vulcan Z",  specs: "16GB (2x8GB) DDR4 3200MHz",  price: "890.000đ",   color: "#dc2626" }
+  { name: "G.Skill Trident Z5 RGB", specs: "18GB (2x8GB) DDR5 6000MHz", price: "2.890.000đ", badge: "Mới", badgeColor: "#22c55e", color: "#e0e7ef" },
+  { name: "Corsair Vengeance RGB", specs: "16GB (2x8GB) DDR5 5600MHz", price: "2.290.000đ", badge: "Bán chạy", badgeColor: "#f97316", color: "#1a1a2e" },
+  { name: "Kingston Fury Beast", specs: "16GB (2x8GB) DDR4 3200MHz", price: "990.000đ", color: "#1a1a2e" },
+  { name: "G.Skill Ripjaws V", specs: "16GB (2x8GB) DDR4 3600MHz", price: "1.290.000đ", color: "#2d2d2d" },
+  { name: "Corsair Dominator Platinum", specs: "32GB (2x16GB) DDR5 6000MHz", price: "5.990.000đ", color: "#c8d0dc" },
+  { name: "TeamGroup T-Force Delta RGB", specs: "32GB (2x16GB) DDR5 6000MHz", price: "4.490.000đ", color: "#111827" },
+  { name: "Crucial Pro", specs: "32GB (2x16GB) DDR5 4800MHz", price: "1.690.000đ", color: "#1f2937" },
+  { name: "Kingston Fury Beast", specs: "32GB (2x16GB) DDR5 6000MHz", price: "4.290.000đ", color: "#1a1a2e" },
+  { name: "G.Skill Trident Z5 RGB", specs: "32GB (2x16GB) DDR5 6400MHz", price: "5.490.000đ", color: "#e0e7ef" },
+  { name: "Corsair Vengeance LPX", specs: "16GB (2x8GB) DDR4 3200MHz", price: "1.190.000đ", color: "#111" },
+  { name: "Apacer PANTHER", specs: "16GB (2x8GB) DDR4 3600MHz", price: "1.090.000đ", color: "#f59e0b" },
+  { name: "TeamGroup T-Force Vulcan Z", specs: "16GB (2x8GB) DDR4 3200MHz", price: "890.000đ", color: "#dc2626" }
 ];
 
 const defaultLaptops = [
@@ -268,6 +268,40 @@ const defaultAccessories = [
   }
 ];
 
+
+const defaultAccessoryCombos = [
+  {
+    id: "combo-gaming-starter",
+    title: "Combo Gaming Starter",
+    desc: "Bộ phụ kiện cơ bản cho góc gaming: bàn phím, chuột và lót chuột.",
+    productIds: [2, 3, 4],
+    discountPercent: 10,
+    image: "",
+    isActive: true,
+    createdAt: new Date().toISOString()
+  },
+  {
+    id: "combo-work-clean",
+    title: "Combo Góc Làm Việc Gọn Gàng",
+    desc: "Màn hình, bàn phím và chuột cho setup học tập hoặc văn phòng.",
+    productIds: [1, 3, 9],
+    discountPercent: 12,
+    image: "",
+    isActive: true,
+    createdAt: new Date().toISOString()
+  },
+  {
+    id: "combo-streamer-basic",
+    title: "Combo Streamer Basic",
+    desc: "Webcam, tai nghe và hub chuyển đổi cho nhu cầu học online, họp và livestream.",
+    productIds: [1, 6, 8],
+    discountPercent: 15,
+    image: "",
+    isActive: true,
+    createdAt: new Date().toISOString()
+  }
+];
+
 const defaultTickets = [
   {
     id: "TK-1024",
@@ -364,6 +398,7 @@ async function readData() {
   const components = await readCollection("components", oldDb?.components ?? defaultComponents);
   const laptops = await readCollection("laptops", oldDb?.laptops ?? defaultLaptops);
   const accessories = await readCollection("accessories", oldDb?.accessories ?? defaultAccessories);
+  const accessoryCombos = await readCollection("accessoryCombos", oldDb?.accessoryCombos ?? defaultAccessoryCombos);
   const tickets = await readCollection("tickets", oldDb?.tickets ?? defaultTickets);
   const accounts = await readCollection("accounts", oldDb?.accounts ?? defaultAccounts);
   const orders = await readCollection("orders", oldDb?.orders ?? defaultOrders);
@@ -400,11 +435,12 @@ async function readData() {
     await writeCollection("components", components);
     await writeCollection("laptops", laptops);
     await writeCollection("accessories", accessories);
+    await writeCollection("accessoryCombos", accessoryCombos);
     await writeCollection("tickets", tickets);
     await writeCollection("accounts", accounts);
     await writeCollection("orders", orders);
     await writeCollection("payments", payments);
-    
+
     try {
       await rename("./backend/data.json", "./backend/data.json.bak");
       console.log("[Migration] Successfully migrated data.json to backend/db/*.json. Backup saved to backend/data.json.bak");
@@ -413,7 +449,7 @@ async function readData() {
     }
   }
 
-  return { pcs, components, laptops, accessories, tickets, accounts, orders, payments };
+  return { pcs, components, laptops, accessories, accessoryCombos, tickets, accounts, orders, payments };
 }
 
 async function writeData(db: any) {
@@ -421,6 +457,7 @@ async function writeData(db: any) {
   if (db.components) await writeCollection("components", db.components);
   if (db.laptops) await writeCollection("laptops", db.laptops);
   if (db.accessories) await writeCollection("accessories", db.accessories);
+  if (db.accessoryCombos) await writeCollection("accessoryCombos", db.accessoryCombos);
   if (db.tickets) await writeCollection("tickets", db.tickets);
   if (db.accounts) await writeCollection("accounts", db.accounts);
   if (db.orders) await writeCollection("orders", db.orders);
@@ -556,6 +593,28 @@ serve({
         image: rewriteLocalImage(acc.image, origin)
       }));
       return Response.json(accessoriesWithOrigin, { headers });
+    }
+
+    // GET & POST Accessory Combos
+    if (url.pathname === "/api/accessory-combos") {
+      if (req.method === "POST") {
+        try {
+          const body = await req.json();
+          const db = await readData();
+          db.accessoryCombos = body;
+          await writeData(db);
+          return Response.json({ success: true }, { headers });
+        } catch (err) {
+          return Response.json({ error: "Invalid JSON body" }, { status: 400, headers });
+        }
+      }
+      const db = await readData();
+      const origin = `${req.headers.get("x-forwarded-proto") || "http"}://${req.headers.get("x-forwarded-host") || req.headers.get("host") || `localhost:${PORT}`}`;
+      const combosWithOrigin = (db.accessoryCombos || []).map((combo: any) => ({
+        ...combo,
+        image: rewriteLocalImage(combo.image, origin)
+      }));
+      return Response.json(combosWithOrigin, { headers });
     }
 
     // GET & POST Support Tickets
@@ -1017,7 +1076,7 @@ serve({
 
         const db = await readData();
         const userIndex = db.accounts?.findIndex((u: any) => u.email.toLowerCase() === tokenInfo.email.toLowerCase());
-        
+
         if (userIndex === -1) {
           return Response.json({ error: "Không tìm thấy người dùng." }, { status: 400, headers });
         }
@@ -1083,7 +1142,7 @@ serve({
       try {
         const body = await req.json();
         const { email, name, phone, address, avatar, newPassword } = body;
-        
+
         if (!email) {
           return Response.json({ error: "Email không được để trống" }, { status: 400, headers });
         }
@@ -1095,7 +1154,7 @@ serve({
         }
 
         const user = db.accounts[userIndex];
-        
+
         // Update fields
         user.name = name ? name.trim() : user.name;
         if (phone !== undefined) user.phone = phone.trim();

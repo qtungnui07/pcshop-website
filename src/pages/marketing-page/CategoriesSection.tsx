@@ -1,6 +1,26 @@
 import { motion } from 'framer-motion';
-import { ArrowRight } from 'lucide-react';
+import { ChevronRight, Gamepad2, Clock, Cpu, Palette } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { pcCategories } from './data';
+
+const getCategorySlug = (name: string) => {
+  return name.toLowerCase()
+    .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+    .replace(/đ/g, "d")
+    .replace(/[^a-z0-9\s-]/g, "")
+    .trim()
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-');
+};
+
+const getCategoryIcon = (name: string) => {
+  const n = name.toLowerCase();
+  if (n.includes('gaming')) return Gamepad2;
+  if (n.includes('van phong') || n.includes('văn phòng')) return Clock;
+  if (n.includes('workstation')) return Cpu;
+  if (n.includes('do hoa') || n.includes('đồ họa')) return Palette;
+  return Cpu; // Default
+};
 
 export default function CategoriesSection() {
   return (
@@ -13,39 +33,45 @@ export default function CategoriesSection() {
       </h2>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {pcCategories.map((cat, i) => (
-          <motion.div
-            key={cat.name}
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: 0.2 }}
-            transition={{ delay: i * 0.07, duration: 0.4, ease: 'easeOut' }}
-            whileHover={{ y: -5 }}
-            className="group cursor-pointer rounded-2xl overflow-hidden bg-white border border-[#e8e8ed] shadow-sm hover:shadow-md transition-all duration-300"
-          >
-            {/* Product image */}
-            <div
-              className="relative w-full aspect-[4/3] overflow-hidden bg-zinc-50"
-              style={{
-                background: cat.imgName
-                  ? `linear-gradient(135deg, ${cat.from || '#f8fafc'}, ${cat.to || '#eef2ff'})`
-                  : '#f8fafc'
-              }}
+        {pcCategories.map((cat, i) => {
+          const Icon = getCategoryIcon(cat.name);
+          return (
+            <Link
+              to={`/pc/${getCategorySlug(cat.name)}`}
+              key={cat.name}
+              className="block"
             >
-              {(cat.imgName || cat.image) && (
-                <img
-                  src={cat.imgName ? `/images/${cat.imgName}` : cat.image}
-                  alt={cat.name}
-                  className="absolute inset-0 h-full w-full object-contain p-3 transition-transform duration-300 group-hover:scale-105"
-                />
-              )}
-            </div>
-            <div className="px-4 py-3 flex items-center justify-between">
-              <span className="text-sm font-semibold text-[#1d1d1f]">{cat.name}</span>
-              <ArrowRight className="w-4 h-4 text-[#86868b] group-hover:translate-x-1 transition-transform duration-200" />
-            </div>
-          </motion.div>
-        ))}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.2 }}
+                transition={{ delay: i * 0.07, duration: 0.4, ease: 'easeOut' }}
+                whileHover={{ y: -4 }}
+                className="group cursor-pointer bg-white rounded-2xl border border-zinc-100 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden"
+              >
+                {/* Product image */}
+                <div className="w-full aspect-[4/3] relative overflow-hidden bg-zinc-50">
+                  <img
+                    src={`/images/${cat.imgName}`}
+                    alt={cat.name}
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
+                  <div className="absolute top-3 left-3 w-9 h-9 rounded-xl bg-white/80 backdrop-blur flex items-center justify-center border border-white/20 shadow-sm">
+                    {cat.name.toLowerCase().includes("workstation") ? (
+                      <span className="text-[11px] font-black text-zinc-500">Ai</span>
+                    ) : (
+                      <Icon className="w-4.5 h-4.5 text-zinc-500" strokeWidth={1.8} />
+                    )}
+                  </div>
+                </div>
+                <div className="flex items-center justify-between px-3.5 py-3">
+                  <span className="text-[13px] font-bold text-zinc-800 group-hover:text-zinc-950 transition-colors">{cat.name}</span>
+                  <ChevronRight className="w-4 h-4 text-zinc-400 group-hover:text-zinc-700 group-hover:translate-x-0.5 transition-all duration-200" />
+                </div>
+              </motion.div>
+            </Link>
+          );
+        })}
       </div>
     </section>
   );

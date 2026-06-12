@@ -72,6 +72,19 @@ interface AccessoryItem {
   fallbackIcon?: string;
 }
 
+interface AccessoryComboItem {
+  id?: string | number;
+  title: string;
+  name?: string;
+  desc?: string;
+  specs?: string;
+  productIds: Array<string | number>;
+  discountPercent: number;
+  image?: string;
+  isActive?: boolean;
+  createdAt?: string;
+}
+
 const PORT = 3001;
 const API_BASE = typeof window !== "undefined"
   ? (window.location.hostname.includes("qtitpc.dev")
@@ -165,10 +178,15 @@ const ACCESSORY_BRAND_OPTIONS = [
 const ACCESSORY_COLOR_OPTIONS = [
   { name: "Đen", hex: "#000000" },
   { name: "Trắng", hex: "#ffffff" },
+  { name: "Xám", hex: "#9ca3af" },
+  { name: "Bạc", hex: "#e5e7eb" },
   { name: "Hồng", hex: "#f472b6" },
-  { name: "Xanh lá", hex: "#34d399" },
-  { name: "Xanh dương", hex: "#38bdf8" },
-  { name: "Tím", hex: "#a78bfa" }
+  { name: "Xanh dương", hex: "#0ea5e9" },
+  { name: "Đỏ", hex: "#ef4444" },
+  { name: "Xanh lá", hex: "#10b981" },
+  { name: "Tím", hex: "#8b5cf6" },
+  { name: "Vàng", hex: "#facc15" },
+  { name: "Cam", hex: "#fb923c" },
 ];
 
 // Autofill Templates
@@ -369,12 +387,13 @@ const AUTOFILL_TEMPLATES: Record<string, any[]> = {
 export default function AdminIndex() {
   const { user, loading: authLoading } = useAuth();
   const [activeCategory, setActiveCategory] = useState<string>("pc");
-  
+
   // Database arrays
   const [pcs, setPcs] = useState<PCItem[]>([]);
   const [laptops, setLaptops] = useState<LaptopItem[]>([]);
   const [components, setComponents] = useState<ComponentItem[]>([]);
   const [accessories, setAccessories] = useState<AccessoryItem[]>([]);
+  const [accessoryCombos, setAccessoryCombos] = useState<AccessoryComboItem[]>([]);
   const [tickets, setTickets] = useState<any[]>([]);
   const [accounts, setAccounts] = useState<any[]>([]);
 
@@ -384,6 +403,7 @@ export default function AdminIndex() {
     laptop: false,
     "linh-kien": false,
     "phu-kien": false,
+    "combo-phu-kien": false,
     tickets: false,
     accounts: false
   });
@@ -397,7 +417,7 @@ export default function AdminIndex() {
   // Editor states
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [editorOffsetTop, setEditorOffsetTop] = useState(0);
-  
+
   // Shared Form inputs
   const [formName, setFormName] = useState("");
   const [formSpecs, setFormSpecs] = useState("");
@@ -433,6 +453,9 @@ export default function AdminIndex() {
   const [formPhuKienColors, setFormPhuKienColors] = useState<string[]>([]);
   const [formPhuKienFallbackIcon, setFormPhuKienFallbackIcon] = useState("Headphones");
 
+  // Combo phụ kiện specific inputs
+  const [formComboProductIds, setFormComboProductIds] = useState<string[]>([]);
+
   // Validation feedback
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
 
@@ -442,23 +465,25 @@ export default function AdminIndex() {
     setLoading(true);
     try {
       const authHeader = { "Authorization": `Bearer ${user.email}` };
-      const [pcsRes, laptopsRes, componentsRes, accessoriesRes, ticketsRes, accountsRes] = await Promise.all([
+      const [pcsRes, laptopsRes, componentsRes, accessoriesRes, accessoryCombosRes, ticketsRes, accountsRes] = await Promise.all([
         fetch(`${API_BASE}/api/featured-pcs`).then(r => r.json()),
         fetch(`${API_BASE}/api/laptops`).then(r => r.json()),
         fetch(`${API_BASE}/api/components`).then(r => r.json()),
         fetch(`${API_BASE}/api/accessories`).then(r => r.json()),
+        fetch(`${API_BASE}/api/accessory-combos`).then(r => r.ok ? r.json() : []),
         fetch(`${API_BASE}/api/tickets`, { headers: authHeader }).then(r => r.ok ? r.json() : []),
         fetch(`${API_BASE}/api/accounts`, { headers: authHeader }).then(r => r.ok ? r.json() : [])
       ]);
-      
+
       setPcs(pcsRes);
       setLaptops(laptopsRes);
       setComponents(componentsRes);
       setAccessories(accessoriesRes);
+      setAccessoryCombos(accessoryCombosRes);
       setTickets(ticketsRes);
       setAccounts(accountsRes);
-      
-      setDirty({ pc: false, laptop: false, "linh-kien": false, "phu-kien": false, tickets: false, accounts: false });
+
+      setDirty({ pc: false, laptop: false, "linh-kien": false, "phu-kien": false, "combo-phu-kien": false, tickets: false, accounts: false });
       setEditingIndex(null);
       setEditorOffsetTop(0);
     } catch (err) {
@@ -480,6 +505,7 @@ export default function AdminIndex() {
     if (activeCategory === "laptop") return laptops;
     if (activeCategory === "linh-kien") return components;
     if (activeCategory === "phu-kien") return accessories;
+    if (activeCategory === "combo-phu-kien") return accessoryCombos;
     if (activeCategory === "tickets") return tickets;
     return accounts;
   };
@@ -488,7 +514,7 @@ export default function AdminIndex() {
     const list = getActiveList();
     if (!searchQuery.trim()) return list;
     const q = searchQuery.toLowerCase();
-    
+
     return list.filter((item: any) => {
       const matchName = item.name?.toLowerCase().includes(q);
       const matchSpecs = item.specs?.toLowerCase().includes(q);
@@ -498,9 +524,11 @@ export default function AdminIndex() {
       const matchRole = item.role?.toLowerCase().includes(q);
       const matchProvider = item.provider?.toLowerCase().includes(q);
       const matchTicketTitle = item.title?.toLowerCase().includes(q);
+      const matchComboTitle = item.title?.toLowerCase().includes(q);
+      const matchComboDesc = item.desc?.toLowerCase().includes(q);
       const matchTicketStatus = item.status?.toLowerCase().includes(q);
       const matchTicketId = item.id?.toLowerCase().includes(q);
-      return matchName || matchSpecs || matchBrand || matchCategory || matchEmail || matchRole || matchProvider || matchTicketTitle || matchTicketStatus || matchTicketId;
+      return matchName || matchSpecs || matchBrand || matchCategory || matchEmail || matchRole || matchProvider || matchTicketTitle || matchComboTitle || matchComboDesc || matchTicketStatus || matchTicketId;
     });
   };
 
@@ -539,7 +567,7 @@ export default function AdminIndex() {
   const handleMove = (indexInFilteredList: number, direction: "up" | "down") => {
     const filteredList = getFilteredList();
     const activeList = [...getActiveList()];
-    
+
     const item = filteredList[indexInFilteredList];
     const originalIndex = activeList.findIndex(x => x === item);
     if (originalIndex === -1) return;
@@ -573,6 +601,7 @@ export default function AdminIndex() {
     else if (activeCategory === "laptop") setLaptops(newList);
     else if (activeCategory === "linh-kien") setComponents(newList);
     else if (activeCategory === "phu-kien") setAccessories(newList);
+    else if (activeCategory === "combo-phu-kien") setAccessoryCombos(newList);
     else if (activeCategory === "tickets") setTickets(newList);
     else setAccounts(newList);
   };
@@ -583,7 +612,7 @@ export default function AdminIndex() {
     const activeList = getActiveList();
     const item = filteredList[indexInFilteredList];
     const originalIndex = activeList.findIndex(x => x === item);
-    
+
     if (activeCategory === "accounts" && user && item.email === user.email) {
       alert("Bạn không thể tự xóa tài khoản của chính mình!");
       return;
@@ -594,7 +623,7 @@ export default function AdminIndex() {
     const newList = activeList.filter(x => x !== item);
     updateActiveListState(newList);
     setDirty({ ...dirty, [activeCategory]: true });
-    
+
     if (editingIndex === originalIndex) {
       setEditingIndex(null);
       setEditorOffsetTop(0);
@@ -632,6 +661,12 @@ export default function AdminIndex() {
     } else if (activeCategory === "linh-kien") {
       setFormLinhKienCategory("RAM");
       setFormLinhKienColor("#e0e7ef");
+    } else if (activeCategory === "combo-phu-kien") {
+      setFormName("Combo phụ kiện mới");
+      setFormSpecs("Bộ phụ kiện được ghép từ các sản phẩm đang bán.");
+      setFormPrice("10");
+      setFormImage("");
+      setFormComboProductIds([]);
     } else {
       setFormBrand("LG");
       setFormPhuKienCategory("Màn hình");
@@ -645,7 +680,7 @@ export default function AdminIndex() {
   const handleStartEdit = (indexInFilteredList: number) => {
     const filteredList = getFilteredList();
     const item: any = filteredList[indexInFilteredList];
-    
+
     // Find index in original array
     const originalList = getActiveList();
     const originalIndex = originalList.findIndex(x => x === item);
@@ -673,6 +708,15 @@ export default function AdminIndex() {
     } else if (activeCategory === "tickets") {
       setTicketStatus(item.status || "pending");
     } else {
+      if (activeCategory === "combo-phu-kien") {
+        setFormName(item.title || item.name || "");
+        setFormSpecs(item.desc || item.specs || "");
+        setFormPrice(String(item.discountPercent ?? 0));
+        setFormImage(item.image || "");
+        setFormComboProductIds((item.productIds || []).map((id: string | number) => String(id)));
+        return;
+      }
+
       // Populate fields
       setFormName(item.name);
       setFormSpecs(item.specs || "");
@@ -756,6 +800,13 @@ export default function AdminIndex() {
       if (editingIndex === -1 && !accountPassword.trim()) errors.password = "Mật khẩu không được trống.";
     } else if (activeCategory === "tickets") {
       // Nothing to validate for tickets
+    } else if (activeCategory === "combo-phu-kien") {
+      const discountPercent = Number(String(formPrice).replace(/[^\d]/g, ""));
+      if (!formName.trim()) errors.name = "Tên combo không được trống.";
+      if (formComboProductIds.length < 2) errors.products = "Combo cần chọn ít nhất 2 sản phẩm.";
+      if (Number.isNaN(discountPercent) || discountPercent < 0 || discountPercent > 90) {
+        errors.price = "Phần trăm giảm giá phải từ 0 đến 90.";
+      }
     } else {
       if (!formName.trim()) errors.name = "Tên sản phẩm không được trống.";
       if (!formPrice.trim() && typeof formPrice !== "number") errors.price = "Giá hiển thị không được trống.";
@@ -800,6 +851,22 @@ export default function AdminIndex() {
       };
     } else if (activeCategory === "tickets") {
       newItem = { ...originalList[editingIndex!], status: ticketStatus };
+    } else if (activeCategory === "combo-phu-kien") {
+      const existing = editingIndex === -1 ? null : (originalList[editingIndex!] as any);
+      const discountPercent = Math.min(90, Math.max(0, Number(String(formPrice).replace(/[^\d]/g, "")) || 0));
+      const comboItem: AccessoryComboItem = {
+        id: editingIndex === -1 ? `combo-${Date.now()}` : existing?.id || `combo-${Date.now()}`,
+        title: formName.trim(),
+        name: formName.trim(),
+        desc: formSpecs.trim(),
+        specs: formSpecs.trim(),
+        productIds: formComboProductIds,
+        discountPercent,
+        image: formImage.trim(),
+        isActive: true,
+        createdAt: existing?.createdAt || new Date().toISOString()
+      };
+      newItem = comboItem;
     } else if (activeCategory === "pc") {
       const imgUrl = isCustomImage ? customImageUrl : formImage;
       const pcItem: PCItem = {
@@ -885,6 +952,9 @@ export default function AdminIndex() {
     } else if (activeCategory === "phu-kien") {
       url = `${API_BASE}/api/accessories`;
       payload = accessories;
+    } else if (activeCategory === "combo-phu-kien") {
+      url = `${API_BASE}/api/accessory-combos`;
+      payload = accessoryCombos;
     } else if (activeCategory === "tickets") {
       url = `${API_BASE}/api/tickets/bulk`;
       payload = tickets;
@@ -896,14 +966,14 @@ export default function AdminIndex() {
     try {
       const res = await fetch(url, {
         method: "POST",
-        headers: { 
+        headers: {
           "Content-Type": "application/json",
           "Authorization": `Bearer ${user.email}`
         },
         body: JSON.stringify(payload)
       });
       if (!res.ok) throw new Error("API responded with error code");
-      
+
       setDirty({ ...dirty, [activeCategory]: false });
       setSaveSuccess(true);
       setTimeout(() => setSaveSuccess(false), 3000);
@@ -921,6 +991,32 @@ export default function AdminIndex() {
     } else {
       setFormPhuKienColors([...formPhuKienColors, colorName]);
     }
+  };
+
+  const handleToggleComboProduct = (productId: string | number) => {
+    const value = String(productId);
+    if (formComboProductIds.includes(value)) {
+      setFormComboProductIds(formComboProductIds.filter((id) => id !== value));
+    } else {
+      setFormComboProductIds([...formComboProductIds, value]);
+    }
+    setFormErrors({ ...formErrors, products: "" });
+  };
+
+  const getProductsByIds = (productIds: Array<string | number>) => {
+    return productIds
+      .map((id) => accessories.find((product) => String(product.id) === String(id)))
+      .filter((product): product is AccessoryItem => Boolean(product));
+  };
+
+  const getComboOriginalPrice = (productIds: Array<string | number>) => {
+    return getProductsByIds(productIds).reduce((sum, product) => sum + Number(product.price || 0), 0);
+  };
+
+  const getComboDiscountedPrice = (productIds: Array<string | number>, discountPercent: number | string) => {
+    const originalPrice = getComboOriginalPrice(productIds);
+    const discount = Math.min(90, Math.max(0, Number(String(discountPercent).replace(/[^\d]/g, "")) || 0));
+    return Math.max(0, Math.round(originalPrice * (100 - discount) / 100));
   };
 
   // Format helper for accessory prices in the admin list
@@ -955,7 +1051,7 @@ export default function AdminIndex() {
           </div>
           <h1 className="text-2xl font-bold text-gray-900 mb-2">Từ chối truy cập</h1>
           <p className="text-sm text-gray-500 mb-8 leading-relaxed">
-            Tài khoản của bạn không có quyền truy cập vào bảng điều khiển Admin. 
+            Tài khoản của bạn không có quyền truy cập vào bảng điều khiển Admin.
             Vui lòng đăng nhập bằng tài khoản Quản trị viên để tiếp tục.
           </p>
           <div className="flex flex-col gap-3 w-full">
@@ -979,7 +1075,7 @@ export default function AdminIndex() {
 
   return (
     <div className="w-full max-w-[1450px] mx-auto px-4 md:px-8 py-6 text-zinc-800 font-sans">
-      
+
       {/* ── HEADER & GLOBAL CONTROLS ─────────────────────────────────── */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-zinc-200 pb-6 mb-8">
         <div>
@@ -1007,15 +1103,14 @@ export default function AdminIndex() {
             <RotateCcw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
             Tải lại
           </button>
-          
+
           <button
             onClick={handleSaveToDatabase}
             disabled={saving || getActiveList().length === 0}
-            className={`flex items-center gap-1.5 px-5 py-2 text-white text-sm font-semibold rounded-xl transition-all cursor-pointer active:scale-95 ${
-              dirty[activeCategory]
+            className={`flex items-center gap-1.5 px-5 py-2 text-white text-sm font-semibold rounded-xl transition-all cursor-pointer active:scale-95 ${dirty[activeCategory]
                 ? 'bg-emerald-600 hover:bg-emerald-700 shadow-md shadow-emerald-600/10'
                 : 'bg-zinc-800 hover:bg-zinc-950 disabled:opacity-50'
-            }`}
+              }`}
           >
             {saveSuccess ? (
               <>
@@ -1031,10 +1126,10 @@ export default function AdminIndex() {
       </div>
 
       {/* ── CATEGORY SWITCHER TABS ───────────────────────────────────── */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-3.5 mb-8">
+      <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3.5 mb-8">
         {CATEGORIES.map((cat) => {
           const CatIcon = cat.icon;
-          const isActive = activeCategory === cat.id;
+          const isActive = activeCategory === cat.id || (cat.id === "phu-kien" && activeCategory === "combo-phu-kien");
           return (
             <button
               key={cat.id}
@@ -1044,11 +1139,10 @@ export default function AdminIndex() {
                 setEditorOffsetTop(0);
                 setSearchQuery("");
               }}
-              className={`flex items-center gap-3 p-4 rounded-2xl border text-left transition-all duration-300 cursor-pointer ${
-                isActive
+              className={`flex items-center gap-3 p-4 rounded-2xl border text-left transition-all duration-300 cursor-pointer ${isActive
                   ? `${cat.color} ring-2 ring-zinc-950/5 font-extrabold shadow-sm scale-[1.02]`
                   : "bg-white border-zinc-200 text-zinc-500 hover:border-zinc-300 hover:text-zinc-800"
-              }`}
+                }`}
             >
               <div className={`p-2 rounded-xl ${isActive ? 'bg-white shadow-sm' : 'bg-zinc-100'}`}>
                 <CatIcon className="w-5 h-5" />
@@ -1062,6 +1156,55 @@ export default function AdminIndex() {
         })}
       </div>
 
+      {(activeCategory === "phu-kien" || activeCategory === "combo-phu-kien") && (
+        <div className="-mt-4 mb-8 rounded-2xl border border-orange-100 bg-orange-50/50 p-2 shadow-sm">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <div className="px-3 py-2">
+              <p className="text-[11px] font-black uppercase tracking-[0.14em] text-orange-500">
+                Phụ kiện Gaming
+              </p>
+              <p className="text-xs font-medium text-zinc-500">
+                Quản lý sản phẩm phụ kiện và các combo bán kèm trong cùng một khu vực.
+              </p>
+            </div>
+
+            <div className="flex rounded-xl border border-orange-100 bg-white p-1">
+              <button
+                type="button"
+                onClick={() => {
+                  setActiveCategory("phu-kien");
+                  setEditingIndex(null);
+                  setEditorOffsetTop(0);
+                  setSearchQuery("");
+                }}
+                className={`rounded-lg px-4 py-2 text-xs font-black transition ${activeCategory === "phu-kien"
+                    ? "bg-zinc-950 text-white shadow-sm"
+                    : "text-zinc-500 hover:bg-zinc-50 hover:text-zinc-950"
+                  }`}
+              >
+                Sản phẩm phụ kiện
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setActiveCategory("combo-phu-kien");
+                  setEditingIndex(null);
+                  setEditorOffsetTop(0);
+                  setSearchQuery("");
+                }}
+                className={`rounded-lg px-4 py-2 text-xs font-black transition ${activeCategory === "combo-phu-kien"
+                    ? "bg-zinc-950 text-white shadow-sm"
+                    : "text-zinc-500 hover:bg-zinc-50 hover:text-zinc-950"
+                  }`}
+              >
+                Combo phụ kiện
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {loading ? (
         <div className="flex flex-col items-center justify-center py-24 text-zinc-400 gap-3">
           <div className="w-9 h-9 border-4 border-zinc-200 border-t-zinc-900 rounded-full animate-spin" />
@@ -1069,29 +1212,29 @@ export default function AdminIndex() {
         </div>
       ) : (
         <div id="admin-grid-container" className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start relative">
-          
+
           {/* ── LEFT: PRODUCT LIST (7 Columns) ────────────────────────── */}
           <div className="lg:col-span-7 xl:col-span-8 flex flex-col gap-4">
-            
+
             {/* Toolbar: Search & Create */}
             <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3 bg-zinc-50 border border-zinc-200 px-4 py-3 rounded-2xl">
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
                 <input
                   type="text"
-                  placeholder={`Tìm kiếm trong ${CATEGORIES.find(c => c.id === activeCategory)?.name}...`}
+                  placeholder={`Tìm kiếm trong ${activeCategory === "combo-phu-kien" ? "Combo phụ kiện" : CATEGORIES.find(c => c.id === activeCategory)?.name}...`}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="w-full pl-9 pr-4 py-1.5 bg-white border border-zinc-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-zinc-950/5 focus:border-zinc-800 outline-none transition-all"
                 />
               </div>
-              
+
               <button
                 onClick={handleStartCreate}
                 disabled={activeCategory === "tickets"}
                 className={`flex items-center justify-center gap-1.5 px-4 py-2 bg-zinc-900 hover:bg-zinc-950 text-white text-xs font-bold rounded-xl transition-colors cursor-pointer active:scale-95 ${activeCategory === "tickets" ? "hidden" : ""}`}
               >
-                <Plus className="w-4 h-4" /> {activeCategory === "accounts" ? "Tạo tài khoản mới" : "Thêm sản phẩm mới"}
+                <Plus className="w-4 h-4" /> {activeCategory === "accounts" ? "Tạo tài khoản mới" : activeCategory === "combo-phu-kien" ? "Thêm combo mới" : "Thêm sản phẩm mới"}
               </button>
             </div>
 
@@ -1104,20 +1247,19 @@ export default function AdminIndex() {
               <div className="flex flex-col gap-3">
                 {getFilteredList().map((item: any, idx) => {
                   const originalIndex = getActiveList().findIndex(x => x === item);
-                  
+
                   return (
                     <div
                       key={originalIndex}
                       id={`admin-item-card-${originalIndex}`}
-                      className={`flex items-center justify-between bg-white border rounded-2xl p-4 transition-all shadow-sm ${
-                        editingIndex === originalIndex
+                      className={`flex items-center justify-between bg-white border rounded-2xl p-4 transition-all shadow-sm ${editingIndex === originalIndex
                           ? "ring-2 ring-zinc-950 border-transparent bg-zinc-50/20"
                           : "border-zinc-200/80 hover:border-zinc-300"
-                      }`}
+                        }`}
                     >
                       {/* Product details info row */}
                       <div className="flex items-center gap-4 min-w-0 flex-1">
-                        
+
                         {/* Dynamic Thumbnail */}
                         {activeCategory === "pc" && (
                           <div className="w-16 h-16 bg-[#0c0c0e] rounded-xl flex items-center justify-center p-1 border border-zinc-200 relative overflow-hidden flex-shrink-0">
@@ -1190,6 +1332,23 @@ export default function AdminIndex() {
                             )}
                           </div>
                         )}
+                        {activeCategory === "combo-phu-kien" && (
+                          <div className="w-16 h-16 bg-amber-50 rounded-xl flex items-center justify-center p-1 border border-amber-100 relative overflow-hidden flex-shrink-0">
+                            {(item.image || getProductsByIds(item.productIds || [])[0]?.image) ? (
+                              <img
+                                src={item.image || getProductsByIds(item.productIds || [])[0]?.image}
+                                alt={item.title || item.name}
+                                className="max-w-full max-h-full object-cover rounded"
+                              />
+                            ) : (
+                              <Sparkles className="w-7 h-7 text-amber-500" />
+                            )}
+                            <span className="absolute bottom-0 left-0 right-0 text-[8px] font-extrabold text-white text-center py-0.5 bg-red-500">
+                              -{item.discountPercent || 0}%
+                            </span>
+                          </div>
+                        )}
+
                         {activeCategory === "accounts" && (
                           <div className="w-16 h-16 rounded-xl flex items-center justify-center p-1 border border-zinc-200 relative overflow-hidden bg-zinc-50 flex-shrink-0">
                             {item.avatar ? (
@@ -1210,14 +1369,12 @@ export default function AdminIndex() {
                           <div className="flex items-center gap-1.5 mb-0.5">
                             {activeCategory === "accounts" ? (
                               <>
-                                <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded uppercase ${
-                                  item.role === "admin" ? "bg-red-100 text-red-700" : "bg-zinc-100 text-zinc-700"
-                                }`}>
+                                <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded uppercase ${item.role === "admin" ? "bg-red-100 text-red-700" : "bg-zinc-100 text-zinc-700"
+                                  }`}>
                                   {item.role}
                                 </span>
-                                <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded uppercase ${
-                                  item.provider === "google" ? "bg-blue-100 text-blue-700" : "bg-zinc-100 text-zinc-500"
-                                }`}>
+                                <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded uppercase ${item.provider === "google" ? "bg-blue-100 text-blue-700" : "bg-zinc-100 text-zinc-500"
+                                  }`}>
                                   {item.provider}
                                 </span>
                                 <h3 className="text-sm font-bold text-zinc-900 truncate">
@@ -1226,12 +1383,11 @@ export default function AdminIndex() {
                               </>
                             ) : activeCategory === "tickets" ? (
                               <>
-                                <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded uppercase ${
-                                  item.status === 'completed' ? 'bg-emerald-100 text-emerald-700' :
-                                  item.status === 'processing' ? 'bg-blue-100 text-blue-700' :
-                                  item.status === 'cancelled' ? 'bg-red-100 text-red-700' :
-                                  'bg-orange-100 text-orange-700'
-                                }`}>
+                                <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded uppercase ${item.status === 'completed' ? 'bg-emerald-100 text-emerald-700' :
+                                    item.status === 'processing' ? 'bg-blue-100 text-blue-700' :
+                                      item.status === 'cancelled' ? 'bg-red-100 text-red-700' :
+                                        'bg-orange-100 text-orange-700'
+                                  }`}>
                                   {item.status}
                                 </span>
                                 <span className="bg-zinc-100 text-zinc-700 text-[9px] font-bold px-1.5 py-0.5 rounded uppercase">
@@ -1239,6 +1395,18 @@ export default function AdminIndex() {
                                 </span>
                                 <h3 className="text-sm font-bold text-zinc-900 truncate">
                                   {item.title}
+                                </h3>
+                              </>
+                            ) : activeCategory === "combo-phu-kien" ? (
+                              <>
+                                <span className="bg-amber-100 text-amber-700 text-[9px] font-bold px-1.5 py-0.5 rounded uppercase">
+                                  Combo
+                                </span>
+                                <span className="bg-red-100 text-red-700 text-[9px] font-bold px-1.5 py-0.5 rounded uppercase">
+                                  -{item.discountPercent || 0}%
+                                </span>
+                                <h3 className="text-sm font-bold text-zinc-900 truncate">
+                                  {item.title || item.name}
                                 </h3>
                               </>
                             ) : (
@@ -1254,7 +1422,7 @@ export default function AdminIndex() {
                               </>
                             )}
                           </div>
-                          
+
                           {activeCategory === "accounts" ? (
                             <p className="text-[11px] text-zinc-400 font-medium leading-relaxed truncate max-w-[450px]">
                               {item.email}
@@ -1269,11 +1437,20 @@ export default function AdminIndex() {
                             </p>
                           )}
 
-                          {activeCategory !== "accounts" && activeCategory !== "tickets" && (
+                          {activeCategory !== "accounts" && activeCategory !== "tickets" && activeCategory !== "combo-phu-kien" && (
                             <div className="flex items-center gap-2 mt-1">
                               <span className="text-xs font-bold text-zinc-800">
-                                {activeCategory === "phu-kien" ? formatAccessoryPrice(item.price) : item.price}
+                                {activeCategory === "phu-kien"
+                                  ? formatAccessoryPrice(item.price)
+                                  : activeCategory === "combo-phu-kien"
+                                    ? formatAccessoryPrice(getComboDiscountedPrice(item.productIds || [], item.discountPercent || 0))
+                                    : item.price}
                               </span>
+                              {activeCategory === "combo-phu-kien" && (
+                                <span className="text-[10px] text-zinc-400 line-through">
+                                  {formatAccessoryPrice(getComboOriginalPrice(item.productIds || []))}
+                                </span>
+                              )}
                               {activeCategory === "phu-kien" && item.colors && (
                                 <div className="flex gap-1">
                                   {item.colors.map((c: string) => (
@@ -1319,7 +1496,7 @@ export default function AdminIndex() {
                         >
                           <Edit3 className="w-4.5 h-4.5" />
                         </button>
-                        
+
                         <button
                           onClick={() => handleDelete(idx)}
                           className="p-2 text-red-500 hover:bg-red-50 hover:text-red-700 rounded-xl transition-all cursor-pointer"
@@ -1337,7 +1514,7 @@ export default function AdminIndex() {
           </div>
 
           {/* ── RIGHT: EDITOR FORM PANE (4-5 Columns) ────────────────── */}
-          <div 
+          <div
             id="admin-editor-panel"
             className="lg:col-span-5 xl:col-span-4 lg:sticky lg:top-24 lg:mt-[var(--editor-offset-top)] lg:max-h-[calc(100vh-120px)] lg:overflow-y-auto pr-1 transition-[margin-top] duration-300 ease-out"
             style={{ "--editor-offset-top": `${editorOffsetTop}px` } as CSSProperties}
@@ -1356,7 +1533,9 @@ export default function AdminIndex() {
                     <Sparkles className="w-5 h-5 text-zinc-950" />
                     {activeCategory === "accounts"
                       ? (editingIndex === -1 ? 'Tạo tài khoản mới' : `Chỉnh sửa tài khoản #${editingIndex + 1}`)
-                      : (editingIndex === -1 ? 'Thêm sản phẩm mới' : `Chỉnh sửa #${editingIndex + 1}`)}
+                      : activeCategory === "combo-phu-kien"
+                        ? (editingIndex === -1 ? 'Thêm combo mới' : `Chỉnh sửa combo #${editingIndex + 1}`)
+                        : (editingIndex === -1 ? 'Thêm sản phẩm mới' : `Chỉnh sửa #${editingIndex + 1}`)}
                   </h2>
 
                   {/* SMART TEMPLATE DROPDOWN */}
@@ -1403,12 +1582,12 @@ export default function AdminIndex() {
                           <option value="cancelled">Đã hủy</option>
                         </select>
                         <div className="mt-4 p-3 bg-zinc-50 border border-zinc-200 rounded-lg space-y-2 text-sm leading-relaxed text-zinc-800">
-                           <p><span className="font-bold text-zinc-500">Khách hàng:</span> {getActiveList()[editingIndex!]?.contactName}</p>
-                           <p><span className="font-bold text-zinc-500">Email:</span> {getActiveList()[editingIndex!]?.contactEmail}</p>
-                           <p><span className="font-bold text-zinc-500">SĐT:</span> {getActiveList()[editingIndex!]?.contactPhone}</p>
-                           <p><span className="font-bold text-zinc-500">Địa chỉ:</span> {getActiveList()[editingIndex!]?.contactAddress}</p>
-                           <p><span className="font-bold text-zinc-500">Sản phẩm:</span> {getActiveList()[editingIndex!]?.productName} ({getActiveList()[editingIndex!]?.serialNumber})</p>
-                           <p><span className="font-bold text-zinc-500">Chi tiết vấn đề:</span> {getActiveList()[editingIndex!]?.description}</p>
+                          <p><span className="font-bold text-zinc-500">Khách hàng:</span> {getActiveList()[editingIndex!]?.contactName}</p>
+                          <p><span className="font-bold text-zinc-500">Email:</span> {getActiveList()[editingIndex!]?.contactEmail}</p>
+                          <p><span className="font-bold text-zinc-500">SĐT:</span> {getActiveList()[editingIndex!]?.contactPhone}</p>
+                          <p><span className="font-bold text-zinc-500">Địa chỉ:</span> {getActiveList()[editingIndex!]?.contactAddress}</p>
+                          <p><span className="font-bold text-zinc-500">Sản phẩm:</span> {getActiveList()[editingIndex!]?.productName} ({getActiveList()[editingIndex!]?.serialNumber})</p>
+                          <p><span className="font-bold text-zinc-500">Chi tiết vấn đề:</span> {getActiveList()[editingIndex!]?.description}</p>
                         </div>
                       </div>
                     ) : activeCategory !== "accounts" ? (
@@ -1426,9 +1605,8 @@ export default function AdminIndex() {
                                 setFormErrors({ ...formErrors, brand: "" });
                               }}
                               placeholder="Ví dụ: ASUS, Dell, Apple..."
-                              className={`w-full px-3 py-2 border rounded-lg text-sm font-medium outline-none transition-all ${
-                                formErrors.brand ? 'border-red-500 focus:ring-red-500/10' : 'border-zinc-200 focus:border-zinc-900'
-                              }`}
+                              className={`w-full px-3 py-2 border rounded-lg text-sm font-medium outline-none transition-all ${formErrors.brand ? 'border-red-500 focus:ring-red-500/10' : 'border-zinc-200 focus:border-zinc-900'
+                                }`}
                             />
                             {formErrors.brand && <span className="text-[10px] text-red-500 mt-1 block font-bold">{formErrors.brand}</span>}
                           </div>
@@ -1444,9 +1622,8 @@ export default function AdminIndex() {
                                 setFormBrand(e.target.value);
                                 setFormErrors({ ...formErrors, brand: "" });
                               }}
-                              className={`w-full px-3 py-2 border rounded-lg bg-white text-sm font-medium outline-none transition-all ${
-                                formErrors.brand ? 'border-red-500 focus:ring-red-500/10' : 'border-zinc-200 focus:border-zinc-900'
-                              }`}
+                              className={`w-full px-3 py-2 border rounded-lg bg-white text-sm font-medium outline-none transition-all ${formErrors.brand ? 'border-red-500 focus:ring-red-500/10' : 'border-zinc-200 focus:border-zinc-900'
+                                }`}
                             >
                               <option value="" disabled>-- Chọn thương hiệu --</option>
                               {ACCESSORY_BRAND_OPTIONS.map((brand) => (
@@ -1459,318 +1636,363 @@ export default function AdminIndex() {
                           </div>
                         )}
 
-                    {/* Category selectors */}
-                    {activeCategory === "linh-kien" && (
-                      <div>
-                        <label className="block mb-1.5 text-zinc-700">Danh mục Linh kiện</label>
-                        <select
-                          value={formLinhKienCategory}
-                          onChange={(e) => setFormLinhKienCategory(e.target.value)}
-                          className="w-full px-3 py-2 border border-zinc-200 rounded-lg text-sm font-medium focus:border-zinc-900 outline-none"
-                        >
-                          <option value="RAM">RAM</option>
-                          <option value="CPU">CPU - Vi xử lý</option>
-                          <option value="VGA">VGA - Card màn hình</option>
-                          <option value="Mainboard">Mainboard - Bo mạch chủ</option>
-                          <option value="SSD">SSD - Ổ cứng thể rắn</option>
-                          <option value="HDD">HDD - Ổ cứng cơ</option>
-                          <option value="PSU">PSU - Nguồn máy tính</option>
-                          <option value="Cooling">Tản nhiệt</option>
-                          <option value="Case">Vỏ máy tính (Case)</option>
-                        </select>
-                      </div>
-                    )}
-
-                    {activeCategory === "phu-kien" && (
-                      <div>
-                        <label className="block mb-1.5 text-zinc-700">Danh mục Phụ kiện</label>
-                        <select
-                          value={formPhuKienCategory}
-                          onChange={(e) => {
-                            const newCat = e.target.value;
-                            setFormPhuKienCategory(newCat);
-                            const opt = ACCESSORY_CATEGORY_OPTIONS.find((c) => c.name === newCat);
-                            if (opt) {
-                              setFormBrand(opt.defaultBrand);
-                              setFormPhuKienFallbackIcon(opt.icon);
-                            }
-                          }}
-                          className="w-full px-3 py-2 border border-zinc-200 rounded-lg text-sm font-medium focus:border-zinc-900 outline-none"
-                        >
-                          {ACCESSORY_CATEGORY_OPTIONS.map((cat) => (
-                            <option key={cat.name} value={cat.name}>
-                              {cat.name}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                    )}
-
-                    {/* Name */}
-                    <div>
-                      <label className="block mb-1 text-zinc-700">Tên sản phẩm</label>
-                      <input
-                        type="text"
-                        required
-                        value={formName}
-                        onChange={(e) => {
-                          setFormName(e.target.value);
-                          setFormErrors({ ...formErrors, name: "" });
-                        }}
-                        placeholder="Nhập tên sản phẩm..."
-                        className={`w-full px-3 py-2 border rounded-lg text-sm font-medium outline-none transition-all ${
-                          formErrors.name ? 'border-red-500 focus:ring-red-500/10' : 'border-zinc-200 focus:border-zinc-900'
-                        }`}
-                      />
-                      {formErrors.name && <span className="text-[10px] text-red-500 mt-1 block font-bold">{formErrors.name}</span>}
-                    </div>
-
-                    {/* Specs */}
-                    <div>
-                      <label className="block mb-1.5 text-zinc-700">Thông số kỹ thuật (Ấn Enter xuống dòng)</label>
-                      <textarea
-                        rows={3}
-                        required
-                        value={formSpecs}
-                        onChange={(e) => setFormSpecs(e.target.value)}
-                        placeholder={
-                          activeCategory === "pc"
-                            ? "Intel Core i7 • RTX 4070 SUPER\n32GB RAM • 1TB SSD"
-                            : activeCategory === "laptop"
-                            ? "Core i7 / 16GB / 512GB SSD / 14\" FHD+"
-                            : "Nhập thông số chi tiết sản phẩm..."
-                        }
-                        className="w-full px-3 py-2 border border-zinc-200 rounded-lg text-sm font-medium focus:border-zinc-900 outline-none resize-none"
-                      />
-                    </div>
-
-                    {/* Price */}
-                    <div>
-                      <label className="block mb-1 text-zinc-700">Giá hiển thị</label>
-                      <input
-                        type="text"
-                        required
-                        value={formPrice}
-                        onChange={(e) => {
-                          setFormPrice(e.target.value);
-                          setFormErrors({ ...formErrors, price: "" });
-                        }}
-                        placeholder={activeCategory === "phu-kien" ? "Ví dụ: 3990000 (chỉ nhập số)" : "Ví dụ: 28.990.000đ"}
-                        className={`w-full px-3 py-2 border rounded-lg text-sm font-medium outline-none transition-all ${
-                          formErrors.price ? 'border-red-500 focus:ring-red-500/10' : 'border-zinc-200 focus:border-zinc-900'
-                        }`}
-                      />
-                      {formErrors.price && <span className="text-[10px] text-red-500 mt-1 block font-bold">{formErrors.price}</span>}
-                    </div>
-
-                    {/* Badge & Color */}
-                    {activeCategory !== "laptop" && (
-                      <div className="grid grid-cols-2 gap-3">
-                        <div>
-                          <label className="block mb-1 text-zinc-700">Nhãn (Badge)</label>
-                          <input
-                            type="text"
-                            value={formBadge}
-                            onChange={(e) => setFormBadge(e.target.value)}
-                            placeholder="Mới, Hot, Bán chạy..."
-                            className="w-full px-3 py-2 border border-zinc-200 rounded-lg text-sm font-medium focus:border-zinc-900 outline-none"
-                          />
-                        </div>
-                        <div>
-                          <label className="block mb-1 text-zinc-700">Màu sắc Nhãn</label>
-                          <div className="flex gap-2 items-center">
-                            <input
-                              type="color"
-                              value={formBadgeColor}
-                              onChange={(e) => setFormBadgeColor(e.target.value)}
-                              className="w-10 h-9 p-0 border border-zinc-200 rounded-lg cursor-pointer"
-                            />
-                            <input
-                              type="text"
-                              value={formBadgeColor}
-                              onChange={(e) => setFormBadgeColor(e.target.value)}
-                              className="w-full px-2 py-2 border border-zinc-200 rounded-lg text-xs font-mono focus:border-zinc-900 outline-none"
-                            />
-                          </div>
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Fallback Color for components */}
-                    {activeCategory === "linh-kien" && (
-                      <div className="border border-zinc-150 rounded-xl p-3 bg-zinc-50">
-                        <label className="block mb-1.5 text-zinc-700 font-bold">Màu nền đại diện</label>
-                        <div className="flex gap-3 items-center">
-                          <input
-                            type="color"
-                            value={formLinhKienColor}
-                            onChange={(e) => setFormLinhKienColor(e.target.value)}
-                            className="w-10 h-9 p-0 border border-zinc-200 rounded-lg cursor-pointer"
-                          />
-                          <input
-                            type="text"
-                            value={formLinhKienColor}
-                            onChange={(e) => setFormLinhKienColor(e.target.value)}
-                            className="w-full px-3 py-2 border border-zinc-200 rounded-lg text-sm font-mono focus:border-zinc-900 outline-none bg-white"
-                          />
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Fallback Gradients for PCs */}
-                    {activeCategory === "pc" && (
-                      <div className="border border-zinc-150 rounded-xl p-3 bg-zinc-50">
-                        <div className="flex justify-between items-center mb-2">
-                          <label className="text-zinc-700 font-bold">Màu nền fallback</label>
-                          <span className="text-[10px] text-zinc-400">Không hiển thị nếu có ảnh</span>
-                        </div>
-                        
-                        <div className="flex flex-wrap gap-1 mb-3">
-                          {GRADIENT_PRESETS.map((p) => (
-                            <button
-                              key={p.name}
-                              type="button"
-                              onClick={() => { setFormFrom(p.from); setFormTo(p.to); }}
-                              className="px-2 py-1 bg-white hover:bg-zinc-100 border border-zinc-200 rounded-lg text-[9px] font-bold cursor-pointer"
+                        {/* Category selectors */}
+                        {activeCategory === "linh-kien" && (
+                          <div>
+                            <label className="block mb-1.5 text-zinc-700">Danh mục Linh kiện</label>
+                            <select
+                              value={formLinhKienCategory}
+                              onChange={(e) => setFormLinhKienCategory(e.target.value)}
+                              className="w-full px-3 py-2 border border-zinc-200 rounded-lg text-sm font-medium focus:border-zinc-900 outline-none"
                             >
-                              {p.name}
-                            </button>
-                          ))}
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-3">
-                          <div>
-                            <label className="block mb-1 text-[10px] text-zinc-500">Màu Đầu (From)</label>
-                            <div className="flex gap-1.5 items-center">
-                              <input type="color" value={formFrom} onChange={(e) => setFormFrom(e.target.value)} className="w-8 h-8 p-0 border border-zinc-200 rounded-lg cursor-pointer" />
-                              <input type="text" value={formFrom} onChange={(e) => setFormFrom(e.target.value)} className="w-full px-2 py-1 border border-zinc-200 rounded-lg text-[10px] font-mono outline-none bg-white" />
-                            </div>
+                              <option value="RAM">RAM</option>
+                              <option value="CPU">CPU - Vi xử lý</option>
+                              <option value="VGA">VGA - Card màn hình</option>
+                              <option value="Mainboard">Mainboard - Bo mạch chủ</option>
+                              <option value="SSD">SSD - Ổ cứng thể rắn</option>
+                              <option value="HDD">HDD - Ổ cứng cơ</option>
+                              <option value="PSU">PSU - Nguồn máy tính</option>
+                              <option value="Cooling">Tản nhiệt</option>
+                              <option value="Case">Vỏ máy tính (Case)</option>
+                            </select>
                           </div>
-                          <div>
-                            <label className="block mb-1 text-[10px] text-zinc-500">Màu Cuối (To)</label>
-                            <div className="flex gap-1.5 items-center">
-                              <input type="color" value={formTo} onChange={(e) => setFormTo(e.target.value)} className="w-8 h-8 p-0 border border-zinc-200 rounded-lg cursor-pointer" />
-                              <input type="text" value={formTo} onChange={(e) => setFormTo(e.target.value)} className="w-full px-2 py-1 border border-zinc-200 rounded-lg text-[10px] font-mono outline-none bg-white" />
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Colors Selector for Accessories */}
-                    {activeCategory === "phu-kien" && (
-                      <div>
-                        <label className="block mb-1 text-zinc-700">Màu sắc sản phẩm</label>
-                        <div className="grid grid-cols-3 gap-2 mt-1">
-                          {ACCESSORY_COLOR_OPTIONS.map((c) => {
-                            const isChecked = formPhuKienColors.includes(c.name);
-                            return (
-                              <button
-                                type="button"
-                                key={c.name}
-                                onClick={() => handleToggleColorCheckbox(c.name)}
-                                className={`flex items-center gap-1.5 p-2 rounded-lg border text-left cursor-pointer transition-all ${
-                                  isChecked
-                                    ? 'border-zinc-900 bg-zinc-950/5 font-extrabold'
-                                    : 'border-zinc-200 bg-white hover:border-zinc-300'
-                                }`}
-                              >
-                                <span
-                                  className="w-3.5 h-3.5 rounded-full border border-zinc-200"
-                                  style={{ backgroundColor: c.hex }}
-                                />
-                                <span className="text-[11px] text-zinc-800">{c.name}</span>
-                              </button>
-                            );
-                          })}
-                        </div>
-                        {formErrors.colors && <span className="text-[10px] text-red-500 mt-1 block font-bold">{formErrors.colors}</span>}
-                      </div>
-                    )}
-
-                    {/* Fallback Icon for Accessories */}
-                    {activeCategory === "phu-kien" && (
-                      <div>
-                        <label className="block mb-1.5 text-zinc-700">Icon đại diện (Khi lỗi hình ảnh)</label>
-                        <div className="flex gap-3 items-center">
-                          <select
-                            value={formPhuKienFallbackIcon}
-                            onChange={(e) => setFormPhuKienFallbackIcon(e.target.value)}
-                            className="w-full px-3 py-2 border border-zinc-200 rounded-lg text-sm font-medium focus:border-zinc-900 outline-none"
-                          >
-                            <option value="Headphones">Tai nghe (Headphones)</option>
-                            <option value="Keyboard">Bàn phím (Keyboard)</option>
-                            <option value="Mouse">Chuột (Mouse)</option>
-                            <option value="Grid3X3">Lót chuột (Grid)</option>
-                            <option value="Speaker">Loa (Speaker)</option>
-                            <option value="Webcam">Webcam (Webcam)</option>
-                            <option value="Monitor">Màn hình / Giá đỡ (Monitor)</option>
-                            <option value="Cable">Cáp & Hub (Cable)</option>
-                            <option value="HelpCircle">Khác (HelpCircle)</option>
-                          </select>
-                          
-                          {/* Live Icon preview */}
-                          <div className="w-10 h-10 border border-zinc-200 rounded-lg bg-zinc-50 flex items-center justify-center flex-shrink-0">
-                            {(() => {
-                              const PreviewIcon = ACCESSORY_ICONS[formPhuKienFallbackIcon] || Keyboard;
-                              return <PreviewIcon className="w-5 h-5 text-zinc-800" />;
-                            })()}
-                          </div>
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Image / Image templates */}
-                    {activeCategory === "pc" ? (
-                      <div>
-                        <label className="block mb-1.5 text-zinc-700 flex items-center gap-1">
-                          <Image className="w-4 h-4 text-zinc-400" /> Hình ảnh sản phẩm
-                        </label>
-                        <select
-                          value={isCustomImage ? "custom" : formImage}
-                          onChange={(e) => {
-                            const val = e.target.value;
-                            if (val === "custom") {
-                              setIsCustomImage(true);
-                              setFormImage("custom");
-                            } else {
-                              setIsCustomImage(false);
-                              setFormImage(val);
-                            }
-                          }}
-                          className="w-full px-3 py-2 border border-zinc-200 rounded-lg text-sm font-medium focus:border-zinc-900 outline-none mb-2"
-                        >
-                          {PC_IMAGE_TEMPLATES.map((img) => (
-                            <option key={img.filename} value={img.url}>{img.name}</option>
-                          ))}
-                          <option value="custom">-- Nhập link ảnh tùy chỉnh --</option>
-                        </select>
-
-                        {isCustomImage && (
-                          <input
-                            type="url"
-                            required
-                            value={customImageUrl}
-                            onChange={(e) => setCustomImageUrl(e.target.value)}
-                            placeholder="https://example.com/pc-image.png"
-                            className="w-full px-3 py-2 border border-zinc-200 rounded-lg text-sm font-medium focus:border-zinc-900 outline-none"
-                          />
                         )}
-                      </div>
-                    ) : (
-                      <div>
-                        <label className="block mb-1 text-zinc-700 flex items-center gap-1">
-                          <Image className="w-4 h-4 text-zinc-400" /> Link hình ảnh sản phẩm
-                        </label>
-                        <input
-                          type="url"
-                          value={formImage}
-                          onChange={(e) => setFormImage(e.target.value)}
-                          placeholder="https://images.unsplash.com/... hoặc /src/assets/..."
-                          className="w-full px-3 py-2 border border-zinc-200 rounded-lg text-sm font-medium focus:border-zinc-900 outline-none"
-                        />
-                      </div>
-                    )}
+
+                        {activeCategory === "phu-kien" && (
+                          <div>
+                            <label className="block mb-1.5 text-zinc-700">Danh mục Phụ kiện</label>
+                            <select
+                              value={formPhuKienCategory}
+                              onChange={(e) => {
+                                const newCat = e.target.value;
+                                setFormPhuKienCategory(newCat);
+                                const opt = ACCESSORY_CATEGORY_OPTIONS.find((c) => c.name === newCat);
+                                if (opt) {
+                                  setFormBrand(opt.defaultBrand);
+                                  setFormPhuKienFallbackIcon(opt.icon);
+                                }
+                              }}
+                              className="w-full px-3 py-2 border border-zinc-200 rounded-lg text-sm font-medium focus:border-zinc-900 outline-none"
+                            >
+                              {ACCESSORY_CATEGORY_OPTIONS.map((cat) => (
+                                <option key={cat.name} value={cat.name}>
+                                  {cat.name}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+                        )}
+
+                        {/* Name */}
+                        <div>
+                          <label className="block mb-1 text-zinc-700">Tên sản phẩm</label>
+                          <input
+                            type="text"
+                            required
+                            value={formName}
+                            onChange={(e) => {
+                              setFormName(e.target.value);
+                              setFormErrors({ ...formErrors, name: "" });
+                            }}
+                            placeholder="Nhập tên sản phẩm..."
+                            className={`w-full px-3 py-2 border rounded-lg text-sm font-medium outline-none transition-all ${formErrors.name ? 'border-red-500 focus:ring-red-500/10' : 'border-zinc-200 focus:border-zinc-900'
+                              }`}
+                          />
+                          {formErrors.name && <span className="text-[10px] text-red-500 mt-1 block font-bold">{formErrors.name}</span>}
+                        </div>
+
+                        {/* Specs */}
+                        <div>
+                          <label className="block mb-1.5 text-zinc-700">{activeCategory === "combo-phu-kien" ? "Mô tả combo" : "Thông số kỹ thuật (Ấn Enter xuống dòng)"}</label>
+                          <textarea
+                            rows={3}
+                            required
+                            value={formSpecs}
+                            onChange={(e) => setFormSpecs(e.target.value)}
+                            placeholder={
+                              activeCategory === "pc"
+                                ? "Intel Core i7 • RTX 4070 SUPER\n32GB RAM • 1TB SSD"
+                                : activeCategory === "laptop"
+                                  ? "Core i7 / 16GB / 512GB SSD / 14\" FHD+"
+                                  : activeCategory === "combo-phu-kien"
+                                    ? "Mô tả lợi ích của combo..."
+                                    : "Nhập thông số chi tiết sản phẩm..."
+                            }
+                            className="w-full px-3 py-2 border border-zinc-200 rounded-lg text-sm font-medium focus:border-zinc-900 outline-none resize-none"
+                          />
+                        </div>
+
+                        {/* Price */}
+                        <div>
+                          <label className="block mb-1 text-zinc-700">{activeCategory === "combo-phu-kien" ? "Giảm giá combo (%)" : "Giá hiển thị"}</label>
+                          <input
+                            type="text"
+                            required
+                            value={formPrice}
+                            onChange={(e) => {
+                              setFormPrice(e.target.value);
+                              setFormErrors({ ...formErrors, price: "" });
+                            }}
+                            placeholder={activeCategory === "combo-phu-kien" ? "Ví dụ: 10" : activeCategory === "phu-kien" ? "Ví dụ: 3990000 (chỉ nhập số)" : "Ví dụ: 28.990.000đ"}
+                            className={`w-full px-3 py-2 border rounded-lg text-sm font-medium outline-none transition-all ${formErrors.price ? 'border-red-500 focus:ring-red-500/10' : 'border-zinc-200 focus:border-zinc-900'
+                              }`}
+                          />
+                          {formErrors.price && <span className="text-[10px] text-red-500 mt-1 block font-bold">{formErrors.price}</span>}
+                        </div>
+
+                        {activeCategory === "combo-phu-kien" && (
+                          <div className="border border-zinc-150 rounded-xl p-3 bg-zinc-50">
+                            <label className="block mb-1.5 text-zinc-700 font-bold">
+                              Chọn sản phẩm trong combo
+                            </label>
+                            <div className="max-h-64 overflow-y-auto rounded-xl border border-zinc-200 bg-white p-2 space-y-2">
+                              {accessories.map((product) => {
+                                const isChecked = formComboProductIds.includes(String(product.id));
+                                return (
+                                  <button
+                                    key={product.id}
+                                    type="button"
+                                    onClick={() => handleToggleComboProduct(product.id || product.name)}
+                                    className={`flex w-full items-center gap-3 rounded-lg border p-2 text-left transition ${isChecked
+                                        ? "border-zinc-950 bg-zinc-950/5"
+                                        : "border-zinc-100 hover:border-zinc-300"
+                                      }`}
+                                  >
+                                    <span className={`h-4 w-4 rounded border ${isChecked ? "border-zinc-950 bg-zinc-950" : "border-zinc-300 bg-white"}`} />
+                                    <span className="min-w-0 flex-1">
+                                      <span className="block truncate text-[12px] font-bold text-zinc-900">
+                                        {product.name}
+                                      </span>
+                                      <span className="block text-[11px] text-zinc-400">
+                                        {product.category} • {formatAccessoryPrice(product.price)}
+                                      </span>
+                                    </span>
+                                  </button>
+                                );
+                              })}
+                            </div>
+                            {formErrors.products && <span className="text-[10px] text-red-500 mt-1 block font-bold">{formErrors.products}</span>}
+
+                            <div className="mt-3 rounded-xl bg-white border border-zinc-200 p-3 text-[12px]">
+                              <div className="flex justify-between text-zinc-500">
+                                <span>Tổng giá lẻ</span>
+                                <span className="line-through">{formatAccessoryPrice(getComboOriginalPrice(formComboProductIds))}</span>
+                              </div>
+                              <div className="mt-1 flex justify-between font-black text-zinc-950">
+                                <span>Giá sau giảm</span>
+                                <span>{formatAccessoryPrice(getComboDiscountedPrice(formComboProductIds, formPrice))}</span>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Badge & Color */}
+                        {activeCategory !== "laptop" && activeCategory !== "combo-phu-kien" && (
+                          <div className="grid grid-cols-2 gap-3">
+                            <div>
+                              <label className="block mb-1 text-zinc-700">Nhãn (Badge)</label>
+                              <input
+                                type="text"
+                                value={formBadge}
+                                onChange={(e) => setFormBadge(e.target.value)}
+                                placeholder="Mới, Hot, Bán chạy..."
+                                className="w-full px-3 py-2 border border-zinc-200 rounded-lg text-sm font-medium focus:border-zinc-900 outline-none"
+                              />
+                            </div>
+                            <div>
+                              <label className="block mb-1 text-zinc-700">Màu sắc Nhãn</label>
+                              <div className="flex gap-2 items-center">
+                                <input
+                                  type="color"
+                                  value={formBadgeColor}
+                                  onChange={(e) => setFormBadgeColor(e.target.value)}
+                                  className="w-10 h-9 p-0 border border-zinc-200 rounded-lg cursor-pointer"
+                                />
+                                <input
+                                  type="text"
+                                  value={formBadgeColor}
+                                  onChange={(e) => setFormBadgeColor(e.target.value)}
+                                  className="w-full px-2 py-2 border border-zinc-200 rounded-lg text-xs font-mono focus:border-zinc-900 outline-none"
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Fallback Color for components */}
+                        {activeCategory === "linh-kien" && (
+                          <div className="border border-zinc-150 rounded-xl p-3 bg-zinc-50">
+                            <label className="block mb-1.5 text-zinc-700 font-bold">Màu nền đại diện</label>
+                            <div className="flex gap-3 items-center">
+                              <input
+                                type="color"
+                                value={formLinhKienColor}
+                                onChange={(e) => setFormLinhKienColor(e.target.value)}
+                                className="w-10 h-9 p-0 border border-zinc-200 rounded-lg cursor-pointer"
+                              />
+                              <input
+                                type="text"
+                                value={formLinhKienColor}
+                                onChange={(e) => setFormLinhKienColor(e.target.value)}
+                                className="w-full px-3 py-2 border border-zinc-200 rounded-lg text-sm font-mono focus:border-zinc-900 outline-none bg-white"
+                              />
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Fallback Gradients for PCs */}
+                        {activeCategory === "pc" && (
+                          <div className="border border-zinc-150 rounded-xl p-3 bg-zinc-50">
+                            <div className="flex justify-between items-center mb-2">
+                              <label className="text-zinc-700 font-bold">Màu nền fallback</label>
+                              <span className="text-[10px] text-zinc-400">Không hiển thị nếu có ảnh</span>
+                            </div>
+
+                            <div className="flex flex-wrap gap-1 mb-3">
+                              {GRADIENT_PRESETS.map((p) => (
+                                <button
+                                  key={p.name}
+                                  type="button"
+                                  onClick={() => { setFormFrom(p.from); setFormTo(p.to); }}
+                                  className="px-2 py-1 bg-white hover:bg-zinc-100 border border-zinc-200 rounded-lg text-[9px] font-bold cursor-pointer"
+                                >
+                                  {p.name}
+                                </button>
+                              ))}
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-3">
+                              <div>
+                                <label className="block mb-1 text-[10px] text-zinc-500">Màu Đầu (From)</label>
+                                <div className="flex gap-1.5 items-center">
+                                  <input type="color" value={formFrom} onChange={(e) => setFormFrom(e.target.value)} className="w-8 h-8 p-0 border border-zinc-200 rounded-lg cursor-pointer" />
+                                  <input type="text" value={formFrom} onChange={(e) => setFormFrom(e.target.value)} className="w-full px-2 py-1 border border-zinc-200 rounded-lg text-[10px] font-mono outline-none bg-white" />
+                                </div>
+                              </div>
+                              <div>
+                                <label className="block mb-1 text-[10px] text-zinc-500">Màu Cuối (To)</label>
+                                <div className="flex gap-1.5 items-center">
+                                  <input type="color" value={formTo} onChange={(e) => setFormTo(e.target.value)} className="w-8 h-8 p-0 border border-zinc-200 rounded-lg cursor-pointer" />
+                                  <input type="text" value={formTo} onChange={(e) => setFormTo(e.target.value)} className="w-full px-2 py-1 border border-zinc-200 rounded-lg text-[10px] font-mono outline-none bg-white" />
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Colors Selector for Accessories */}
+                        {activeCategory === "phu-kien" && (
+                          <div>
+                            <label className="block mb-1 text-zinc-700">Màu sắc sản phẩm</label>
+                            <div className="grid grid-cols-3 gap-2 mt-1 sm:grid-cols-4">
+                              {ACCESSORY_COLOR_OPTIONS.map((c) => {
+                                const isChecked = formPhuKienColors.includes(c.name);
+                                return (
+                                  <button
+                                    type="button"
+                                    key={c.name}
+                                    onClick={() => handleToggleColorCheckbox(c.name)}
+                                    className={`flex items-center gap-1.5 p-2 rounded-lg border text-left cursor-pointer transition-all ${isChecked
+                                        ? 'border-zinc-900 bg-zinc-950/5 font-extrabold'
+                                        : 'border-zinc-200 bg-white hover:border-zinc-300'
+                                      }`}
+                                  >
+                                    <span
+                                      className="w-3.5 h-3.5 rounded-full border border-zinc-200"
+                                      style={{ backgroundColor: c.hex }}
+                                    />
+                                    <span className="text-[11px] text-zinc-800">{c.name}</span>
+                                  </button>
+                                );
+                              })}
+                            </div>
+                            {formErrors.colors && <span className="text-[10px] text-red-500 mt-1 block font-bold">{formErrors.colors}</span>}
+                          </div>
+                        )}
+
+                        {/* Fallback Icon for Accessories */}
+                        {activeCategory === "phu-kien" && (
+                          <div>
+                            <label className="block mb-1.5 text-zinc-700">Icon đại diện (Khi lỗi hình ảnh)</label>
+                            <div className="flex gap-3 items-center">
+                              <select
+                                value={formPhuKienFallbackIcon}
+                                onChange={(e) => setFormPhuKienFallbackIcon(e.target.value)}
+                                className="w-full px-3 py-2 border border-zinc-200 rounded-lg text-sm font-medium focus:border-zinc-900 outline-none"
+                              >
+                                <option value="Headphones">Tai nghe (Headphones)</option>
+                                <option value="Keyboard">Bàn phím (Keyboard)</option>
+                                <option value="Mouse">Chuột (Mouse)</option>
+                                <option value="Grid3X3">Lót chuột (Grid)</option>
+                                <option value="Speaker">Loa (Speaker)</option>
+                                <option value="Webcam">Webcam (Webcam)</option>
+                                <option value="Monitor">Màn hình / Giá đỡ (Monitor)</option>
+                                <option value="Cable">Cáp & Hub (Cable)</option>
+                                <option value="HelpCircle">Khác (HelpCircle)</option>
+                              </select>
+
+                              {/* Live Icon preview */}
+                              <div className="w-10 h-10 border border-zinc-200 rounded-lg bg-zinc-50 flex items-center justify-center flex-shrink-0">
+                                {(() => {
+                                  const PreviewIcon = ACCESSORY_ICONS[formPhuKienFallbackIcon] || Keyboard;
+                                  return <PreviewIcon className="w-5 h-5 text-zinc-800" />;
+                                })()}
+                              </div>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Image / Image templates */}
+                        {activeCategory === "pc" ? (
+                          <div>
+                            <label className="block mb-1.5 text-zinc-700 flex items-center gap-1">
+                              <Image className="w-4 h-4 text-zinc-400" /> Hình ảnh sản phẩm
+                            </label>
+                            <select
+                              value={isCustomImage ? "custom" : formImage}
+                              onChange={(e) => {
+                                const val = e.target.value;
+                                if (val === "custom") {
+                                  setIsCustomImage(true);
+                                  setFormImage("custom");
+                                } else {
+                                  setIsCustomImage(false);
+                                  setFormImage(val);
+                                }
+                              }}
+                              className="w-full px-3 py-2 border border-zinc-200 rounded-lg text-sm font-medium focus:border-zinc-900 outline-none mb-2"
+                            >
+                              {PC_IMAGE_TEMPLATES.map((img) => (
+                                <option key={img.filename} value={img.url}>{img.name}</option>
+                              ))}
+                              <option value="custom">-- Nhập link ảnh tùy chỉnh --</option>
+                            </select>
+
+                            {isCustomImage && (
+                              <input
+                                type="url"
+                                required
+                                value={customImageUrl}
+                                onChange={(e) => setCustomImageUrl(e.target.value)}
+                                placeholder="https://example.com/pc-image.png"
+                                className="w-full px-3 py-2 border border-zinc-200 rounded-lg text-sm font-medium focus:border-zinc-900 outline-none"
+                              />
+                            )}
+                          </div>
+                        ) : (
+                          <div>
+                            <label className="block mb-1 text-zinc-700 flex items-center gap-1">
+                              <Image className="w-4 h-4 text-zinc-400" /> Link hình ảnh sản phẩm
+                            </label>
+                            <input
+                              type="url"
+                              value={formImage}
+                              onChange={(e) => setFormImage(e.target.value)}
+                              placeholder="https://images.unsplash.com/... hoặc /src/assets/..."
+                              className="w-full px-3 py-2 border border-zinc-200 rounded-lg text-sm font-medium focus:border-zinc-900 outline-none"
+                            />
+                          </div>
+                        )}
                       </>
                     ) : (
                       <div className="space-y-4">
@@ -1786,9 +2008,8 @@ export default function AdminIndex() {
                               setFormErrors({ ...formErrors, name: "" });
                             }}
                             placeholder="Nhập họ và tên..."
-                            className={`w-full px-3 py-2 border rounded-lg text-sm font-medium outline-none transition-all ${
-                              formErrors.name ? 'border-red-500 focus:ring-red-500/10' : 'border-zinc-200 focus:border-zinc-900'
-                            }`}
+                            className={`w-full px-3 py-2 border rounded-lg text-sm font-medium outline-none transition-all ${formErrors.name ? 'border-red-500 focus:ring-red-500/10' : 'border-zinc-200 focus:border-zinc-900'
+                              }`}
                           />
                           {formErrors.name && <span className="text-[10px] text-red-500 mt-1 block font-bold">{formErrors.name}</span>}
                         </div>
@@ -1805,9 +2026,8 @@ export default function AdminIndex() {
                               setFormErrors({ ...formErrors, email: "" });
                             }}
                             placeholder="username@qtitpc.dev..."
-                            className={`w-full px-3 py-2 border rounded-lg text-sm font-medium outline-none transition-all ${
-                              formErrors.email ? 'border-red-500 focus:ring-red-500/10' : 'border-zinc-200 focus:border-zinc-900'
-                            }`}
+                            className={`w-full px-3 py-2 border rounded-lg text-sm font-medium outline-none transition-all ${formErrors.email ? 'border-red-500 focus:ring-red-500/10' : 'border-zinc-200 focus:border-zinc-900'
+                              }`}
                           />
                           {formErrors.email && <span className="text-[10px] text-red-500 mt-1 block font-bold">{formErrors.email}</span>}
                         </div>
@@ -1823,9 +2043,8 @@ export default function AdminIndex() {
                               setFormErrors({ ...formErrors, password: "" });
                             }}
                             placeholder={editingIndex === -1 ? "Nhập mật khẩu..." : "••••••••"}
-                            className={`w-full px-3 py-2 border rounded-lg text-sm font-medium outline-none transition-all ${
-                              formErrors.password ? 'border-red-500 focus:ring-red-500/10' : 'border-zinc-200 focus:border-zinc-900'
-                            }`}
+                            className={`w-full px-3 py-2 border rounded-lg text-sm font-medium outline-none transition-all ${formErrors.password ? 'border-red-500 focus:ring-red-500/10' : 'border-zinc-200 focus:border-zinc-900'
+                              }`}
                           />
                           {formErrors.password && <span className="text-[10px] text-red-500 mt-1 block font-bold">{formErrors.password}</span>}
                         </div>
