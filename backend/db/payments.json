@@ -1,5 +1,36 @@
 [
   {
+    "id": "PAY-1781278307116-C8QVKV",
+    "status": "paid",
+    "orderId": "ORD-1781278338182",
+    "paymentMethod": "BANK_QR_FAKE",
+    "orderPayload": {
+      "userId": "acc-1001",
+      "email": "admin@qtitpc.dev",
+      "customerName": "Quản trị viên",
+      "phone": "12345",
+      "address": "12345",
+      "note": "12345",
+      "items": [
+        {
+          "id": "component-VGA-MSI GeForce RTX 4060 VENTUS 2X",
+          "name": "MSI GeForce RTX 4060 VENTUS 2X",
+          "specs": "8GB GDDR6 / 128-bit / 2 Fan / Black",
+          "price": "8.590.000đ",
+          "image": "https://product.hstatic.net/200000722513/product/rtx_4060_ventus_2x_black_8g_oc_c34ea8c824fb4afb9f1241cec761e799.png",
+          "category": "VGA",
+          "quantity": 1
+        }
+      ],
+      "totalItems": 1,
+      "totalPrice": 8590000,
+      "paymentMethod": "BANK_QR_FAKE"
+    },
+    "createdAt": "2026-06-12T15:31:47.116Z",
+    "expiresAt": "2026-06-12T15:36:47.116Z",
+    "paidAt": "2026-06-12T15:32:18.182Z"
+  },
+  {
     "id": "PAY-1781225330771-HDGE24",
     "status": "paid",
     "orderId": "ORD-1781225350667",

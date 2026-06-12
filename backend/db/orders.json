@@ -1,5 +1,59 @@
 [
   {
+    "id": "ORD-1781278338182",
+    "userId": "acc-1001",
+    "email": "admin@qtitpc.dev",
+    "customerName": "Quản trị viên",
+    "phone": "12345",
+    "address": "12345",
+    "note": "12345",
+    "items": [
+      {
+        "id": "component-VGA-MSI GeForce RTX 4060 VENTUS 2X",
+        "name": "MSI GeForce RTX 4060 VENTUS 2X",
+        "specs": "8GB GDDR6 / 128-bit / 2 Fan / Black",
+        "price": "8.590.000đ",
+        "image": "https://product.hstatic.net/200000722513/product/rtx_4060_ventus_2x_black_8g_oc_c34ea8c824fb4afb9f1241cec761e799.png",
+        "category": "VGA",
+        "quantity": 1
+      }
+    ],
+    "totalItems": 1,
+    "totalPrice": 8590000,
+    "paymentMethod": "BANK_QR_FAKE",
+    "paymentStatus": "success",
+    "status": "processing",
+    "createdAt": "2026-06-12T15:32:18.182Z",
+    "updatedAt": "2026-06-12T15:32:18.182Z"
+  },
+  {
+    "id": "ORD-1781278277575",
+    "userId": "acc-1001",
+    "email": "admin@qtitpc.dev",
+    "customerName": "Quản trị viên",
+    "phone": "2345678",
+    "address": "1234567",
+    "note": "123456",
+    "items": [
+      {
+        "id": "component-VGA-ASUS Dual GeForce RTX 4060 White",
+        "name": "ASUS Dual GeForce RTX 4060 White",
+        "specs": "8GB GDDR6 / 128-bit / 2 Fan / White",
+        "price": "8.490.000đ",
+        "image": "https://ttcenter.com.vn/uploads/product/rwmxyt9k-1567-card-man-hinh-asus-dual-geforce-rtx-4060-8gb-gddr6-2-fan-oc-white-dual-rtx4060-o8g-white.webp",
+        "category": "VGA",
+        "quantity": 1
+      }
+    ],
+    "totalItems": 1,
+    "totalPrice": 8490000,
+    "paymentMethod": "COD",
+    "paymentStatus": "pending",
+    "status": "processing",
+    "createdAt": "2026-06-12T15:31:17.575Z",
+    "updatedAt": "2026-06-12T15:31:17.575Z"
+  },
+  {
     "id": "ORD-1781225350667",
     "userId": "acc-1001",
     "email": "admin@qtitpc.dev",

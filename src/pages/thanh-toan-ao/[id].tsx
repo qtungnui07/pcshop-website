@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
-import { CheckCircle2, Loader2, Smartphone } from "lucide-react";
+import { CheckCircle2, CreditCard, Loader2, Smartphone } from "lucide-react";
 import { API_BASE } from "../../context/AuthContext";
 import { formatCartPrice, type CartItem } from "../../context/CartContext";
 
@@ -102,16 +102,17 @@ export default function FakePaymentPage() {
 
   const paid = session.status === "paid";
   const expired = session.status === "expired" || remainingSeconds <= 0;
+  const isMomo = session.paymentMethod === "MOMO_FAKE";
 
   return (
-    <div className="min-h-screen bg-[#a50064] px-4 py-8 text-white">
+    <div className={`min-h-screen px-4 py-8 text-white ${isMomo ? "bg-[#a50064]" : "bg-zinc-950"}`}>
       <div className="mx-auto max-w-md">
         <div className="mb-8 flex items-center justify-center gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white text-xl font-black text-[#a50064]">
-            M
+          <div className={`flex h-11 w-11 items-center justify-center rounded-2xl bg-white text-xl font-black ${isMomo ? "text-[#a50064]" : "text-zinc-950"}`}>
+            {isMomo ? "M" : <CreditCard className="h-6 w-6" />}
           </div>
           <div>
-            <p className="text-lg font-black">MoMo Pay Demo</p>
+            <p className="text-lg font-black">{isMomo ? "MoMo Pay Demo" : "Bank QR Demo"}</p>
             <p className="text-xs font-bold uppercase tracking-[0.16em] text-white/60">Thanh toán giả lập</p>
           </div>
         </div>
@@ -177,7 +178,7 @@ export default function FakePaymentPage() {
                 type="button"
                 onClick={handleConfirm}
                 disabled={confirming || expired}
-                className="mt-5 flex h-12 w-full items-center justify-center gap-2 rounded-full bg-[#a50064] text-sm font-black text-white transition hover:bg-[#8c0056] disabled:cursor-not-allowed disabled:bg-zinc-200 disabled:text-zinc-400"
+                className={`mt-5 flex h-12 w-full items-center justify-center gap-2 rounded-full text-sm font-black text-white transition disabled:cursor-not-allowed disabled:bg-zinc-200 disabled:text-zinc-400 ${isMomo ? "bg-[#a50064] hover:bg-[#8c0056]" : "bg-zinc-950 hover:bg-zinc-800"}`}
               >
                 {confirming ? (
                   <>
@@ -186,7 +187,7 @@ export default function FakePaymentPage() {
                   </>
                 ) : (
                   <>
-                    <Smartphone className="h-4 w-4" />
+                    {isMomo ? <Smartphone className="h-4 w-4" /> : <CreditCard className="h-4 w-4" />}
                     Tôi đã thanh toán
                   </>
                 )}
