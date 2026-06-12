@@ -37,10 +37,10 @@ export default function HeroSection() {
               {current.desc}
             </p>
             <div className="flex items-center gap-3 flex-wrap">
-              <button className="px-6 py-[11px] bg-[#1d1d1f] text-white text-sm font-medium rounded-full hover:bg-[#3d3d3f] active:scale-95 transition-all duration-200">
+              <Link to={current.link1} className="px-6 py-[11px] bg-[#1d1d1f] text-white text-sm font-medium rounded-full hover:bg-[#3d3d3f] active:scale-95 transition-all duration-200">
                 {current.cta1}
-              </button>
-              <Link to="/tu-build-pc" className="px-6 py-[11px] border border-[#1d1d1f]/70 text-[#1d1d1f] text-sm font-medium rounded-full hover:bg-[#1d1d1f] hover:text-white active:scale-95 transition-all duration-200">
+              </Link>
+              <Link to={current.link2} className="px-6 py-[11px] border border-[#1d1d1f]/70 text-[#1d1d1f] text-sm font-medium rounded-full hover:bg-[#1d1d1f] hover:text-white active:scale-95 transition-all duration-200">
                 {current.cta2}
               </Link>
             </div>
