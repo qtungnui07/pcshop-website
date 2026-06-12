@@ -23,7 +23,6 @@ import {
 import { useEffect, useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
-import AddToCartButton from "../../components/AddToCartButton";
 
 /*
   src/pages/phu-kien/index.tsx
@@ -120,26 +119,16 @@ const ICON_MAP: Record<string, React.ElementType> = {
 const REAL_IMAGES = {
   hero:
     "https://images.unsplash.com/photo-1707858004668-d33b9a1d1956?auto=format&fit=crop&w=1600&q=85",
-  monitor:
-    "https://product.hstatic.net/1000037809/product/thegioigear_mobiuz_2k_165hz_1000r__ex3210r_2_61962d272a4245baa47733790459db51_master.jpg",
-  keyboardWhite:
-    "https://images.unsplash.com/photo-1632078965632-575bd4061be4?auto=format&fit=crop&w=1200&q=85",
-  mouse:
-    "https://gearshop.vn/upload/images/Product/VGN/R1%20SE%20Plus/Chu%E1%BB%99t-VGN-Dragon-Fly-R1-SE-Plus-(SE-%2B)---Black-White--H%C3%A0ng-Ch%C3%ADnh-H%C3%A3ng---BH-12-th%C3%A1ng-(1).png",
-  mousePad:
-    "https://encrypted-tbn3.gstatic.com/shopping?q=tbn:ANd9GcQ2Kl9PaDGHi7ThC8bxRTqZu4rScfQXUdqMpmCXK0aAYUV2SWp_WryfJauBlY7crymEjtwHlngBzlwJ1DSA7hVEXsAX24cjGlzJAnZXO1mVh5fnPdBkMGw2eg",
-  headphonesWhite:
-    "https://images.unsplash.com/photo-1713926304458-b8e00dfa9911?auto=format&fit=crop&w=1200&q=85",
-  speaker:
-    "https://images.unsplash.com/photo-1715321835688-831f4767cf93?auto=format&fit=crop&w=1200&q=85",
-  webcam:
-    "https://images.unsplash.com/photo-1670278458296-00ff8a63141e?auto=format&fit=crop&w=1200&q=85",
-  cableHub:
-    "https://encrypted-tbn2.gstatic.com/shopping?q=tbn:ANd9GcRFTve4ApMI81low3--Wq1KCX6jWY3Jp2FG3r6IQMJzTZfGrBRgqpkoj6niwuCJLOg4xVXQJXkHAK-q9t4T43Zt3eIqz7UpQ5iRdqrfy43Vv3JumiFA9KMfOA",
-  monitorStand:
-    "https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?auto=format&fit=crop&w=1200&q=85",
-  setupDark:
-    "https://images.unsplash.com/photo-1707858057802-ab1227691ed5?auto=format&fit=crop&w=1200&q=85",
+  monitor: "/accessories/categories/man-hinh.png",
+  keyboardWhite: "/accessories/categories/ban-phim.png",
+  mouse: "/accessories/categories/chuot.png",
+  mousePad: "/accessories/categories/lot-chuot.png",
+  headphonesWhite: "/accessories/categories/tai-nghe.png",
+  speaker: "/accessories/categories/loa.png",
+  webcam: "/accessories/categories/webcam.png",
+  cableHub: "/accessories/categories/cap-hub.png",
+  monitorStand: "/accessories/categories/gia-do.png",
+  setupDark: "/accessories/categories/chuot.png",
 };
 
 const HERO_ACCESSORIES_IMAGE = "/accessories/hero-phu-kien.png";
@@ -192,7 +181,6 @@ const heroBenefits = [
   },
 ];
 
-/*
 const comboItems = [
   {
     title: "Combo Gaming",
@@ -223,7 +211,6 @@ const comboItems = [
     Icon: Headphones,
   },
 ];
-*/
 
 function formatPrice(price: number) {
   return new Intl.NumberFormat("vi-VN").format(price || 0) + " đ";
@@ -619,10 +606,7 @@ export default function PhuKienIndex() {
           paddingTop: "96px",
         }}
       >
-        <div 
-          className="relative mx-auto grid max-w-[1700px] grid-cols-1 items-center gap-10 px-4 py-14 md:px-8 lg:grid-cols-[0.82fr_1.18fr] lg:px-10 xl:px-12 2xl:px-16"
-          style={{ minHeight: "calc(100vh - 96px)" }}
-        >
+        <div className="relative mx-auto grid min-h-[570px] max-w-[1700px] grid-cols-1 items-center gap-10 px-4 py-14 md:px-8 lg:grid-cols-[0.82fr_1.18fr] lg:px-10 xl:px-12 2xl:px-16">
           <motion.div
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
@@ -649,7 +633,7 @@ export default function PhuKienIndex() {
                 type="button"
                 onClick={() => {
                   document
-                    .getElementById("danh-muc-phu-kien")
+                    .getElementById("accessories-products")
                     ?.scrollIntoView({ behavior: "smooth", block: "start" });
                 }}
                 className="inline-flex items-center gap-2 rounded-full bg-zinc-950 px-7 py-3.5 text-[13px] font-bold text-white shadow-[0_14px_30px_rgba(0,0,0,0.18)] transition hover:-translate-y-0.5 hover:bg-zinc-800 active:scale-95"
@@ -688,27 +672,24 @@ export default function PhuKienIndex() {
             initial={{ opacity: 0, x: 32, scale: 0.985 }}
             animate={{ opacity: 1, x: 0, scale: 1 }}
             transition={{ duration: 0.75, ease: [0.25, 1, 0.5, 1], delay: 0.08 }}
-            className="relative hidden lg:flex items-center justify-center"
-            style={{ alignSelf: "stretch" }}
+            className="relative hidden h-[460px] lg:block"
           >
             <div className="absolute -inset-8 rounded-[44px] bg-[radial-gradient(circle_at_52%_45%,rgba(255,255,255,0.95),rgba(255,255,255,0)_65%)]" />
 
-            <div className="relative z-10 w-full h-[450px] flex items-center justify-center overflow-hidden mb-12">
-              <ImageWithFallback
-                src={HERO_ACCESSORIES_IMAGE}
-                alt="Bộ phụ kiện máy tính màu trắng"
-                Icon={Keyboard}
-                className="max-h-[380px] w-auto relative z-10 object-contain rounded-[34px] shadow-[0_28px_70px_rgba(15,23,42,0.16)] ring-1 ring-white/80"
-                iconClassName="h-28 w-28 text-zinc-900"
-              />
-            </div>
+            <ImageWithFallback
+              src={HERO_ACCESSORIES_IMAGE}
+              alt="Bộ phụ kiện máy tính màu trắng"
+              Icon={Keyboard}
+              className="absolute right-0 top-1/2 h-[420px] w-[94%] -translate-y-1/2 rounded-[34px] object-cover object-center shadow-[0_28px_70px_rgba(15,23,42,0.16)] ring-1 ring-white/80"
+              iconClassName="h-28 w-28 text-zinc-900"
+            />
           </motion.div>
         </div>
       </section>
 
       <main className="mx-auto max-w-[1700px] px-4 md:px-8 lg:px-10 xl:px-12 2xl:px-16">
         {/* CATEGORIES */}
-        <section id="danh-muc-phu-kien" className="scroll-mt-28 py-9">
+        <section className="py-9">
           <div className="mb-5 flex items-center justify-between">
             <h2 className="text-[19px] font-bold tracking-tight text-zinc-950">
               Danh mục phụ kiện
@@ -744,7 +725,7 @@ export default function PhuKienIndex() {
                     src={image}
                     alt={name}
                     Icon={Icon}
-                    className="h-full w-full object-contain p-1.5 transition duration-300 group-hover:scale-105"
+                    className="h-full w-full object-cover object-center transition duration-300 group-hover:scale-105"
                     iconClassName="h-10 w-10 text-zinc-900"
                   />
                 </div>
@@ -1114,8 +1095,7 @@ export default function PhuKienIndex() {
                           {formatPrice(product.price)}
                         </p>
 
-                        <div className="flex items-center justify-between gap-3">
-                          <div className="flex gap-1.5">
+                        <div className="flex gap-1.5">
                           {product.colors.slice(0, 4).map((color) => (
                             <span
                               key={color}
@@ -1126,17 +1106,6 @@ export default function PhuKienIndex() {
                               )}`}
                             />
                           ))}
-                          </div>
-                          <AddToCartButton
-                            product={{
-                              id: `accessory-${product.id}`,
-                              name: product.name,
-                              specs: product.brand,
-                              price: product.price,
-                              image: product.image,
-                              category: product.category,
-                            }}
-                          />
                         </div>
                       </div>
                     </article>
@@ -1193,7 +1162,7 @@ export default function PhuKienIndex() {
         </section>
 
         {/* COMBOS */}
-        {/* <section className="py-14 md:py-16">
+        <section className="py-14 md:py-16">
           <div className="mb-6 flex items-center justify-between">
             <h2 className="text-[19px] font-bold tracking-tight text-zinc-950">
               Có thể bạn sẽ cần
@@ -1236,7 +1205,7 @@ export default function PhuKienIndex() {
               </article>
             ))}
           </div>
-        </section> */}
+        </section>
       </main>
     </div>
   );
