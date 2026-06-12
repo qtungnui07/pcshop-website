@@ -132,14 +132,14 @@
   {
     "id": 906,
     "name": "Lê Tiến Hưng",
-    "brand": "Logitech",
-    "category": "Cáp & Hub",
-    "price": 1000,
+    "brand": "Razer",
+    "category": "Lót chuột",
+    "price": 100000,
     "badge": "Không ai mua",
     "colors": [
       "Hồng"
     ],
-    "image": "http://localhost:3001/images/demo-product.jpg",
-    "fallbackIcon": "Cable"
+    "image": "https://api-pc.qtitpc.dev/images/demo-product.jpg",
+    "fallbackIcon": "Grid3X3"
   }
 ]

@@ -30,6 +30,7 @@ services:
   tunnel:
     image: cloudflare/cloudflared:latest
     container_name: pcshop-tunnel
+    network_mode: host
     user: "1000:1000"
     volumes:
       - /home/q/.cloudflared:/home/q/.cloudflared

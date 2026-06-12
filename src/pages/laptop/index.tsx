@@ -6,6 +6,7 @@ import {
 } from "lucide-react";
 import { useMemo, useState, useEffect } from "react";
 import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
 import AddToCartButton from "../../components/AddToCartButton";
 
 /* ── TYPES ─────────────────────────────────────────────────────────── */
@@ -535,9 +536,16 @@ export default function LaptopIndex() {
                 >
                   Khám phá ngay <ArrowRight className="w-4 h-4" />
                 </button>
-                <button className="inline-flex items-center gap-2 px-8 py-3.5 bg-white/80 border border-zinc-300 hover:bg-white text-zinc-800 text-[15px] font-semibold rounded-full transition-all duration-200 shadow-sm active:scale-95 cursor-pointer">
+                {/* <button className="inline-flex items-center gap-2 px-8 py-3.5 bg-white/80 border border-zinc-300 hover:bg-white text-zinc-800 text-[15px] font-semibold rounded-full transition-all duration-200 shadow-sm active:scale-95 cursor-pointer">
                   Tư vấn chọn laptop <ArrowRight className="w-4 h-4" />
                 </button>
+                 */}
+                 <Link
+                  to="/ho-tro" // Thay đường dẫn bạn muốn đến tại đây
+                  className="inline-flex items-center gap-2 px-8 py-3.5 bg-white/80 border border-zinc-300 hover:bg-white text-zinc-800 text-[15px] font-semibold rounded-full transition-all duration-200 shadow-sm active:scale-95 cursor-pointer text-center"
+                >
+                  Tư vấn chọn laptop <ArrowRight className="w-4 h-4" />
+                </Link>
               </motion.div>
               <motion.div variants={heroItem} className="flex flex-wrap items-center gap-x-8 gap-y-3 pt-7 border-t border-zinc-300/40 w-full">
                 {perks.map(({ icon: Icon, title }) => (
