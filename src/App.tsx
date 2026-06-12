@@ -2,7 +2,7 @@ import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import MainLayout from './layouts/MainLayout';
 import { CartProvider } from './context/CartContext';
 import type { ComponentType } from 'react';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 
 // Automatically import all .tsx files inside the pages directory
 const modules = import.meta.glob('./pages/**/*.tsx', { eager: true });
@@ -34,13 +34,32 @@ const routes = Object.keys(modules).map((path) => {
 
 function ScrollToTop() {
   const { pathname, search, hash } = useLocation();
+  const prevPathnameRef = useRef<string | null>(null);
+  const prevCategoryRef = useRef<string | null>(null);
 
   useEffect(() => {
     const isPCCategory = pathname.startsWith('/pc/') && pathname !== '/pc';
     const searchParams = new URLSearchParams(search);
-    const hasAccessoryCategory = pathname === '/phu-kien' && searchParams.get('category');
-    const hasComponentCategory = pathname === '/linh-kien' && searchParams.get('category');
+    const category = searchParams.get('category');
+    const hasAccessoryCategory = pathname === '/phu-kien' && category;
+    const hasComponentCategory = pathname === '/linh-kien' && category;
     const shouldScrollToComponentCategories = hasComponentCategory && hash === '#danh-muc-linh-kien';
+
+    const pathnameChanged = prevPathnameRef.current !== pathname;
+    const categoryChanged = prevCategoryRef.current !== category;
+
+    prevPathnameRef.current = pathname;
+    prevCategoryRef.current = category;
+
+    // Only scroll if pathname or category has changed
+    if (!pathnameChanged && !categoryChanged) {
+      return;
+    }
+
+    // If pathname didn't change, we are on /linh-kien, category changed, but we are NOT scrolling to #danh-muc-linh-kien, we return early
+    if (!pathnameChanged && hasComponentCategory && !shouldScrollToComponentCategories) {
+      return;
+    }
 
     if (isPCCategory) {
       const timer = setTimeout(() => {
@@ -70,8 +89,6 @@ function ScrollToTop() {
         }
       }, 100);
       return () => clearTimeout(timer);
-    } else if (hasComponentCategory) {
-      return;
     } else {
       window.scrollTo({ top: 0, behavior: 'instant' as any });
     }

@@ -1,7 +1,8 @@
 import {
   ShieldCheck, Wrench, Truck, CheckCircle2,
   ChevronRight, Heart, Grid, List, RotateCcw,
-  ChevronDown, ChevronLeft, SlidersHorizontal, X, Search
+  ChevronDown, ChevronLeft, SlidersHorizontal, X, Search,
+  ArrowRight
 } from "lucide-react";
 import { useState, useEffect, useMemo } from "react";
 import { motion } from "framer-motion";
@@ -408,7 +409,7 @@ export default function LinhKienIndex() {
     setMaxPrice(MAX_PRICE);
 
     // Keep only category in search params
-    setSearchParams({ category: activeCategory });
+    setSearchParams({ category: activeCategory }, { replace: true });
   };
 
   const handleFilterToggle = (
@@ -429,13 +430,12 @@ export default function LinhKienIndex() {
     } else {
       newParams.delete(paramName);
     }
-    setSearchParams(newParams);
+    setSearchParams(newParams, { replace: true });
   };
-
   const handleCategorySelect = (catId: string) => {
     setActiveCategory(catId);
     resetFilters();
-    setSearchParams({ category: catId });
+    setSearchParams({ category: catId }, { replace: true });
   };
 
   /* Derived filtered + sorted list */
@@ -573,7 +573,7 @@ export default function LinhKienIndex() {
               // Sync price to URL
               const newParams = new URLSearchParams(searchParams);
               newParams.set("minPrice", String(val));
-              setSearchParams(newParams);
+              setSearchParams(newParams, { replace: true });
             }}
             className="dual-range-slider"
             style={{ zIndex: activeInput === 'min' ? 10 : 3 }}
@@ -591,7 +591,7 @@ export default function LinhKienIndex() {
               // Sync price to URL
               const newParams = new URLSearchParams(searchParams);
               newParams.set("maxPrice", String(val));
-              setSearchParams(newParams);
+              setSearchParams(newParams, { replace: true });
             }}
             className="dual-range-slider"
             style={{ zIndex: activeInput === 'max' ? 10 : 3 }}
@@ -848,10 +848,10 @@ export default function LinhKienIndex() {
                   }}
                   className="inline-flex items-center gap-2 px-8 py-3.5 bg-[#1d1d1f] hover:bg-zinc-800 text-white text-[15px] font-semibold rounded-full transition-all duration-200 shadow-md active:scale-95 cursor-pointer"
                 >
-                  Xem linh kiện <ChevronRight className="w-4 h-4" />
+                  Xem linh kiện <ArrowRight className="w-4 h-4" />
                 </button>
                 <button className="inline-flex items-center gap-2 px-8 py-3.5 bg-white/80 border border-zinc-300 hover:bg-white text-zinc-800 text-[15px] font-semibold rounded-full transition-all duration-200 shadow-sm active:scale-95 cursor-pointer">
-                  Hướng dẫn build PC <ChevronRight className="w-4 h-4" />
+                  Hướng dẫn build PC <ArrowRight className="w-4 h-4" />
                 </button>
               </motion.div>
 
