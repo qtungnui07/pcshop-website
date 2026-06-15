@@ -1,5 +1,85 @@
 [
   {
+    "id": "PAY-1781531600953-4302CX",
+    "status": "paid",
+    "orderId": "ORD-1781531607363",
+    "paymentMethod": "MOMO_FAKE",
+    "orderPayload": {
+      "userId": "acc-1001",
+      "email": "admin@qtitpc.dev",
+      "customerName": "Quản trị viên",
+      "phone": "1234",
+      "address": "12345",
+      "note": "13245",
+      "items": [
+        {
+          "id": "component-RAM-G.Skill Trident Z5 RGB",
+          "name": "G.Skill Trident Z5 RGB",
+          "specs": "16GB (2x8GB) DDR5 6000MHz",
+          "price": "2.890.000đ",
+          "image": "https://cdn-files.hacom.vn/hacom/cdn/web/12022026/DDR5.jpg",
+          "category": "RAM",
+          "quantity": 1
+        },
+        {
+          "id": "component-RAM-Corsair Vengeance RGB",
+          "name": "Corsair Vengeance RGB",
+          "specs": "16GB (2x8GB) DDR5 5600MHz",
+          "price": "2.290.000đ",
+          "image": "https://anphat.com.vn/media/product/45518_ram_corsair_vengeance_rgb_96gb__2_.jpg",
+          "category": "RAM",
+          "quantity": 1
+        }
+      ],
+      "totalItems": 2,
+      "totalPrice": 5180000,
+      "paymentMethod": "MOMO_FAKE"
+    },
+    "createdAt": "2026-06-15T13:53:20.953Z",
+    "expiresAt": "2026-06-15T13:58:20.953Z",
+    "paidAt": "2026-06-15T13:53:27.363Z"
+  },
+  {
+    "id": "PAY-1781531599398-DP2MUH",
+    "status": "pending",
+    "orderId": "",
+    "paymentMethod": "BANK_QR_FAKE",
+    "orderPayload": {
+      "userId": "acc-1001",
+      "email": "admin@qtitpc.dev",
+      "customerName": "Quản trị viên",
+      "phone": "1234",
+      "address": "12345",
+      "note": "13245",
+      "items": [
+        {
+          "id": "component-RAM-G.Skill Trident Z5 RGB",
+          "name": "G.Skill Trident Z5 RGB",
+          "specs": "16GB (2x8GB) DDR5 6000MHz",
+          "price": "2.890.000đ",
+          "image": "https://cdn-files.hacom.vn/hacom/cdn/web/12022026/DDR5.jpg",
+          "category": "RAM",
+          "quantity": 1
+        },
+        {
+          "id": "component-RAM-Corsair Vengeance RGB",
+          "name": "Corsair Vengeance RGB",
+          "specs": "16GB (2x8GB) DDR5 5600MHz",
+          "price": "2.290.000đ",
+          "image": "https://anphat.com.vn/media/product/45518_ram_corsair_vengeance_rgb_96gb__2_.jpg",
+          "category": "RAM",
+          "quantity": 1
+        }
+      ],
+      "totalItems": 2,
+      "totalPrice": 5180000,
+      "paymentMethod": "BANK_QR_FAKE"
+    },
+    "createdAt": "2026-06-15T13:53:19.398Z",
+    "expiresAt": "2026-06-15T13:58:19.398Z",
+    "paidAt": ""
+  },
+  {
     "id": "PAY-1781278307116-C8QVKV",
     "status": "paid",
     "orderId": "ORD-1781278338182",
