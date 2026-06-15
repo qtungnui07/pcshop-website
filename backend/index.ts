@@ -685,8 +685,8 @@ serve({
             totalItems: body.totalItems || 0,
             totalPrice: body.totalPrice || 0,
             paymentMethod: body.paymentMethod || "QR_FAKE",
-            paymentStatus: "success",
-            status: "processing",
+            paymentStatus: body.paymentStatus || (body.paymentMethod === "COD" ? "pending" : "success"),
+            status: body.status || "processing",
             createdAt: now,
             updatedAt: now
           };
