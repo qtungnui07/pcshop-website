@@ -21,7 +21,7 @@ import {
   Speaker,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import AddToCartButton from "../../components/AddToCartButton";
 
@@ -417,6 +417,7 @@ function getPaginationItems(currentPage: number, totalPages: number) {
 }
 
 export default function PhuKienIndex() {
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [products, setProducts] = useState<AccessoryProduct[]>([]);
   const [combos, setCombos] = useState<AccessoryCombo[]>([]);
@@ -1135,13 +1136,15 @@ export default function PhuKienIndex() {
                   return (
                     <article
                       key={product.id}
-                      className={`group relative overflow-hidden rounded-[20px] border border-zinc-100 bg-white shadow-[0_4px_18px_rgba(0,0,0,0.04)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_16px_32px_rgba(0,0,0,0.08)] ${viewMode === "list" ? "grid grid-cols-[210px_1fr] items-center" : ""
+                      onClick={() => navigate(`/san-pham/accessory-${product.name}`)}
+                      className={`group relative overflow-hidden rounded-[20px] border border-zinc-100 bg-white shadow-[0_4px_18px_rgba(0,0,0,0.04)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_16px_32px_rgba(0,0,0,0.08)] cursor-pointer ${viewMode === "list" ? "grid grid-cols-[210px_1fr] items-center" : ""
                         }`}
                     >
                       <button
-                        onClick={() =>
-                          setLiked((prev) => toggleSetValue(prev, product.id))
-                        }
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setLiked((prev) => toggleSetValue(prev, product.id));
+                        }}
                         className="absolute right-4 top-4 z-[2] flex h-8 w-8 items-center justify-center rounded-full bg-white/90 text-zinc-400 shadow-sm transition hover:text-zinc-950"
                       >
                         <Heart
@@ -1182,7 +1185,7 @@ export default function PhuKienIndex() {
 
                           <AddToCartButton
                             product={{
-                              id: `accessory-${product.id}`,
+                              id: `accessory-${product.name}`,
                               name: product.name,
                               specs: `${product.brand} • ${product.category}`,
                               price: product.price,

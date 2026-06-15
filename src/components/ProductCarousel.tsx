@@ -3,11 +3,13 @@ import { ChevronRight, ChevronLeft } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { latestProducts, containerVariants, itemVariants } from '../constants/data';
 import AddToCartButton from './AddToCartButton';
+import { useNavigate } from 'react-router-dom';
 
 export default function ProductCarousel() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
+  const navigate = useNavigate();
 
   const checkScroll = () => {
     if (scrollRef.current) {
@@ -63,6 +65,7 @@ export default function ProductCarousel() {
             <motion.div
               variants={itemVariants}
               key={idx}
+              onClick={() => navigate(`/san-pham/latest-${product.title}`)}
               className="min-w-[280px] md:min-w-[300px] lg:min-w-[320px] xl:min-w-[360px] 2xl:min-w-[400px] h-[360px] md:h-[400px] lg:h-[420px] xl:h-[460px] 2xl:h-[500px] rounded-[2rem] snap-start relative overflow-hidden cursor-pointer shadow-[2px_4px_16px_rgba(0,0,0,0.04)] hover:shadow-xl hover:scale-[1.02] transition-all duration-300 p-6 md:p-8 flex flex-col justify-between"
               style={{ background: `linear-gradient(135deg, #${product.from}, #${product.to})` }}
             >

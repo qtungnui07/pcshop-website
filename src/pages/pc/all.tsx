@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { 
   ChevronRight, 
   Heart, 
@@ -113,6 +113,7 @@ function FilterSection({ title, options, defaultChecked = [] }: { title: string,
 }
 
 export default function AllPCsPage() {
+  const navigate = useNavigate();
   const MIN_PRICE = 5_000_000;
   const MAX_PRICE = 100_000_000;
   const [minPrice, setMinPrice] = useState(MIN_PRICE);
@@ -378,8 +379,18 @@ export default function AllPCsPage() {
             {/* Product Cards Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
               {paginatedProducts.map((p, i) => (
-                <div key={i} className="group bg-white rounded-2xl border border-zinc-100 p-4 shadow-sm hover:shadow-md hover:border-zinc-200 transition-all duration-300 flex flex-col relative">
-                  <button onClick={() => toggleLike(p.id)} className="absolute top-4 right-4 z-10 w-8 h-8 flex items-center justify-center rounded-full bg-white/80 backdrop-blur border border-zinc-100 shadow-sm hover:bg-white transition-colors cursor-pointer">
+                <div
+                  key={i}
+                  onClick={() => navigate(`/san-pham/pc-${p.name}`)}
+                  className="group bg-white rounded-2xl border border-zinc-100 p-4 shadow-sm hover:shadow-md hover:border-zinc-200 transition-all duration-300 flex flex-col relative cursor-pointer"
+                >
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleLike(p.id);
+                    }}
+                    className="absolute top-4 right-4 z-10 w-8 h-8 flex items-center justify-center rounded-full bg-white/80 backdrop-blur border border-zinc-100 shadow-sm hover:bg-white transition-colors cursor-pointer"
+                  >
                     <Heart className={`w-4 h-4 transition-colors ${liked.has(p.id) ? "fill-red-500 text-red-500" : "text-zinc-400"}`} />
                   </button>
                   
@@ -411,7 +422,7 @@ export default function AllPCsPage() {
                       <div className="text-[15px] font-bold text-zinc-900">{p.priceStr}</div>
                       <AddToCartButton
                         product={{
-                          id: `pc-${p.id}`,
+                          id: `pc-${p.name}`,
                           name: p.name,
                           specs: p.specs,
                           price: p.price,

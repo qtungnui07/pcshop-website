@@ -4,7 +4,7 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 interface PCItem {
   badge: string;
@@ -94,6 +94,7 @@ const API_BASE = typeof window !== "undefined"
 
 /* ── PAGE ─────────────────────────────────────────────────────────── */
 export default function PCIndex() {
+  const navigate = useNavigate();
   const [liked, setLiked] = useState<Set<number>>(new Set());
   const [pcs, setPcs] = useState<PCItem[]>(() =>
     featuredPCs.map(pc => ({
@@ -312,7 +313,11 @@ export default function PCIndex() {
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
             {pcs.map((pc, i) => (
-              <div key={i} className="w-full bg-white rounded-2xl border border-zinc-100 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 overflow-hidden group/card">
+              <div
+                key={i}
+                onClick={() => navigate(`/san-pham/pc-${pc.name}`)}
+                className="w-full bg-white rounded-2xl border border-zinc-100 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 overflow-hidden group/card cursor-pointer"
+              >
                 <div className="relative">
                   {pc.image ? (
                     <div className="w-full aspect-[4/3.5] relative overflow-hidden bg-zinc-900">
@@ -336,7 +341,13 @@ export default function PCIndex() {
                   <p className="text-[11px] text-zinc-400 leading-snug whitespace-pre-line mb-3">{pc.specs}</p>
                   <div className="flex items-center justify-between">
                     <span className="text-[13px] font-bold text-zinc-900">{pc.price}</span>
-                    <button onClick={() => toggleLike(i)} className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-zinc-100 transition-colors cursor-pointer">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleLike(i);
+                      }}
+                      className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-zinc-100 transition-colors cursor-pointer"
+                    >
                       <Heart className={`w-4 h-4 transition-colors ${liked.has(i) ? "fill-red-500 text-red-500" : "text-zinc-400"}`} />
                     </button>
                   </div>
