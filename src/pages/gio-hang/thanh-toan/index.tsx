@@ -3,7 +3,6 @@ import { Link, useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
   CheckCircle2,
-  CreditCard,
   Loader2,
   MapPin,
   MessageSquare,
@@ -22,7 +21,6 @@ import {
   useCart,
   formatCartPrice,
   parseCartPrice,
-  type CartItem,
 } from "../../../context/CartContext";
 import { API_BASE, useAuth } from "../../../context/AuthContext";
 
@@ -405,19 +403,17 @@ export default function CartCheckoutPage() {
               ].map((item) => (
                 <div
                   key={item.id}
-                  className={`rounded-2xl border px-4 py-3 transition ${
-                    step === item.id
-                      ? "border-zinc-950 bg-white shadow-sm"
-                      : step > item.id
-                        ? "border-emerald-200 bg-emerald-50"
-                        : "border-transparent bg-white/60"
-                  }`}
+                  className={`rounded-2xl border px-4 py-3 transition ${step === item.id
+                    ? "border-zinc-950 bg-white shadow-sm"
+                    : step > item.id
+                      ? "border-emerald-200 bg-emerald-50"
+                      : "border-transparent bg-white/60"
+                    }`}
                 >
                   <div className="flex items-center gap-2">
                     <span
-                      className={`flex h-6 w-6 items-center justify-center rounded-full text-[11px] font-black ${
-                        step >= item.id ? "bg-zinc-950 text-white" : "bg-zinc-200 text-zinc-500"
-                      }`}
+                      className={`flex h-6 w-6 items-center justify-center rounded-full text-[11px] font-black ${step >= item.id ? "bg-zinc-950 text-white" : "bg-zinc-200 text-zinc-500"
+                        }`}
                     >
                       {item.id}
                     </span>
@@ -580,11 +576,10 @@ export default function CartCheckoutPage() {
                           setQrDataUrl("");
                         }
                       }}
-                      className={`rounded-[24px] border p-4 text-left transition ${
-                        paymentMethod === id
-                          ? activeClass
-                          : "border-zinc-200 bg-[#fbfbfd] hover:border-zinc-300"
-                      }`}
+                      className={`rounded-[24px] border p-4 text-left transition ${paymentMethod === id
+                        ? activeClass
+                        : "border-zinc-200 bg-[#fbfbfd] hover:border-zinc-300"
+                        }`}
                     >
                       <div className="flex items-start gap-3">
                         <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl ${iconClass}`}>
@@ -684,9 +679,8 @@ export default function CartCheckoutPage() {
             </section>
 
             {step === 2 && paymentMethod !== "COD" && (
-              <section className={`overflow-hidden rounded-[30px] p-5 text-white shadow-[0_18px_60px_rgba(15,23,42,0.14)] md:p-6 ${
-                paymentMethod === "MOMO_FAKE" ? "bg-[#a50064]" : "bg-zinc-950"
-              }`}>
+              <section className={`overflow-hidden rounded-[30px] p-5 text-white shadow-[0_18px_60px_rgba(15,23,42,0.14)] md:p-6 ${paymentMethod === "MOMO_FAKE" ? "bg-[#a50064]" : "bg-zinc-950"
+                }`}>
                 <div className="flex items-center justify-between gap-4">
                   <div className="flex items-center gap-2 text-sm font-extrabold">
                     {paymentMethod === "MOMO_FAKE" ? <Smartphone className="h-5 w-5" /> : <QrCode className="h-5 w-5" />}
