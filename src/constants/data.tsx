@@ -98,6 +98,14 @@ export const latestProducts = [
   { badge: "", title: "Tai nghe 7.1", description: "Âm thanh vòm sống động.", price: "Từ 2.490.000đ", from: "F0E76F", to: "D9F9DF" },
 ];
 
+export const hotProducts = [
+  { badge: "Bán chạy", title: "Laptop Gaming Pro", description: "Mạnh mẽ vượt trội. Chiến game mượt mà.", price: "Từ 24.990.000đ", from: "F0E76F", to: "ECB65F" },
+  { badge: "Mới", title: "RAM DDR5 32GB", description: "Tốc độ cực cao, đa nhiệm tối đa.", price: "Từ 3.290.000đ", from: "AEE2FF", to: "D9F9DF" },
+  { badge: "Giảm 15%", title: "Tản nước AIO", description: "Làm mát tối ưu, LED RGB rực rỡ.", price: "Từ 2.890.000đ", from: "B5BAFF", to: "AEE2FF" },
+  { badge: "Hot", title: "CPU Intel i9-14900K", description: "Xử lý cực nhanh, cân mọi tác vụ nặng.", price: "Từ 14.490.000đ", from: "9FA1FF", to: "B5BAFF" },
+];
+
+
 export const categories = [
   { name: 'PC', icon: <Box className="w-10 h-10 mb-3 text-[#1d1d1f]" strokeWidth={1} /> },
   { name: 'Laptop', icon: <Laptop className="w-10 h-10 mb-3 text-[#1d1d1f]" strokeWidth={1} /> },

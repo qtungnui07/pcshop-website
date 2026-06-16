@@ -5,7 +5,26 @@ import { latestProducts, containerVariants, itemVariants } from '../constants/da
 import AddToCartButton from './AddToCartButton';
 import { useNavigate } from 'react-router-dom';
 
-export default function ProductCarousel() {
+interface Product {
+  badge?: string;
+  title: string;
+  description: string;
+  price: string;
+  from: string;
+  to: string;
+}
+
+interface ProductCarouselProps {
+  title?: string;
+  subtitle?: string;
+  products?: Product[];
+}
+
+export default function ProductCarousel({
+  title = "Thế hệ mới nhất.",
+  subtitle = "Xem ngay có gì mới.",
+  products = latestProducts
+}: ProductCarouselProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
@@ -45,7 +64,7 @@ export default function ProductCarousel() {
     <div className="mt-16 md:mt-24 pb-12">
       <div className="max-w-[1700px] mx-auto px-4 md:px-8 lg:px-10 xl:px-12 2xl:px-16">
         <h2 className="text-2xl md:text-3xl font-semibold tracking-tight text-[#1d1d1f] mb-8">
-          <span className="text-[#1d1d1f]">Thế hệ mới nhất.</span> <span className="text-[#86868b]">Xem ngay có gì mới.</span>
+          <span className="text-[#1d1d1f]">{title}</span> <span className="text-[#86868b]">{subtitle}</span>
         </h2>
       </div>
 
@@ -61,7 +80,7 @@ export default function ProductCarousel() {
         >
           <div className="shrink-0 snap-start [--page-padding:16px] md:[--page-padding:32px] lg:[--page-padding:40px] xl:[--page-padding:48px] 2xl:[--page-padding:64px]" style={{ width: 'max(var(--page-padding), calc(50vw - 900px + var(--page-padding)))' }}></div>
 
-          {latestProducts.map((product, idx) => (
+          {products.map((product, idx) => (
             <motion.div
               variants={itemVariants}
               key={idx}

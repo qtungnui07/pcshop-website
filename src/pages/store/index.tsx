@@ -1,6 +1,7 @@
 import StoreHeader from '../../components/StoreHeader';
 import CategoryList from '../../components/CategoryList';
 import ProductCarousel from '../../components/ProductCarousel';
+import { latestProducts, hotProducts } from '../../constants/data';
 
 export default function Store() {
   return (
@@ -13,7 +14,17 @@ export default function Store() {
         />
         <CategoryList />
       </div>
-      <ProductCarousel />
+      <ProductCarousel
+        title="Thế hệ mới nhất."
+        subtitle="Xem ngay có gì mới."
+        products={latestProducts}
+      />
+      <ProductCarousel
+        title="12"
+        subtitle="123"
+        products={hotProducts}
+      />
     </>
   );
 }
+
