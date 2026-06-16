@@ -35,10 +35,10 @@ const getComponentCatId = (name: string) => {
 
 const getMenuLink = (menuName: string, splitCatName: string, link: string) => {
   const menuSlug = getMenuSlug(menuName);
-  
+
   if (menuSlug === 'linh-kien') {
     const catId = getComponentCatId(splitCatName);
-    
+
     if (splitCatName === 'RAM') {
       if (link.includes('GB')) {
         return `/linh-kien?category=ram&capacity=${link}`;
@@ -47,44 +47,44 @@ const getMenuLink = (menuName: string, splitCatName: string, link: string) => {
         return `/linh-kien?category=ram&type=${link}`;
       }
     }
-    
+
     if (splitCatName === 'CPU - Vi Xử Lý') {
       const brand = link.startsWith('Intel') ? 'Intel' : 'AMD';
       const series = link.replace('Intel ', '').replace('AMD ', '');
       return `/linh-kien?category=cpu&brand=${brand}&cpuSeries=${series}`;
     }
-    
+
     if (splitCatName === 'VGA - Card Màn Hình') {
       const cleanLink = link.replace('NVIDIA ', '').replace('AMD ', '');
       return `/linh-kien?category=vga&vgaSeries=${cleanLink}`;
     }
-    
+
     if (splitCatName === 'Mainboard - Bo Mạch Chủ') {
       return `/linh-kien?category=mainboard&chipset=${link}`;
     }
-    
+
     if (splitCatName === 'Ổ Cứng SSD') {
       if (link.includes('GB') || link.includes('TB')) {
         return `/linh-kien?category=ssd&capacity=${link}`;
       }
       return `/linh-kien?category=ssd&type=${link}`;
     }
-    
+
     if (splitCatName === 'Ổ Cứng HDD') {
       return `/linh-kien?category=hdd&capacity=${link}`;
     }
-    
+
     if (splitCatName === 'Nguồn (PSU)') {
       if (link.includes('Plus')) {
         return `/linh-kien?category=psu&cert=${link}`;
       }
       return `/linh-kien?category=psu&wattage=${link}`;
     }
-    
+
     if (splitCatName === 'Tản Nhiệt') {
       return `/linh-kien?category=cooling&type=${link}`;
     }
-    
+
     if (splitCatName === 'Case - Vỏ Máy Tính') {
       return `/linh-kien?category=case&size=${link}`;
     }
@@ -339,8 +339,8 @@ export default function Navbar() {
                               {/* @ts-ignore */}
                               {currentMenu.splitData?.map((cat, idx) => (
                                 <motion.li variants={itemVariants} key={idx}>
-                                  <Link 
-                                    to={`/linh-kien?category=${getComponentCatId(cat.name)}`} 
+                                  <Link
+                                    to={`/linh-kien?category=${getComponentCatId(cat.name)}`}
                                     onMouseEnter={() => setActiveSplitCategory(cat.name)}
                                     onClick={() => setActiveMenu(null)}
                                     className={`text-xl font-medium transition-colors block ${activeSplitCategory === cat.name ? 'text-blue-600' : 'text-[#1d1d1f] hover:text-blue-600'}`}
@@ -368,9 +368,9 @@ export default function Navbar() {
                                 <div className="grid grid-cols-2 md:grid-cols-3 gap-y-4 gap-x-8">
                                   {/* @ts-ignore */}
                                   {cat.links.map((link, lIdx) => (
-                                    <Link 
-                                      to={getMenuLink(currentMenu?.name || '', cat.name, link)} 
-                                      key={lIdx} 
+                                    <Link
+                                      to={getMenuLink(currentMenu?.name || '', cat.name, link)}
+                                      key={lIdx}
                                       onClick={() => setActiveMenu(null)}
                                       className="text-xl font-medium text-[#1d1d1f] hover:text-blue-600 transition-colors block"
                                     >
