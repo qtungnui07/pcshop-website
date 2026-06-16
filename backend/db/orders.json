@@ -1,0 +1,226 @@
+[
+  {
+    "id": "ORD-1781531607363",
+    "userId": "acc-1001",
+    "email": "admin@qtitpc.dev",
+    "customerName": "Quản trị viên",
+    "phone": "1234",
+    "address": "12345",
+    "note": "13245",
+    "items": [
+      {
+        "id": "component-RAM-G.Skill Trident Z5 RGB",
+        "name": "G.Skill Trident Z5 RGB",
+        "specs": "16GB (2x8GB) DDR5 6000MHz",
+        "price": "2.890.000đ",
+        "image": "https://cdn-files.hacom.vn/hacom/cdn/web/12022026/DDR5.jpg",
+        "category": "RAM",
+        "quantity": 1
+      },
+      {
+        "id": "component-RAM-Corsair Vengeance RGB",
+        "name": "Corsair Vengeance RGB",
+        "specs": "16GB (2x8GB) DDR5 5600MHz",
+        "price": "2.290.000đ",
+        "image": "https://anphat.com.vn/media/product/45518_ram_corsair_vengeance_rgb_96gb__2_.jpg",
+        "category": "RAM",
+        "quantity": 1
+      }
+    ],
+    "totalItems": 2,
+    "totalPrice": 5180000,
+    "paymentMethod": "MOMO_FAKE",
+    "paymentStatus": "success",
+    "status": "processing",
+    "createdAt": "2026-06-15T13:53:27.363Z",
+    "updatedAt": "2026-06-15T13:53:27.363Z"
+  },
+  {
+    "id": "ORD-1781278338182",
+    "userId": "acc-1001",
+    "email": "admin@qtitpc.dev",
+    "customerName": "Quản trị viên",
+    "phone": "12345",
+    "address": "12345",
+    "note": "12345",
+    "items": [
+      {
+        "id": "component-VGA-MSI GeForce RTX 4060 VENTUS 2X",
+        "name": "MSI GeForce RTX 4060 VENTUS 2X",
+        "specs": "8GB GDDR6 / 128-bit / 2 Fan / Black",
+        "price": "8.590.000đ",
+        "image": "https://product.hstatic.net/200000722513/product/rtx_4060_ventus_2x_black_8g_oc_c34ea8c824fb4afb9f1241cec761e799.png",
+        "category": "VGA",
+        "quantity": 1
+      }
+    ],
+    "totalItems": 1,
+    "totalPrice": 8590000,
+    "paymentMethod": "BANK_QR_FAKE",
+    "paymentStatus": "success",
+    "status": "processing",
+    "createdAt": "2026-06-12T15:32:18.182Z",
+    "updatedAt": "2026-06-12T15:32:18.182Z"
+  },
+  {
+    "id": "ORD-1781278277575",
+    "userId": "acc-1001",
+    "email": "admin@qtitpc.dev",
+    "customerName": "Quản trị viên",
+    "phone": "2345678",
+    "address": "1234567",
+    "note": "123456",
+    "items": [
+      {
+        "id": "component-VGA-ASUS Dual GeForce RTX 4060 White",
+        "name": "ASUS Dual GeForce RTX 4060 White",
+        "specs": "8GB GDDR6 / 128-bit / 2 Fan / White",
+        "price": "8.490.000đ",
+        "image": "https://ttcenter.com.vn/uploads/product/rwmxyt9k-1567-card-man-hinh-asus-dual-geforce-rtx-4060-8gb-gddr6-2-fan-oc-white-dual-rtx4060-o8g-white.webp",
+        "category": "VGA",
+        "quantity": 1
+      }
+    ],
+    "totalItems": 1,
+    "totalPrice": 8490000,
+    "paymentMethod": "COD",
+    "paymentStatus": "pending",
+    "status": "processing",
+    "createdAt": "2026-06-12T15:31:17.575Z",
+    "updatedAt": "2026-06-12T15:31:17.575Z"
+  },
+  {
+    "id": "ORD-1781225350667",
+    "userId": "acc-1001",
+    "email": "admin@qtitpc.dev",
+    "customerName": "Quản trị viên",
+    "phone": "78654",
+    "address": "675",
+    "note": "7",
+    "items": [
+      {
+        "id": "laptop-5",
+        "name": "HP Spectre x360 14",
+        "specs": "Intel Core i7-1355U / 16GB /\n1TB SSD / 14\" 2.8K OLED",
+        "price": 26990000,
+        "image": "https://anphat.com.vn/media/lib/06-09-2024/laptop-hp-spectre-x360-14-eu0051tu-a2nl3pa-3.jpg",
+        "category": "Laptop",
+        "quantity": 1
+      }
+    ],
+    "totalItems": 1,
+    "totalPrice": 26990000,
+    "paymentMethod": "MOMO_FAKE",
+    "paymentStatus": "success",
+    "status": "processing",
+    "createdAt": "2026-06-12T00:49:10.667Z",
+    "updatedAt": "2026-06-12T00:49:10.667Z"
+  },
+  {
+    "id": "ORD-1781224685494",
+    "userId": "acc-1001",
+    "email": "admin@qtitpc.dev",
+    "customerName": "Quản trị viên",
+    "phone": "0912371281",
+    "address": "123",
+    "note": "12",
+    "items": [
+      {
+        "id": "laptop-2",
+        "name": "MacBook Air M3 13 inch",
+        "specs": "Apple M3 / 16GB / 512GB SSD /\n13.6\" Liquid Retina",
+        "price": 24990000,
+        "image": "https://encrypted-tbn2.gstatic.com/shopping?q=tbn:ANd9GcTbxAi_Z_ijMzLLuRoihWYPcUOv3JxvRrQJ-AYjHRQXAPHoMcG3FbvvOMWTRuCrT4q_1clKx0wEt7jFLUri1Qa_VTazzEh9-PLM9zGCBwmzn-ZmYIsMeDqhtlI",
+        "category": "Laptop",
+        "quantity": 1
+      }
+    ],
+    "totalItems": 1,
+    "totalPrice": 24990000,
+    "paymentMethod": "MOMO_FAKE",
+    "paymentStatus": "success",
+    "status": "processing",
+    "createdAt": "2026-06-12T00:38:05.494Z",
+    "updatedAt": "2026-06-12T00:38:05.494Z"
+  },
+  {
+    "id": "ORD-1781205740595",
+    "userId": "acc-1001",
+    "email": "admin@qtitpc.dev",
+    "customerName": "Quản trị viên",
+    "phone": "21",
+    "address": "3123",
+    "note": "123",
+    "items": [
+      {
+        "id": "latest-Màn hình 4K",
+        "name": "Màn hình 4K",
+        "specs": "Độ phân giải siêu nét cho đồ họa.",
+        "price": "Từ 8.490.000đ",
+        "category": "Cửa hàng",
+        "quantity": 1
+      }
+    ],
+    "totalItems": 1,
+    "totalPrice": 8490000,
+    "paymentMethod": "MOMO_FAKE",
+    "paymentStatus": "success",
+    "status": "processing",
+    "createdAt": "2026-06-11T19:22:20.595Z",
+    "updatedAt": "2026-06-11T19:22:20.595Z"
+  },
+  {
+    "id": "ORD-1781204807908",
+    "userId": "acc-1001",
+    "email": "admin@qtitpc.dev",
+    "customerName": "Quản trị viên",
+    "phone": "123123",
+    "address": "123",
+    "note": "123",
+    "items": [
+      {
+        "id": "component-VGA-ASUS Dual GeForce RTX 4060 White",
+        "name": "ASUS Dual GeForce RTX 4060 White",
+        "specs": "8GB GDDR6 / 128-bit / 2 Fan / White",
+        "price": "8.490.000đ",
+        "image": "https://ttcenter.com.vn/uploads/product/rwmxyt9k-1567-card-man-hinh-asus-dual-geforce-rtx-4060-8gb-gddr6-2-fan-oc-white-dual-rtx4060-o8g-white.webp",
+        "category": "VGA",
+        "quantity": 1
+      }
+    ],
+    "totalItems": 1,
+    "totalPrice": 8490000,
+    "paymentMethod": "BANK_QR_FAKE",
+    "paymentStatus": "success",
+    "status": "processing",
+    "createdAt": "2026-06-11T19:06:47.908Z",
+    "updatedAt": "2026-06-11T19:06:47.908Z"
+  },
+  {
+    "id": "ORD-1781204245228",
+    "userId": "acc-1001",
+    "email": "admin@qtitpc.dev",
+    "customerName": "Quản trị viên",
+    "phone": "123123123123",
+    "address": "123123",
+    "note": "123123",
+    "items": [
+      {
+        "id": "laptop-2",
+        "name": "MacBook Air M3 13 inch",
+        "specs": "Apple M3 / 16GB / 512GB SSD /\n13.6\" Liquid Retina",
+        "price": 24990000,
+        "image": "https://encrypted-tbn2.gstatic.com/shopping?q=tbn:ANd9GcTbxAi_Z_ijMzLLuRoihWYPcUOv3JxvRrQJ-AYjHRQXAPHoMcG3FbvvOMWTRuCrT4q_1clKx0wEt7jFLUri1Qa_VTazzEh9-PLM9zGCBwmzn-ZmYIsMeDqhtlI",
+        "category": "Laptop",
+        "quantity": 1
+      }
+    ],
+    "totalItems": 1,
+    "totalPrice": 24990000,
+    "paymentMethod": "QR_FAKE",
+    "paymentStatus": "success",
+    "status": "processing",
+    "createdAt": "2026-06-11T18:57:25.228Z",
+    "updatedAt": "2026-06-11T18:57:25.228Z"
+  }
+]
