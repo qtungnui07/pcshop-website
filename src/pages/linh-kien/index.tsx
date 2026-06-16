@@ -6,7 +6,7 @@ import {
 } from "lucide-react";
 import { useState, useEffect, useMemo } from "react";
 import { motion } from "framer-motion";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import componentsHeroImage from "../../assets/rtx_5090.png";
 import AddToCartButton from "../../components/AddToCartButton";
 
@@ -298,6 +298,7 @@ const API_BASE = typeof window !== "undefined"
 
 /* ── PAGE ──────────────────────────────────────────────────────────── */
 export default function LinhKienIndex() {
+  const navigate = useNavigate();
   const [liked, setLiked] = useState<Set<string>>(new Set());
   const [activeCategory, setActiveCategory] = useState("ram");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
@@ -1094,7 +1095,11 @@ export default function LinhKienIndex() {
               }>
                 {paginatedProducts.map((p, i) => (
                   viewMode === "grid" ? (
-                    <div key={i} className="group bg-white rounded-2xl border border-zinc-100 p-3.5 shadow-sm hover:shadow-md hover:border-zinc-200 transition-all duration-300 flex flex-col relative">
+                    <div
+                      key={i}
+                      onClick={() => navigate(`/san-pham/component-${p.category || "linh-kien"}-${p.name}`)}
+                      className="group bg-white rounded-2xl border border-zinc-100 p-3.5 shadow-sm hover:shadow-md hover:border-zinc-200 transition-all duration-300 flex flex-col relative cursor-pointer"
+                    >
                       {/* Badge */}
                       {p.badge && (
                         <span
@@ -1106,7 +1111,10 @@ export default function LinhKienIndex() {
                       )}
                       {/* Like */}
                       <button
-                        onClick={() => toggleLike(p.name)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleLike(p.name);
+                        }}
                         className="absolute top-3 right-3 z-10 w-7 h-7 flex items-center justify-center rounded-full bg-white border border-zinc-100 shadow-sm hover:bg-white transition-colors cursor-pointer"
                       >
                         <Heart className={`w-3.5 h-3.5 transition-colors ${liked.has(p.name) ? "fill-red-500 text-red-500" : "text-zinc-300"}`} />
@@ -1132,7 +1140,11 @@ export default function LinhKienIndex() {
                       </div>
                     </div>
                   ) : (
-                    <div key={i} className="group bg-white rounded-xl border border-zinc-100 p-3 shadow-sm hover:shadow-md transition-all duration-300 flex items-center gap-4 relative">
+                    <div
+                      key={i}
+                      onClick={() => navigate(`/san-pham/component-${p.category || "linh-kien"}-${p.name}`)}
+                      className="group bg-white rounded-xl border border-zinc-100 p-3 shadow-sm hover:shadow-md transition-all duration-300 flex items-center gap-4 relative cursor-pointer"
+                    >
                       <div className="w-20 h-16 shrink-0">
                         <ProductImage src={p.image} alt={p.name} color={p.color} />
                       </div>
@@ -1156,7 +1168,13 @@ export default function LinhKienIndex() {
                           category: p.category || "Linh kiện",
                         }}
                       />
-                      <button onClick={() => toggleLike(p.name)} className="w-7 h-7 flex items-center justify-center rounded-full bg-zinc-50 hover:bg-zinc-100 transition-colors cursor-pointer shrink-0">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleLike(p.name);
+                        }}
+                        className="w-7 h-7 flex items-center justify-center rounded-full bg-zinc-50 hover:bg-zinc-100 transition-colors cursor-pointer shrink-0"
+                      >
                         <Heart className={`w-3.5 h-3.5 transition-colors ${liked.has(p.name) ? "fill-red-500 text-red-500" : "text-zinc-300"}`} />
                       </button>
                     </div>

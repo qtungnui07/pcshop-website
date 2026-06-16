@@ -1,5 +1,6 @@
 import { useState, useMemo, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useCart } from '../../context/CartContext';
 import { 
   ChevronRight, 
   Heart, 
@@ -182,6 +183,8 @@ const defaultMeta = categoryMappings["pc-gaming"];
 
 export default function PCCategoryPage() {
   const { category } = useParams();
+  const navigate = useNavigate();
+  const { addItem } = useCart();
   const slug = (category || '').toLowerCase();
   
   // Resolve category configuration, fallback to pc-gaming
@@ -713,11 +716,15 @@ export default function PCCategoryPage() {
                 {filteredProducts.map((p) => (
                   <div 
                     key={p.id} 
-                    className="group bg-white rounded-2xl border border-zinc-200/40 p-4 shadow-sm hover:shadow-md hover:border-zinc-250 transition-all duration-300 flex flex-col relative"
+                    onClick={() => navigate(`/san-pham/pc-${p.name}`)}
+                    className="group bg-white rounded-2xl border border-zinc-200/40 p-4 shadow-sm hover:shadow-md hover:border-zinc-250 transition-all duration-300 flex flex-col relative cursor-pointer"
                   >
                     {/* Favorite Heart Button */}
                     <button 
-                      onClick={() => toggleLike(p.id)} 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleLike(p.id);
+                      }}
                       className="absolute top-4 right-4 z-10 w-8 h-8 flex items-center justify-center rounded-full bg-white/80 backdrop-blur border border-zinc-100 shadow-sm hover:bg-white transition-colors cursor-pointer"
                     >
                       <Heart className={`w-4 h-4 transition-colors ${liked.has(p.id) ? "fill-red-500 text-red-500" : "text-zinc-400"}`} />
@@ -761,7 +768,7 @@ export default function PCCategoryPage() {
                       <AddToCartButton
                         className="absolute bottom-4 right-4"
                         product={{
-                          id: `pc-${p.id}`,
+                          id: `pc-${p.name}`,
                           name: p.name,
                           specs: p.specs,
                           price: p.price,
@@ -780,7 +787,8 @@ export default function PCCategoryPage() {
                 {filteredProducts.map((p) => (
                   <div 
                     key={p.id} 
-                    className="group bg-white rounded-2xl border border-zinc-200/40 p-4 shadow-sm hover:shadow-md hover:border-zinc-250 transition-all duration-300 flex flex-row items-center gap-6 relative"
+                    onClick={() => navigate(`/san-pham/pc-${p.name}`)}
+                    className="group bg-white rounded-2xl border border-zinc-200/40 p-4 shadow-sm hover:shadow-md hover:border-zinc-250 transition-all duration-300 flex flex-row items-center gap-6 relative cursor-pointer"
                   >
                     {/* Badge */}
                     {p.badge && (
@@ -822,19 +830,38 @@ export default function PCCategoryPage() {
                     {/* Right action tools */}
                     <div className="flex flex-col items-end gap-10 pr-2">
                       <button 
-                        onClick={() => toggleLike(p.id)} 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleLike(p.id);
+                        }}
                         className="w-8 h-8 flex items-center justify-center rounded-full bg-zinc-50 border border-zinc-200 shadow-sm hover:bg-zinc-100 hover:border-zinc-300 transition-colors cursor-pointer"
                       >
                         <Heart className={`w-4 h-4 transition-colors ${liked.has(p.id) ? "fill-red-500 text-red-500" : "text-zinc-400"}`} />
                       </button>
 
-                      <button className="px-5 py-2 bg-[#1d1d1f] hover:bg-zinc-800 text-white text-[12px] font-bold rounded-full transition-colors active:scale-95 cursor-pointer shadow-sm">
+                      <button 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          const success = addItem({
+                            id: `pc-${p.name}`,
+                            name: p.name,
+                            specs: p.specs,
+                            price: p.price,
+                            image: p.img,
+                            category: "PC"
+                          });
+                          if (success) {
+                            navigate("/gio-hang");
+                          }
+                        }}
+                        className="px-5 py-2 bg-[#1d1d1f] hover:bg-zinc-800 text-white text-[12px] font-bold rounded-full transition-colors active:scale-95 cursor-pointer shadow-sm"
+                      >
                         Mua ngay
                       </button>
                       <AddToCartButton
                         label="Thêm"
                         product={{
-                          id: `pc-${p.id}`,
+                          id: `pc-${p.name}`,
                           name: p.name,
                           specs: p.specs,
                           price: p.price,

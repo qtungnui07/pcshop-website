@@ -1,554 +1,369 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { CheckCircle2, CreditCard, Loader2, Minus, Plus, QrCode, ShoppingBag, Smartphone, Trash2 } from "lucide-react";
-import QRCode from "qrcode";
+import {
+  ArrowRight,
+  CheckCircle2,
+  Minus,
+  Plus,
+  RotateCcw,
+  ShoppingBag,
+  Trash2,
+} from "lucide-react";
 import { useCart, formatCartPrice, parseCartPrice } from "../../context/CartContext";
-import { API_BASE, useAuth } from "../../context/AuthContext";
+import { useAuth } from "../../context/AuthContext";
 
-type PaymentSession = {
-  id: string;
-  status: "pending" | "paid" | "expired";
-  orderId?: string;
-  paymentMethod: "MOMO_FAKE" | "BANK_QR_FAKE";
-  expiresAt: string;
-};
-
-const getPendingPaymentKey = (userId: string) => `pcshop_pending_payment_${userId}`;
+const getCheckoutSelectionKey = (userId: string) => `pcshop_checkout_selection_${userId}`;
 
 export default function CartPage() {
   const { items, totalItems, totalPrice, updateQuantity, removeItem, clearCart } = useCart();
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [checkoutOpen, setCheckoutOpen] = useState(false);
-  const [customerName, setCustomerName] = useState("");
-  const [phone, setPhone] = useState("");
-  const [address, setAddress] = useState("");
-  const [note, setNote] = useState("");
-  const [paymentMethod, setPaymentMethod] = useState<"MOMO_FAKE" | "BANK_QR_FAKE">("MOMO_FAKE");
-  const [paymentSession, setPaymentSession] = useState<PaymentSession | null>(null);
-  const [qrDataUrl, setQrDataUrl] = useState("");
-  const [remainingSeconds, setRemainingSeconds] = useState(0);
-  const [submitting, setSubmitting] = useState(false);
-  const [checkoutError, setCheckoutError] = useState("");
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [cartError, setCartError] = useState("");
 
   useEffect(() => {
-    if (!user) return;
-    setCustomerName(user.name || "");
-    setPhone(user.phone || "");
-    setAddress(user.address || "");
-  }, [user]);
+    setSelectedIds((current) => {
+      const validIds = new Set(items.map((item) => item.id));
+      const next = new Set([...current].filter((id) => validIds.has(id)));
 
-  useEffect(() => {
-    if (!user) return;
-
-    const rawPendingPayment = localStorage.getItem(getPendingPaymentKey(user.id));
-    if (!rawPendingPayment) return;
-
-    try {
-      const saved = JSON.parse(rawPendingPayment) as {
-        session: PaymentSession;
-        paymentMethod: "MOMO_FAKE" | "BANK_QR_FAKE";
-        customerName?: string;
-        phone?: string;
-        address?: string;
-        note?: string;
-      };
-
-      if (!saved.session || saved.session.status !== "pending") return;
-      if (new Date(saved.session.expiresAt).getTime() <= Date.now()) {
-        localStorage.removeItem(getPendingPaymentKey(user.id));
-        return;
+      if (current.size === 0 && items.length > 0) {
+        return new Set(items.map((item) => item.id));
       }
 
-      const qrUrl = `${window.location.origin}/thanh-toan-ao/${saved.session.id}`;
-      QRCode.toDataURL(qrUrl, {
-        width: 420,
-        margin: 1,
-        color: {
-          dark: saved.paymentMethod === "MOMO_FAKE" ? "#a50064" : "#09090b",
-          light: "#ffffff",
-        },
-      }).then((image) => {
-        setCheckoutOpen(true);
-        setPaymentMethod(saved.paymentMethod);
-        setPaymentSession(saved.session);
-        setQrDataUrl(image);
-        setCustomerName(saved.customerName || user.name || "");
-        setPhone(saved.phone || user.phone || "");
-        setAddress(saved.address || user.address || "");
-        setNote(saved.note || "");
-      });
-    } catch {
-      localStorage.removeItem(getPendingPaymentKey(user.id));
+      return next;
+    });
+  }, [items]);
+
+  const selectedItems = useMemo(
+    () => items.filter((item) => selectedIds.has(item.id)),
+    [items, selectedIds]
+  );
+
+  const selectedTotalItems = selectedItems.reduce((sum, item) => sum + item.quantity, 0);
+  const selectedTotalPrice = selectedItems.reduce(
+    (sum, item) => sum + parseCartPrice(item.price) * item.quantity,
+    0
+  );
+  const allSelected = items.length > 0 && selectedIds.size === items.length;
+
+  const toggleItem = (id: string) => {
+    setSelectedIds((current) => {
+      const next = new Set(current);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
+  };
+
+  const toggleSelectAll = () => {
+    setCartError("");
+    setSelectedIds(allSelected ? new Set() : new Set(items.map((item) => item.id)));
+  };
+
+  const handleDeleteSelected = () => {
+    if (selectedItems.length === 0) {
+      setCartError("Vui lòng chọn ít nhất một sản phẩm để xóa.");
+      return;
     }
-  }, [user]);
 
-  useEffect(() => {
-    if (!paymentSession) return;
+    selectedItems.forEach((item) => removeItem(item.id));
+    setSelectedIds(new Set());
+    setCartError("");
+  };
 
-    const updateCountdown = () => {
-      const remaining = Math.max(0, Math.ceil((new Date(paymentSession.expiresAt).getTime() - Date.now()) / 1000));
-      setRemainingSeconds(remaining);
-    };
+  const handleClearCart = () => {
+    clearCart();
+    setSelectedIds(new Set());
+    setCartError("");
+  };
 
-    updateCountdown();
-    const timer = window.setInterval(updateCountdown, 1000);
-    return () => window.clearInterval(timer);
-  }, [paymentSession]);
-
-  useEffect(() => {
-    if (!paymentSession || paymentSession.status !== "pending") return;
-
-    const poll = async () => {
-      try {
-        const response = await fetch(`${API_BASE}/api/payments/${paymentSession.id}`);
-        const data = await response.json();
-        if (!response.ok) throw new Error(data.error || "Không thể kiểm tra thanh toán.");
-
-        const session = data.session as PaymentSession;
-        setPaymentSession(session);
-
-        if (session.status === "paid") {
-          if (user) {
-            localStorage.removeItem(getPendingPaymentKey(user.id));
-          }
-          clearCart();
-          navigate("/don-hang");
-        }
-
-        if (session.status === "expired") {
-          if (user) {
-            localStorage.removeItem(getPendingPaymentKey(user.id));
-          }
-          setCheckoutError("Mã QR đã hết hạn. Vui lòng tạo mã mới.");
-        }
-      } catch (error: any) {
-        setCheckoutError(error.message || "Không thể kiểm tra trạng thái thanh toán.");
-      }
-    };
-
-    const interval = window.setInterval(poll, 2000);
-    return () => window.clearInterval(interval);
-  }, [paymentSession, clearCart, navigate]);
-
-  const paymentUrl = paymentSession
-    ? `${window.location.origin}/thanh-toan-ao/${paymentSession.id}`
-    : "";
-
-  const formattedCountdown = `${Math.floor(remainingSeconds / 60)}:${String(remainingSeconds % 60).padStart(2, "0")}`;
-
-  const handleCheckout = async () => {
-    setCheckoutError("");
+  const handleGoCheckout = () => {
+    setCartError("");
 
     if (!user) {
-      setCheckoutError("Vui lòng đăng nhập để thanh toán.");
+      setCartError("Vui lòng đăng nhập để thanh toán.");
       return;
     }
 
-    if (!customerName.trim() || !phone.trim() || !address.trim()) {
-      setCheckoutError("Vui lòng nhập đầy đủ tên, số điện thoại và địa chỉ nhận hàng.");
+    if (selectedItems.length === 0) {
+      setCartError("Vui lòng chọn ít nhất một sản phẩm để thanh toán.");
       return;
     }
 
-    setSubmitting(true);
+    localStorage.setItem(
+      getCheckoutSelectionKey(user.id || user.email),
+      JSON.stringify(selectedItems.map((item) => item.id))
+    );
 
-    try {
-      const orderPayload = {
-        userId: user.id,
-        email: user.email,
-        customerName: customerName.trim(),
-        phone: phone.trim(),
-        address: address.trim(),
-        note: note.trim(),
-        items,
-        totalItems,
-        totalPrice,
-        paymentMethod,
-      };
-
-      const response = await fetch(`${API_BASE}/api/payments`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          paymentMethod,
-          orderPayload,
-        }),
-      });
-      const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.error || "Không thể tạo phiên thanh toán.");
-      }
-
-      const session = data.session as PaymentSession;
-      const qrUrl = `${window.location.origin}/thanh-toan-ao/${session.id}`;
-      const image = await QRCode.toDataURL(qrUrl, {
-        width: 420,
-        margin: 1,
-        color: {
-          dark: paymentMethod === "MOMO_FAKE" ? "#a50064" : "#09090b",
-          light: "#ffffff",
-        },
-      });
-
-      setPaymentSession(session);
-      setQrDataUrl(image);
-      localStorage.setItem(
-        getPendingPaymentKey(user.id),
-        JSON.stringify({
-          session,
-          paymentMethod,
-          customerName: customerName.trim(),
-          phone: phone.trim(),
-          address: address.trim(),
-          note: note.trim(),
-        })
-      );
-    } catch (error: any) {
-      setCheckoutError(error.message || "Không thể tạo mã QR. Vui lòng thử lại.");
-    } finally {
-      setSubmitting(false);
-    }
+    navigate("/gio-hang/thanh-toan");
   };
 
   return (
-    <div className="min-h-screen bg-[#f5f5f7] pt-28 pb-16">
-      <div className="mx-auto max-w-[1180px] px-4 md:px-8">
-        <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <p className="mb-2 inline-flex rounded-full border border-zinc-200 bg-white px-3 py-1 text-[11px] font-bold uppercase tracking-[0.18em] text-zinc-500">
-              Giỏ hàng
-            </p>
-            <h1 className="text-4xl font-extrabold tracking-tight text-zinc-950 md:text-5xl">
-              Sản phẩm đã chọn
-            </h1>
-          </div>
+    <div className="min-h-screen bg-[#f5f5f7] pb-16 pt-28 text-[#1d1d1f]">
+      <div className="mx-auto max-w-[1280px] px-4 md:px-8">
+        <section className="mb-8 overflow-hidden rounded-[34px] border border-white/70 bg-white shadow-[0_18px_60px_rgba(15,23,42,0.08)]">
+          <div className="grid gap-8 p-6 md:p-8 lg:grid-cols-[1fr_330px] lg:items-center">
+            <div>
+              <p className="mb-4 inline-flex rounded-full border border-zinc-200 bg-[#fbfbfd] px-3 py-1 text-[11px] font-bold uppercase tracking-[0.18em] text-zinc-500">
+                Giỏ hàng
+              </p>
+              <h1 className="text-4xl font-extrabold leading-[1.08] tracking-[-0.04em] text-zinc-950 md:text-6xl">
+                Chọn sản phẩm
+                <br className="hidden sm:block" />
+                cần thanh toán.
+              </h1>
+              <p className="mt-5 max-w-2xl text-[15px] font-medium leading-7 text-zinc-500">
+                Bạn có thể mua toàn bộ giỏ hàng hoặc chỉ chọn một vài sản phẩm. Các sản phẩm chưa chọn sẽ vẫn được giữ lại trong giỏ.
+              </p>
+            </div>
 
-          {items.length > 0 && (
-            <button
-              type="button"
-              onClick={clearCart}
-              className="inline-flex h-10 items-center justify-center rounded-full border border-zinc-200 bg-white px-4 text-sm font-bold text-zinc-500 transition hover:border-red-100 hover:bg-red-50 hover:text-red-600 cursor-pointer"
-            >
-              Xóa giỏ hàng
-            </button>
-          )}
-        </div>
+            <div className="rounded-[28px] bg-[#f5f5f7] p-4">
+              <div className="flex items-center justify-between border-b border-zinc-200 pb-3">
+                <span className="text-sm font-bold text-zinc-500">Tổng giỏ hàng</span>
+                <span className="text-sm font-extrabold text-zinc-950">{totalItems} sản phẩm</span>
+              </div>
+              <div className="mt-4 flex items-end justify-between gap-3">
+                <span className="text-sm font-bold text-zinc-500">Đang chọn</span>
+                <div className="text-right">
+                  <p className="text-sm font-bold text-zinc-500">{selectedTotalItems} sản phẩm</p>
+                  <p className="text-2xl font-extrabold tracking-tight text-zinc-950">
+                    {formatCartPrice(selectedTotalPrice)}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
 
         {items.length === 0 ? (
-          <div className="rounded-[28px] border border-zinc-200 bg-white px-6 py-16 text-center shadow-sm">
-            <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-zinc-100 text-zinc-400">
-              <ShoppingBag className="h-7 w-7" />
+          <section className="overflow-hidden rounded-[34px] border border-zinc-200 bg-white px-6 py-20 text-center shadow-[0_18px_60px_rgba(15,23,42,0.06)]">
+            <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-[28px] bg-[#f5f5f7] text-zinc-400">
+              <ShoppingBag className="h-9 w-9" />
             </div>
-            <h2 className="text-xl font-extrabold text-zinc-950">Giỏ hàng đang trống</h2>
-            <p className="mx-auto mt-2 max-w-md text-sm font-medium leading-6 text-zinc-500">
-              Chọn sản phẩm bằng nút dấu cộng trên card để thêm vào giỏ hàng.
+            <h2 className="text-2xl font-extrabold tracking-tight text-zinc-950">
+              Giỏ hàng của bạn đang trống
+            </h2>
+            <p className="mx-auto mt-3 max-w-md text-sm font-medium leading-6 text-zinc-500">
+              Hãy chọn PC, laptop, linh kiện hoặc phụ kiện rồi thêm vào giỏ hàng.
             </p>
             <Link
               to="/store"
-              className="mt-7 inline-flex h-11 items-center justify-center rounded-full bg-zinc-950 px-6 text-sm font-bold text-white transition hover:bg-zinc-800"
+              className="mt-8 inline-flex h-12 items-center justify-center gap-2 rounded-full bg-zinc-950 px-6 text-sm font-bold text-white transition hover:bg-zinc-800"
             >
               Tiếp tục mua hàng
+              <ArrowRight className="h-4 w-4" />
             </Link>
-          </div>
+          </section>
         ) : (
-          <div className="grid gap-6 lg:grid-cols-[1fr_360px]">
-            <div className="overflow-hidden rounded-[24px] border border-zinc-200 bg-white shadow-sm">
-              {items.map((item) => (
-                <div
-                  key={item.id}
-                  className="grid gap-4 border-b border-zinc-100 p-4 last:border-b-0 sm:grid-cols-[96px_1fr_auto] sm:items-center"
-                >
-                  <div className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-2xl border border-zinc-100 bg-zinc-50">
-                    {item.image ? (
-                      <img src={item.image} alt={item.name} className="max-h-full max-w-full object-contain p-2" />
-                    ) : (
-                      <ShoppingBag className="h-7 w-7 text-zinc-300" />
-                    )}
-                  </div>
-
-                  <div className="min-w-0">
-                    {item.category && (
-                      <p className="mb-1 text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-400">
-                        {item.category}
-                      </p>
-                    )}
-                    <h2 className="text-[15px] font-extrabold leading-snug text-zinc-950">{item.name}</h2>
-                    {item.specs && (
-                      <p className="mt-1 max-w-xl whitespace-pre-line text-xs font-medium leading-5 text-zinc-500">
-                        {item.specs}
-                      </p>
-                    )}
-                    <p className="mt-3 text-sm font-extrabold text-zinc-950">{formatCartPrice(item.price)}</p>
-                  </div>
-
-                  <div className="flex items-center justify-between gap-4 sm:flex-col sm:items-end">
-                    <div className="flex items-center overflow-hidden rounded-full border border-zinc-200 bg-white">
-                      <button
-                        type="button"
-                        onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                        className="flex h-9 w-9 items-center justify-center text-zinc-500 transition hover:bg-zinc-100 hover:text-zinc-950 cursor-pointer"
-                        aria-label="Giảm số lượng"
-                      >
-                        <Minus className="h-3.5 w-3.5" />
-                      </button>
-                      <span className="min-w-8 text-center text-sm font-extrabold text-zinc-950">{item.quantity}</span>
-                      <button
-                        type="button"
-                        onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                        className="flex h-9 w-9 items-center justify-center text-zinc-500 transition hover:bg-zinc-100 hover:text-zinc-950 cursor-pointer"
-                        aria-label="Tăng số lượng"
-                      >
-                        <Plus className="h-3.5 w-3.5" />
-                      </button>
-                    </div>
-
-                    <div className="flex items-center gap-3">
-                      <p className="text-sm font-extrabold text-zinc-950">
-                        {formatCartPrice(parseCartPrice(item.price) * item.quantity)}
-                      </p>
-                      <button
-                        type="button"
-                        onClick={() => removeItem(item.id)}
-                        className="flex h-9 w-9 items-center justify-center rounded-full bg-zinc-50 text-zinc-400 transition hover:bg-red-50 hover:text-red-500 cursor-pointer"
-                        aria-label="Xóa sản phẩm"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <aside className="h-fit rounded-[24px] border border-zinc-200 bg-white p-5 shadow-sm">
-              <h2 className="text-lg font-extrabold text-zinc-950">Tổng đơn</h2>
-              <div className="mt-5 space-y-3 border-b border-zinc-100 pb-5 text-sm font-semibold text-zinc-500">
-                <div className="flex items-center justify-between">
-                  <span>Số lượng</span>
-                  <span className="text-zinc-950">{totalItems}</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span>Tạm tính</span>
-                  <span className="text-zinc-950">{formatCartPrice(totalPrice)}</span>
-                </div>
-              </div>
-              <div className="mt-5 flex items-center justify-between">
-                <span className="text-sm font-bold text-zinc-500">Tổng cộng</span>
-                <span className="text-2xl font-extrabold text-zinc-950">{formatCartPrice(totalPrice)}</span>
-              </div>
-              <button
-                type="button"
-                onClick={() => setCheckoutOpen(true)}
-                className="mt-6 h-12 w-full rounded-full bg-zinc-950 text-sm font-extrabold text-white transition hover:bg-zinc-800 active:scale-[0.99] cursor-pointer"
-              >
-                Thanh toán
-              </button>
-            </aside>
-          </div>
-        )}
-
-        {items.length > 0 && checkoutOpen && (
-          <div
-            className="mt-6 grid gap-6 rounded-[28px] border border-zinc-200 bg-white p-5 shadow-sm lg:grid-cols-[1fr_360px]"
-          >
-            <section>
-              <div className="mb-5 flex items-center justify-between gap-4">
+          <div className="grid gap-7 lg:grid-cols-[minmax(0,1fr)_380px]">
+            <section className="overflow-hidden rounded-[30px] border border-zinc-200 bg-white shadow-[0_12px_40px_rgba(15,23,42,0.05)]">
+              <div className="flex flex-col gap-4 border-b border-zinc-100 px-5 py-5 md:flex-row md:items-center md:justify-between md:px-6">
                 <div>
                   <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-zinc-400">
-                    Thanh toán
+                    Sản phẩm trong giỏ
                   </p>
-                  <h2 className="mt-1 text-2xl font-extrabold text-zinc-950">Thông tin nhận hàng</h2>
+                  <h2 className="mt-1 text-xl font-extrabold tracking-tight text-zinc-950">
+                    Chọn mặt hàng muốn mua
+                  </h2>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setCheckoutOpen(false);
-                    setPaymentSession(null);
-                    setQrDataUrl("");
-                    setCheckoutError("");
-                    if (user) {
-                      localStorage.removeItem(getPendingPaymentKey(user.id));
-                    }
-                  }}
-                  className="rounded-full border border-zinc-200 px-4 py-2 text-xs font-bold text-zinc-500 transition hover:bg-zinc-50 cursor-pointer"
-                >
-                  Đóng
-                </button>
+
+                <div className="flex flex-wrap items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={toggleSelectAll}
+                    className="inline-flex h-10 items-center justify-center gap-2 rounded-full border border-zinc-200 bg-white px-4 text-xs font-bold text-zinc-700 transition hover:bg-zinc-50"
+                  >
+                    <span
+                      className={`flex h-4 w-4 items-center justify-center rounded border ${allSelected ? "border-zinc-950 bg-zinc-950" : "border-zinc-300 bg-white"
+                        }`}
+                    >
+                      {allSelected && <CheckCircle2 className="h-3 w-3 text-white" />}
+                    </span>
+                    {allSelected ? "Bỏ chọn tất cả" : "Chọn tất cả"}
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={handleDeleteSelected}
+                    className="inline-flex h-10 items-center justify-center gap-2 rounded-full border border-zinc-200 bg-white px-4 text-xs font-bold text-zinc-500 transition hover:border-red-100 hover:bg-red-50 hover:text-red-600"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                    Xóa đã chọn
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={handleClearCart}
+                    className="inline-flex h-10 items-center justify-center gap-2 rounded-full bg-zinc-950 px-4 text-xs font-bold text-white transition hover:bg-zinc-800"
+                  >
+                    <RotateCcw className="h-4 w-4" />
+                    Xóa tất cả
+                  </button>
+                </div>
               </div>
 
-              <div className="grid gap-4 sm:grid-cols-2">
-                <label className="block">
-                  <span className="mb-1.5 block text-xs font-bold text-zinc-500">Họ tên</span>
-                  <input
-                    value={customerName}
-                    onChange={(event) => setCustomerName(event.target.value)}
-                    className="h-11 w-full rounded-xl border border-zinc-200 bg-white px-3 text-sm font-semibold text-zinc-950 outline-none transition focus:border-zinc-400"
-                    placeholder="Nguyễn Văn A"
-                  />
-                </label>
-                <label className="block">
-                  <span className="mb-1.5 block text-xs font-bold text-zinc-500">Số điện thoại</span>
-                  <input
-                    value={phone}
-                    onChange={(event) => setPhone(event.target.value)}
-                    className="h-11 w-full rounded-xl border border-zinc-200 bg-white px-3 text-sm font-semibold text-zinc-950 outline-none transition focus:border-zinc-400"
-                    placeholder="09xx xxx xxx"
-                  />
-                </label>
-              </div>
-
-              <label className="mt-4 block">
-                <span className="mb-1.5 block text-xs font-bold text-zinc-500">Địa chỉ nhận hàng</span>
-                <textarea
-                  value={address}
-                  onChange={(event) => setAddress(event.target.value)}
-                  className="min-h-24 w-full resize-none rounded-xl border border-zinc-200 bg-white px-3 py-3 text-sm font-semibold text-zinc-950 outline-none transition focus:border-zinc-400"
-                  placeholder="Số nhà, phường/xã, quận/huyện, tỉnh/thành..."
-                />
-              </label>
-
-              <label className="mt-4 block">
-                <span className="mb-1.5 block text-xs font-bold text-zinc-500">Ghi chú</span>
-                <input
-                  value={note}
-                  onChange={(event) => setNote(event.target.value)}
-                  className="h-11 w-full rounded-xl border border-zinc-200 bg-white px-3 text-sm font-semibold text-zinc-950 outline-none transition focus:border-zinc-400"
-                  placeholder="Ví dụ: giao buổi tối, gọi trước khi giao..."
-                />
-              </label>
-
-              {checkoutError && (
-                <p className="mt-4 rounded-xl bg-red-50 px-3 py-2 text-sm font-bold text-red-600">
-                  {checkoutError}
+              {cartError && (
+                <p className="mx-5 mt-5 rounded-2xl bg-red-50 px-4 py-3 text-sm font-bold text-red-600 md:mx-6">
+                  {cartError}
                 </p>
               )}
+
+              <div className="divide-y divide-zinc-100">
+                {items.map((item) => {
+                  const checked = selectedIds.has(item.id);
+                  return (
+                    <article
+                      key={item.id}
+                      className={`grid gap-4 p-4 transition md:p-5 xl:grid-cols-[40px_116px_1fr_auto] xl:items-center ${checked ? "bg-white" : "bg-[#fbfbfd] opacity-75"
+                        }`}
+                    >
+                      <button
+                        type="button"
+                        onClick={() => toggleItem(item.id)}
+                        className={`flex h-7 w-7 items-center justify-center rounded-full border transition ${checked
+                            ? "border-zinc-950 bg-zinc-950 text-white"
+                            : "border-zinc-300 bg-white text-transparent hover:border-zinc-500"
+                          }`}
+                        aria-label={checked ? "Bỏ chọn sản phẩm" : "Chọn sản phẩm"}
+                      >
+                        <CheckCircle2 className="h-4 w-4" />
+                      </button>
+
+                      <div className="flex h-[108px] w-[108px] items-center justify-center overflow-hidden rounded-[24px] border border-zinc-100 bg-[#f5f5f7]">
+                        {item.image ? (
+                          <img
+                            src={item.image}
+                            alt={item.name}
+                            className="h-full w-full object-contain p-3"
+                          />
+                        ) : (
+                          <ShoppingBag className="h-8 w-8 text-zinc-300" />
+                        )}
+                      </div>
+
+                      <div className="min-w-0">
+                        {item.category && (
+                          <p className="mb-1 text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-400">
+                            {item.category}
+                          </p>
+                        )}
+                        <h3 className="text-[16px] font-extrabold leading-snug tracking-tight text-zinc-950">
+                          {item.name}
+                        </h3>
+                        {item.specs && (
+                          <p className="mt-2 max-w-2xl whitespace-pre-line text-xs font-medium leading-5 text-zinc-500">
+                            {item.specs}
+                          </p>
+                        )}
+                        <div className="mt-4 flex flex-wrap items-center gap-3">
+                          <p className="rounded-full bg-zinc-100 px-3 py-1 text-sm font-extrabold text-zinc-950">
+                            {formatCartPrice(item.price)}
+                          </p>
+                          <span className="text-xs font-semibold text-zinc-400">
+                            Tổng dòng: {formatCartPrice(parseCartPrice(item.price) * item.quantity)}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-between gap-4 xl:flex-col xl:items-end">
+                        <div className="flex items-center overflow-hidden rounded-full border border-zinc-200 bg-white shadow-sm">
+                          <button
+                            type="button"
+                            onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                            className="flex h-10 w-10 items-center justify-center text-zinc-500 transition hover:bg-zinc-100 hover:text-zinc-950"
+                            aria-label="Giảm số lượng"
+                          >
+                            <Minus className="h-3.5 w-3.5" />
+                          </button>
+                          <span className="min-w-9 text-center text-sm font-extrabold text-zinc-950">
+                            {item.quantity}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                            className="flex h-10 w-10 items-center justify-center text-zinc-500 transition hover:bg-zinc-100 hover:text-zinc-950"
+                            aria-label="Tăng số lượng"
+                          >
+                            <Plus className="h-3.5 w-3.5" />
+                          </button>
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={() => removeItem(item.id)}
+                          className="inline-flex h-10 items-center justify-center gap-2 rounded-full bg-zinc-50 px-4 text-xs font-bold text-zinc-400 transition hover:bg-red-50 hover:text-red-500"
+                          aria-label="Xóa sản phẩm"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                          Xóa
+                        </button>
+                      </div>
+                    </article>
+                  );
+                })}
+              </div>
             </section>
 
-            <aside className={`rounded-3xl p-5 text-white ${paymentMethod === "MOMO_FAKE" ? "bg-[#a50064]" : "bg-zinc-950"}`}>
-              <div className="flex items-center gap-2 text-sm font-extrabold">
-                {paymentMethod === "MOMO_FAKE" ? <Smartphone className="h-5 w-5" /> : <QrCode className="h-5 w-5" />}
-                {paymentMethod === "MOMO_FAKE" ? "MoMo giả lập" : "QR ngân hàng giả lập"}
-              </div>
+            <aside className="h-fit space-y-5 lg:sticky lg:top-28">
+              <section className="rounded-[30px] border border-zinc-200 bg-white p-5 shadow-[0_18px_60px_rgba(15,23,42,0.08)] md:p-6">
+                <h2 className="text-xl font-extrabold tracking-tight text-zinc-950">
+                  Tóm tắt lựa chọn
+                </h2>
 
-              <div className="mt-5 grid grid-cols-2 gap-2 rounded-2xl bg-white/10 p-1">
+                <div className="mt-5 space-y-3 border-b border-zinc-100 pb-5 text-sm font-semibold text-zinc-500">
+                  <div className="flex items-center justify-between">
+                    <span>Tổng giỏ hàng</span>
+                    <span className="font-extrabold text-zinc-950">{formatCartPrice(totalPrice)}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span>Số lượng đã chọn</span>
+                    <span className="font-extrabold text-zinc-950">{selectedTotalItems}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span>Chưa chọn</span>
+                    <span className="font-extrabold text-zinc-950">
+                      {Math.max(0, totalItems - selectedTotalItems)} sản phẩm
+                    </span>
+                  </div>
+                </div>
+
+                <div className="mt-5 flex items-end justify-between">
+                  <span className="text-sm font-bold text-zinc-500">Cần thanh toán</span>
+                  <span className="text-2xl font-extrabold tracking-tight text-zinc-950">
+                    {formatCartPrice(selectedTotalPrice)}
+                  </span>
+                </div>
+
                 <button
                   type="button"
-                  onClick={() => {
-                    setPaymentMethod("MOMO_FAKE");
-                    setPaymentSession(null);
-                    setQrDataUrl("");
-                    if (user) {
-                      localStorage.removeItem(getPendingPaymentKey(user.id));
-                    }
-                  }}
-                  className={`flex h-10 items-center justify-center gap-2 rounded-xl text-xs font-extrabold transition cursor-pointer ${
-                    paymentMethod === "MOMO_FAKE" ? "bg-white text-[#a50064]" : "text-white/75 hover:bg-white/10"
-                  }`}
+                  onClick={handleGoCheckout}
+                  className="mt-6 flex h-12 w-full items-center justify-center gap-2 rounded-full bg-zinc-950 text-sm font-extrabold text-white transition hover:bg-zinc-800 active:scale-[0.99]"
                 >
-                  <Smartphone className="h-4 w-4" />
-                  MoMo
+                  Thanh toán sản phẩm đã chọn
+                  <ArrowRight className="h-4 w-4" />
                 </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setPaymentMethod("BANK_QR_FAKE");
-                    setPaymentSession(null);
-                    setQrDataUrl("");
-                    if (user) {
-                      localStorage.removeItem(getPendingPaymentKey(user.id));
-                    }
-                  }}
-                  className={`flex h-10 items-center justify-center gap-2 rounded-xl text-xs font-extrabold transition cursor-pointer ${
-                    paymentMethod === "BANK_QR_FAKE" ? "bg-white text-zinc-950" : "text-white/75 hover:bg-white/10"
-                  }`}
-                >
-                  <CreditCard className="h-4 w-4" />
-                  QR Bank
-                </button>
-              </div>
 
-              <div className="mt-4 rounded-2xl bg-white p-4">
-                {paymentMethod === "MOMO_FAKE" && (
-                  <div className="mb-3 flex items-center justify-center gap-2">
-                    <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#a50064] text-lg font-black text-white">
-                      M
-                    </div>
-                    <div>
-                      <p className="text-sm font-black text-[#a50064]">MoMo Pay Demo</p>
-                      <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-400">Sandbox fake</p>
-                    </div>
+                <p className="mt-3 text-center text-xs font-semibold leading-5 text-zinc-400">
+                  Các sản phẩm chưa chọn sẽ tiếp tục nằm trong giỏ hàng sau khi thanh toán.
+                </p>
+              </section>
+
+              <section className="rounded-[30px] border border-zinc-200 bg-white p-5 shadow-sm">
+                <h3 className="text-sm font-extrabold text-zinc-950">Gợi ý thao tác</h3>
+                <div className="mt-4 space-y-3 text-sm font-semibold text-zinc-600">
+                  <div className="flex items-center gap-3">
+                    <CheckCircle2 className="h-4 w-4 text-zinc-950" />
+                    Chọn từng sản phẩm để mua riêng
                   </div>
-                )}
-                {qrDataUrl ? (
-                  <img src={qrDataUrl} alt="Mã QR thanh toán giả lập" className="aspect-square w-full rounded-xl bg-white" />
-                ) : (
-                  <div className="flex aspect-square flex-col items-center justify-center rounded-xl bg-zinc-50 text-center">
-                    <QrCode className="mb-3 h-12 w-12 text-zinc-300" />
-                    <p className="text-sm font-extrabold text-zinc-950">Bấm tạo mã QR</p>
-                    <p className="mt-1 max-w-[180px] text-xs font-semibold leading-5 text-zinc-400">
-                      QR sẽ tồn tại trong 5 phút và mở trang thanh toán ảo.
-                    </p>
+                  <div className="flex items-center gap-3">
+                    <ShoppingBag className="h-4 w-4 text-zinc-950" />
+                    Sản phẩm chưa chọn vẫn được giữ lại
                   </div>
-                )}
-              </div>
-
-              <div className="mt-5 space-y-2 text-sm">
-                <div className="flex justify-between gap-4 text-white/70">
-                  <span>Phương thức</span>
-                  <span className="font-bold text-white">{paymentMethod === "MOMO_FAKE" ? "Ví MoMo demo" : "Chuyển khoản demo"}</span>
+                  <div className="flex items-center gap-3">
+                    <Trash2 className="h-4 w-4 text-zinc-950" />
+                    Có thể xóa riêng hoặc xóa toàn bộ
+                  </div>
                 </div>
-                <div className="flex justify-between gap-4 text-zinc-300">
-                  <span>Nội dung</span>
-                  <span className="font-bold text-white">{paymentSession?.id || `PCSTORE-${user?.id?.slice(-5) || "ORDER"}`}</span>
-                </div>
-                <div className="flex justify-between gap-4 text-zinc-300">
-                  <span>Số tiền</span>
-                  <span className="font-extrabold text-white">{formatCartPrice(totalPrice)}</span>
-                </div>
-                {paymentSession && (
-                  <>
-                    <div className="flex justify-between gap-4 text-zinc-300">
-                      <span>Thời gian còn lại</span>
-                      <span className="font-extrabold text-white">{formattedCountdown}</span>
-                    </div>
-                    <a
-                      href={paymentUrl}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="block truncate rounded-xl bg-white/10 px-3 py-2 text-[11px] font-bold text-white/80 transition hover:bg-white/15"
-                    >
-                      {paymentUrl}
-                    </a>
-                  </>
-                )}
-              </div>
-
-              <button
-                type="button"
-                onClick={handleCheckout}
-                disabled={submitting || paymentSession?.status === "pending"}
-                className="mt-6 flex h-12 w-full items-center justify-center gap-2 rounded-full bg-white text-sm font-extrabold text-zinc-950 transition hover:bg-zinc-100 disabled:cursor-not-allowed disabled:opacity-70 cursor-pointer"
-              >
-                {submitting ? (
-                  <>
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    Đang xác nhận...
-                  </>
-                ) : paymentSession?.status === "pending" ? (
-                  <>
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    Đang chờ điện thoại xác nhận
-                  </>
-                ) : (
-                  <>
-                    <CheckCircle2 className="h-4 w-4" />
-                    Tạo mã QR 5 phút
-                  </>
-                )}
-              </button>
-              <p className="mt-3 text-center text-[11px] font-semibold leading-5 text-zinc-400">
-                Quét QR bằng điện thoại, bấm xác nhận trên trang mở ra. Web này sẽ tự nhận thành công.
-              </p>
+              </section>
             </aside>
           </div>
         )}

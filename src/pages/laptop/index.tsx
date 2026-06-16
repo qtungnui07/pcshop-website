@@ -6,7 +6,7 @@ import {
 } from "lucide-react";
 import { useMemo, useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import AddToCartButton from "../../components/AddToCartButton";
 import * as THREE from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
@@ -360,6 +360,7 @@ function parseLaptopProduct(raw: any, index: number): LaptopProduct {
 
 /* ── PAGE ───────────────────────────────────────────────────────────── */
 export default function LaptopIndex() {
+  const navigate = useNavigate();
   const API_BASE =
     typeof window !== "undefined"
       ? (window.location.hostname.includes("qtitpc.dev")
@@ -927,9 +928,16 @@ export default function LaptopIndex() {
               }>
                 {paginatedProducts.map((p) => (
                   viewMode === "grid" ? (
-                    <div key={p.id} className="group bg-white rounded-2xl border border-zinc-100 p-4 shadow-sm hover:shadow-md hover:border-zinc-200 hover:-translate-y-0.5 transition-all duration-300 flex flex-col relative">
+                    <div
+                       key={p.id}
+                      onClick={() => navigate(`/san-pham/laptop-${p.name}`)}
+                      className="group bg-white rounded-2xl border border-zinc-100 p-4 shadow-sm hover:shadow-md hover:border-zinc-200 hover:-translate-y-0.5 transition-all duration-300 flex flex-col relative cursor-pointer"
+                    >
                       <button
-                        onClick={() => toggleLike(p.id)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleLike(p.id);
+                        }}
                         className="absolute top-4 right-4 z-10 w-8 h-8 flex items-center justify-center rounded-full bg-white/80 backdrop-blur border border-zinc-100 shadow-sm hover:bg-white transition-colors cursor-pointer"
                       >
                         <Heart className={`w-4 h-4 transition-colors ${liked.has(p.id) ? "fill-red-500 text-red-500" : "text-zinc-400"}`} />
@@ -949,7 +957,7 @@ export default function LaptopIndex() {
                           <div className="text-[15px] font-bold text-zinc-900">{formatPrice(p.price)}</div>
                           <AddToCartButton
                             product={{
-                              id: `laptop-${p.id}`,
+                              id: `laptop-${p.name}`,
                               name: p.name,
                               specs: p.specs,
                               price: p.price,
@@ -961,7 +969,11 @@ export default function LaptopIndex() {
                       </div>
                     </div>
                   ) : (
-                    <div key={p.id} className="group bg-white rounded-xl border border-zinc-100 p-3 shadow-sm hover:shadow-md transition-all duration-300 flex items-center gap-4 relative">
+                    <div
+                      key={p.id}
+                      onClick={() => navigate(`/san-pham/laptop-${p.name}`)}
+                      className="group bg-white rounded-xl border border-zinc-100 p-3 shadow-sm hover:shadow-md transition-all duration-300 flex items-center gap-4 relative cursor-pointer"
+                    >
                       <div className="w-24 h-20 shrink-0 flex items-center justify-center p-2">
                         <img src={p.img} alt={p.name} className="max-w-full max-h-full object-contain" />
                       </div>
@@ -974,7 +986,7 @@ export default function LaptopIndex() {
                       </div>
                       <AddToCartButton
                         product={{
-                          id: `laptop-${p.id}`,
+                          id: `laptop-${p.name}`,
                           name: p.name,
                           specs: p.specs,
                           price: p.price,
@@ -982,7 +994,13 @@ export default function LaptopIndex() {
                           category: "Laptop",
                         }}
                       />
-                      <button onClick={() => toggleLike(p.id)} className="w-7 h-7 flex items-center justify-center rounded-full bg-zinc-50 hover:bg-zinc-100 transition-colors cursor-pointer shrink-0">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleLike(p.id);
+                        }}
+                        className="w-7 h-7 flex items-center justify-center rounded-full bg-zinc-50 hover:bg-zinc-100 transition-colors cursor-pointer shrink-0"
+                      >
                         <Heart className={`w-3.5 h-3.5 transition-colors ${liked.has(p.id) ? "fill-red-500 text-red-500" : "text-zinc-300"}`} />
                       </button>
                     </div>
