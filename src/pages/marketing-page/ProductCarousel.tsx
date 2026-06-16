@@ -1,8 +1,8 @@
 import { useState, useRef, useEffect } from 'react';
 import { ChevronRight, ChevronLeft } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { latestProducts, containerVariants, itemVariants } from '../constants/data';
-import AddToCartButton from './AddToCartButton';
+import { latestProducts, containerVariants, itemVariants } from '../../constants/data';
+import AddToCartButton from '../../components/AddToCartButton';
 import { useNavigate } from 'react-router-dom';
 
 interface Product {

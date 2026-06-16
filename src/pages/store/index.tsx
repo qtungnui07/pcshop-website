@@ -1,6 +1,6 @@
 import StoreHeader from '../../components/StoreHeader';
 import CategoryList from '../../components/CategoryList';
-import ProductCarousel from '../../components/ProductCarousel';
+import ProductCarousel from '../marketing-page/ProductCarousel';
 import { latestProducts, hotProducts } from '../../constants/data';
 
 export default function Store() {
