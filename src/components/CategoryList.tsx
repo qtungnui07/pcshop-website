@@ -7,10 +7,10 @@ const getCategoryUrl = (name: string) => {
     case 'pc': return '/pc';
     case 'laptop': return '/laptop';
     case 'màn hình': return '/phu-kien?category=man-hinh';
-    case 'cpu': return '/linh-kien/cpu-vi-xu-ly';
-    case 'gpu': return '/linh-kien/vga-card-man-hinh';
-    case 'ram': return '/linh-kien/ram';
-    case 'hdd/ssd': return '/linh-kien/o-cung-ssd';
+    case 'cpu': return '/linh-kien?category=cpu#danh-muc-linh-kien';
+    case 'gpu': return '/linh-kien?category=vga#danh-muc-linh-kien';
+    case 'ram': return '/linh-kien?category=ram#danh-muc-linh-kien';
+    case 'hdd/ssd': return '/linh-kien?category=ssd#danh-muc-linh-kien';
     case 'chuột': return '/phu-kien?category=chuot';
     case 'bàn phím': return '/phu-kien?category=ban-phim';
     case 'âm thanh': return '/phu-kien?category=tai-nghe';

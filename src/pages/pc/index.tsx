@@ -4,7 +4,7 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 interface PCItem {
   badge: string;
@@ -57,12 +57,12 @@ const brands = [
   { name: "Apple", logo: "https://upload.wikimedia.org/wikipedia/commons/f/fa/Apple_logo_black.svg" },
 ];
 
-const perks = [
-  { icon: ShieldCheck, title: "Bảo hành 36 tháng",      desc: "An tâm sử dụng dài lâu" },
-  { icon: Wrench,      title: "Hỗ trợ build miễn phí",  desc: "Tư vấn & lắp ráp tận tình" },
-  { icon: Truck,       title: "Giao hàng toàn quốc",    desc: "Nhanh chóng & an toàn" },
-  { icon: CreditCard,  title: "Trả góp 0% lãi suất",    desc: "Dễ dàng & linh hoạt" },
-];
+// const perks = [
+//   { icon: ShieldCheck, title: "Bảo hành 36 tháng",      desc: "An tâm sử dụng dài lâu" },
+ 
+//   { icon: Truck,       title: "Giao hàng toàn quốc",    desc: "Nhanh chóng & an toàn" },
+//   { icon: CreditCard,  title: "Trả góp 0% lãi suất",    desc: "Dễ dàng & linh hoạt" },
+// ];
 
 /* ── GRADIENT BLOCK placeholder ───────────────────────────────────── */
 function Grad({ from, to, glow, className = "", children }: {
@@ -94,6 +94,7 @@ const API_BASE = typeof window !== "undefined"
 
 /* ── PAGE ─────────────────────────────────────────────────────────── */
 export default function PCIndex() {
+  const navigate = useNavigate();
   const [liked, setLiked] = useState<Set<number>>(new Set());
   const [pcs, setPcs] = useState<PCItem[]>(() =>
     featuredPCs.map(pc => ({
@@ -195,15 +196,20 @@ export default function PCIndex() {
                 <Link to="/pc/pc-gaming" className="inline-flex items-center gap-2 px-8 py-3.5 bg-[#1d1d1f] hover:bg-zinc-800 text-white text-[15px] font-semibold rounded-full transition-all duration-200 shadow-md active:scale-95 cursor-pointer">
                   Xem PC Gaming <ArrowRight className="w-4 h-4" />
                 </Link>
-                <button className="inline-flex items-center gap-2 px-8 py-3.5 bg-white/80 border border-zinc-300 hover:bg-white text-zinc-800 text-[15px] font-semibold rounded-full transition-all duration-200 shadow-sm active:scale-95 cursor-pointer">
+                <Link
+                  to="/tu-build-pc"
+                  className="inline-flex items-center gap-2 px-8 py-3.5 bg-white/80 border border-zinc-300 hover:bg-white text-zinc-800 text-[15px] font-semibold rounded-full transition-all duration-200 shadow-sm active:scale-95 cursor-pointer"
+                >
                   Tự build PC <ArrowRight className="w-4 h-4" />
-                </button>
+                </Link>
               </motion.div>
               <motion.div variants={heroItem} className="flex flex-wrap items-center gap-x-8 gap-y-3 pt-7 border-t border-zinc-300/40 w-full">
                 {[
                   { Icon: ShieldCheck, text: "Bảo hành lên đến\n36 tháng" },
                   { Icon: Truck,       text: "Giao hàng nhanh\ntoàn quốc" },
                   { Icon: CheckCircle2,text: "Test máy kỹ càng\ntrước khi giao" },
+                  { Icon: CreditCard,  text: "Trả góp 0% lãi suất" },
+                  { Icon: Wrench,      text: "Hỗ trợ build miễn phí" },
                 ].map(({ Icon, text }) => (
                   <div key={text} className="flex items-center gap-2">
                     <Icon className="w-5 h-5 text-zinc-700 shrink-0" strokeWidth={1.8} />
@@ -307,7 +313,11 @@ export default function PCIndex() {
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
             {pcs.map((pc, i) => (
-              <div key={i} className="w-full bg-white rounded-2xl border border-zinc-100 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 overflow-hidden group/card">
+              <div
+                key={i}
+                onClick={() => navigate(`/san-pham/pc-${pc.name}`)}
+                className="w-full bg-white rounded-2xl border border-zinc-100 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 overflow-hidden group/card cursor-pointer"
+              >
                 <div className="relative">
                   {pc.image ? (
                     <div className="w-full aspect-[4/3.5] relative overflow-hidden bg-zinc-900">
@@ -331,7 +341,13 @@ export default function PCIndex() {
                   <p className="text-[11px] text-zinc-400 leading-snug whitespace-pre-line mb-3">{pc.specs}</p>
                   <div className="flex items-center justify-between">
                     <span className="text-[13px] font-bold text-zinc-900">{pc.price}</span>
-                    <button onClick={() => toggleLike(i)} className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-zinc-100 transition-colors cursor-pointer">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleLike(i);
+                      }}
+                      className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-zinc-100 transition-colors cursor-pointer"
+                    >
                       <Heart className={`w-4 h-4 transition-colors ${liked.has(i) ? "fill-red-500 text-red-500" : "text-zinc-400"}`} />
                     </button>
                   </div>
@@ -360,7 +376,7 @@ export default function PCIndex() {
         </section>
 
         {/* ══ 5. PERKS ═══════════════════════════════════════════════════ */}
-        <section className="mt-10 mb-8">
+        {/* <section className="mt-10 mb-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
             {perks.map(({ icon: Icon, title, desc }, i) => (
               <div key={i} className="flex items-start gap-3 py-2">
@@ -374,7 +390,7 @@ export default function PCIndex() {
               </div>
             ))}
           </div>
-        </section>
+        </section> */}
 
       </div>
     </div>

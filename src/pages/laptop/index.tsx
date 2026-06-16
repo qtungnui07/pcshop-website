@@ -4,8 +4,154 @@ import {
   ShieldCheck, Truck, CheckCircle2, ChevronDown,
   SlidersHorizontal, X, Search, ArrowRight,
 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
+import { Link, useNavigate } from "react-router-dom";
+import AddToCartButton from "../../components/AddToCartButton";
+import * as THREE from "three";
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
+
+const MACBOOK_NEO_MODEL = "/models/macbook-neo.glb";
+
+function MacBookNeoViewer() {
+  const mountRef = useRef<HTMLDivElement | null>(null);
+  const [loaded, setLoaded] = useState(false);
+  const [failed, setFailed] = useState(false);
+
+  useEffect(() => {
+    if (!mountRef.current) return;
+
+    let cancelled = false;
+    let frameId = 0;
+    const mount = mountRef.current;
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(34, 1, 0.1, 100);
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    const modelRoot = new THREE.Group();
+    const clock = new THREE.Clock();
+    const animationDuration = 3.2;
+
+    renderer.setClearColor(0x000000, 0);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
+    mount.appendChild(renderer.domElement);
+
+    camera.position.set(0.25, 1.05, 6.8);
+    camera.lookAt(0, 0, 0);
+    scene.add(modelRoot);
+    scene.add(new THREE.AmbientLight(0xffffff, 1.8));
+
+    const keyLight = new THREE.DirectionalLight(0xffffff, 3.4);
+    keyLight.position.set(3.2, 5, 4.5);
+    scene.add(keyLight);
+
+    const fillLight = new THREE.DirectionalLight(0x9fc5ff, 1.5);
+    fillLight.position.set(-4, 2.5, 3);
+    scene.add(fillLight);
+
+    const rimLight = new THREE.DirectionalLight(0xffffff, 1.2);
+    rimLight.position.set(0, 3, -4);
+    scene.add(rimLight);
+
+    const resize = () => {
+      const rect = mount.getBoundingClientRect();
+      const width = Math.max(rect.width, 1);
+      const height = Math.max(rect.height, 1);
+      camera.aspect = width / height;
+      camera.updateProjectionMatrix();
+      renderer.setSize(width, height, false);
+    };
+
+    const resizeObserver = new ResizeObserver(resize);
+    resizeObserver.observe(mount);
+    resize();
+
+    new GLTFLoader().load(
+      MACBOOK_NEO_MODEL,
+      (gltf) => {
+        if (cancelled) return;
+
+        const model = gltf.scene;
+        const fittedModel = new THREE.Group();
+        const box = new THREE.Box3().setFromObject(model);
+        const size = box.getSize(new THREE.Vector3());
+        const center = box.getCenter(new THREE.Vector3());
+        const maxAxis = Math.max(size.x, size.y, size.z) || 1;
+        const scale = 3.45 / maxAxis;
+
+        model.position.sub(center);
+        fittedModel.add(model);
+        fittedModel.scale.setScalar(scale);
+        fittedModel.rotation.set(-0.08, 0, 0);
+        modelRoot.add(fittedModel);
+        modelRoot.position.set(0.05, 0.05, 0);
+        setLoaded(true);
+
+        const animate = () => {
+          if (cancelled) return;
+
+          const elapsed = clock.getElapsedTime();
+          const t = Math.min(elapsed / animationDuration, 1);
+          const eased = 1 - Math.pow(1 - t, 3);
+          modelRoot.rotation.y = Math.PI * 2 * (1 - eased);
+
+          renderer.render(scene, camera);
+          if (t < 1) {
+            frameId = window.requestAnimationFrame(animate);
+          }
+        };
+
+        animate();
+      },
+      undefined,
+      () => {
+        if (!cancelled) setFailed(true);
+      }
+    );
+
+    return () => {
+      cancelled = true;
+      if (frameId) window.cancelAnimationFrame(frameId);
+      resizeObserver.disconnect();
+      renderer.dispose();
+      scene.traverse((object) => {
+        const mesh = object as THREE.Mesh;
+        if (mesh.geometry) mesh.geometry.dispose();
+        const materials = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
+        materials.forEach((material) => material?.dispose?.());
+      });
+      renderer.domElement.remove();
+    };
+  }, []);
+
+  return (
+    <div className="relative z-10 w-full h-[min(58vh,620px)] min-h-[440px] overflow-hidden">
+      {!loaded && !failed && (
+        <div className="absolute inset-0 z-20 flex items-center justify-center">
+          <div className="h-8 w-8 rounded-full border-2 border-zinc-300 border-t-zinc-900 animate-spin" />
+        </div>
+      )}
+      {failed && (
+        <div className="absolute inset-0 flex items-center justify-center text-sm font-medium text-zinc-500">
+          3D model unavailable
+        </div>
+      )}
+      <div
+        ref={mountRef}
+        aria-label="MacBook Neo 3D model"
+        className={`h-full w-full transition-opacity duration-500 ${loaded ? "opacity-100" : "opacity-0"}`}
+      />
+      <a
+        href="https://sketchfab.com/3d-models/macbook-neo-266970634d9a435fa4589efe326b25d6"
+        target="_blank"
+        rel="noreferrer"
+        className="absolute bottom-4 right-4 z-30 rounded-full bg-white/75 px-3 py-1 text-[11px] font-semibold text-zinc-500 shadow-sm backdrop-blur transition hover:bg-white hover:text-zinc-800"
+      >
+        MacBook Neo by rtql8d
+      </a>
+    </div>
+  );
+}
 
 /* ── TYPES ─────────────────────────────────────────────────────────── */
 type LaptopBrand = "ASUS" | "Apple" | "Dell" | "Lenovo" | "HP" | "Acer" | "MSI";
@@ -74,7 +220,7 @@ const categories = [
   },
 ];
 
-const products: LaptopProduct[] = [
+const defaultProducts: LaptopProduct[] = [
   { id: 1,  brand: "ASUS",   name: "ASUS ROG Zephyrus G14 2024",  cpu: "AMD Ryzen 9",    ram: "16GB", screen: "13 - 14 inch",   gpu: "NVIDIA RTX 4060", specs: "Ryzen 9 8945HS / 16GB /\n1TB SSD / RTX 4060 / 14\" OLED",        price: 28990000, badge: "Bán chạy", img: "https://dlcdnwebimgs.asus.com/gain/97f4b8da-e77d-418c-8515-3850123533be/w800" },
   { id: 2,  brand: "Apple",  name: "MacBook Air M3 13 inch",       cpu: "Apple M Series", ram: "16GB", screen: "13 - 14 inch",   gpu: "Apple M Series" as any, specs: "Apple M3 / 16GB / 512GB SSD /\n13.6\" Liquid Retina",               price: 24990000, img: "https://store.storeimages.cdn-apple.com/8756/as-images.apple.com/is/mba13-midnight-select-202402?wid=904&hei=840&fmt=jpeg&qlt=90&.v=1708367688034" },
   { id: 3,  brand: "Dell",   name: "Dell XPS 13 Plus 9320",        cpu: "Intel Core i7",  ram: "16GB", screen: "13 - 14 inch",   gpu: "Intel Iris Xe",   specs: "Intel Core i7-1360P / 16GB /\n512GB SSD / 13.4\" FHD+",             price: 27490000, img: "https://i.dell.com/is/image/DellContent/content/dam/ss2/product-images/dell-client-products/notebooks/xps-notebooks/xps-13-9320/media-gallery/xs9320nt-cnb-00000ff090-gy.psd?fmt=png-alpha&pscan=auto&scl=1&hei=402&wid=555&qlt=100,1&resMode=sharp2&size=555,402&chrss=full" },
@@ -156,9 +302,87 @@ function FilterGroup({ title, children }: { title: string; children: React.React
   );
 }
 
+function parseLaptopProduct(raw: any, index: number): LaptopProduct {
+  const priceVal = parseInt(raw.price?.toString().replace(/[^\d]/g, ""), 10) || 0;
+  const specsStr = raw.specs || "";
+  const nameLower = (raw.name || "").toLowerCase();
+
+  let brandVal: LaptopBrand = "ASUS";
+  if (raw.brand && ["ASUS", "Apple", "Dell", "Lenovo", "HP", "Acer", "MSI"].includes(raw.brand)) {
+    brandVal = raw.brand as LaptopBrand;
+  } else {
+    if (nameLower.includes("asus")) brandVal = "ASUS";
+    else if (nameLower.includes("macbook") || nameLower.includes("apple")) brandVal = "Apple";
+    else if (nameLower.includes("dell")) brandVal = "Dell";
+    else if (nameLower.includes("lenovo") || nameLower.includes("thinkpad")) brandVal = "Lenovo";
+    else if (nameLower.includes("hp") || nameLower.includes("spectre") || nameLower.includes("omen")) brandVal = "HP";
+    else if (nameLower.includes("acer") || nameLower.includes("swift")) brandVal = "Acer";
+    else if (nameLower.includes("msi") || nameLower.includes("stealth")) brandVal = "MSI";
+  }
+
+  let ramVal: LaptopRAM = "16GB";
+  if (specsStr.includes("32GB")) ramVal = "32GB";
+  else if (specsStr.includes("8GB")) ramVal = "8GB";
+
+  let cpuVal: LaptopCPU = "Intel Core i7";
+  if (specsStr.includes("M3 Pro")) cpuVal = "Apple M Series";
+  else if (specsStr.includes("M3")) cpuVal = "Apple M Series";
+  else if (specsStr.includes("M2")) cpuVal = "Apple M Series";
+  else if (specsStr.includes("M1")) cpuVal = "Apple M Series";
+  else if (specsStr.includes("i9") || specsStr.includes("14900")) cpuVal = "Intel Core i9";
+  else if (specsStr.includes("i5") || specsStr.includes("125H")) cpuVal = "Intel Core i5";
+  else if (specsStr.includes("Ryzen 9")) cpuVal = "AMD Ryzen 9";
+  else if (specsStr.includes("Ryzen 7")) cpuVal = "AMD Ryzen 7";
+
+  let gpuVal: LaptopGPU = "Intel Iris Xe";
+  if (specsStr.includes("4070")) gpuVal = "NVIDIA RTX 4070";
+  else if (specsStr.includes("4060")) gpuVal = "NVIDIA RTX 4060";
+  else if (specsStr.toLowerCase().includes("radeon")) gpuVal = "AMD Radeon";
+
+  let screenVal: LaptopScreen = "13 - 14 inch";
+  if (specsStr.includes('15.6"') || specsStr.includes('15.6 inch')) screenVal = "15 - 15.6 inch";
+  else if (specsStr.includes('16"') || specsStr.includes('16 inch') || specsStr.includes('16.1"')) screenVal = "16 inch trở lên";
+
+  return {
+    id: raw.id || (index + 1),
+    brand: brandVal,
+    name: raw.name || "",
+    cpu: cpuVal,
+    ram: ramVal,
+    screen: screenVal,
+    gpu: gpuVal,
+    specs: specsStr,
+    price: priceVal,
+    badge: raw.badge || undefined,
+    img: raw.image || raw.img || ""
+  };
+}
+
 /* ── PAGE ───────────────────────────────────────────────────────────── */
 export default function LaptopIndex() {
-  const [liked, setLiked] = useState<Set<number>>(new Set());
+  const navigate = useNavigate();
+  const API_BASE =
+    typeof window !== "undefined"
+      ? (window.location.hostname.includes("qtitpc.dev")
+        ? "https://api-pc.qtitpc.dev"
+        : `${window.location.protocol}//${window.location.hostname}:3001`)
+      : "http://localhost:3001";
+
+  const [products, setProducts] = useState<LaptopProduct[]>(defaultProducts);
+
+  useEffect(() => {
+    fetch(`${API_BASE}/api/laptops`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data)) {
+          const parsed = data.map((item, idx) => parseLaptopProduct(item, idx));
+          setProducts(parsed);
+        }
+      })
+      .catch((err) => console.error("Error fetching laptops from backend:", err));
+  }, []);
+
+  const [liked, setLiked] = useState<Set<any>>(new Set());
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [sortBy, setSortBy] = useState("newest");
   const [showMobileFilter, setShowMobileFilter] = useState(false);
@@ -173,6 +397,13 @@ export default function LaptopIndex() {
   const [minPrice,   setMinPrice]   = useState(MIN_PRICE);
   const [maxPrice,   setMaxPrice]   = useState(MAX_PRICE);
   const [activeInput, setActiveInput] = useState<'min' | 'max'>('min');
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 16;
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [selBrands, selRAMs, selCPUs, selScreens, selGPUs, minPrice, maxPrice, sortBy, activeCategory]);
 
   const toggleLike = (id: number) =>
     setLiked(p => toggleSet(p, id));
@@ -219,7 +450,16 @@ export default function LaptopIndex() {
     if (sortBy === "price-desc") result = [...result].sort((a, b) => b.price - a.price);
     if (sortBy === "name")       result = [...result].sort((a, b) => a.name.localeCompare(b.name));
     return result;
-  }, [selBrands, selRAMs, selCPUs, selScreens, selGPUs, minPrice, maxPrice, sortBy, activeCategory]);
+  }, [products, selBrands, selRAMs, selCPUs, selScreens, selGPUs, minPrice, maxPrice, sortBy, activeCategory]);
+
+  const totalPages = useMemo(() => {
+    return Math.ceil(filteredProducts.length / ITEMS_PER_PAGE) || 1;
+  }, [filteredProducts.length]);
+
+  const paginatedProducts = useMemo(() => {
+    const start = (currentPage - 1) * ITEMS_PER_PAGE;
+    return filteredProducts.slice(start, start + ITEMS_PER_PAGE);
+  }, [filteredProducts, currentPage]);
 
   const heroContainer = {
     hidden: {},
@@ -392,9 +632,12 @@ export default function LaptopIndex() {
         className="overflow-hidden relative"
         style={{
           background: "linear-gradient(135deg, #ffffff 0%, #f0f6ff 40%, #e3effe 70%, #dceafd 100%)",
+          marginLeft: "calc(-50vw + 50%)",
+          marginRight: "calc(-50vw + 50%)",
           marginTop: "-96px",
-          paddingTop: "calc(96px + 2.5rem)",
-          paddingBottom: "6rem",
+          paddingTop: "96px",
+          paddingLeft: "calc(50vw - 50%)",
+          paddingRight: "calc(50vw - 50%)",
         }}
       >
         {/* Top-right blue glow */}
@@ -413,28 +656,47 @@ export default function LaptopIndex() {
         }} />
         
         <div className="max-w-[1700px] mx-auto px-4 md:px-8 lg:px-10 xl:px-12 2xl:px-16 relative z-10">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
-            <motion.div variants={heroContainer} initial="hidden" animate="show" className="max-w-2xl relative z-10">
-              <motion.h1 variants={heroItem} className="text-[3rem] md:text-[4rem] lg:text-[4.5rem] font-bold tracking-tight text-zinc-900 leading-[1.08] mb-6 whitespace-nowrap">
-                Laptop Gaming<br />hiệu năng bứt phá.
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center" style={{ minHeight: "calc(100vh - 96px)" }}>
+            <motion.div variants={heroContainer} initial="hidden" animate="show" className="max-w-2xl flex flex-col items-start justify-center pr-8 py-12 relative z-10">
+              <motion.div variants={heroItem}>
+                <span className="inline-block px-3 py-1 bg-white/70 text-zinc-500 rounded-full text-[11px] font-semibold uppercase tracking-widest mb-6 border border-zinc-200/60">
+                  Laptop chính hãng
+                </span>
+              </motion.div>
+              <motion.h1 variants={heroItem} className="text-[3.2rem] md:text-[4.2rem] lg:text-[5rem] font-bold tracking-tight text-zinc-900 leading-[1.08] mb-6 whitespace-nowrap">
+                Bứt phá giới hạn<br />làm chủ công nghệ.
               </motion.h1>
-              <motion.p variants={heroItem} className="text-[17px] text-zinc-500 mb-10 leading-relaxed max-w-md">
-                Sức mạnh tản nhiệt đỉnh cao,<br />
-                sẵn sàng cùng bạn chiến mọi tựa game.
+              <motion.p variants={heroItem} className="text-[17px] text-zinc-500 mb-10 leading-relaxed">
+                Laptop sẽ giúp bạn bật nguồn cảm hứng<br />
+                sẵn sàng cùng bạn chinh phục mọi thử thách.
               </motion.p>
-              <motion.div variants={heroItem} className="flex flex-wrap items-center gap-3">
-                <button className="inline-flex items-center gap-2 px-8 py-3.5 bg-[#1d1d1f] hover:bg-zinc-800 text-white text-[15px] font-semibold rounded-full transition-all duration-200 shadow-md active:scale-95 cursor-pointer">
+              <motion.div variants={heroItem} className="flex flex-row gap-3 mb-12">
+                <button
+                  onClick={() => {
+                    document
+                      .getElementById("chon-laptop-theo-nhu-cau")
+                      ?.scrollIntoView({ behavior: "smooth", block: "start" });
+                  }}
+                  className="inline-flex items-center gap-2 px-8 py-3.5 bg-[#1d1d1f] hover:bg-zinc-800 text-white text-[15px] font-semibold rounded-full transition-all duration-200 shadow-md active:scale-95 cursor-pointer"
+                >
                   Khám phá ngay <ArrowRight className="w-4 h-4" />
                 </button>
-                <button className="inline-flex items-center gap-2 px-8 py-3.5 bg-white/80 border border-zinc-300 hover:bg-white text-zinc-800 text-[15px] font-semibold rounded-full transition-all duration-200 shadow-sm active:scale-95 cursor-pointer">
+                {/* <button className="inline-flex items-center gap-2 px-8 py-3.5 bg-white/80 border border-zinc-300 hover:bg-white text-zinc-800 text-[15px] font-semibold rounded-full transition-all duration-200 shadow-sm active:scale-95 cursor-pointer">
                   Tư vấn chọn laptop <ArrowRight className="w-4 h-4" />
                 </button>
+                 */}
+                 <Link
+                  to="/ho-tro" // Thay đường dẫn bạn muốn đến tại đây
+                  className="inline-flex items-center gap-2 px-8 py-3.5 bg-white/80 border border-zinc-300 hover:bg-white text-zinc-800 text-[15px] font-semibold rounded-full transition-all duration-200 shadow-sm active:scale-95 cursor-pointer text-center"
+                >
+                  Tư vấn chọn laptop <ArrowRight className="w-4 h-4" />
+                </Link>
               </motion.div>
-              <motion.div variants={heroItem} className="flex flex-wrap items-center gap-x-8 gap-y-3 pt-7 mt-8 border-t border-zinc-200 w-full">
+              <motion.div variants={heroItem} className="flex flex-wrap items-center gap-x-8 gap-y-3 pt-7 border-t border-zinc-300/40 w-full">
                 {perks.map(({ icon: Icon, title }) => (
                   <div key={title} className="flex items-center gap-2">
-                    <Icon className="w-5 h-5 text-zinc-500 shrink-0" strokeWidth={1.8} />
-                    <span className="text-[13px] text-zinc-500 leading-tight whitespace-pre-line font-medium">{title}</span>
+                    <Icon className="w-5 h-5 text-zinc-700 shrink-0" strokeWidth={1.8} />
+                    <span className="text-[13px] text-zinc-700 leading-tight whitespace-pre-line font-semibold">{title}</span>
                   </div>
                 ))}
               </motion.div>
@@ -444,15 +706,32 @@ export default function LaptopIndex() {
               initial={{ opacity: 0, x: 50, scale: 0.95 }}
               animate={{ opacity: 1, x: 0, scale: 1 }}
               transition={{ duration: 1, ease: [0.25, 1, 0.5, 1], delay: 0.2 }}
-              className="relative hidden lg:block"
+              className="relative hidden lg:flex items-center justify-center"
+              style={{ alignSelf: "stretch" }}
             >
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-zinc-200/40 rounded-full blur-3xl opacity-60 pointer-events-none" />
-              <img
-                src="https://images.unsplash.com/photo-1611186871348-b1ce696e52c9?q=80&w=2070&auto=format&fit=crop"
-                alt="Laptop display"
-                className="w-full relative z-10 object-cover rounded-xl shadow-2xl mix-blend-multiply"
-                onError={e => { (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?q=80&w=2071&auto=format&fit=crop"; }}
-              />
+              {/* Blue glow behind Laptop */}
+              <div style={{
+                position: "absolute",
+                width: 600, height: 600,
+                background: "radial-gradient(circle, rgba(147,197,253,0.3) 0%, rgba(165,180,252,0.1) 50%, transparent 70%)",
+                bottom: "12%", left: "50%", transform: "translateX(-48%)",
+                pointerEvents: "none",
+                zIndex: 0,
+              }} />
+              
+              {/* Floor reflection */}
+              <div style={{
+                position: "absolute",
+                width: 500, height: 60,
+                background: "radial-gradient(ellipse, rgba(120,170,250,0.2) 0%, transparent 70%)",
+                bottom: "14%", left: "50%", transform: "translateX(-48%)",
+                pointerEvents: "none",
+                zIndex: 1,
+              }} />
+
+              <div className="relative z-10 w-full flex items-center justify-center overflow-hidden">
+                <MacBookNeoViewer />
+              </div>
             </motion.div>
           </div>
         </div>
@@ -461,7 +740,7 @@ export default function LaptopIndex() {
       <div className="max-w-[1700px] mx-auto px-4 md:px-8 lg:px-10 xl:px-12 2xl:px-16 mt-8 md:mt-10">
 
         {/* ══ 2. CHỌN THEO NHU CẦU ═══════════════════════════════════════ */}
-        <section className="mb-16 md:mb-20">
+        <section id="chon-laptop-theo-nhu-cau" className="scroll-mt-28 mb-16 md:mb-20">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-xl md:text-2xl font-bold tracking-tight text-zinc-900">Chọn laptop theo nhu cầu</h2>
             {activeCategory !== null && (
@@ -647,11 +926,18 @@ export default function LaptopIndex() {
                 ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
                 : "flex flex-col gap-3"
               }>
-                {filteredProducts.map((p) => (
+                {paginatedProducts.map((p) => (
                   viewMode === "grid" ? (
-                    <div key={p.id} className="group bg-white rounded-2xl border border-zinc-100 p-4 shadow-sm hover:shadow-md hover:border-zinc-200 hover:-translate-y-0.5 transition-all duration-300 flex flex-col relative">
+                    <div
+                       key={p.id}
+                      onClick={() => navigate(`/san-pham/laptop-${p.name}`)}
+                      className="group bg-white rounded-2xl border border-zinc-100 p-4 shadow-sm hover:shadow-md hover:border-zinc-200 hover:-translate-y-0.5 transition-all duration-300 flex flex-col relative cursor-pointer"
+                    >
                       <button
-                        onClick={() => toggleLike(p.id)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleLike(p.id);
+                        }}
                         className="absolute top-4 right-4 z-10 w-8 h-8 flex items-center justify-center rounded-full bg-white/80 backdrop-blur border border-zinc-100 shadow-sm hover:bg-white transition-colors cursor-pointer"
                       >
                         <Heart className={`w-4 h-4 transition-colors ${liked.has(p.id) ? "fill-red-500 text-red-500" : "text-zinc-400"}`} />
@@ -667,11 +953,27 @@ export default function LaptopIndex() {
                       <div className="flex flex-col flex-1">
                         <h3 className="text-[14px] font-bold text-zinc-900 leading-tight mb-2 line-clamp-2">{p.name}</h3>
                         <p className="text-[12px] text-zinc-500 leading-relaxed mb-4 flex-1 whitespace-pre-line">{p.specs}</p>
-                        <div className="text-[15px] font-bold text-zinc-900">{formatPrice(p.price)}</div>
+                        <div className="flex items-center justify-between gap-3">
+                          <div className="text-[15px] font-bold text-zinc-900">{formatPrice(p.price)}</div>
+                          <AddToCartButton
+                            product={{
+                              id: `laptop-${p.name}`,
+                              name: p.name,
+                              specs: p.specs,
+                              price: p.price,
+                              image: p.img,
+                              category: "Laptop",
+                            }}
+                          />
+                        </div>
                       </div>
                     </div>
                   ) : (
-                    <div key={p.id} className="group bg-white rounded-xl border border-zinc-100 p-3 shadow-sm hover:shadow-md transition-all duration-300 flex items-center gap-4 relative">
+                    <div
+                      key={p.id}
+                      onClick={() => navigate(`/san-pham/laptop-${p.name}`)}
+                      className="group bg-white rounded-xl border border-zinc-100 p-3 shadow-sm hover:shadow-md transition-all duration-300 flex items-center gap-4 relative cursor-pointer"
+                    >
                       <div className="w-24 h-20 shrink-0 flex items-center justify-center p-2">
                         <img src={p.img} alt={p.name} className="max-w-full max-h-full object-contain" />
                       </div>
@@ -682,7 +984,23 @@ export default function LaptopIndex() {
                       <div className="text-right shrink-0">
                         <p className="text-[14px] font-extrabold text-zinc-900">{formatPrice(p.price)}</p>
                       </div>
-                      <button onClick={() => toggleLike(p.id)} className="w-7 h-7 flex items-center justify-center rounded-full bg-zinc-50 hover:bg-zinc-100 transition-colors cursor-pointer shrink-0">
+                      <AddToCartButton
+                        product={{
+                          id: `laptop-${p.name}`,
+                          name: p.name,
+                          specs: p.specs,
+                          price: p.price,
+                          image: p.img,
+                          category: "Laptop",
+                        }}
+                      />
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleLike(p.id);
+                        }}
+                        className="w-7 h-7 flex items-center justify-center rounded-full bg-zinc-50 hover:bg-zinc-100 transition-colors cursor-pointer shrink-0"
+                      >
                         <Heart className={`w-3.5 h-3.5 transition-colors ${liked.has(p.id) ? "fill-red-500 text-red-500" : "text-zinc-300"}`} />
                       </button>
                     </div>
@@ -692,17 +1010,51 @@ export default function LaptopIndex() {
             )}
 
             {/* Pagination */}
-            {filteredProducts.length > 0 && (
+            {totalPages > 1 && (
               <div className="flex items-center justify-center gap-2 mt-10">
-                <button className="w-9 h-9 flex items-center justify-center rounded-lg border border-zinc-200 text-zinc-400 hover:bg-zinc-50 transition-colors cursor-pointer">
+                <button
+                  disabled={currentPage === 1}
+                  onClick={() => {
+                    setCurrentPage(p => Math.max(1, p - 1));
+                    document.getElementById("products-section")?.scrollIntoView({ behavior: "smooth" });
+                  }}
+                  className={`w-9 h-9 flex items-center justify-center rounded-lg border border-zinc-200 transition-colors ${
+                    currentPage === 1 ? "text-zinc-300 cursor-not-allowed opacity-50" : "text-zinc-600 hover:bg-zinc-50 cursor-pointer"
+                  }`}
+                >
                   <ChevronDown className="w-4 h-4 rotate-90" />
                 </button>
-                <button className="w-9 h-9 flex items-center justify-center rounded-lg bg-zinc-900 text-white font-medium text-[13px]">1</button>
-                <button className="w-9 h-9 flex items-center justify-center rounded-lg border border-zinc-200 text-zinc-600 hover:bg-zinc-50 font-medium text-[13px] transition-colors cursor-pointer">2</button>
-                <button className="w-9 h-9 flex items-center justify-center rounded-lg border border-zinc-200 text-zinc-600 hover:bg-zinc-50 font-medium text-[13px] transition-colors cursor-pointer">3</button>
-                <span className="px-2 text-zinc-400">...</span>
-                <button className="w-9 h-9 flex items-center justify-center rounded-lg border border-zinc-200 text-zinc-600 hover:bg-zinc-50 font-medium text-[13px] transition-colors cursor-pointer">6</button>
-                <button className="w-9 h-9 flex items-center justify-center rounded-lg border border-zinc-200 text-zinc-600 hover:bg-zinc-50 transition-colors cursor-pointer">
+                
+                {Array.from({ length: totalPages }, (_, idx) => {
+                  const pageNum = idx + 1;
+                  return (
+                    <button
+                      key={pageNum}
+                      onClick={() => {
+                        setCurrentPage(pageNum);
+                        document.getElementById("products-section")?.scrollIntoView({ behavior: "smooth" });
+                      }}
+                      className={`w-9 h-9 flex items-center justify-center rounded-lg font-medium text-[13px] transition-colors cursor-pointer ${
+                        currentPage === pageNum
+                          ? "bg-zinc-950 text-white"
+                          : "border border-zinc-200 text-zinc-600 hover:bg-zinc-50"
+                      }`}
+                    >
+                      {pageNum}
+                    </button>
+                  );
+                })}
+
+                <button
+                  disabled={currentPage === totalPages}
+                  onClick={() => {
+                    setCurrentPage(p => Math.min(totalPages, p + 1));
+                    document.getElementById("products-section")?.scrollIntoView({ behavior: "smooth" });
+                  }}
+                  className={`w-9 h-9 flex items-center justify-center rounded-lg border border-zinc-200 transition-colors ${
+                    currentPage === totalPages ? "text-zinc-300 cursor-not-allowed opacity-50" : "text-zinc-600 hover:bg-zinc-50 cursor-pointer"
+                  }`}
+                >
                   <ChevronDown className="w-4 h-4 -rotate-90" />
                 </button>
               </div>

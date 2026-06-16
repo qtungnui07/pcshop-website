@@ -1,5 +1,6 @@
-import { useState, useMemo } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useState, useMemo, useEffect } from 'react';
+import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useCart } from '../../context/CartContext';
 import { 
   ChevronRight, 
   Heart, 
@@ -13,7 +14,86 @@ import {
   ArrowRight
 } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { pcProducts } from '../../constants/pcData';
+import { pcProducts, type PCProduct } from '../../constants/pcData';
+import AddToCartButton from '../../components/AddToCartButton';
+
+const API_BASE =
+  typeof window !== "undefined"
+    ? (window.location.hostname.includes("qtitpc.dev")
+      ? "https://api-pc.qtitpc.dev"
+      : `${window.location.protocol}//${window.location.hostname}:3001`)
+    : "http://localhost:3001";
+
+function parsePCProduct(raw: any): PCProduct {
+  const priceVal = parseInt(raw.price?.toString().replace(/[^\d]/g, ""), 10) || 0;
+  const specsStr = raw.specs || "";
+  
+  let ramVal: any = '16GB';
+  if (specsStr.includes('128GB')) ramVal = '128GB';
+  else if (specsStr.includes('64GB')) ramVal = '64GB';
+  else if (specsStr.includes('32GB')) ramVal = '32GB';
+  else if (specsStr.includes('8GB')) ramVal = '8GB';
+  
+  let gpuVal: any = 'Onboard';
+  if (specsStr.includes('RTX 4090')) gpuVal = 'RTX 4090';
+  else if (specsStr.includes('RTX 4080')) gpuVal = 'RTX 4080';
+  else if (specsStr.includes('RTX 4070 Ti')) gpuVal = 'RTX 4070 Ti';
+  else if (specsStr.includes('RTX 4070')) gpuVal = 'RTX 4070';
+  else if (specsStr.includes('RTX 4060 Ti')) gpuVal = 'RTX 4060 Ti';
+  else if (specsStr.includes('RTX 4060')) gpuVal = 'RTX 4060';
+  else if (specsStr.includes('RTX 3050')) gpuVal = 'RTX 3050';
+  else if (specsStr.includes('RX 7600')) gpuVal = 'RX 7600';
+
+  let cpuSeriesVal: any = 'Core i5';
+  if (specsStr.includes('i9') || specsStr.includes('14900')) cpuSeriesVal = 'Core i9';
+  else if (specsStr.includes('i7') || specsStr.includes('14700') || specsStr.includes('13700')) cpuSeriesVal = 'Core i7';
+  else if (specsStr.includes('i3')) cpuSeriesVal = 'Core i3';
+  else if (specsStr.includes('Ryzen 9') || specsStr.includes('7900') || specsStr.includes('7970')) cpuSeriesVal = 'Ryzen 9';
+  else if (specsStr.includes('Ryzen 7') || specsStr.includes('7800') || specsStr.includes('7700')) cpuSeriesVal = 'Ryzen 7';
+  else if (specsStr.includes('Ryzen 5') || specsStr.includes('7600') || specsStr.includes('5600')) cpuSeriesVal = 'Ryzen 5';
+
+  let cpuBrandVal: 'Intel' | 'AMD' = specsStr.toLowerCase().includes('ryzen') || specsStr.toLowerCase().includes('threadripper') ? 'AMD' : 'Intel';
+
+  let categoryVal: any = 'PC Gaming';
+  const nameLower = (raw.name || "").toLowerCase();
+  const specsLower = specsStr.toLowerCase();
+  if (nameLower.includes('workstation') || specsLower.includes('threadripper')) {
+    categoryVal = 'PC Workstation';
+  } else if (nameLower.includes('mini') || specsLower.includes('mini')) {
+    categoryVal = 'PC Mini';
+  } else if (nameLower.includes('văn phòng') || nameLower.includes('office')) {
+    categoryVal = 'PC Văn Phòng';
+  } else if (nameLower.includes('creator') || nameLower.includes('đồ họa') || nameLower.includes('studio')) {
+    categoryVal = 'PC Đồ Họa';
+  }
+
+  let brandVal: any = 'ASUS';
+  if (nameLower.includes('msi') || specsLower.includes('msi')) brandVal = 'MSI';
+  else if (nameLower.includes('gigabyte')) brandVal = 'Gigabyte';
+  else if (nameLower.includes('corsair')) brandVal = 'Corsair';
+  else if (nameLower.includes('dell')) brandVal = 'Dell';
+  else if (nameLower.includes('hp')) brandVal = 'HP';
+  else if (nameLower.includes('acer')) brandVal = 'Acer';
+
+  return {
+    id: raw.id || raw.name?.replace(/\s+/g, '-').toLowerCase() || Math.random().toString(),
+    name: raw.name || "",
+    specs: specsStr,
+    brand: brandVal,
+    ram: ramVal,
+    gpu: gpuVal,
+    cpuBrand: cpuBrandVal,
+    cpuSeries: cpuSeriesVal,
+    price: priceVal,
+    priceStr: priceVal.toLocaleString('vi-VN') + " đ",
+    img: raw.image || raw.img || "",
+    badge: raw.badge,
+    badgeColor: raw.badgeColor,
+    category: categoryVal,
+    from: raw.from || "#7c3aed",
+    to: raw.to || "#ec4899",
+  };
+}
 
 const categoryMappings = {
   "pc-gaming": {
@@ -103,6 +183,8 @@ const defaultMeta = categoryMappings["pc-gaming"];
 
 export default function PCCategoryPage() {
   const { category } = useParams();
+  const navigate = useNavigate();
+  const { addItem } = useCart();
   const slug = (category || '').toLowerCase();
   
   // Resolve category configuration, fallback to pc-gaming
@@ -123,6 +205,20 @@ export default function PCCategoryPage() {
   const [liked, setLiked] = useState<Set<string>>(new Set());
   const [isGridView, setIsGridView] = useState(true);
   const [sortBy, setSortBy] = useState<'newest' | 'price-asc' | 'price-desc'>('newest');
+
+  const [products, setProducts] = useState<PCProduct[]>(pcProducts);
+
+  useEffect(() => {
+    fetch(`${API_BASE}/api/featured-pcs`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data)) {
+          const parsed = data.map(parsePCProduct);
+          setProducts(parsed);
+        }
+      })
+      .catch((err) => console.error("Error fetching PCs from backend:", err));
+  }, []);
 
   // Static list values to show in filters
   const ramOptions = ["8GB", "16GB", "32GB", "64GB", "128GB"];
@@ -169,7 +265,7 @@ export default function PCCategoryPage() {
   // Filter & Sort Products
   const filteredProducts = useMemo(() => {
     // 1. Filter by active category
-    let list = pcProducts.filter(p => p.category === meta.dbCategoryName);
+    let list = products.filter(p => p.category === meta.dbCategoryName);
 
     // 2. Filter by Price Range
     list = list.filter(p => p.price >= minPrice && p.price <= maxPrice);
@@ -199,11 +295,11 @@ export default function PCCategoryPage() {
     }
 
     return list;
-  }, [meta.dbCategoryName, minPrice, maxPrice, selectedRams, selectedCpus, selectedGpus, sortBy]);
+  }, [products, meta.dbCategoryName, minPrice, maxPrice, selectedRams, selectedCpus, selectedGpus, sortBy]);
 
   // Count helper functions for labels
   const getFilterCounts = useMemo(() => {
-    const baseList = pcProducts.filter(p => p.category === meta.dbCategoryName);
+    const baseList = products.filter(p => p.category === meta.dbCategoryName);
     
     const ramCounts: Record<string, number> = {};
     const cpuCounts: Record<string, number> = {};
@@ -222,7 +318,7 @@ export default function PCCategoryPage() {
     });
 
     return { ramCounts, cpuCounts, gpuCounts };
-  }, [meta.dbCategoryName]);
+  }, [products, meta.dbCategoryName]);
 
   // Hero section animation variants
   const heroContainer = {
@@ -620,11 +716,15 @@ export default function PCCategoryPage() {
                 {filteredProducts.map((p) => (
                   <div 
                     key={p.id} 
-                    className="group bg-white rounded-2xl border border-zinc-200/40 p-4 shadow-sm hover:shadow-md hover:border-zinc-250 transition-all duration-300 flex flex-col relative"
+                    onClick={() => navigate(`/san-pham/pc-${p.name}`)}
+                    className="group bg-white rounded-2xl border border-zinc-200/40 p-4 shadow-sm hover:shadow-md hover:border-zinc-250 transition-all duration-300 flex flex-col relative cursor-pointer"
                   >
                     {/* Favorite Heart Button */}
                     <button 
-                      onClick={() => toggleLike(p.id)} 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleLike(p.id);
+                      }}
                       className="absolute top-4 right-4 z-10 w-8 h-8 flex items-center justify-center rounded-full bg-white/80 backdrop-blur border border-zinc-100 shadow-sm hover:bg-white transition-colors cursor-pointer"
                     >
                       <Heart className={`w-4 h-4 transition-colors ${liked.has(p.id) ? "fill-red-500 text-red-500" : "text-zinc-400"}`} />
@@ -665,6 +765,17 @@ export default function PCCategoryPage() {
                       <div className="text-[14px] font-bold text-zinc-900 mt-auto">
                         {p.priceStr}
                       </div>
+                      <AddToCartButton
+                        className="absolute bottom-4 right-4"
+                        product={{
+                          id: `pc-${p.name}`,
+                          name: p.name,
+                          specs: p.specs,
+                          price: p.price,
+                          image: p.img,
+                          category: "PC",
+                        }}
+                      />
                     </div>
 
                   </div>
@@ -676,7 +787,8 @@ export default function PCCategoryPage() {
                 {filteredProducts.map((p) => (
                   <div 
                     key={p.id} 
-                    className="group bg-white rounded-2xl border border-zinc-200/40 p-4 shadow-sm hover:shadow-md hover:border-zinc-250 transition-all duration-300 flex flex-row items-center gap-6 relative"
+                    onClick={() => navigate(`/san-pham/pc-${p.name}`)}
+                    className="group bg-white rounded-2xl border border-zinc-200/40 p-4 shadow-sm hover:shadow-md hover:border-zinc-250 transition-all duration-300 flex flex-row items-center gap-6 relative cursor-pointer"
                   >
                     {/* Badge */}
                     {p.badge && (
@@ -718,15 +830,45 @@ export default function PCCategoryPage() {
                     {/* Right action tools */}
                     <div className="flex flex-col items-end gap-10 pr-2">
                       <button 
-                        onClick={() => toggleLike(p.id)} 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleLike(p.id);
+                        }}
                         className="w-8 h-8 flex items-center justify-center rounded-full bg-zinc-50 border border-zinc-200 shadow-sm hover:bg-zinc-100 hover:border-zinc-300 transition-colors cursor-pointer"
                       >
                         <Heart className={`w-4 h-4 transition-colors ${liked.has(p.id) ? "fill-red-500 text-red-500" : "text-zinc-400"}`} />
                       </button>
 
-                      <button className="px-5 py-2 bg-[#1d1d1f] hover:bg-zinc-800 text-white text-[12px] font-bold rounded-full transition-colors active:scale-95 cursor-pointer shadow-sm">
+                      <button 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          const success = addItem({
+                            id: `pc-${p.name}`,
+                            name: p.name,
+                            specs: p.specs,
+                            price: p.price,
+                            image: p.img,
+                            category: "PC"
+                          });
+                          if (success) {
+                            navigate("/gio-hang");
+                          }
+                        }}
+                        className="px-5 py-2 bg-[#1d1d1f] hover:bg-zinc-800 text-white text-[12px] font-bold rounded-full transition-colors active:scale-95 cursor-pointer shadow-sm"
+                      >
                         Mua ngay
                       </button>
+                      <AddToCartButton
+                        label="Thêm"
+                        product={{
+                          id: `pc-${p.name}`,
+                          name: p.name,
+                          specs: p.specs,
+                          price: p.price,
+                          image: p.img,
+                          category: "PC",
+                        }}
+                      />
                     </div>
 
                   </div>

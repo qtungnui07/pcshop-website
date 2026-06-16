@@ -45,5 +45,34 @@
     "role": "user",
     "avatar": "",
     "provider": "local"
+  },
+  {
+    "id": "acc-1781188575514",
+    "name": "Tung Dinh Quang",
+    "email": "21107.qt.vn@gmail.com",
+    "password": "",
+    "role": "user",
+    "avatar": "https://api-pc.qtitpc.dev/images/users/avatar-1781188621794-nd0bdat.png",
+    "provider": "google",
+    "phone": "",
+    "address": ""
+  },
+  {
+    "id": "acc-1781188967064",
+    "name": "Quang Tung Dinh",
+    "email": "samsunga03qtx2@gmail.com",
+    "password": "",
+    "role": "user",
+    "avatar": "https://img.clerk.com/eyJ0eXBlIjoicHJveHkiLCJzcmMiOiJodHRwczovL2ltYWdlcy5jbGVyay5kZXYvb2F1dGhfZ29vZ2xlL2ltZ18zRXprb0ZhUEw1djBFUU5Fb1AzZlhtZ3Y4alEifQ",
+    "provider": "google"
+  },
+  {
+    "id": "acc-1781570629579",
+    "name": "Nguyễn Tuấn Dũng",
+    "email": "1@1.1",
+    "password": "11111111",
+    "role": "admin",
+    "avatar": "https://api.dicebear.com/7.x/pixel-art/svg?seed=Nguy%E1%BB%85n%20Tu%E1%BA%A5n%20D%C5%A9ng",
+    "provider": "local"
   }
 ]

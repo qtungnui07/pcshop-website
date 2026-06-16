@@ -1,11 +1,14 @@
 import {
   ShieldCheck, Wrench, Truck, CheckCircle2,
   ChevronRight, Heart, Grid, List, RotateCcw,
-  ChevronDown, ChevronLeft, SlidersHorizontal, X, Search
+  ChevronDown, ChevronLeft, SlidersHorizontal, X, Search,
+  ArrowRight
 } from "lucide-react";
 import { useState, useEffect, useMemo } from "react";
 import { motion } from "framer-motion";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
+import componentsHeroImage from "../../assets/rtx_5090.png";
+import AddToCartButton from "../../components/AddToCartButton";
 
 /* ── TYPES ─────────────────────────────────────────────────────────── */
 interface Product {
@@ -14,36 +17,153 @@ interface Product {
   price: string;
   badge?: string;
   badgeColor?: string;
+  image?: string;
   color?: string;
   category?: string;
 }
 
 /* ── DATA ──────────────────────────────────────────────────────────── */
 const componentCategories = [
-  { id: "ram",       label: "RAM",              from: "#7c3aed", to: "#a78bfa", glow: "rgba(167,139,250,0.35)" },
-  { id: "cpu",       label: "CPU / Vi Xử Lý",  from: "#0f172a", to: "#1e3a5f", glow: "rgba(56,189,248,0.25)" },
-  { id: "vga",       label: "VGA / Card Màn",   from: "#dc2626", to: "#f97316", glow: "rgba(249,115,22,0.30)" },
-  { id: "mainboard", label: "Mainboard",         from: "#065f46", to: "#059669", glow: "rgba(5,150,105,0.30)" },
-  { id: "ssd",       label: "SSD / Ổ Cứng SSD", from: "#1e40af", to: "#38bdf8", glow: "rgba(56,189,248,0.30)" },
-  { id: "hdd",       label: "HDD / Ổ Cứng HDD", from: "#374151", to: "#6b7280", glow: "rgba(107,114,128,0.25)" },
-  { id: "psu",       label: "PSU / Nguồn",       from: "#78350f", to: "#d97706", glow: "rgba(217,119,6,0.30)" },
-  { id: "cooling",   label: "Tản Nhiệt",         from: "#164e63", to: "#06b6d4", glow: "rgba(6,182,212,0.30)" },
-  { id: "case",      label: "Case / Vỏ Máy",     from: "#1c1917", to: "#44403c", glow: "rgba(68,64,60,0.40)" },
+  { id: "ram",       label: "RAM",             glow: "rgba(167,139,250,0.35)", image: "ram.webp" },
+  { id: "cpu",       label: "CPU / Vi Xử Lý",  glow: "rgba(56,189,248,0.25)", image: "cpu.webp" },
+  { id: "vga",       label: "VGA / Card Màn",   glow: "rgba(249,115,22,0.30)", image: "gpu.webp" },
+  { id: "mainboard", label: "Mainboard", glow: "rgba(5,150,105,0.30)", image: "main.jpg" },
+  { id: "ssd",       label: "SSD / Ổ Cứng SSD", glow: "rgba(56,189,248,0.30)", image: "ssd.jpg" },
+  { id: "hdd",       label: "HDD / Ổ Cứng HDD", glow: "rgba(107,114,128,0.25)", image: "hdd.jpg" },
+  { id: "psu",       label: "PSU / Nguồn",        glow: "rgba(217,119,6,0.30)", image: "psu.webp" },
+  { id: "cooling",   label: "Tản Nhiệt",        glow: "rgba(6,182,212,0.30)", image: "tannhiet.webp" },
+  { id: "case",      label: "Case / Vỏ Máy",     glow: "rgba(68,64,60,0.40)", image: "case.webp" },
 ];
 
 const defaultProducts: Product[] = [
-  { name: "G.Skill Trident Z5 RGB",      specs: "18GB (2x8GB) DDR5 6000MHz",  price: "2.890.000đ", badge: "Mới",     badgeColor: "#22c55e", color: "#e0e7ef" },
-  { name: "Corsair Vengeance RGB",        specs: "16GB (2x8GB) DDR5 5600MHz",  price: "2.290.000đ", badge: "Bán chạy",badgeColor: "#f97316", color: "#1a1a2e" },
-  { name: "Kingston Fury Beast",          specs: "16GB (2x8GB) DDR4 3200MHz",  price: "990.000đ",   color: "#1a1a2e" },
-  { name: "G.Skill Ripjaws V",            specs: "16GB (2x8GB) DDR4 3600MHz",  price: "1.290.000đ", color: "#2d2d2d" },
-  { name: "Corsair Dominator Platinum",   specs: "32GB (2x16GB) DDR5 6000MHz", price: "5.990.000đ", color: "#c8d0dc" },
-  { name: "TeamGroup T-Force Delta RGB",  specs: "32GB (2x16GB) DDR5 6000MHz", price: "4.490.000đ", color: "#111827" },
-  { name: "Crucial Pro",                  specs: "32GB (2x16GB) DDR5 4800MHz", price: "1.690.000đ", color: "#1f2937" },
-  { name: "Kingston Fury Beast",          specs: "32GB (2x16GB) DDR5 6000MHz", price: "4.290.000đ", color: "#1a1a2e" },
-  { name: "G.Skill Trident Z5 RGB",      specs: "32GB (2x16GB) DDR5 6400MHz", price: "5.490.000đ", color: "#e0e7ef" },
-  { name: "Corsair Vengeance LPX",        specs: "16GB (2x8GB) DDR4 3200MHz",  price: "1.190.000đ", color: "#111" },
-  { name: "Apacer PANTHER",              specs: "16GB (2x8GB) DDR4 3600MHz",  price: "1.090.000đ", color: "#f59e0b" },
-  { name: "TeamGroup T-Force Vulcan Z",  specs: "16GB (2x8GB) DDR4 3200MHz",  price: "890.000đ",   color: "#dc2626" },
+  // --- RAM ---
+  { name: "G.Skill Trident Z5 RGB", specs: "16GB (2x8GB) DDR5 6000MHz", price: "2.890.000đ", badge: "Mới", badgeColor: "#22c55e", color: "#e0e7ef", category: "RAM" },
+  { name: "Corsair Vengeance RGB", specs: "16GB (2x8GB) DDR5 5600MHz", price: "2.290.000đ", badge: "Bán chạy", badgeColor: "#f97316", color: "#1a1a2e", category: "RAM" },
+  { name: "Kingston Fury Beast DDR4", specs: "16GB (2x8GB) DDR4 3200MHz", price: "990.000đ", color: "#1a1a2e", category: "RAM" },
+  { name: "G.Skill Ripjaws V DDR4", specs: "16GB (2x8GB) DDR4 3600MHz", price: "1.290.000đ", color: "#2d2d2d", category: "RAM" },
+  { name: "Corsair Dominator Platinum", specs: "32GB (2x16GB) DDR5 6000MHz", price: "5.990.000đ", color: "#c8d0dc", category: "RAM" },
+  { name: "Kingston Fury Beast DDR5", specs: "32GB (2x16GB) DDR5 6000MHz", price: "4.290.000đ", color: "#1a1a2e", category: "RAM" },
+
+  // --- CPU ---
+  { name: "Intel Core i5-14600K", specs: "14 Cores / 20 Threads up to 5.3GHz LGA1700", price: "7.890.000đ", badge: "Bán chạy", badgeColor: "#2563eb", color: "#1a1a2e", category: "CPU" },
+  { name: "Intel Core i7-14700K", specs: "20 Cores / 28 Threads up to 5.6GHz LGA1700", price: "10.490.000đ", badge: "Hot", badgeColor: "#dc2626", color: "#1a1a2e", category: "CPU" },
+  { name: "Intel Core i9-14900K", specs: "24 Cores / 32 Threads up to 6.0GHz LGA1700", price: "15.990.000đ", color: "#1a1a2e", category: "CPU" },
+  { name: "AMD Ryzen 5 7600X", specs: "6 Cores / 12 Threads up to 5.3GHz AM5", price: "5.890.000đ", color: "#1f2937", category: "CPU" },
+  { name: "AMD Ryzen 7 7800X3D", specs: "8 Cores / 16 Threads up to 5.0GHz 96MB AM5", price: "10.890.000đ", badge: "Cực hot", badgeColor: "#8b5cf6", color: "#1f2937", category: "CPU" },
+  { name: "AMD Ryzen 9 7900X", specs: "12 Cores / 24 Threads up to 5.6GHz AM5", price: "11.490.000đ", color: "#1f2937", category: "CPU" },
+
+  // --- VGA ---
+  { name: "ASUS Dual GeForce RTX 4060 White", specs: "8GB GDDR6 / 128-bit / 2 Fan / White", price: "8.490.000đ", badge: "Mới", badgeColor: "#10b981", color: "#e0e7ef", category: "VGA" },
+  { name: "MSI GeForce RTX 4060 VENTUS 2X", specs: "8GB GDDR6 / 128-bit / 2 Fan / Black", price: "8.590.000đ", badge: "Bán chạy", badgeColor: "#f97316", color: "#111", category: "VGA" },
+  { name: "Gigabyte RTX 4070 SUPER EAGLE", specs: "12GB GDDR6X / 192-bit / 3 Fan", price: "19.490.000đ", color: "#c8d0dc", category: "VGA" },
+  { name: "ASUS ROG Strix RTX 4080 SUPER", specs: "16GB GDDR6X / 256-bit / RGB", price: "34.990.000đ", color: "#2d2d2d", category: "VGA" },
+  { name: "MSI GeForce RTX 4090 SUPRIM X", specs: "24GB GDDR6X / 384-bit / Premium Design", price: "64.990.000đ", color: "#cbd5e1", category: "VGA" },
+
+  // --- Mainboard ---
+  { name: "ASUS TUF GAMING B760M-PLUS", specs: "LGA1700 / DDR5 / Intel B760 Micro-ATX", price: "4.490.000đ", color: "#1f2937", category: "Mainboard" },
+  { name: "ASUS ROG STRIX B760-F GAMING", specs: "LGA1700 / DDR5 / Intel Chipset B760 ATX", price: "5.490.000đ", color: "#2d2d2d", category: "Mainboard" },
+  { name: "Gigabyte Z790 AORUS ELITE AX", specs: "LGA1700 / DDR5 / Intel Chipset Z790 ATX", price: "7.990.000đ", badge: "Cao cấp", badgeColor: "#d97706", color: "#374151", category: "Mainboard" },
+  { name: "MSI MAG B650 TOMAHAWK WIFI", specs: "Socket AM5 / DDR5 / AMD Chipset B650 ATX", price: "5.890.000đ", color: "#1a1a2e", category: "Mainboard" },
+  { name: "ASUS ROG CROSSHAIR X670E HERO", specs: "Socket AM5 / DDR5 / AMD Chipset X670E ATX", price: "18.990.000đ", color: "#2d2d2d", category: "Mainboard" },
+
+  // --- SSD ---
+  { name: "Samsung 990 Pro 1TB NVMe", specs: "PCIe Gen 4.0 x4 M.2 2280 up to 7450MB/s", price: "2.990.000đ", badge: "Cực nhanh", badgeColor: "#2563eb", color: "#1e40af", category: "SSD" },
+  { name: "Crucial P3 Plus 2TB NVMe", specs: "PCIe Gen 4.0 x4 M.2 2280 up to 5000MB/s", price: "3.290.000đ", color: "#38bdf8", category: "SSD" },
+  { name: "Kingston NV2 500GB NVMe", specs: "PCIe Gen 4.0 x4 M.2 2280 up to 3500MB/s", price: "1.190.000đ", color: "#111827", category: "SSD" },
+  { name: "Samsung 980 500GB NVMe", specs: "PCIe Gen 3.0 x4 M.2 2280 up to 3100MB/s", price: "1.490.000đ", color: "#1e40af", category: "SSD" },
+  { name: "Western Digital Blue 1TB SATA III", specs: "2.5\" SSD read up to 560MB/s", price: "1.990.000đ", color: "#1f2937", category: "SSD" },
+
+  // --- HDD ---
+  { name: "Seagate Barracuda 2TB HDD", specs: "3.5\" SATA 3 7200RPM 256MB Cache", price: "1.590.000đ", color: "#374151", category: "HDD" },
+  { name: "Western Digital Blue 1TB HDD", specs: "3.5\" SATA 3 7200RPM 64MB Cache", price: "1.190.000đ", color: "#1f2937", category: "HDD" },
+  { name: "Seagate IronWolf 4TB NAS", specs: "3.5\" SATA 3 5900RPM 64MB Cache", price: "3.490.000đ", badge: "Dành cho NAS", badgeColor: "#2563eb", color: "#374151", category: "HDD" },
+  { name: "Western Digital Red Pro 8TB NAS", specs: "3.5\" SATA 3 7200RPM 256MB Cache", price: "7.290.000đ", color: "#1f2937", category: "HDD" },
+
+  // --- PSU ---
+  { name: "Corsair RM750e 750W", specs: "750 Watt / 80 Plus Gold / Full Modular / ATX", price: "2.890.000đ", badge: "Bán chạy", badgeColor: "#f97316", color: "#78350f", category: "PSU" },
+  { name: "MSI MAG A650BN 650W", specs: "650 Watt / 80 Plus Bronze / Non-Modular", price: "1.390.000đ", color: "#1a1a2e", category: "PSU" },
+  { name: "ASUS ROG THOR 850P 850W", specs: "850 Watt / 80 Plus Platinum / OLED Screen", price: "6.490.000đ", badge: "Cao cấp", badgeColor: "#8b5cf6", color: "#2d2d2d", category: "PSU" },
+  { name: "Corsair RM1000x 1000W", specs: "1000 Watt / 80 Plus Gold / Full Modular", price: "4.890.000đ", color: "#78350f", category: "PSU" },
+
+  // --- Cooling ---
+  { name: "Thermalright Peerless Assassin 120", specs: "Dual Fan Air Cooler / 6 Heatpipes / Black", price: "990.000đ", color: "#164e63", category: "Cooling" },
+  { name: "Corsair iCUE H150i Elite White", specs: "360mm AIO Liquid Cooler / White Design / ARGB", price: "5.490.000đ", badge: "ARGB", badgeColor: "#ec4899", color: "#e0e7ef", category: "Cooling" },
+  { name: "Lian Li Galahad II Trinity 360", specs: "360mm AIO Liquid Cooler / ARGB / Black", price: "4.190.000đ", color: "#1c1917", category: "Cooling" },
+  { name: "Noctua NH-D15", specs: "Premium Dual-Tower Air Cooler / Quiet / Brown", price: "2.890.000đ", color: "#78350f", category: "Cooling" },
+
+  // --- Case ---
+  { name: "Lian Li O11 Dynamic EVO", specs: "Mid Tower Case / Dual Chamber / White", price: "4.290.000đ", badge: "Hot", badgeColor: "#8b5cf6", color: "#e0e7ef", category: "Case" },
+  { name: "Corsair 4000D Airflow", specs: "Mid Tower Case / High-Airflow / Black", price: "2.190.000đ", color: "#111", category: "Case" },
+  { name: "NZXT H9 Flow", specs: "Dual-Chamber Mid Tower / Glass Panel / Black", price: "4.490.000đ", color: "#1c1917", category: "Case" },
+  { name: "ASUS ROG Hyperion GR701", specs: "Flagship Full Tower / E-ATX / RGB / Black", price: "10.990.000đ", color: "#2d2d2d", category: "Case" },
+
+  // --- Extra RAM ---
+  { name: "G.Skill Ripjaws S5", specs: "32GB (2x16GB) DDR5 5600MHz", price: "3.490.000đ", color: "#2d2d2d", category: "RAM" },
+  { name: "Kingston Fury Renegade", specs: "32GB (2x16GB) DDR5 6400MHz", price: "4.990.000đ", badge: "Mới", badgeColor: "#22c55e", color: "#1a1a2e", category: "RAM" },
+
+  // --- Extra CPU ---
+  { name: "Intel Core i3-14100", specs: "4 Cores / 8 Threads up to 4.7GHz LGA1700", price: "3.290.000đ", color: "#1a1a2e", category: "CPU" },
+  { name: "AMD Ryzen 5 7600", specs: "6 Cores / 12 Threads up to 5.1GHz AM5", price: "5.290.000đ", color: "#1f2937", category: "CPU" },
+
+  // --- Extra VGA ---
+  { name: "ASUS TUF RTX 4070 Ti SUPER", specs: "16GB GDDR6X / 256-bit / 3 Fan", price: "24.990.000đ", badge: "Cao cấp", badgeColor: "#d97706", color: "#2d2d2d", category: "VGA" },
+  { name: "Gigabyte RX 7600 XT GAMING OC", specs: "16GB GDDR6 / 128-bit / 3 Fan", price: "9.990.000đ", color: "#c8d0dc", category: "VGA" },
+
+  // --- Extra Mainboard ---
+  { name: "MSI PRO Z790-P WIFI", specs: "LGA1700 / DDR5 / Intel Chipset Z790 ATX", price: "6.290.000đ", color: "#1a1a2e", category: "Mainboard" },
+  { name: "Gigabyte B650M AORUS ELITE AX", specs: "Socket AM5 / DDR5 / AMD Chipset B650 Micro-ATX", price: "5.190.000đ", color: "#374151", category: "Mainboard" },
+
+  // --- Extra SSD ---
+  { name: "Samsung 980 Pro 2TB NVMe", specs: "PCIe Gen 4.0 x4 M.2 2280 up to 7000MB/s", price: "4.590.000đ", badge: "Bán chạy", badgeColor: "#f97316", color: "#1e40af", category: "SSD" },
+  { name: "Kingston NV2 2TB NVMe", specs: "PCIe Gen 4.0 x4 M.2 2280 up to 3500MB/s", price: "3.390.000đ", color: "#111827", category: "SSD" },
+
+  // --- Extra HDD ---
+  { name: "Western Digital Purple 4TB", specs: "3.5\" SATA 3 5400RPM 64MB Cache", price: "2.990.000đ", color: "#1f2937", category: "HDD" },
+  { name: "Seagate IronWolf Pro 12TB NAS", specs: "3.5\" SATA 3 7200RPM 256MB Cache", price: "9.490.000đ", color: "#374151", category: "HDD" },
+
+  // --- Extra PSU ---
+  { name: "ASUS ROG Strix 750W Gold", specs: "750 Watt / 80 Plus Gold / Full Modular", price: "3.290.000đ", color: "#2d2d2d", category: "PSU" },
+  { name: "MSI MAG A850GL 850W", specs: "850 Watt / 80 Plus Gold / Full Modular / ATX 3.0", price: "3.390.000đ", color: "#1a1a2e", category: "PSU" },
+
+  // --- Extra Cooling ---
+  { name: "Deepcool AK400 Digital", specs: "Single Fan Air Cooler / Digital Screen / Black", price: "850.000đ", color: "#164e63", category: "Cooling" },
+  { name: "NZXT Kraken 360 RGB", specs: "360mm AIO Liquid Cooler / LCD Screen / Black", price: "6.290.000đ", badge: "Màn hình LCD", badgeColor: "#8b5cf6", color: "#1c1917", category: "Cooling" },
+
+  // --- Extra Case ---
+  { name: "NZXT H5 Flow", specs: "Compact Mid Tower / High-Airflow / Black", price: "2.390.000đ", color: "#1c1917", category: "Case" },
+  { name: "Corsair 3000D RGB Airflow White", specs: "Mid Tower Case / 3x ARGB Fans / White", price: "2.290.000đ", color: "#e0e7ef", category: "Case" },
+
+  // --- 10 more RAM ---
+  { name: "Corsair Vengeance LPX DDR4 8G", specs: "8GB DDR4 3200MHz Black", price: "550.000đ", color: "#111", category: "RAM" },
+  { name: "Corsair Vengeance LPX DDR4 16G", specs: "16GB (2x8GB) DDR4 3200MHz Black", price: "1.090.000đ", color: "#111", category: "RAM" },
+  { name: "Kingston Fury Beast RGB DDR4", specs: "16GB (2x8GB) DDR4 3600MHz RGB", price: "1.390.000đ", color: "#1a1a2e", category: "RAM" },
+  { name: "G.Skill Trident Z Royal Gold", specs: "16GB (2x8GB) DDR4 3600MHz Gold", price: "2.490.000đ", badge: "Premium", badgeColor: "#f59e0b", color: "#fca5a5", category: "RAM" },
+  { name: "G.Skill Trident Z Royal Silver", specs: "32GB (2x16GB) DDR4 3600MHz Silver", price: "3.990.000đ", badge: "Premium", badgeColor: "#64748b", color: "#e2e8f0", category: "RAM" },
+  { name: "TeamGroup T-Force Delta DDR5 16G", specs: "16GB (2x8GB) DDR5 5200MHz RGB", price: "1.990.000đ", color: "#111827", category: "RAM" },
+  { name: "TeamGroup T-Force Delta DDR5 32G", specs: "32GB (2x16GB) DDR5 6000MHz RGB", price: "3.790.000đ", color: "#111827", category: "RAM" },
+  { name: "Crucial Pro DDR5", specs: "32GB (2x16GB) DDR5 5600MHz Black", price: "2.690.000đ", color: "#1f2937", category: "RAM" },
+  { name: "Corsair Dominator Titanium", specs: "32GB (2x16GB) DDR5 7200MHz White", price: "6.990.000đ", badge: "Siêu cấp", badgeColor: "#dc2626", color: "#e0e7ef", category: "RAM" },
+  { name: "G.Skill Trident Z5 Neo", specs: "64GB (2x32GB) DDR5 6000MHz RGB", price: "6.490.000đ", color: "#2d2d2d", category: "RAM" },
+
+  // --- 8 more CPU ---
+  { name: "Intel Core i3-12100F", specs: "4 Cores / 8 Threads up to 4.3GHz LGA1700", price: "1.990.000đ", color: "#1a1a2e", category: "CPU" },
+  { name: "Intel Core i5-12400F", specs: "6 Cores / 12 Threads up to 4.4GHz LGA1700", price: "3.490.000đ", badge: "Bán chạy", badgeColor: "#f97316", color: "#1a1a2e", category: "CPU" },
+  { name: "Intel Core i5-13400F", specs: "10 Cores / 16 Threads up to 4.6GHz LGA1700", price: "4.990.000đ", color: "#1a1a2e", category: "CPU" },
+  { name: "Intel Core i7-13700K", specs: "16 Cores / 24 Threads up to 5.4GHz LGA1700", price: "8.990.000đ", color: "#1a1a2e", category: "CPU" },
+  { name: "AMD Ryzen 5 5600X", specs: "6 Cores / 12 Threads up to 4.6GHz AM4", price: "3.890.000đ", color: "#1f2937", category: "CPU" },
+  { name: "AMD Ryzen 5 7600X", specs: "6 Cores / 12 Threads up to 5.3GHz AM5", price: "5.790.000đ", color: "#1f2937", category: "CPU" },
+  { name: "AMD Ryzen 7 5700X", specs: "8 Cores / 16 Threads up to 4.6GHz AM4", price: "4.890.000đ", color: "#1f2937", category: "CPU" },
+  { name: "AMD Ryzen 9 7950X", specs: "16 Cores / 32 Threads up to 5.7GHz AM5", price: "14.990.000đ", badge: "Flagship", badgeColor: "#8b5cf6", color: "#1f2937", category: "CPU" },
+
+  // --- 8 more VGA ---
+  { name: "MSI GTX 1650 D6 VENTUS XS", specs: "4GB GDDR6 / 128-bit / 2 Fan", price: "3.690.000đ", color: "#111", category: "VGA" },
+  { name: "ASUS Dual Radeon RX 6600", specs: "8GB GDDR6 / 128-bit / 2 Fan", price: "5.990.000đ", color: "#2d2d2d", category: "VGA" },
+  { name: "Gigabyte RTX 3060 WINDFORCE", specs: "12GB GDDR6 / 192-bit / 2 Fan", price: "7.990.000đ", color: "#c8d0dc", category: "VGA" },
+  { name: "MSI RTX 4060 Ti GAMING X", specs: "8GB GDDR6 / 128-bit / Twin Frozr", price: "11.490.000đ", badge: "RGB", badgeColor: "#22c55e", color: "#111", category: "VGA" },
+  { name: "Gigabyte RTX 4070 WINDFORCE", specs: "12GB GDDR6X / 192-bit / 3 Fan", price: "16.990.000đ", color: "#c8d0dc", category: "VGA" },
+  { name: "ASUS TUF RTX 4070 Ti SUPER OC", specs: "16GB GDDR6X / 256-bit / 3 Fan", price: "25.990.000đ", color: "#2d2d2d", category: "VGA" },
+  { name: "ASUS ROG Strix RTX 4090 OC", specs: "24GB GDDR6X / 384-bit / Flagship GPU", price: "69.990.000đ", badge: "Khủng", badgeColor: "#dc2626", color: "#cbd5e1", category: "VGA" },
+  { name: "PowerColor Hellhound RX 7800 XT", specs: "16GB GDDR6 / 256-bit / Led Ice Blue", price: "14.490.000đ", color: "#1c1917", category: "VGA" }
 ];
 
 
@@ -72,17 +192,11 @@ const perks = [
 
 /* ── HELPERS ────────────────────────────────────────────────────────── */
 function parsePrice(priceStr: string) {
-  return parseInt(priceStr.replace(/\\D/g, ''), 10) || 0;
+  return parseInt(priceStr.replace(/\D/g, ''), 10) || 0;
 }
 
 function formatPrice(p: number) {
   return new Intl.NumberFormat("vi-VN").format(p) + " đ";
-}
-
-function toggleSet<T>(set: Set<T>, value: T): Set<T> {
-  const next = new Set(set);
-  next.has(value) ? next.delete(value) : next.add(value);
-  return next;
 }
 
 /* ── FilterCheckbox ─────────────────────────────────────────────────── */
@@ -125,13 +239,42 @@ function FilterGroup({ title, children }: { title: string; children: React.React
   );
 }
 
-/* ── PRODUCT PLACEHOLDER IMAGE ─────────────────────────────────────── */
-function ProductPlaceholder({ color = "#e5e7eb" }: { color?: string }) {
+/* ── PRODUCT IMAGE ─────────────────────────────────────────────────── */
+function ProductImage({
+  src,
+  alt,
+  color = "#e5e7eb",
+}: {
+  src?: string;
+  alt: string;
+  color?: string;
+}) {
+  const [imageFailed, setImageFailed] = useState(false);
+  const shouldShowImage = Boolean(src && !imageFailed);
+
   return (
     <div
-      className="w-full aspect-[4/3] rounded-xl flex items-center justify-center"
-      style={{ background: `linear-gradient(135deg, ${color}22 0%, ${color}44 100%)`, border: `1px solid ${color}33` }}
+      className="relative w-full aspect-[4/3] rounded-xl flex items-center justify-center overflow-hidden bg-white"
+      style={shouldShowImage
+        ? { border: "1px solid #f1f5f9" }
+        : { background: "#f8fafc", border: "1px solid #e5e7eb" }
+      }
     >
+      {shouldShowImage ? (
+        <>
+          <div
+            className="absolute left-1/2 top-1/2 h-3/5 w-3/5 -translate-x-1/2 -translate-y-1/2 rounded-full blur-2xl opacity-25"
+            style={{ backgroundColor: color }}
+          />
+          <img
+            src={src}
+            alt={alt}
+            className="absolute inset-2 m-auto max-w-[calc(100%-16px)] max-h-[calc(100%-16px)] object-contain"
+            loading="lazy"
+            onError={() => setImageFailed(true)}
+          />
+        </>
+      ) : (
       <div className="flex flex-col items-center gap-2 opacity-30">
         <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke={color === "#e0e7ef" ? "#94a3b8" : "#6b7280"} strokeWidth="1.5">
           <rect x="2" y="6" width="20" height="12" rx="2" />
@@ -142,6 +285,7 @@ function ProductPlaceholder({ color = "#e5e7eb" }: { color?: string }) {
           Ảnh sản phẩm
         </span>
       </div>
+      )}
     </div>
   );
 }
@@ -154,7 +298,8 @@ const API_BASE = typeof window !== "undefined"
 
 /* ── PAGE ──────────────────────────────────────────────────────────── */
 export default function LinhKienIndex() {
-  const [liked, setLiked] = useState<Set<number>>(new Set());
+  const navigate = useNavigate();
+  const [liked, setLiked] = useState<Set<string>>(new Set());
   const [activeCategory, setActiveCategory] = useState("ram");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [products, setProducts] = useState<Product[]>(defaultProducts);
@@ -221,9 +366,32 @@ export default function LinhKienIndex() {
     setMaxPrice(maxP ? Number(maxP) : MAX_PRICE);
   }, [searchParams]);
 
-  const toggleLike = (i: number) => {
-    setLiked(p => toggleSet(p, i));
+  const toggleLike = (name: string) => {
+    setLiked(p => {
+      const next = new Set(p);
+      next.has(name) ? next.delete(name) : next.add(name);
+      return next;
+    });
   };
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 16;
+
+  // Reset page when category or filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [
+    activeCategory,
+    selBrands,
+    selCapacities,
+    selTypes,
+    selBuses,
+    selSeries,
+    selWattages,
+    selSizes,
+    minPrice,
+    maxPrice
+  ]);
 
   const hasActiveFilter =
     selBrands.size > 0 || selCapacities.size > 0 || selTypes.size > 0 ||
@@ -242,7 +410,7 @@ export default function LinhKienIndex() {
     setMaxPrice(MAX_PRICE);
 
     // Keep only category in search params
-    setSearchParams({ category: activeCategory });
+    setSearchParams({ category: activeCategory }, { replace: true });
   };
 
   const handleFilterToggle = (
@@ -263,13 +431,12 @@ export default function LinhKienIndex() {
     } else {
       newParams.delete(paramName);
     }
-    setSearchParams(newParams);
+    setSearchParams(newParams, { replace: true });
   };
-
   const handleCategorySelect = (catId: string) => {
     setActiveCategory(catId);
     resetFilters();
-    setSearchParams({ category: catId });
+    setSearchParams({ category: catId }, { replace: true });
   };
 
   /* Derived filtered + sorted list */
@@ -326,6 +493,15 @@ export default function LinhKienIndex() {
     if (sortBy === "name")       result = [...result].sort((a, b) => a.name.localeCompare(b.name));
     return result;
   }, [products, activeCategory, selBrands, selCapacities, selTypes, selBuses, selSeries, selWattages, selSizes, minPrice, maxPrice, sortBy]);
+
+  const totalPages = useMemo(() => {
+    return Math.ceil(filteredProducts.length / ITEMS_PER_PAGE) || 1;
+  }, [filteredProducts.length]);
+
+  const paginatedProducts = useMemo(() => {
+    const start = (currentPage - 1) * ITEMS_PER_PAGE;
+    return filteredProducts.slice(start, start + ITEMS_PER_PAGE);
+  }, [filteredProducts, currentPage]);
 
   const heroContainer = {
     hidden: {},
@@ -398,7 +574,7 @@ export default function LinhKienIndex() {
               // Sync price to URL
               const newParams = new URLSearchParams(searchParams);
               newParams.set("minPrice", String(val));
-              setSearchParams(newParams);
+              setSearchParams(newParams, { replace: true });
             }}
             className="dual-range-slider"
             style={{ zIndex: activeInput === 'min' ? 10 : 3 }}
@@ -416,7 +592,7 @@ export default function LinhKienIndex() {
               // Sync price to URL
               const newParams = new URLSearchParams(searchParams);
               newParams.set("maxPrice", String(val));
-              setSearchParams(newParams);
+              setSearchParams(newParams, { replace: true });
             }}
             className="dual-range-slider"
             style={{ zIndex: activeInput === 'max' ? 10 : 3 }}
@@ -619,74 +795,114 @@ export default function LinhKienIndex() {
     <div className="bg-[#fafafa] min-h-screen pb-16">
 
       {/* ══ 1. HERO ═════════════════════════════════════════════════════ */}
-      <div className="relative overflow-hidden" style={{ background: "linear-gradient(135deg, #f8fafc 0%, #f0f4f8 40%, #e8eef5 100%)" }}>
-        {/* BG glow */}
-        <div className="absolute inset-0 pointer-events-none">
-          <div style={{ position: "absolute", top: "-10%", right: "-5%", width: 700, height: 700, background: "radial-gradient(circle, rgba(147,197,253,0.25) 0%, transparent 65%)" }} />
-          <div style={{ position: "absolute", bottom: 0, left: 0, width: 500, height: 300, background: "radial-gradient(ellipse at 0% 100%, rgba(255,255,255,0.8) 0%, transparent 70%)" }} />
-        </div>
+      <div 
+        className="relative overflow-hidden" 
+        style={{ 
+          background: "linear-gradient(135deg, #ffffff 0%, #f0f6ff 40%, #e3effe 70%, #dceafd 100%)",
+          marginLeft: "calc(-50vw + 50%)",
+          marginRight: "calc(-50vw + 50%)",
+          marginTop: "-96px",
+          paddingTop: "96px",
+          paddingLeft: "calc(50vw - 50%)",
+          paddingRight: "calc(50vw - 50%)",
+          position: "relative",
+        }}
+      >
+        {/* Top-right blue glow */}
+        <div style={{
+          position: "absolute", top: "-10%", right: "-5%",
+          width: 800, height: 800,
+          background: "radial-gradient(circle, rgba(147,197,253,0.35) 0%, rgba(165,180,252,0.15) 40%, transparent 70%)",
+          pointerEvents: "none",
+        }} />
+        {/* Bottom left soft white fade */}
+        <div style={{
+          position: "absolute", bottom: 0, left: 0,
+          width: 600, height: 400,
+          background: "radial-gradient(ellipse at 0% 100%, rgba(255,255,255,0.9) 0%, transparent 70%)",
+          pointerEvents: "none",
+        }} />
 
-        <div className="max-w-[1700px] mx-auto px-4 md:px-8 lg:px-10 xl:px-12 2xl:px-16 py-10 md:py-16 relative">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+        <div className="max-w-[1700px] mx-auto px-4 md:px-8 lg:px-10 xl:px-12 2xl:px-16 relative z-10">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center" style={{ minHeight: "calc(100vh - 96px)" }}>
 
             {/* Left */}
-            <motion.div variants={heroContainer} initial="hidden" animate="show" className="max-w-2xl">
+            <motion.div variants={heroContainer} initial="hidden" animate="show" className="max-w-2xl flex flex-col items-start justify-center pr-8 py-12 relative z-10">
               <motion.div variants={heroItem}>
-                <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold tracking-widest uppercase text-zinc-500 mb-5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-zinc-400" />
+                <span className="inline-block px-3 py-1 bg-white/70 text-zinc-500 rounded-full text-[11px] font-semibold uppercase tracking-widest mb-6 border border-zinc-200/60">
                   Linh kiện chính hãng
                 </span>
               </motion.div>
-              <motion.h1 variants={heroItem} className="text-[3.2rem] md:text-[4.2rem] lg:text-[5rem] font-bold tracking-tight text-zinc-900 leading-[1.08] mb-6">
-                Linh kiện PC<br />cho mọi cấu hình.
+              <motion.h1 variants={heroItem} className="text-[3.1rem] md:text-[4.2rem] lg:text-[4.35rem] font-bold tracking-tight text-zinc-900 leading-[1.08] mb-6">
+                Linh kiện PC<br /><span className="whitespace-nowrap">cho mọi cấu hình.</span>
               </motion.h1>
-              <motion.p variants={heroItem} className="text-[16px] text-zinc-500 leading-relaxed mb-8">
+              <motion.p variants={heroItem} className="text-[17px] text-zinc-500 leading-relaxed mb-10">
                 Đa dạng linh kiện chính hãng, chất lượng cao.<br />
                 Tương thích tối ưu – Bền bỉ – Hiệu suất vượt trội.
               </motion.p>
-              <motion.div variants={heroItem} className="flex flex-wrap gap-3">
-                <button className="inline-flex items-center gap-2 px-7 py-3 bg-zinc-900 hover:bg-zinc-800 text-white text-[14px] font-semibold rounded-lg transition-all duration-200 shadow-lg shadow-zinc-900/20 active:scale-95 cursor-pointer">
-                  Xem linh kiện <ChevronRight className="w-4 h-4" />
+              <motion.div variants={heroItem} className="flex flex-row gap-3 mb-12">
+                <button
+                  onClick={() => {
+                    document
+                      .getElementById("danh-muc-linh-kien")
+                      ?.scrollIntoView({ behavior: "smooth", block: "start" });
+                  }}
+                  className="inline-flex items-center gap-2 px-8 py-3.5 bg-[#1d1d1f] hover:bg-zinc-800 text-white text-[15px] font-semibold rounded-full transition-all duration-200 shadow-md active:scale-95 cursor-pointer"
+                >
+                  Xem linh kiện <ArrowRight className="w-4 h-4" />
                 </button>
-                <button className="inline-flex items-center gap-2 px-7 py-3 bg-white border border-zinc-200 hover:bg-zinc-50 text-zinc-800 text-[14px] font-semibold rounded-lg transition-all duration-200 shadow-sm active:scale-95 cursor-pointer">
-                  Hướng dẫn build PC <ChevronRight className="w-4 h-4" />
+                <button className="inline-flex items-center gap-2 px-8 py-3.5 bg-white/80 border border-zinc-300 hover:bg-white text-zinc-800 text-[15px] font-semibold rounded-full transition-all duration-200 shadow-sm active:scale-95 cursor-pointer">
+                  Hướng dẫn build PC <ArrowRight className="w-4 h-4" />
                 </button>
               </motion.div>
 
               {/* Mini perks */}
-              <motion.div variants={heroItem} className="flex flex-wrap gap-6 mt-10 pt-8 border-t border-zinc-200/60">
+              <motion.div variants={heroItem} className="flex flex-wrap items-center gap-x-8 gap-y-3 pt-7 border-t border-zinc-300/40 w-full">
                 {perks.map(({ icon: Icon, title }) => (
                   <div key={title} className="flex items-center gap-2">
-                    <Icon className="w-5 h-5 text-zinc-500 shrink-0" strokeWidth={1.6} />
-                    <span className="text-[12px] text-zinc-500 font-medium leading-tight">{title}</span>
+                    <Icon className="w-5 h-5 text-zinc-700 shrink-0" strokeWidth={1.8} />
+                    <span className="text-[13px] text-zinc-700 leading-tight whitespace-pre-line font-semibold">{title}</span>
                   </div>
                 ))}
               </motion.div>
             </motion.div>
 
-            {/* Right — PC case placeholder */}
+            {/* Right — components hero image */}
             <motion.div
               initial={{ opacity: 0, x: 40, scale: 0.96 }}
               animate={{ opacity: 1, x: 0, scale: 1 }}
               transition={{ duration: 1, ease: [0.25, 1, 0.5, 1], delay: 0.2 }}
-              className="relative hidden lg:flex items-end justify-center"
-              style={{ minHeight: 340 }}
+              className="relative hidden lg:flex items-center justify-center"
+              style={{ alignSelf: "stretch" }}
             >
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80%] h-[80%] rounded-full blur-3xl opacity-60 pointer-events-none" style={{ background: "radial-gradient(circle, rgba(147,197,253,0.35) 0%, transparent 70%)" }} />
-              {/* PC Case hero placeholder */}
-              <div className="relative z-10 flex flex-col items-center justify-center w-[360px] h-[320px] rounded-3xl border-2 border-zinc-200/60 bg-white/40 backdrop-blur shadow-2xl">
-                <div className="flex flex-col items-center gap-3 opacity-40">
-                  <svg width="80" height="80" viewBox="0 0 64 64" fill="none" stroke="#64748b" strokeWidth="1.5">
-                    <rect x="12" y="4" width="40" height="56" rx="4" />
-                    <rect x="18" y="10" width="28" height="18" rx="2" />
-                    <circle cx="32" cy="40" r="6" />
-                    <circle cx="32" cy="40" r="2" />
-                    <line x1="12" y1="32" x2="7" y2="32" />
-                    <line x1="52" y1="32" x2="57" y2="32" />
-                  </svg>
-                  <span className="text-[13px] font-semibold text-zinc-500">Ảnh case PC</span>
-                </div>
-              </div>
+              {/* Blue glow behind PC */}
+              <div style={{
+                position: "absolute",
+                width: 600, height: 600,
+                background: "radial-gradient(circle, rgba(147,197,253,0.3) 0%, rgba(165,180,252,0.1) 50%, transparent 70%)",
+                top: "50%", left: "50%", transform: "translate(-48%, -50%)",
+                pointerEvents: "none",
+                zIndex: 0,
+              }} />
+              
+              {/* Floor reflection */}
+              <div style={{
+                position: "absolute",
+                width: 500, height: 60,
+                background: "radial-gradient(ellipse, rgba(120,170,250,0.2) 0%, transparent 70%)",
+                bottom: "18%", left: "50%", transform: "translateX(-48%)",
+                pointerEvents: "none",
+                zIndex: 1,
+              }} />
+
+              <motion.img
+                src={componentsHeroImage}
+                alt="Linh kiện PC"
+                initial={{ opacity: 0, y: 32, scale: 0.8 }}
+                animate={{ opacity: 1, y: 0, scale: 1.05 }}
+                transition={{ type: "spring", stiffness: 150, damping: 14, delay: 0.38 }}
+                className="relative z-10 w-[580px] max-w-full object-contain drop-shadow-2xl"
+              />
             </motion.div>
 
           </div>
@@ -697,7 +913,7 @@ export default function LinhKienIndex() {
       <div className="max-w-[1700px] mx-auto px-4 md:px-8 lg:px-10 xl:px-12 2xl:px-16 mt-10">
 
         {/* ══ 2. CATEGORY NAV ═══════════════════════════════════════════ */}
-        <section className="mb-10">
+        <section id="danh-muc-linh-kien" className="scroll-mt-28 mb-10">
           <div className="flex items-center justify-between mb-5">
             <h2 className="text-[18px] font-bold text-zinc-900">Danh mục linh kiện</h2>
             <a href="#" className="text-[13px] font-semibold text-zinc-500 hover:text-zinc-900 flex items-center gap-1 transition-colors">
@@ -716,10 +932,9 @@ export default function LinhKienIndex() {
               >
                 {/* Gradient block */}
                 <div
-                  className="w-full aspect-[4/3] relative"
+                  className="w-full aspect-[4/3] relative flex items-center justify-center overflow-hidden"
                   style={{
-                    background: `linear-gradient(135deg, ${cat.from} 0%, ${cat.to} 100%)`,
-                    overflow: "hidden",
+                    // background: `linear-gradient(135deg, ${cat.from} 0%, ${cat.to} 100%)`,
                   }}
                 >
                   <div style={{
@@ -727,6 +942,14 @@ export default function LinhKienIndex() {
                     background: `radial-gradient(circle at 30% 30%, ${cat.glow} 0%, transparent 65%)`,
                     pointerEvents: "none",
                   }} />
+                  {cat.image && (
+                    <img
+                      src={`${API_BASE}/images/linh-kien/${cat.image}`}
+                      alt={cat.label}
+                      className="absolute inset-0 w-full h-full object-contain p-2 group-hover:scale-105 transition-transform duration-300"
+                      style={{ mixBlendMode: "multiply" }}
+                    />
+                  )}
                   {activeCategory === cat.id && (
                     <div className="absolute inset-0 ring-2 ring-inset ring-white/20" />
                   )}
@@ -815,7 +1038,7 @@ export default function LinhKienIndex() {
           )}
 
           {/* Products */}
-          <main className="flex-1 min-w-0">
+          <main id="components-grid-top" className="flex-1 min-w-0">
             {/* Toolbar */}
             <div className="hidden lg:flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
               <p className="text-[13px] text-zinc-500 font-medium">
@@ -870,9 +1093,13 @@ export default function LinhKienIndex() {
                 ? "grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-3.5"
                 : "flex flex-col gap-3"
               }>
-                {filteredProducts.map((p, i) => (
+                {paginatedProducts.map((p, i) => (
                   viewMode === "grid" ? (
-                    <div key={i} className="group bg-white rounded-2xl border border-zinc-100 p-3.5 shadow-sm hover:shadow-md hover:border-zinc-200 transition-all duration-300 flex flex-col relative">
+                    <div
+                      key={i}
+                      onClick={() => navigate(`/san-pham/component-${p.category || "linh-kien"}-${p.name}`)}
+                      className="group bg-white rounded-2xl border border-zinc-100 p-3.5 shadow-sm hover:shadow-md hover:border-zinc-200 transition-all duration-300 flex flex-col relative cursor-pointer"
+                    >
                       {/* Badge */}
                       {p.badge && (
                         <span
@@ -884,24 +1111,42 @@ export default function LinhKienIndex() {
                       )}
                       {/* Like */}
                       <button
-                        onClick={() => toggleLike(i)}
-                        className="absolute top-3 right-3 z-10 w-7 h-7 flex items-center justify-center rounded-full bg-white border border-zinc-100 shadow-sm hover:bg-zinc-50 transition-colors cursor-pointer"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleLike(p.name);
+                        }}
+                        className="absolute top-3 right-3 z-10 w-7 h-7 flex items-center justify-center rounded-full bg-white border border-zinc-100 shadow-sm hover:bg-white transition-colors cursor-pointer"
                       >
-                        <Heart className={`w-3.5 h-3.5 transition-colors ${liked.has(i) ? "fill-red-500 text-red-500" : "text-zinc-300"}`} />
+                        <Heart className={`w-3.5 h-3.5 transition-colors ${liked.has(p.name) ? "fill-red-500 text-red-500" : "text-zinc-300"}`} />
                       </button>
-                      {/* Image placeholder */}
-                      <ProductPlaceholder color={p.color} />
+                      <ProductImage src={p.image} alt={p.name} color={p.color} />
                       {/* Info */}
                       <div className="mt-3 flex flex-col flex-1">
                         <h3 className="text-[13px] font-bold text-zinc-900 leading-tight mb-1 line-clamp-2">{p.name}</h3>
                         <p className="text-[11.5px] text-zinc-400 mb-3 flex-1">{p.specs}</p>
-                        <p className="text-[14px] font-extrabold text-zinc-900">{p.price}</p>
+                        <div className="flex items-center justify-between gap-3">
+                          <p className="text-[14px] font-extrabold text-zinc-900">{p.price}</p>
+                          <AddToCartButton
+                            product={{
+                              id: `component-${p.category || "linh-kien"}-${p.name}`,
+                              name: p.name,
+                              specs: p.specs,
+                              price: p.price,
+                              image: p.image,
+                              category: p.category || "Linh kiện",
+                            }}
+                          />
+                        </div>
                       </div>
                     </div>
                   ) : (
-                    <div key={i} className="group bg-white rounded-xl border border-zinc-100 p-3 shadow-sm hover:shadow-md transition-all duration-300 flex items-center gap-4 relative">
+                    <div
+                      key={i}
+                      onClick={() => navigate(`/san-pham/component-${p.category || "linh-kien"}-${p.name}`)}
+                      className="group bg-white rounded-xl border border-zinc-100 p-3 shadow-sm hover:shadow-md transition-all duration-300 flex items-center gap-4 relative cursor-pointer"
+                    >
                       <div className="w-20 h-16 shrink-0">
-                        <ProductPlaceholder color={p.color} />
+                        <ProductImage src={p.image} alt={p.name} color={p.color} />
                       </div>
                       {p.badge && (
                         <span className="absolute top-3 left-2.5 px-2 py-0.5 text-[10px] font-bold text-white rounded-full" style={{ background: p.badgeColor }}>{p.badge}</span>
@@ -913,8 +1158,24 @@ export default function LinhKienIndex() {
                       <div className="text-right shrink-0">
                         <p className="text-[14px] font-extrabold text-zinc-900">{p.price}</p>
                       </div>
-                      <button onClick={() => toggleLike(i)} className="w-7 h-7 flex items-center justify-center rounded-full bg-zinc-50 hover:bg-zinc-100 transition-colors cursor-pointer shrink-0">
-                        <Heart className={`w-3.5 h-3.5 transition-colors ${liked.has(i) ? "fill-red-500 text-red-500" : "text-zinc-300"}`} />
+                      <AddToCartButton
+                        product={{
+                          id: `component-${p.category || "linh-kien"}-${p.name}`,
+                          name: p.name,
+                          specs: p.specs,
+                          price: p.price,
+                          image: p.image,
+                          category: p.category || "Linh kiện",
+                        }}
+                      />
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleLike(p.name);
+                        }}
+                        className="w-7 h-7 flex items-center justify-center rounded-full bg-zinc-50 hover:bg-zinc-100 transition-colors cursor-pointer shrink-0"
+                      >
+                        <Heart className={`w-3.5 h-3.5 transition-colors ${liked.has(p.name) ? "fill-red-500 text-red-500" : "text-zinc-300"}`} />
                       </button>
                     </div>
                   )
@@ -923,25 +1184,49 @@ export default function LinhKienIndex() {
             )}
 
             {/* Pagination */}
-            {filteredProducts.length > 0 && (
+            {totalPages > 1 && (
               <div className="flex items-center justify-center gap-1.5 mt-10">
-                <button className="w-8 h-8 flex items-center justify-center rounded-lg border border-zinc-200 text-zinc-400 hover:bg-zinc-50 transition-colors cursor-pointer">
+                <button
+                  disabled={currentPage === 1}
+                  onClick={() => {
+                    setCurrentPage(p => Math.max(1, p - 1));
+                    document.getElementById("components-grid-top")?.scrollIntoView({ behavior: "smooth" });
+                  }}
+                  className={`w-8 h-8 flex items-center justify-center rounded-lg border border-zinc-200 transition-colors ${
+                    currentPage === 1 ? "text-zinc-350 cursor-not-allowed" : "text-zinc-650 hover:bg-zinc-50 cursor-pointer"
+                  }`}
+                >
                   <ChevronLeft className="w-4 h-4" />
                 </button>
-                {[1, 2, 3].map(n => (
-                  <button
-                    key={n}
-                    className={`w-8 h-8 flex items-center justify-center rounded-lg text-[13px] font-medium transition-colors cursor-pointer
-                      ${n === 1 ? "bg-zinc-900 text-white" : "border border-zinc-200 text-zinc-600 hover:bg-zinc-50"}`}
-                  >
-                    {n}
-                  </button>
-                ))}
-                <span className="px-1 text-zinc-400 text-[13px]">...</span>
-                <button className="w-8 h-8 flex items-center justify-center rounded-lg border border-zinc-200 text-zinc-600 hover:bg-zinc-50 text-[13px] font-medium transition-colors cursor-pointer">
-                  7
-                </button>
-                <button className="w-8 h-8 flex items-center justify-center rounded-lg border border-zinc-200 text-zinc-400 hover:bg-zinc-50 transition-colors cursor-pointer">
+                {Array.from({ length: totalPages }, (_, idx) => {
+                  const pageNum = idx + 1;
+                  return (
+                    <button
+                      key={pageNum}
+                      onClick={() => {
+                        setCurrentPage(pageNum);
+                        document.getElementById("components-grid-top")?.scrollIntoView({ behavior: "smooth" });
+                      }}
+                      className={`w-8 h-8 flex items-center justify-center rounded-lg text-[13px] font-medium transition-colors cursor-pointer ${
+                        currentPage === pageNum
+                          ? "bg-zinc-900 text-white"
+                          : "border border-zinc-200 text-zinc-600 hover:bg-zinc-50"
+                      }`}
+                    >
+                      {pageNum}
+                    </button>
+                  );
+                })}
+                <button
+                  disabled={currentPage === totalPages}
+                  onClick={() => {
+                    setCurrentPage(p => Math.min(totalPages, p + 1));
+                    document.getElementById("components-grid-top")?.scrollIntoView({ behavior: "smooth" });
+                  }}
+                  className={`w-8 h-8 flex items-center justify-center rounded-lg border border-zinc-200 transition-colors ${
+                    currentPage === totalPages ? "text-zinc-350 cursor-not-allowed" : "text-zinc-650 hover:bg-zinc-50 cursor-pointer"
+                  }`}
+                >
                   <ChevronRight className="w-4 h-4" />
                 </button>
               </div>

@@ -8,6 +8,9 @@ const DB_DIR = "./backend/db";
 const rateLimits = new Map<string, { count: number; resetTime: number }>();
 const resetTokens = new Map<string, { email: string; expiresAt: number }>();
 
+const defaultOrders: any[] = [];
+const defaultPayments: any[] = [];
+
 function getClientIP(req: Request): string {
   const cfConnectingIP = req.headers.get("cf-connecting-ip");
   if (cfConnectingIP) return cfConnectingIP.trim();
@@ -135,18 +138,18 @@ const defaultPCs = [
 ];
 
 const defaultComponents = [
-  { name: "G.Skill Trident Z5 RGB",      specs: "18GB (2x8GB) DDR5 6000MHz",  price: "2.890.000đ", badge: "Mới",     badgeColor: "#22c55e", color: "#e0e7ef" },
-  { name: "Corsair Vengeance RGB",        specs: "16GB (2x8GB) DDR5 5600MHz",  price: "2.290.000đ", badge: "Bán chạy",badgeColor: "#f97316", color: "#1a1a2e" },
-  { name: "Kingston Fury Beast",          specs: "16GB (2x8GB) DDR4 3200MHz",  price: "990.000đ",   color: "#1a1a2e" },
-  { name: "G.Skill Ripjaws V",            specs: "16GB (2x8GB) DDR4 3600MHz",  price: "1.290.000đ", color: "#2d2d2d" },
-  { name: "Corsair Dominator Platinum",   specs: "32GB (2x16GB) DDR5 6000MHz", price: "5.990.000đ", color: "#c8d0dc" },
-  { name: "TeamGroup T-Force Delta RGB",  specs: "32GB (2x16GB) DDR5 6000MHz", price: "4.490.000đ", color: "#111827" },
-  { name: "Crucial Pro",                  specs: "32GB (2x16GB) DDR5 4800MHz", price: "1.690.000đ", color: "#1f2937" },
-  { name: "Kingston Fury Beast",          specs: "32GB (2x16GB) DDR5 6000MHz", price: "4.290.000đ", color: "#1a1a2e" },
-  { name: "G.Skill Trident Z5 RGB",      specs: "32GB (2x16GB) DDR5 6400MHz", price: "5.490.000đ", color: "#e0e7ef" },
-  { name: "Corsair Vengeance LPX",        specs: "16GB (2x8GB) DDR4 3200MHz",  price: "1.190.000đ", color: "#111" },
-  { name: "Apacer PANTHER",              specs: "16GB (2x8GB) DDR4 3600MHz",  price: "1.090.000đ", color: "#f59e0b" },
-  { name: "TeamGroup T-Force Vulcan Z",  specs: "16GB (2x8GB) DDR4 3200MHz",  price: "890.000đ",   color: "#dc2626" }
+  { name: "G.Skill Trident Z5 RGB", specs: "18GB (2x8GB) DDR5 6000MHz", price: "2.890.000đ", badge: "Mới", badgeColor: "#22c55e", color: "#e0e7ef" },
+  { name: "Corsair Vengeance RGB", specs: "16GB (2x8GB) DDR5 5600MHz", price: "2.290.000đ", badge: "Bán chạy", badgeColor: "#f97316", color: "#1a1a2e" },
+  { name: "Kingston Fury Beast", specs: "16GB (2x8GB) DDR4 3200MHz", price: "990.000đ", color: "#1a1a2e" },
+  { name: "G.Skill Ripjaws V", specs: "16GB (2x8GB) DDR4 3600MHz", price: "1.290.000đ", color: "#2d2d2d" },
+  { name: "Corsair Dominator Platinum", specs: "32GB (2x16GB) DDR5 6000MHz", price: "5.990.000đ", color: "#c8d0dc" },
+  { name: "TeamGroup T-Force Delta RGB", specs: "32GB (2x16GB) DDR5 6000MHz", price: "4.490.000đ", color: "#111827" },
+  { name: "Crucial Pro", specs: "32GB (2x16GB) DDR5 4800MHz", price: "1.690.000đ", color: "#1f2937" },
+  { name: "Kingston Fury Beast", specs: "32GB (2x16GB) DDR5 6000MHz", price: "4.290.000đ", color: "#1a1a2e" },
+  { name: "G.Skill Trident Z5 RGB", specs: "32GB (2x16GB) DDR5 6400MHz", price: "5.490.000đ", color: "#e0e7ef" },
+  { name: "Corsair Vengeance LPX", specs: "16GB (2x8GB) DDR4 3200MHz", price: "1.190.000đ", color: "#111" },
+  { name: "Apacer PANTHER", specs: "16GB (2x8GB) DDR4 3600MHz", price: "1.090.000đ", color: "#f59e0b" },
+  { name: "TeamGroup T-Force Vulcan Z", specs: "16GB (2x8GB) DDR4 3200MHz", price: "890.000đ", color: "#dc2626" }
 ];
 
 const defaultLaptops = [
@@ -265,6 +268,40 @@ const defaultAccessories = [
   }
 ];
 
+
+const defaultAccessoryCombos = [
+  {
+    id: "combo-gaming-starter",
+    title: "Combo Gaming Starter",
+    desc: "Bộ phụ kiện cơ bản cho góc gaming: bàn phím, chuột và lót chuột.",
+    productIds: [2, 3, 4],
+    discountPercent: 10,
+    image: "",
+    isActive: true,
+    createdAt: new Date().toISOString()
+  },
+  {
+    id: "combo-work-clean",
+    title: "Combo Góc Làm Việc Gọn Gàng",
+    desc: "Màn hình, bàn phím và chuột cho setup học tập hoặc văn phòng.",
+    productIds: [1, 3, 9],
+    discountPercent: 12,
+    image: "",
+    isActive: true,
+    createdAt: new Date().toISOString()
+  },
+  {
+    id: "combo-streamer-basic",
+    title: "Combo Streamer Basic",
+    desc: "Webcam, tai nghe và hub chuyển đổi cho nhu cầu học online, họp và livestream.",
+    productIds: [1, 6, 8],
+    discountPercent: 15,
+    image: "",
+    isActive: true,
+    createdAt: new Date().toISOString()
+  }
+];
+
 const defaultTickets = [
   {
     id: "TK-1024",
@@ -361,8 +398,11 @@ async function readData() {
   const components = await readCollection("components", oldDb?.components ?? defaultComponents);
   const laptops = await readCollection("laptops", oldDb?.laptops ?? defaultLaptops);
   const accessories = await readCollection("accessories", oldDb?.accessories ?? defaultAccessories);
+  const accessoryCombos = await readCollection("accessoryCombos", oldDb?.accessoryCombos ?? defaultAccessoryCombos);
   const tickets = await readCollection("tickets", oldDb?.tickets ?? defaultTickets);
   const accounts = await readCollection("accounts", oldDb?.accounts ?? defaultAccounts);
+  const orders = await readCollection("orders", oldDb?.orders ?? defaultOrders);
+  const payments = await readCollection("payments", oldDb?.payments ?? defaultPayments);
 
   // Auto-migrate image URLs to subfolders if they aren't migrated yet
   let pcsChanged = false;
@@ -395,9 +435,12 @@ async function readData() {
     await writeCollection("components", components);
     await writeCollection("laptops", laptops);
     await writeCollection("accessories", accessories);
+    await writeCollection("accessoryCombos", accessoryCombos);
     await writeCollection("tickets", tickets);
     await writeCollection("accounts", accounts);
-    
+    await writeCollection("orders", orders);
+    await writeCollection("payments", payments);
+
     try {
       await rename("./backend/data.json", "./backend/data.json.bak");
       console.log("[Migration] Successfully migrated data.json to backend/db/*.json. Backup saved to backend/data.json.bak");
@@ -406,7 +449,7 @@ async function readData() {
     }
   }
 
-  return { pcs, components, laptops, accessories, tickets, accounts };
+  return { pcs, components, laptops, accessories, accessoryCombos, tickets, accounts, orders, payments };
 }
 
 async function writeData(db: any) {
@@ -414,8 +457,11 @@ async function writeData(db: any) {
   if (db.components) await writeCollection("components", db.components);
   if (db.laptops) await writeCollection("laptops", db.laptops);
   if (db.accessories) await writeCollection("accessories", db.accessories);
+  if (db.accessoryCombos) await writeCollection("accessoryCombos", db.accessoryCombos);
   if (db.tickets) await writeCollection("tickets", db.tickets);
   if (db.accounts) await writeCollection("accounts", db.accounts);
+  if (db.orders) await writeCollection("orders", db.orders);
+  if (db.payments) await writeCollection("payments", db.payments);
 }
 
 function verifyAdmin(req: Request, db: any): boolean {
@@ -424,6 +470,21 @@ function verifyAdmin(req: Request, db: any): boolean {
   const email = authHeader.replace("Bearer ", "").trim();
   const user = db.accounts?.find((u: any) => u.email === email);
   return user && user.role === "admin";
+}
+
+function rewriteLocalImage(imgUrl: string, origin: string): string {
+  if (!imgUrl) return imgUrl;
+  if (imgUrl.startsWith("/")) {
+    return `${origin}${imgUrl}`;
+  }
+  if (
+    imgUrl.includes("localhost:3001") ||
+    imgUrl.includes("127.0.0.1:3001") ||
+    imgUrl.includes("api-pc.qtitpc.dev")
+  ) {
+    return imgUrl.replace(/^https?:\/\/[^\/]+/g, origin);
+  }
+  return imgUrl;
 }
 
 serve({
@@ -467,7 +528,7 @@ serve({
       const origin = `${req.headers.get("x-forwarded-proto") || "http"}://${req.headers.get("x-forwarded-host") || req.headers.get("host") || `localhost:${PORT}`}`;
       const pcsWithOrigin = db.pcs.map((pc: any) => ({
         ...pc,
-        image: pc.image ? pc.image.replace(/^https?:\/\/[^\/]+/g, origin) : pc.image
+        image: rewriteLocalImage(pc.image, origin)
       }));
       return Response.json(pcsWithOrigin, { headers });
     }
@@ -503,7 +564,13 @@ serve({
         }
       }
       const db = await readData();
-      return Response.json(db.laptops, { headers });
+      const origin = `${req.headers.get("x-forwarded-proto") || "http"}://${req.headers.get("x-forwarded-host") || req.headers.get("host") || `localhost:${PORT}`}`;
+      const laptopsWithOrigin = db.laptops.map((laptop: any) => ({
+        ...laptop,
+        img: rewriteLocalImage(laptop.img, origin),
+        image: rewriteLocalImage(laptop.image, origin)
+      }));
+      return Response.json(laptopsWithOrigin, { headers });
     }
 
     // GET & POST Accessories
@@ -520,7 +587,34 @@ serve({
         }
       }
       const db = await readData();
-      return Response.json(db.accessories, { headers });
+      const origin = `${req.headers.get("x-forwarded-proto") || "http"}://${req.headers.get("x-forwarded-host") || req.headers.get("host") || `localhost:${PORT}`}`;
+      const accessoriesWithOrigin = db.accessories.map((acc: any) => ({
+        ...acc,
+        image: rewriteLocalImage(acc.image, origin)
+      }));
+      return Response.json(accessoriesWithOrigin, { headers });
+    }
+
+    // GET & POST Accessory Combos
+    if (url.pathname === "/api/accessory-combos") {
+      if (req.method === "POST") {
+        try {
+          const body = await req.json();
+          const db = await readData();
+          db.accessoryCombos = body;
+          await writeData(db);
+          return Response.json({ success: true }, { headers });
+        } catch (err) {
+          return Response.json({ error: "Invalid JSON body" }, { status: 400, headers });
+        }
+      }
+      const db = await readData();
+      const origin = `${req.headers.get("x-forwarded-proto") || "http"}://${req.headers.get("x-forwarded-host") || req.headers.get("host") || `localhost:${PORT}`}`;
+      const combosWithOrigin = (db.accessoryCombos || []).map((combo: any) => ({
+        ...combo,
+        image: rewriteLocalImage(combo.image, origin)
+      }));
+      return Response.json(combosWithOrigin, { headers });
     }
 
     // GET & POST Support Tickets
@@ -564,6 +658,161 @@ serve({
         return Response.json({ success: true }, { headers });
       } catch (err) {
         return Response.json({ error: "Invalid JSON body or missing id" }, { status: 400, headers });
+      }
+    }
+
+    // GET & POST Orders
+    if (url.pathname === "/api/orders") {
+      const db = await readData();
+
+      if (req.method === "POST") {
+        try {
+          const body = await req.json();
+          if (!body.userId || !body.email || !Array.isArray(body.items) || body.items.length === 0) {
+            return Response.json({ error: "Thông tin đơn hàng không hợp lệ" }, { status: 400, headers });
+          }
+
+          const now = new Date().toISOString();
+          const order = {
+            id: `ORD-${Date.now()}`,
+            userId: body.userId,
+            email: String(body.email).toLowerCase().trim(),
+            customerName: body.customerName || "",
+            phone: body.phone || "",
+            address: body.address || "",
+            note: body.note || "",
+            items: body.items,
+            totalItems: body.totalItems || 0,
+            totalPrice: body.totalPrice || 0,
+            paymentMethod: body.paymentMethod || "QR_FAKE",
+            paymentStatus: body.paymentStatus || (body.paymentMethod === "COD" ? "pending" : "success"),
+            status: body.status || "processing",
+            createdAt: now,
+            updatedAt: now
+          };
+
+          db.orders = [order, ...(db.orders || [])];
+          await writeData(db);
+          return Response.json({ success: true, order }, { headers });
+        } catch (err) {
+          return Response.json({ error: "Invalid JSON body" }, { status: 400, headers });
+        }
+      }
+
+      const userId = url.searchParams.get("userId");
+      const email = url.searchParams.get("email")?.toLowerCase().trim();
+      let orders = db.orders || [];
+      if (userId || email) {
+        orders = orders.filter((order: any) =>
+          (userId && order.userId === userId) || (email && order.email === email)
+        );
+      }
+      return Response.json(orders, { headers });
+    }
+
+    // POST Update order status
+    if (url.pathname === "/api/orders/update" && req.method === "POST") {
+      try {
+        const body = await req.json();
+        const db = await readData();
+        db.orders = (db.orders || []).map((order: any) =>
+          order.id === body.id ? { ...order, ...body, updatedAt: new Date().toISOString() } : order
+        );
+        await writeData(db);
+        return Response.json({ success: true }, { headers });
+      } catch (err) {
+        return Response.json({ error: "Invalid JSON body or missing id" }, { status: 400, headers });
+      }
+    }
+
+    // POST /api/payments - create a 5-minute fake QR payment session
+    if (url.pathname === "/api/payments" && req.method === "POST") {
+      try {
+        const body = await req.json();
+        const orderPayload = body.orderPayload;
+        if (!orderPayload?.userId || !orderPayload?.email || !Array.isArray(orderPayload?.items) || orderPayload.items.length === 0) {
+          return Response.json({ error: "Thông tin thanh toán không hợp lệ" }, { status: 400, headers });
+        }
+
+        const now = Date.now();
+        const session = {
+          id: `PAY-${now}-${Math.random().toString(36).slice(2, 8).toUpperCase()}`,
+          status: "pending",
+          orderId: "",
+          paymentMethod: body.paymentMethod || "MOMO_FAKE",
+          orderPayload,
+          createdAt: new Date(now).toISOString(),
+          expiresAt: new Date(now + 5 * 60 * 1000).toISOString(),
+          paidAt: ""
+        };
+
+        const db = await readData();
+        db.payments = [session, ...(db.payments || [])];
+        await writeData(db);
+        return Response.json({ success: true, session }, { headers });
+      } catch (err) {
+        return Response.json({ error: "Invalid JSON body" }, { status: 400, headers });
+      }
+    }
+
+    if (url.pathname.startsWith("/api/payments/")) {
+      const parts = url.pathname.split("/").filter(Boolean);
+      const paymentId = parts[2];
+      const action = parts[3];
+      const db = await readData();
+      const payment = (db.payments || []).find((item: any) => item.id === paymentId);
+
+      if (!payment) {
+        return Response.json({ error: "Không tìm thấy phiên thanh toán" }, { status: 404, headers });
+      }
+
+      if (new Date(payment.expiresAt).getTime() < Date.now() && payment.status === "pending") {
+        payment.status = "expired";
+        db.payments = (db.payments || []).map((item: any) => item.id === payment.id ? payment : item);
+        await writeData(db);
+      }
+
+      if (!action && req.method === "GET") {
+        return Response.json({ success: true, session: payment }, { headers });
+      }
+
+      if (action === "confirm" && req.method === "POST") {
+        if (payment.status === "expired") {
+          return Response.json({ error: "Mã QR đã hết hạn" }, { status: 400, headers });
+        }
+
+        if (payment.status === "paid") {
+          const existingOrder = (db.orders || []).find((order: any) => order.id === payment.orderId);
+          return Response.json({ success: true, session: payment, order: existingOrder }, { headers });
+        }
+
+        const now = new Date().toISOString();
+        const payload = payment.orderPayload;
+        const order = {
+          id: `ORD-${Date.now()}`,
+          userId: payload.userId,
+          email: String(payload.email).toLowerCase().trim(),
+          customerName: payload.customerName || "",
+          phone: payload.phone || "",
+          address: payload.address || "",
+          note: payload.note || "",
+          items: payload.items,
+          totalItems: payload.totalItems || 0,
+          totalPrice: payload.totalPrice || 0,
+          paymentMethod: payment.paymentMethod || payload.paymentMethod || "MOMO_FAKE",
+          paymentStatus: "success",
+          status: "processing",
+          createdAt: now,
+          updatedAt: now
+        };
+
+        payment.status = "paid";
+        payment.orderId = order.id;
+        payment.paidAt = now;
+        db.orders = [order, ...(db.orders || [])];
+        db.payments = (db.payments || []).map((item: any) => item.id === payment.id ? payment : item);
+        await writeData(db);
+        return Response.json({ success: true, session: payment, order }, { headers });
       }
     }
 
@@ -827,7 +1076,7 @@ serve({
 
         const db = await readData();
         const userIndex = db.accounts?.findIndex((u: any) => u.email.toLowerCase() === tokenInfo.email.toLowerCase());
-        
+
         if (userIndex === -1) {
           return Response.json({ error: "Không tìm thấy người dùng." }, { status: 400, headers });
         }
@@ -893,7 +1142,7 @@ serve({
       try {
         const body = await req.json();
         const { email, name, phone, address, avatar, newPassword } = body;
-        
+
         if (!email) {
           return Response.json({ error: "Email không được để trống" }, { status: 400, headers });
         }
@@ -905,7 +1154,7 @@ serve({
         }
 
         const user = db.accounts[userIndex];
-        
+
         // Update fields
         user.name = name ? name.trim() : user.name;
         if (phone !== undefined) user.phone = phone.trim();

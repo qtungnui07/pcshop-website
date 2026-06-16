@@ -6,7 +6,9 @@ export const heroSlides = [
     title: ['Build Beyond', 'Performance'],
     desc: 'PC Gaming & Workstation được tối ưu cho mọi nhu cầu.\nHiệu năng mạnh mẽ trong một thiết kế đẳng cấp.',
     cta1: 'Xem PC Gaming',
+    link1: '/pc/pc-gaming',
     cta2: 'Tự Build PC',
+    link2: '/tu-build-pc',
     from: '#d1d1d6',
     to: '#a8a8b3',
   },
@@ -15,7 +17,9 @@ export const heroSlides = [
     title: ['Sức Mạnh', 'Chuyên Nghiệp'],
     desc: 'Đồ họa 3D, AI, video editing — được thiết kế\ncho những công việc đòi hỏi hiệu năng đỉnh cao.',
     cta1: 'Xem Workstation',
+    link1: '/pc/pc-workstation',
     cta2: 'Tư vấn ngay',
+    link2: '/ho-tro',
     from: '#AEE2FF',
     to: '#B5BAFF',
   },
@@ -24,17 +28,19 @@ export const heroSlides = [
     title: ['Nâng Cấp', 'Không Giới Hạn'],
     desc: 'Hàng nghìn linh kiện chính hãng, giá tốt nhất thị trường.\nGiao hàng toàn quốc trong 24h.',
     cta1: 'Xem Linh Kiện',
+    link1: '/linh-kien',
     cta2: 'Tư vấn build',
+    link2: '/ho-tro',
     from: '#D9F9DF',
     to: '#AEE2FF',
   },
 ];
 
 export const pcCategories = [
-  { name: 'PC Gaming',            from: '#D9F9DF', to: '#AEE2FF' },
-  { name: 'PC Workstation',       from: '#AEE2FF', to: '#B5BAFF' },
-  { name: 'PC Văn phòng',         from: '#FFF7AE', to: '#D9F9DF' },
-  { name: 'AI / Machine Learning',from: '#B5BAFF', to: '#9FA1FF' },
+  { name: 'PC Gaming',            imgName: "cat-gaming.png"},
+  { name: 'PC Workstation',       imgName: "cat-workstation.png" },
+  { name: 'PC Văn phòng',         imgName: "cat-vanphong.png" },
+  { name: 'PC Đồ họa',            imgName: "cat-dohoa.png" },
 ];
 
 export const featuredProducts = [

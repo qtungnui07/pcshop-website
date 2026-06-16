@@ -2,11 +2,33 @@ import { useState, useRef, useEffect } from 'react';
 import { ChevronRight, ChevronLeft } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { latestProducts, containerVariants, itemVariants } from '../constants/data';
+import AddToCartButton from './AddToCartButton';
+import { useNavigate } from 'react-router-dom';
 
-export default function ProductCarousel() {
+interface Product {
+  badge?: string;
+  title: string;
+  description: string;
+  price: string;
+  from: string;
+  to: string;
+}
+
+interface ProductCarouselProps {
+  title?: string;
+  subtitle?: string;
+  products?: Product[];
+}
+
+export default function ProductCarousel({
+  title = "Thế hệ mới nhất.",
+  subtitle = "Xem ngay có gì mới.",
+  products = latestProducts
+}: ProductCarouselProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
+  const navigate = useNavigate();
 
   const checkScroll = () => {
     if (scrollRef.current) {
@@ -42,7 +64,7 @@ export default function ProductCarousel() {
     <div className="mt-16 md:mt-24 pb-12">
       <div className="max-w-[1700px] mx-auto px-4 md:px-8 lg:px-10 xl:px-12 2xl:px-16">
         <h2 className="text-2xl md:text-3xl font-semibold tracking-tight text-[#1d1d1f] mb-8">
-          <span className="text-[#1d1d1f]">Thế hệ mới nhất.</span> <span className="text-[#86868b]">Xem ngay có gì mới.</span>
+          <span className="text-[#1d1d1f]">{title}</span> <span className="text-[#86868b]">{subtitle}</span>
         </h2>
       </div>
 
@@ -58,10 +80,11 @@ export default function ProductCarousel() {
         >
           <div className="shrink-0 snap-start [--page-padding:16px] md:[--page-padding:32px] lg:[--page-padding:40px] xl:[--page-padding:48px] 2xl:[--page-padding:64px]" style={{ width: 'max(var(--page-padding), calc(50vw - 900px + var(--page-padding)))' }}></div>
 
-          {latestProducts.map((product, idx) => (
+          {products.map((product, idx) => (
             <motion.div
               variants={itemVariants}
               key={idx}
+              onClick={() => navigate(`/san-pham/latest-${product.title}`)}
               className="min-w-[280px] md:min-w-[300px] lg:min-w-[320px] xl:min-w-[360px] 2xl:min-w-[400px] h-[360px] md:h-[400px] lg:h-[420px] xl:h-[460px] 2xl:h-[500px] rounded-[2rem] snap-start relative overflow-hidden cursor-pointer shadow-[2px_4px_16px_rgba(0,0,0,0.04)] hover:shadow-xl hover:scale-[1.02] transition-all duration-300 p-6 md:p-8 flex flex-col justify-between"
               style={{ background: `linear-gradient(135deg, #${product.from}, #${product.to})` }}
             >
@@ -85,7 +108,15 @@ export default function ProductCarousel() {
                 <p className="text-sm md:text-base font-medium">
                   {product.price}
                 </p>
-                {/* Bạn có thể đặt thẻ <img> ở đây bằng absolute để ảnh nằm góc phải dưới */}
+                <AddToCartButton
+                  product={{
+                    id: `latest-${product.title}`,
+                    name: product.title,
+                    specs: product.description,
+                    price: product.price,
+                    category: "Cửa hàng",
+                  }}
+                />
               </div>
             </motion.div>
           ))}
