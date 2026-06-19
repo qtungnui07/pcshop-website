@@ -25,7 +25,7 @@
         initial="hidden"
         whileInView="show"
         viewport={{ once: true, amount: 0.1 }}
-        className="flex overflow-x-auto gap-8 pb-8 scrollbar-hide snap-x"
+        className="flex overflow-x-auto lg:justify-center gap-8 pb-8 scrollbar-hide snap-x"
       >
         {categories.map((item, index) => (
           <Link to={getCategoryUrl(item.name)} key={index}>
