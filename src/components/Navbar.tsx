@@ -188,7 +188,7 @@ export default function Navbar() {
             category: "PC",
             price: normalizePrice(item.price),
             image: item.image,
-            href: "/pc/all",
+            href: `/san-pham/pc-${item.name}`,
           })),
           ...laptops.map((item: any, index: number) => ({
             id: `laptop-${index}-${item.name}`,
@@ -197,7 +197,7 @@ export default function Navbar() {
             category: "Laptop",
             price: normalizePrice(item.price),
             image: item.img || item.image,
-            href: "/laptop",
+            href: `/san-pham/laptop-${item.name}`,
           })),
           ...components.map((item: any, index: number) => ({
             id: `component-${index}-${item.name}`,
@@ -206,7 +206,7 @@ export default function Navbar() {
             category: item.category || "Linh kiện",
             price: normalizePrice(item.price),
             image: item.image,
-            href: `/linh-kien?category=${generateSlug(item.category || "ram")}`,
+            href: `/san-pham/component-${item.category || "linh-kien"}-${item.name}`,
           })),
           ...accessories.map((item: any, index: number) => ({
             id: `accessory-${index}-${item.name}`,
@@ -215,7 +215,7 @@ export default function Navbar() {
             category: item.category || "Phụ kiện",
             price: normalizePrice(item.price),
             image: item.image,
-            href: `/phu-kien?category=${generateSlug(item.category || "phu-kien")}`,
+            href: `/san-pham/accessory-${item.name}`,
           })),
         ];
 
