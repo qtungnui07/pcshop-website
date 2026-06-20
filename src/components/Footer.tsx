@@ -330,16 +330,16 @@ export default function Footer() {
         }
 
         .footer-inner {
-          max-width: 980px;
+          max-width: 1200px;
           margin: 0 auto;
-          padding: 0 22px;
+          padding: 0 24px;
         }
 
         /* ── Columns ─────────────────────────── */
         .footer-columns {
           display: grid;
-          gap: 24px 16px;
-          padding: 36px 0 28px;
+          gap: 36px 32px;
+          padding: 48px 0 36px;
           border-bottom: 1px solid #d2d2d7;
         }
 
@@ -371,7 +371,7 @@ export default function Footer() {
           font-weight: 600;
           color: #1d1d1f;
           letter-spacing: -0.01em;
-          margin: 0 0 10px 0;
+          margin: 0 0 14px 0;
           line-height: 1.33;
         }
 
@@ -381,7 +381,7 @@ export default function Footer() {
           margin: 0;
           display: flex;
           flex-direction: column;
-          gap: 7px;
+          gap: 10px;
         }
 
         .footer-link {
@@ -403,7 +403,7 @@ export default function Footer() {
           color: #6e6e73;
           line-height: 1.5;
           display: flex;
-          gap: 8px;
+          gap: 10px;
           align-items: flex-start;
         }
 
@@ -424,7 +424,7 @@ export default function Footer() {
           justify-content: space-between;
           flex-wrap: wrap;
           gap: 20px;
-          padding: 20px 0;
+          padding: 28px 0;
           border-bottom: 1px solid #d2d2d7;
         }
 
@@ -462,7 +462,7 @@ export default function Footer() {
 
         /* ── Bottom bar ──────────────────────── */
         .footer-bottom {
-          padding: 20px 0 28px;
+          padding: 28px 0 36px;
           display: flex;
           align-items: flex-start;
           justify-content: space-between;
