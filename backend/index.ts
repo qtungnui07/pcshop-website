@@ -725,6 +725,19 @@ serve({
       }
     }
 
+    // POST /api/orders/bulk to overwrite orders array (for Admin panel deletion)
+    if (url.pathname === "/api/orders/bulk" && req.method === "POST") {
+      try {
+        const body = await req.json();
+        const db = await readData();
+        db.orders = body;
+        await writeData(db);
+        return Response.json({ success: true }, { headers });
+      } catch (err) {
+        return Response.json({ error: "Invalid JSON body" }, { status: 400, headers });
+      }
+    }
+
     // POST /api/payments - create a 5-minute fake QR payment session
     if (url.pathname === "/api/payments" && req.method === "POST") {
       try {
