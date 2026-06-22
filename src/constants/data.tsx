@@ -4,13 +4,6 @@ import { Box, Monitor, Cpu, HardDrive, Mouse, Keyboard, Headphones, Laptop, Memo
 
 export const navItems = [
   {
-    name: 'Cửa hàng',
-    dropdown: [
-      { title: 'Mua sắm', links: ['Mua Sản Phẩm Mới Nhất', 'PC Build Sẵn', 'Linh Kiện Lẻ', 'Màn Hình', 'Gaming Gear'] },
-      { title: 'Liên kết nhanh', links: ['Tìm cửa hàng gần nhất', 'Tình trạng đơn hàng', 'Chính sách bảo hành'] },
-    ]
-  },
-  {
     name: 'PC',
     dropdown: [
       { title: 'Theo Nhu Cầu', links: ['PC Gaming', 'PC Đồ Họa 3D', 'PC Văn Phòng', 'PC Workstation', 'Mini PC'] },

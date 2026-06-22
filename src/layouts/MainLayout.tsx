@@ -5,6 +5,7 @@ import Footer from '../components/Footer';
 export default function MainLayout() {
   const location = useLocation();
   const isAuth = location.pathname.startsWith('/auth');
+  const isHome = location.pathname === '/';
 
   return (
     <div
@@ -29,8 +30,8 @@ export default function MainLayout() {
           <div className="absolute bottom-0 right-0 w-[50%] h-[700px] rounded-full bg-purple-400/15 blur-[120px]" />
         </div>
       )}
-
-      <main className={`relative z-10 flex-1 w-full ${isAuth ? 'flex flex-col items-center justify-center pt-32 pb-20' : 'pt-24 pb-12'}`}>
+ 
+      <main className={`relative z-10 flex-1 w-full ${isAuth ? 'flex flex-col items-center justify-center pt-32 pb-20' : isHome ? 'pt-16 pb-12' : 'pt-24 pb-12'}`}>
         <Outlet />
       </main>
       <Footer />

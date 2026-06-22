@@ -36,10 +36,10 @@ const getComponentCatId = (name: string) => {
 
 const getMenuLink = (menuName: string, splitCatName: string, link: string) => {
   const menuSlug = getMenuSlug(menuName);
-  
+
   if (menuSlug === 'linh-kien') {
     const catId = getComponentCatId(splitCatName);
-    
+
     if (splitCatName === 'RAM') {
       if (link.includes('GB')) {
         return `/linh-kien?category=ram&capacity=${link}`;
@@ -48,44 +48,44 @@ const getMenuLink = (menuName: string, splitCatName: string, link: string) => {
         return `/linh-kien?category=ram&type=${link}`;
       }
     }
-    
+
     if (splitCatName === 'CPU - Vi Xử Lý') {
       const brand = link.startsWith('Intel') ? 'Intel' : 'AMD';
       const series = link.replace('Intel ', '').replace('AMD ', '');
       return `/linh-kien?category=cpu&brand=${brand}&cpuSeries=${series}`;
     }
-    
+
     if (splitCatName === 'VGA - Card Màn Hình') {
       const cleanLink = link.replace('NVIDIA ', '').replace('AMD ', '');
       return `/linh-kien?category=vga&vgaSeries=${cleanLink}`;
     }
-    
+
     if (splitCatName === 'Mainboard - Bo Mạch Chủ') {
       return `/linh-kien?category=mainboard&chipset=${link}`;
     }
-    
+
     if (splitCatName === 'Ổ Cứng SSD') {
       if (link.includes('GB') || link.includes('TB')) {
         return `/linh-kien?category=ssd&capacity=${link}`;
       }
       return `/linh-kien?category=ssd&type=${link}`;
     }
-    
+
     if (splitCatName === 'Ổ Cứng HDD') {
       return `/linh-kien?category=hdd&capacity=${link}`;
     }
-    
+
     if (splitCatName === 'Nguồn (PSU)') {
       if (link.includes('Plus')) {
         return `/linh-kien?category=psu&cert=${link}`;
       }
       return `/linh-kien?category=psu&wattage=${link}`;
     }
-    
+
     if (splitCatName === 'Tản Nhiệt') {
       return `/linh-kien?category=cooling&type=${link}`;
     }
-    
+
     if (splitCatName === 'Case - Vỏ Máy Tính') {
       return `/linh-kien?category=case&size=${link}`;
     }
@@ -188,7 +188,7 @@ export default function Navbar() {
             category: "PC",
             price: normalizePrice(item.price),
             image: item.image,
-            href: "/pc/all",
+            href: `/san-pham/pc-${item.name}`,
           })),
           ...laptops.map((item: any, index: number) => ({
             id: `laptop-${index}-${item.name}`,
@@ -197,7 +197,7 @@ export default function Navbar() {
             category: "Laptop",
             price: normalizePrice(item.price),
             image: item.img || item.image,
-            href: "/laptop",
+            href: `/san-pham/laptop-${item.name}`,
           })),
           ...components.map((item: any, index: number) => ({
             id: `component-${index}-${item.name}`,
@@ -206,7 +206,7 @@ export default function Navbar() {
             category: item.category || "Linh kiện",
             price: normalizePrice(item.price),
             image: item.image,
-            href: `/linh-kien?category=${generateSlug(item.category || "ram")}`,
+            href: `/san-pham/component-${item.category || "linh-kien"}-${item.name}`,
           })),
           ...accessories.map((item: any, index: number) => ({
             id: `accessory-${index}-${item.name}`,
@@ -215,7 +215,7 @@ export default function Navbar() {
             category: item.category || "Phụ kiện",
             price: normalizePrice(item.price),
             image: item.image,
-            href: `/phu-kien?category=${generateSlug(item.category || "phu-kien")}`,
+            href: `/san-pham/accessory-${item.name}`,
           })),
         ];
 
@@ -313,7 +313,7 @@ export default function Navbar() {
         className={`fixed top-0 left-0 w-full z-50 transition-colors duration-300 ${activeMenu || searchOpen ? 'bg-white' : 'bg-white/70 backdrop-blur-md'}`}
         onMouseLeave={handleNavMouseLeave}
       >
-        <div className="max-w-[1000px] mx-auto px-4 md:px-8">
+        <div className="max-w-[1200px] mx-auto px-4 md:px-8">
           <ul className="flex items-center justify-between h-16 text-[15px] text-[#1d1d1f]/80 font-medium tracking-wide">
             <li><Link to="/" className="hover:text-black transition-colors"><Monitor className="w-5 h-5" /></Link></li>
 
@@ -491,7 +491,7 @@ export default function Navbar() {
                       animate="show"
                       exit={{ opacity: 0, transition: { duration: 0.15 } }}
                       style={{ gridArea: '1 / 1' }}
-                      className="max-w-[1000px] w-full mx-auto px-4 md:px-8 py-12"
+                      className="max-w-[1200px] w-full mx-auto px-4 md:px-8 py-12"
                     >
                       {/* @ts-ignore */}
                       {currentMenu?.isSplit ? (
@@ -505,8 +505,8 @@ export default function Navbar() {
                               {/* @ts-ignore */}
                               {currentMenu.splitData?.map((cat, idx) => (
                                 <motion.li variants={itemVariants} key={idx}>
-                                  <Link 
-                                    to={`/linh-kien?category=${getComponentCatId(cat.name)}`} 
+                                  <Link
+                                    to={`/linh-kien?category=${getComponentCatId(cat.name)}`}
                                     onMouseEnter={() => setActiveSplitCategory(cat.name)}
                                     onClick={() => setActiveMenu(null)}
                                     className={`text-xl font-medium transition-colors block ${activeSplitCategory === cat.name ? 'text-blue-600' : 'text-[#1d1d1f] hover:text-blue-600'}`}
@@ -534,9 +534,9 @@ export default function Navbar() {
                                 <div className="grid grid-cols-2 md:grid-cols-3 gap-y-4 gap-x-8">
                                   {/* @ts-ignore */}
                                   {cat.links.map((link, lIdx) => (
-                                    <Link 
-                                      to={getMenuLink(currentMenu?.name || '', cat.name, link)} 
-                                      key={lIdx} 
+                                    <Link
+                                      to={getMenuLink(currentMenu?.name || '', cat.name, link)}
+                                      key={lIdx}
                                       onClick={() => setActiveMenu(null)}
                                       className="text-xl font-medium text-[#1d1d1f] hover:text-blue-600 transition-colors block"
                                     >
@@ -592,7 +592,7 @@ export default function Navbar() {
               transition={{ duration: 0.35, ease: [0.25, 1, 0.5, 1] }}
               className="absolute top-[52px] left-0 w-full bg-white overflow-hidden"
             >
-              <div className="max-w-[1000px] mx-auto px-4 md:px-8 pt-8 pb-10">
+              <div className="max-w-[1200px] mx-auto px-4 md:px-8 pt-8 pb-10">
                 <div className="flex items-center gap-4 border-b border-zinc-100 pb-4">
                   <Search className="w-5 h-5 text-zinc-500 shrink-0" />
                   <input
