@@ -8,7 +8,9 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "backend": "bun --watch backend/index.ts"
+    "backend": "bun --watch backend/index.ts",
+    "backend:prod": "bun backend/index.ts",
+    "db:sync-json": "bun backend/sync-json-to-postgres.ts"
   },
   "dependencies": {
     "@clerk/clerk-react": "^5.61.3",

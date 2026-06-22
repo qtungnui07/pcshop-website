@@ -424,6 +424,7 @@ export default function PhuKienIndex() {
   const [loading, setLoading] = useState(true);
   const [comboLoading, setComboLoading] = useState(true);
   const [fetchError, setFetchError] = useState("");
+  const [reloadKey, setReloadKey] = useState(0);
 
   const [selectedCategories, setSelectedCategories] = useState<Set<string>>(new Set());
   const [selectedBrands, setSelectedBrands] = useState<Set<string>>(new Set());
@@ -489,7 +490,7 @@ export default function PhuKienIndex() {
         setFetchError("Không thể kết nối tới backend phụ kiện.");
       })
       .finally(() => setLoading(false));
-  }, []);
+  }, [reloadKey]);
 
   useEffect(() => {
     setComboLoading(true);
@@ -1082,8 +1083,15 @@ export default function PhuKienIndex() {
                   {fetchError}
                 </h3>
                 <p className="mt-2 text-sm text-zinc-500">
-                  Kiểm tra backend đã chạy và có route /api/accessories chưa.
+                  Dữ liệu vẫn được giữ trong PostgreSQL. Hãy thử tải lại kết nối.
                 </p>
+                <button
+                  type="button"
+                  onClick={() => setReloadKey((value) => value + 1)}
+                  className="mt-5 rounded-full bg-zinc-950 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-zinc-800"
+                >
+                  Tải lại sản phẩm
+                </button>
               </div>
             ) : products.length === 0 ? (
               <div className="flex min-h-[420px] flex-col items-center justify-center rounded-2xl bg-[#fbfbfd] text-center shadow-sm">

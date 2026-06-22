@@ -5,10 +5,10 @@ import App from './App.tsx'
 import { AuthProvider } from './context/AuthContext.tsx'
 import { ClerkProvider } from '@clerk/clerk-react'
 
-const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY
+const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY || "pk_test_aG9wZWZ1bC1sYW1iLTk0LmNsZXJrLmFjY291bnRzLmRldiQ"
 
-if (!PUBLISHABLE_KEY) {
-  throw new Error("Missing Clerk Publishable Key. Please set VITE_CLERK_PUBLISHABLE_KEY in .env file.")
+if (!import.meta.env.VITE_CLERK_PUBLISHABLE_KEY) {
+  console.warn("Warning: VITE_CLERK_PUBLISHABLE_KEY is missing. Using the default fallback key.")
 }
 
 createRoot(document.getElementById('root')!).render(

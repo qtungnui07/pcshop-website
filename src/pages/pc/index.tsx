@@ -28,13 +28,7 @@ const pcCategories = [
   { name: "PC Mini",       imgName: "cat-mini.png",        Icon: Box },
 ];
 
-const featuredPCs = [
-  { badge: "Bán chạy", badgeColor: "#1d1d1f", name: "PC Gaming Infinity",   specs: "i7-14700K • RTX 4070 SUPER\n32GB RAM • 1TB SSD",          price: "28.990.000đ", from: "#7c3aed", to: "#ec4899", imgName: "pc-infinity.png" },
-  { badge: "Mới",      badgeColor: "#2563eb", name: "PC Gaming Frost",       specs: "Ryzen 7 7800X3D • RTX 4070 Ti\n32GB RAM • 1TB SSD",       price: "32.990.000đ", from: "#1d4ed8", to: "#38bdf8", imgName: "pc-frost.png" },
-  { badge: "Hot",      badgeColor: "#dc2626", name: "PC Gaming Nebula",      specs: "i9-14900K • RTX 4080 SUPER\n32GB RAM • 2TB SSD",          price: "45.990.000đ", from: "#0f172a", to: "#1e40af", imgName: "pc-nebula.png" },
-  { badge: "",         badgeColor: "",        name: "PC Workstation Pro",    specs: "Threadripper 7970X • RTX 4090\n64GB RAM • 2TB SSD",       price: "89.990.000đ", from: "#18181b", to: "#3f3f46", imgName: "pc-workstation.png" },
-  { badge: "",         badgeColor: "",        name: "PC Mini White",         specs: "Ryzen 5 7600 • RTX 4060\n16GB RAM • 1TB SSD",             price: "18.990.000đ", from: "#e2e8f0", to: "#f1f5f9", imgName: "pc-mini.png" },
-];
+
 
 const brands = [
   { name: "Intel", logo: "https://upload.wikimedia.org/wikipedia/commons/8/85/Intel_logo_2023.svg" },
@@ -96,14 +90,11 @@ const API_BASE = typeof window !== "undefined"
 export default function PCIndex() {
   const navigate = useNavigate();
   const [liked, setLiked] = useState<Set<number>>(new Set());
-  const [pcs, setPcs] = useState<PCItem[]>(() =>
-    featuredPCs.map(pc => ({
-      ...pc,
-      image: `/images/${pc.imgName}`
-    }))
-  );
+  const [pcs, setPcs] = useState<PCItem[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    setLoading(true);
     fetch(`${API_BASE}/api/featured-pcs`)
       .then((res) => res.json())
       .then((data) => {
@@ -122,11 +113,13 @@ export default function PCIndex() {
           setPcs(normalized);
         }
       })
-      .catch((err) => console.error("Error fetching featured PCs from backend:", err));
+      .catch((err) => console.error("Error fetching featured PCs from backend:", err))
+      .finally(() => setLoading(false));
   }, []);
 
   const toggleLike = (i: number) =>
     setLiked(p => { const n = new Set(p); n.has(i) ? n.delete(i) : n.add(i); return n; });
+
 
 
 
@@ -312,48 +305,63 @@ export default function PCIndex() {
             </Link>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-            {pcs.map((pc, i) => (
-              <div
-                key={i}
-                onClick={() => navigate(`/san-pham/pc-${pc.name}`)}
-                className="w-full bg-white rounded-2xl border border-zinc-100 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 overflow-hidden group/card cursor-pointer"
-              >
-                <div className="relative">
-                  {pc.image ? (
-                    <div className="w-full aspect-[4/3.5] relative overflow-hidden bg-zinc-900">
-                      <img
-                        src={pc.image}
-                        alt={pc.name}
-                        className="w-full h-full object-cover transition-transform duration-500 group-hover/card:scale-105"
-                      />
-                    </div>
-                  ) : (
-                    <Grad from={pc.from} to={pc.to} className="w-full aspect-[4/3.5]" />
-                  )}
-                  {pc.badge && (
-                    <span className="absolute top-2.5 left-2.5 px-2.5 py-0.5 text-[10px] font-bold text-white rounded-full" style={{ background: pc.badgeColor }}>
-                      {pc.badge}
-                    </span>
-                  )}
-                </div>
-                <div className="p-3.5">
-                  <p className="text-[13px] font-bold text-zinc-900 leading-tight mb-1">{pc.name}</p>
-                  <p className="text-[11px] text-zinc-400 leading-snug whitespace-pre-line mb-3">{pc.specs}</p>
-                  <div className="flex items-center justify-between">
-                    <span className="text-[13px] font-bold text-zinc-900">{pc.price}</span>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        toggleLike(i);
-                      }}
-                      className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-zinc-100 transition-colors cursor-pointer"
-                    >
-                      <Heart className={`w-4 h-4 transition-colors ${liked.has(i) ? "fill-red-500 text-red-500" : "text-zinc-400"}`} />
-                    </button>
+            {loading ? (
+              // Loading skeleton
+              Array.from({ length: 5 }).map((_, i) => (
+                <div key={i} className="w-full bg-white rounded-2xl border border-zinc-100 shadow-sm overflow-hidden">
+                  <div className="w-full aspect-[4/3.5] bg-zinc-100 animate-pulse" />
+                  <div className="p-3.5 space-y-2">
+                    <div className="h-4 bg-zinc-100 rounded animate-pulse w-3/4" />
+                    <div className="h-3 bg-zinc-100 rounded animate-pulse w-full" />
+                    <div className="h-3 bg-zinc-100 rounded animate-pulse w-1/2" />
+                    <div className="h-4 bg-zinc-100 rounded animate-pulse w-2/3 mt-2" />
                   </div>
                 </div>
-              </div>
-            ))}
+              ))
+            ) : (
+              pcs.map((pc, i) => (
+                <div
+                  key={i}
+                  onClick={() => navigate(`/san-pham/pc-${pc.name}`)}
+                  className="w-full bg-white rounded-2xl border border-zinc-100 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 overflow-hidden group/card cursor-pointer"
+                >
+                  <div className="relative">
+                    {pc.image ? (
+                      <div className="w-full aspect-[4/3.5] relative overflow-hidden bg-zinc-900">
+                        <img
+                          src={pc.image}
+                          alt={pc.name}
+                          className="w-full h-full object-cover transition-transform duration-500 group-hover/card:scale-105"
+                        />
+                      </div>
+                    ) : (
+                      <Grad from={pc.from} to={pc.to} className="w-full aspect-[4/3.5]" />
+                    )}
+                    {pc.badge && (
+                      <span className="absolute top-2.5 left-2.5 px-2.5 py-0.5 text-[10px] font-bold text-white rounded-full" style={{ background: pc.badgeColor }}>
+                        {pc.badge}
+                      </span>
+                    )}
+                  </div>
+                  <div className="p-3.5">
+                    <p className="text-[13px] font-bold text-zinc-900 leading-tight mb-1">{pc.name}</p>
+                    <p className="text-[11px] text-zinc-400 leading-snug whitespace-pre-line mb-3">{pc.specs}</p>
+                    <div className="flex items-center justify-between">
+                      <span className="text-[13px] font-bold text-zinc-900">{pc.price}</span>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleLike(i);
+                        }}
+                        className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-zinc-100 transition-colors cursor-pointer"
+                      >
+                        <Heart className={`w-4 h-4 transition-colors ${liked.has(i) ? "fill-red-500 text-red-500" : "text-zinc-400"}`} />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         </section>
 

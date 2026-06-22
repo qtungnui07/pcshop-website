@@ -1,8 +1,10 @@
-import { serve } from "bun";
+import { serve, SQL } from "bun";
 import { mkdir, rename } from "node:fs/promises";
 
 const PORT = 3001;
 const DB_DIR = "./backend/db";
+const DATABASE_URL = Bun.env.DATABASE_URL || "postgres://pcshop:pcshop@localhost:5432/pcshop";
+const sql = new SQL(DATABASE_URL);
 
 // In-memory rate limiting and password reset token maps
 const rateLimits = new Map<string, { count: number; resetTime: number }>();
@@ -365,20 +367,61 @@ const defaultAccounts = [
 ];
 
 async function readCollection(name: string, defaultValue: any) {
-  const file = Bun.file(`${DB_DIR}/${name}.json`);
-  if (await file.exists()) {
+  const existing = await sql`SELECT data FROM app_collections WHERE name = ${name}`;
+  if (existing.length > 0) {
+    return typeof existing[0].data === "string" ? JSON.parse(existing[0].data) : existing[0].data;
+  }
+
+  // First PostgreSQL startup: seed from the existing JSON collection when available.
+  let seedData = defaultValue;
+  const legacyFile = Bun.file(`${DB_DIR}/${name}.json`);
+  if (await legacyFile.exists()) {
     try {
-      return await file.json();
-    } catch (e) {
-      console.error(`Failed parsing ${name}.json, resetting to default`, e);
+      seedData = await legacyFile.json();
+    } catch (error) {
+      console.error(`[Migration] Failed parsing ${name}.json, using defaults`, error);
     }
   }
-  await writeCollection(name, defaultValue);
-  return defaultValue;
+
+  await sql`
+    INSERT INTO app_collections (name, data)
+    VALUES (${name}, ${seedData}::jsonb)
+    ON CONFLICT (name) DO NOTHING
+  `;
+
+  const inserted = await sql`SELECT data FROM app_collections WHERE name = ${name}`;
+  const insertedData = inserted[0]?.data;
+  return insertedData === undefined
+    ? seedData
+    : typeof insertedData === "string"
+      ? JSON.parse(insertedData)
+      : insertedData;
 }
 
 async function writeCollection(name: string, data: any) {
-  await Bun.write(`${DB_DIR}/${name}.json`, JSON.stringify(data, null, 2));
+  await sql`
+    INSERT INTO app_collections (name, data, updated_at)
+    VALUES (${name}, ${data}::jsonb, NOW())
+    ON CONFLICT (name) DO UPDATE
+    SET data = EXCLUDED.data, updated_at = NOW()
+  `;
+}
+
+async function initializeDatabase() {
+  await sql`
+    CREATE TABLE IF NOT EXISTS app_collections (
+      name TEXT PRIMARY KEY,
+      data JSONB NOT NULL,
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    )
+  `;
+  // Repair rows created by the initial adapter version, which double-encoded JSON.
+  await sql`
+    UPDATE app_collections
+    SET data = (data #>> '{}')::jsonb, updated_at = NOW()
+    WHERE jsonb_typeof(data) = 'string'
+  `;
+  console.log("[Database] PostgreSQL connection ready");
 }
 
 async function readData() {
@@ -394,15 +437,17 @@ async function readData() {
     }
   }
 
-  const pcs = await readCollection("pcs", oldDb?.pcs ?? defaultPCs);
-  const components = await readCollection("components", oldDb?.components ?? defaultComponents);
-  const laptops = await readCollection("laptops", oldDb?.laptops ?? defaultLaptops);
-  const accessories = await readCollection("accessories", oldDb?.accessories ?? defaultAccessories);
-  const accessoryCombos = await readCollection("accessoryCombos", oldDb?.accessoryCombos ?? defaultAccessoryCombos);
-  const tickets = await readCollection("tickets", oldDb?.tickets ?? defaultTickets);
-  const accounts = await readCollection("accounts", oldDb?.accounts ?? defaultAccounts);
-  const orders = await readCollection("orders", oldDb?.orders ?? defaultOrders);
-  const payments = await readCollection("payments", oldDb?.payments ?? defaultPayments);
+  const [pcs, components, laptops, accessories, accessoryCombos, tickets, accounts, orders, payments] = await Promise.all([
+    readCollection("pcs", oldDb?.pcs ?? defaultPCs),
+    readCollection("components", oldDb?.components ?? defaultComponents),
+    readCollection("laptops", oldDb?.laptops ?? defaultLaptops),
+    readCollection("accessories", oldDb?.accessories ?? defaultAccessories),
+    readCollection("accessoryCombos", oldDb?.accessoryCombos ?? defaultAccessoryCombos),
+    readCollection("tickets", oldDb?.tickets ?? defaultTickets),
+    readCollection("accounts", oldDb?.accounts ?? defaultAccounts),
+    readCollection("orders", oldDb?.orders ?? defaultOrders),
+    readCollection("payments", oldDb?.payments ?? defaultPayments),
+  ]);
 
   // Auto-migrate image URLs to subfolders if they aren't migrated yet
   let pcsChanged = false;
@@ -453,15 +498,17 @@ async function readData() {
 }
 
 async function writeData(db: any) {
-  if (db.pcs) await writeCollection("pcs", db.pcs);
-  if (db.components) await writeCollection("components", db.components);
-  if (db.laptops) await writeCollection("laptops", db.laptops);
-  if (db.accessories) await writeCollection("accessories", db.accessories);
-  if (db.accessoryCombos) await writeCollection("accessoryCombos", db.accessoryCombos);
-  if (db.tickets) await writeCollection("tickets", db.tickets);
-  if (db.accounts) await writeCollection("accounts", db.accounts);
-  if (db.orders) await writeCollection("orders", db.orders);
-  if (db.payments) await writeCollection("payments", db.payments);
+  await Promise.all([
+    db.pcs && writeCollection("pcs", db.pcs),
+    db.components && writeCollection("components", db.components),
+    db.laptops && writeCollection("laptops", db.laptops),
+    db.accessories && writeCollection("accessories", db.accessories),
+    db.accessoryCombos && writeCollection("accessoryCombos", db.accessoryCombos),
+    db.tickets && writeCollection("tickets", db.tickets),
+    db.accounts && writeCollection("accounts", db.accounts),
+    db.orders && writeCollection("orders", db.orders),
+    db.payments && writeCollection("payments", db.payments),
+  ]);
 }
 
 function verifyAdmin(req: Request, db: any): boolean {
@@ -486,6 +533,8 @@ function rewriteLocalImage(imgUrl: string, origin: string): string {
   }
   return imgUrl;
 }
+
+await initializeDatabase();
 
 serve({
   port: PORT,

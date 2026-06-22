@@ -1,5 +1,86 @@
 [
   {
+    "id": "ORD-1781879388279",
+    "userId": "acc-1781570629579",
+    "email": "1@1.1",
+    "customerName": "Nguyễn Tuấn Dũng",
+    "phone": "12345",
+    "address": "23456",
+    "note": "",
+    "items": [
+      {
+        "id": "accessory-Lê Tiến Hưng",
+        "name": "Lê Tiến Hưng",
+        "specs": "Logitech • Cáp & Hub",
+        "price": 100000,
+        "image": "https://api-pc.qtitpc.dev/images/demo-product.jpg",
+        "category": "Phụ kiện - Cáp & Hub",
+        "quantity": 1
+      }
+    ],
+    "totalItems": 1,
+    "totalPrice": 100000,
+    "paymentMethod": "MOMO_FAKE",
+    "paymentStatus": "success",
+    "status": "processing",
+    "createdAt": "2026-06-19T14:29:48.279Z",
+    "updatedAt": "2026-06-19T14:29:48.279Z"
+  },
+  {
+    "id": "ORD-1781830851220",
+    "userId": "acc-1001",
+    "email": "admin@qtitpc.dev",
+    "customerName": "Quản trị viêná",
+    "phone": "ád",
+    "address": "ád",
+    "note": "sd",
+    "items": [
+      {
+        "id": "component-CPU-Intel Core i5-14600K",
+        "name": "Intel Core i5-14600K",
+        "specs": "14 Cores / 20 Threads up to 5.3GHz LGA1700",
+        "price": "7.890.000đ",
+        "image": "https://product.hstatic.net/200000420363/product/_new_-anh-sp-web_0229438098674c899bd2c5675e1559c0_master.jpg",
+        "category": "CPU",
+        "quantity": 1
+      }
+    ],
+    "totalItems": 1,
+    "totalPrice": 7890000,
+    "paymentMethod": "MOMO_FAKE",
+    "paymentStatus": "success",
+    "status": "processing",
+    "createdAt": "2026-06-19T01:00:51.220Z",
+    "updatedAt": "2026-06-19T01:00:51.220Z"
+  },
+  {
+    "id": "ORD-1781830399855",
+    "userId": "acc-1781570629579",
+    "email": "1@1.1",
+    "customerName": "Nguyễn Tuấn Dũng",
+    "phone": "12345",
+    "address": "12346",
+    "note": "123456",
+    "items": [
+      {
+        "id": "component-VGA-MSI GeForce RTX 4060 VENTUS 2X",
+        "name": "MSI GeForce RTX 4060 VENTUS 2X",
+        "specs": "8GB GDDR6 / 128-bit / 2 Fan / Black",
+        "price": "8.590.000đ",
+        "image": "https://product.hstatic.net/200000722513/product/rtx_4060_ventus_2x_black_8g_oc_c34ea8c824fb4afb9f1241cec761e799.png",
+        "category": "VGA",
+        "quantity": 1
+      }
+    ],
+    "totalItems": 1,
+    "totalPrice": 8590000,
+    "paymentMethod": "COD",
+    "paymentStatus": "pending",
+    "status": "processing",
+    "createdAt": "2026-06-19T00:53:19.855Z",
+    "updatedAt": "2026-06-19T00:53:19.855Z"
+  },
+  {
     "id": "ORD-1781531607363",
     "userId": "acc-1001",
     "email": "admin@qtitpc.dev",

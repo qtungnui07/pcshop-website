@@ -8,7 +8,7 @@ import {
   RotateCcw, 
   ChevronDown 
 } from "lucide-react";
-import { pcProducts, type PCProduct } from "../../constants/pcData";
+import { type PCProduct } from "../../constants/pcData";
 import AddToCartButton from "../../components/AddToCartButton";
 
 const API_BASE =
@@ -120,7 +120,7 @@ export default function AllPCsPage() {
   const [maxPrice, setMaxPrice] = useState(MAX_PRICE);
   const [activeInput, setActiveInput] = useState<'min' | 'max'>('min');
   const [liked, setLiked] = useState<Set<string>>(new Set());
-  const [products, setProducts] = useState<PCProduct[]>(pcProducts);
+  const [products, setProducts] = useState<PCProduct[]>([]);
 
   useEffect(() => {
     fetch(`${API_BASE}/api/featured-pcs`)

@@ -6,27 +6,7 @@ import {
 } from "lucide-react";
 import AddToCartButton from "../../components/AddToCartButton";
 import { formatCartPrice, useCart } from "../../context/CartContext";
-import { latestProducts } from "../../constants/data";
-import { pcProducts } from "../../constants/pcData";
 
-const fallbackLaptops = [
-  { id: "1", name: "ASUS TUF Gaming A15", brand: "ASUS", price: "20.990.000đ", specs: "Ryzen 5 7535HS / 16GB / 512GB SSD / RTX 3050 / 144Hz", badge: "Bán chạy", img: "" },
-  { id: "2", name: "Acer Nitro V 15", brand: "Acer", price: "21.490.000đ", specs: "Core i5-13420H / 16GB / 512GB SSD / RTX 4050 / 144Hz", badge: "Hot", img: "" },
-  { id: "3", name: "MSI Cyborg 15", brand: "MSI", price: "22.990.000đ", specs: "Core i7-13620H / 16GB / 512GB SSD / RTX 4060 / 144Hz", badge: "Mới", img: "" },
-  { id: "4", name: "Lenovo Legion 5 Slim", brand: "Lenovo", price: "34.990.000đ", specs: "Ryzen 7 7840HS / 16GB / 512GB SSD / RTX 4060 / 165Hz WQXGA", badge: "Premium", img: "" }
-];
-
-const fallbackAccessories = [
-  { id: "1", name: "Màn hình ASUS VY249HE", brand: "ASUS", category: "Màn hình", price: "2.890.000đ", image: "", colors: ["Đen"] },
-  { id: "2", name: "Bàn phím cơ Akko 3087", brand: "Akko", category: "Bàn phím", price: "1.390.000đ", image: "", colors: ["Hồng", "Xám"] },
-  { id: "3", name: "Chuột Logitech G102 Lightsync", brand: "Logitech", category: "Chuột", price: "390.000đ", image: "", colors: ["Đen", "Trắng"] }
-];
-
-const fallbackComponents = [
-  { name: "G.Skill Trident Z5 RGB", specs: "16GB (2x8GB) DDR5 6000MHz", price: "2.890.000đ", badge: "Mới", category: "RAM" },
-  { name: "Intel Core i7-14700K", specs: "20 Cores / 28 Threads up to 5.6GHz LGA1700", price: "10.490.000đ", badge: "Hot", category: "CPU" },
-  { name: "ASUS Dual GeForce RTX 4060 White", specs: "8GB GDDR6 / 128-bit / 2 Fan / White", price: "8.490.000đ", badge: "Mới", category: "VGA" }
-];
 
 // Helper to determine API Base URL
 const API_BASE = typeof window !== "undefined"
@@ -79,17 +59,25 @@ export default function ProductDetailPage() {
     const fetchProduct = async () => {
       try {
         if (id.startsWith("latest-")) {
-          // Resolve from static latestProducts
+          // Legacy URL format — resolve via PC API
           const title = id.replace("latest-", "");
-          const match = latestProducts.find(p => p.title === title);
+          let data: any[] = [];
+          try {
+            const res = await fetch(`${API_BASE}/api/featured-pcs`);
+            if (!res.ok) throw new Error("API error");
+            data = await res.json();
+          } catch {
+            console.warn("Backend offline for latest- lookup.");
+          }
+          const match = data.find((item: any) => isNameMatch(item.name, title));
           if (match) {
             const normalized: NormalizedProduct = {
               id,
-              name: match.title,
-              specs: match.description,
+              name: match.name,
+              specs: match.specs || "",
               price: match.price,
-              image: "", // no image in latestProducts data
-              category: "Cửa hàng",
+              image: match.image || "",
+              category: "PC",
               badge: match.badge || undefined,
               from: match.from,
               to: match.to
@@ -111,8 +99,8 @@ export default function ProductDetailPage() {
             if (!res.ok) throw new Error("API error");
             data = await res.json();
           } catch {
-            console.warn("Backend offline. Using offline laptop fallback dataset.");
-            data = fallbackLaptops;
+            console.warn("Backend offline. Using empty laptop fallback.");
+            data = [];
           }
           
           // Find matching laptop (by name, ID or index)
@@ -162,17 +150,8 @@ export default function ProductDetailPage() {
             if (!res.ok) throw new Error("API error");
             data = await res.json();
           } catch {
-            console.warn("Backend offline. Using offline PC fallback dataset.");
-            data = pcProducts.map(p => ({
-              id: p.id,
-              name: p.name,
-              specs: p.specs,
-              price: p.priceStr,
-              image: p.img,
-              badge: p.badge,
-              from: p.from,
-              to: p.to
-            }));
+            console.warn("Backend offline. Using empty PC fallback.");
+            data = [];
           }
 
           // Find match (by name, ID or index)
@@ -225,8 +204,8 @@ export default function ProductDetailPage() {
             if (!res.ok) throw new Error("API error");
             data = await res.json();
           } catch {
-            console.warn("Backend offline. Using offline accessories fallback dataset.");
-            data = fallbackAccessories;
+            console.warn("Backend offline. Using empty accessories fallback.");
+            data = [];
           }
 
           const match = data.find((item: any) => 
@@ -237,7 +216,7 @@ export default function ProductDetailPage() {
             const normalized: NormalizedProduct = {
               id,
               name: match.name,
-              specs: `${match.brand} • ${match.category}`,
+              specs: match.specs || `${match.brand} • ${match.category}`,
               price: match.price,
               image: match.image || "",
               category: `Phụ kiện - ${match.category}`,
@@ -273,8 +252,8 @@ export default function ProductDetailPage() {
             if (!res.ok) throw new Error("API error");
             data = await res.json();
           } catch {
-            console.warn("Backend offline. Using offline components fallback dataset.");
-            data = fallbackComponents;
+            console.warn("Backend offline. Using empty components fallback.");
+            data = [];
           }
 
           const match = data.find((item: any) => {

@@ -472,6 +472,7 @@ export default function AdminEdit() {
           name: formName.trim(),
           brand: formBrand.trim(),
           category: formPhuKienCategory,
+          specs: formSpecs.trim(),
           price: numericPrice,
           badge: formBadge.trim(),
           colors: formPhuKienColors,
@@ -499,7 +500,7 @@ export default function AdminEdit() {
       if (!saveRes.ok) throw new Error("Auto-save failed");
 
       // Redirect back with successful save
-      navigate(`/admin?view=${category === "accounts" ? "accounts" : "products"}`);
+      navigate(`/admin?view=${category === "accounts" ? "accounts" : "products"}${category === "accounts" ? "" : `&category=${category}`}`);
     } catch (err) {
       console.error(err);
       alert("Không thể lưu cấu hình mới. Vui lòng kiểm tra lại kết nối!");
@@ -555,7 +556,7 @@ export default function AdminEdit() {
       {/* Back button header */}
       <div className="flex items-center gap-3.5 mb-6">
         <button
-          onClick={() => navigate(`/admin?view=${category === "accounts" ? "accounts" : "products"}`)}
+          onClick={() => navigate(`/admin?view=${category === "accounts" ? "accounts" : "products"}${category === "accounts" ? "" : `&category=${category}`}`)}
           className="p-2 border border-zinc-200 hover:bg-zinc-100 rounded-xl bg-white transition cursor-pointer shadow-sm text-zinc-700 active:scale-95"
         >
           <ArrowLeft className="w-4 h-4" />
@@ -847,7 +848,7 @@ export default function AdminEdit() {
             </button>
             <button
               type="button"
-              onClick={() => navigate(`/admin?view=${category === "accounts" ? "accounts" : "products"}`)}
+              onClick={() => navigate(`/admin?view=${category === "accounts" ? "accounts" : "products"}${category === "accounts" ? "" : `&category=${category}`}`)}
               className="px-6 py-3 border border-zinc-200 hover:bg-zinc-55 hover:text-zinc-800 text-zinc-500 text-xs font-bold rounded-xl transition cursor-pointer"
             >
               Hủy bỏ
@@ -859,6 +860,71 @@ export default function AdminEdit() {
         {/* RIGHT COLUMN: Visuals / Colors / Image Templates (4-5 columns) */}
         {category !== "accounts" && (
           <div className="lg:col-span-5 xl:col-span-4 space-y-6">
+
+            {/* Live product preview */}
+            <div className="overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm">
+              <div className="border-b border-zinc-100 px-5 py-3">
+                <h3 className="text-[10px] font-extrabold uppercase tracking-wider text-zinc-900">
+                  Xem trước sản phẩm trực tiếp
+                </h3>
+                <p className="mt-0.5 text-[9px] font-semibold text-zinc-400">Thay đổi ở biểu mẫu sẽ hiển thị ngay tại đây</p>
+              </div>
+
+              <div className="p-4">
+                <div
+                  className="relative flex aspect-[4/3] items-center justify-center overflow-hidden rounded-xl border border-zinc-100 p-5"
+                  style={{
+                    background: category === "pc"
+                      ? `linear-gradient(135deg, ${formFrom}, ${formTo})`
+                      : category === "linh-kien"
+                        ? formLinhKienColor
+                        : "#fafafa"
+                  }}
+                >
+                  {formBadge && category !== "laptop" && category !== "combo-phu-kien" && (
+                    <span
+                      className="absolute left-3 top-3 z-10 rounded-full px-2.5 py-1 text-[8px] font-black uppercase text-white shadow-sm"
+                      style={{ backgroundColor: formBadgeColor }}
+                    >
+                      {formBadge}
+                    </span>
+                  )}
+                  {(isCustomImage ? customImageUrl : formImage) ? (
+                    <img
+                      src={isCustomImage ? customImageUrl : formImage}
+                      alt={formName || "Product preview"}
+                      className="max-h-full max-w-full object-contain drop-shadow-lg"
+                    />
+                  ) : (
+                    <Image className="h-10 w-10 text-zinc-300" />
+                  )}
+                </div>
+
+                <div className="px-1 pb-1 pt-4">
+                  {(formBrand || category === "linh-kien" || category === "combo-phu-kien") && (
+                    <p className="mb-1 text-[9px] font-black uppercase tracking-wider text-blue-600">
+                      {formBrand || (category === "linh-kien" ? formLinhKienCategory : "Combo phụ kiện")}
+                    </p>
+                  )}
+                  <h4 className="line-clamp-2 text-sm font-black leading-snug text-zinc-950">
+                    {formName || "Tên sản phẩm sẽ hiển thị tại đây"}
+                  </h4>
+                  <p className="mt-2 line-clamp-3 whitespace-pre-line text-[10px] font-medium leading-relaxed text-zinc-500">
+                    {formSpecs || "Thông số kỹ thuật và mô tả sản phẩm"}
+                  </p>
+                  <p className="mt-3 text-base font-black text-zinc-950">
+                    {category === "combo-phu-kien"
+                      ? formatPrice(getComboDiscountedPrice())
+                      : category === "phu-kien"
+                        ? formatPrice(formPrice)
+                        : formPrice || "0đ"}
+                  </p>
+                  {category === "phu-kien" && formPhuKienColors.length > 0 && (
+                    <p className="mt-1 text-[9px] font-semibold text-zinc-400">Màu: {formPhuKienColors.join(", ")}</p>
+                  )}
+                </div>
+              </div>
+            </div>
             
             {/* Badges details settings (Except combo / laptop) */}
             {category !== "laptop" && category !== "combo-phu-kien" && (

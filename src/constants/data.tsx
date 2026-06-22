@@ -82,22 +82,6 @@ export const itemVariants: Variants = {
   },
 };
 
-export const latestProducts = [
-  { badge: "Mới", title: "PC Build Gaming", description: "Sức mạnh vượt trội. Chiến mọi tựa game.", price: "Từ 15.990.000đ", from: "D9F9DF", to: "AEE2FF" },
-  { badge: "Bán chạy", title: "Màn hình 4K", description: "Độ phân giải siêu nét cho đồ họa.", price: "Từ 8.490.000đ", from: "AEE2FF", to: "B5BAFF" },
-  { badge: "Sắp ra mắt", title: "RTX 5090", description: "Đỉnh cao card đồ họa thế hệ mới.", price: "Đang cập nhật", from: "B5BAFF", to: "9FA1FF" },
-  { badge: "Giảm giá", title: "Bàn phím Cơ", description: "Gõ êm ái, LED RGB siêu sáng.", price: "Từ 1.290.000đ", from: "9FA1FF", to: "ECB65F" },
-  { badge: "Mới", title: "Chuột Siêu Nhẹ", description: "Phản hồi nhanh, thiết kế công thái học.", price: "Từ 1.990.000đ", from: "ECB65F", to: "F0E76F" },
-  { badge: "", title: "Tai nghe 7.1", description: "Âm thanh vòm sống động.", price: "Từ 2.490.000đ", from: "F0E76F", to: "D9F9DF" },
-];
-
-export const hotProducts = [
-  { badge: "Bán chạy", title: "Laptop Gaming Pro", description: "Mạnh mẽ vượt trội. Chiến game mượt mà.", price: "Từ 24.990.000đ", from: "F0E76F", to: "ECB65F" },
-  { badge: "Mới", title: "RAM DDR5 32GB", description: "Tốc độ cực cao, đa nhiệm tối đa.", price: "Từ 3.290.000đ", from: "AEE2FF", to: "D9F9DF" },
-  { badge: "Giảm 15%", title: "Tản nước AIO", description: "Làm mát tối ưu, LED RGB rực rỡ.", price: "Từ 2.890.000đ", from: "B5BAFF", to: "AEE2FF" },
-  { badge: "Hot", title: "CPU Intel i9-14900K", description: "Xử lý cực nhanh, cân mọi tác vụ nặng.", price: "Từ 14.490.000đ", from: "9FA1FF", to: "B5BAFF" },
-];
-
 
 export const categories = [
   { name: 'PC', icon: <Box className="w-10 h-10 mb-3 text-[#1d1d1f]" strokeWidth={1} /> },

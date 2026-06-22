@@ -7,7 +7,8 @@ import {
 import { useState, useEffect, useMemo } from "react";
 import { motion } from "framer-motion";
 import { useSearchParams, useNavigate } from "react-router-dom";
-import componentsHeroImage from "../../assets/rtx_5090.png";
+// import componentsHeroImage from "../../assets/rtx_5090.png";
+const componentsHeroImage = "/images/pc.png";
 import AddToCartButton from "../../components/AddToCartButton";
 
 /* ── TYPES ─────────────────────────────────────────────────────────── */
@@ -898,8 +899,8 @@ export default function LinhKienIndex() {
               <motion.img
                 src={componentsHeroImage}
                 alt="Linh kiện PC"
-                initial={{ opacity: 0, y: 32, scale: 0.8 }}
-                animate={{ opacity: 1, y: 0, scale: 1.05 }}
+                initial={{ opacity: 0, y: 32, scale: 1.1 }}
+                animate={{ opacity: 1, y: 0, scale: 1.5 }}
                 transition={{ type: "spring", stiffness: 150, damping: 14, delay: 0.38 }}
                 className="relative z-10 w-[580px] max-w-full object-contain drop-shadow-2xl"
               />

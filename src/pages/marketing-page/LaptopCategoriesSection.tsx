@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { ChevronRight, Gamepad2, Clock, Cpu, Palette, Laptop } from 'lucide-react';
+import { ChevronRight, Gamepad2, Clock, Palette, Laptop } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { laptopCategories } from './data';
 

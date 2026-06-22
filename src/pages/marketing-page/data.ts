@@ -50,37 +50,6 @@ export const laptopCategories = [
   { name: 'MacBook',              imgName: "cat-macbook.png" },
 ];
 
-export const featuredProducts = [
-  {
-    badge: 'Bán chạy',
-    name: 'PC Gaming Infinity',
-    specs: 'i7-14700K / RTX 4070 SUPER / 32GB RAM',
-    price: '28.990.000 đ',
-    from: '#D9F9DF', to: '#AEE2FF',
-  },
-  {
-    badge: 'Bán chạy',
-    name: 'PC Gaming Galaxy',
-    specs: 'Ryzen 7 7800X3D / RTX 4070 Ti SUPER / 32GB RAM',
-    price: '32.990.000 đ',
-    from: '#AEE2FF', to: '#B5BAFF',
-  },
-  {
-    badge: '',
-    name: 'PC Gaming Nebula',
-    specs: 'i9-14900K / RTX 4080 SUPER / 32GB RAM',
-    price: '45.990.000 đ',
-    from: '#B5BAFF', to: '#9FA1FF',
-  },
-  {
-    badge: '',
-    name: 'PC Workstation Pro',
-    specs: 'Threadripper 7970X / RTX 4090 / 64GB RAM',
-    price: '89.990.000 đ',
-    from: '#9FA1FF', to: '#ECB65F',
-  },
-];
-
 export const trustBadges = [
   { Icon: Shield,       title: 'Bảo hành 36 tháng',      desc: 'An tâm sử dụng dài lâu' },
   { Icon: Wrench,       title: 'Hỗ trợ build miễn phí',  desc: 'Tư vấn & lắp ráp chuyên nghiệp' },

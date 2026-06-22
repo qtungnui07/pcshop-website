@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useSearchParams, Link } from "react-router-dom";
+import { useSearchParams, Link, useNavigate } from "react-router-dom";
 import {
   Plus,
   Trash2,
@@ -168,7 +168,12 @@ const staffMembers = [
 export default function AdminIndex() {
   const { user, loading: authLoading } = useAuth();
   const [searchParams] = useSearchParams();
-  const [activeCategory, setActiveCategory] = useState<string>("pc");
+  const navigate = useNavigate();
+  const requestedCategory = searchParams.get("category");
+  const productCategories = ["pc", "laptop", "linh-kien", "phu-kien", "combo-phu-kien"];
+  const [activeCategory, setActiveCategory] = useState<string>(
+    requestedCategory && productCategories.includes(requestedCategory) ? requestedCategory : "pc"
+  );
 
   // Database arrays
   const [pcs, setPcs] = useState<PCItem[]>([]);
@@ -182,6 +187,7 @@ export default function AdminIndex() {
 
   // UI States
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [expandedOrders, setExpandedOrders] = useState<Record<string, boolean>>({});
@@ -197,17 +203,33 @@ export default function AdminIndex() {
   const fetchData = async () => {
     if (!user || user.role !== "admin") return;
     setLoading(true);
+    setLoadError("");
     try {
       const authHeader = { "Authorization": `Bearer ${user.email}` };
+      const failedSources: string[] = [];
+      const fetchList = async (label: string, url: string, init?: RequestInit) => {
+        try {
+          const response = await fetch(url, init);
+          if (!response.ok) throw new Error(`${response.status} ${response.statusText}`);
+          const data = await response.json();
+          if (!Array.isArray(data)) throw new Error("Dữ liệu trả về không phải danh sách");
+          return data;
+        } catch (error) {
+          console.error(`Admin failed loading ${label}:`, error);
+          failedSources.push(label);
+          return [];
+        }
+      };
+
       const [pcsRes, laptopsRes, componentsRes, accessoriesRes, accessoryCombosRes, ticketsRes, accountsRes, ordersRes] = await Promise.all([
-        fetch(`${API_BASE}/api/featured-pcs`).then(r => r.json()),
-        fetch(`${API_BASE}/api/laptops`).then(r => r.json()),
-        fetch(`${API_BASE}/api/components`).then(r => r.json()),
-        fetch(`${API_BASE}/api/accessories`).then(r => r.json()),
-        fetch(`${API_BASE}/api/accessory-combos`).then(r => r.ok ? r.json() : []),
-        fetch(`${API_BASE}/api/tickets`, { headers: authHeader }).then(r => r.ok ? r.json() : []),
-        fetch(`${API_BASE}/api/accounts`, { headers: authHeader }).then(r => r.ok ? r.json() : []),
-        fetch(`${API_BASE}/api/orders`, { headers: authHeader }).then(r => r.ok ? r.json() : [])
+        fetchList("PC", `${API_BASE}/api/featured-pcs`),
+        fetchList("laptop", `${API_BASE}/api/laptops`),
+        fetchList("linh kiện", `${API_BASE}/api/components`),
+        fetchList("phụ kiện", `${API_BASE}/api/accessories`),
+        fetchList("combo phụ kiện", `${API_BASE}/api/accessory-combos`),
+        fetchList("ticket", `${API_BASE}/api/tickets`, { headers: authHeader }),
+        fetchList("tài khoản", `${API_BASE}/api/accounts`, { headers: authHeader }),
+        fetchList("đơn hàng", `${API_BASE}/api/orders`, { headers: authHeader })
       ]);
 
       setPcs(pcsRes);
@@ -218,6 +240,10 @@ export default function AdminIndex() {
       setTickets(ticketsRes);
       setAccounts(accountsRes);
       setOrders(ordersRes);
+
+      if (failedSources.length > 0) {
+        setLoadError(`Không tải được: ${failedSources.join(", ")}. Các danh mục còn lại vẫn hoạt động.`);
+      }
 
       setSearchQuery("");
     } catch (err) {
@@ -232,6 +258,12 @@ export default function AdminIndex() {
       fetchData();
     }
   }, [user]);
+
+  useEffect(() => {
+    if (requestedCategory && productCategories.includes(requestedCategory)) {
+      setActiveCategory(requestedCategory);
+    }
+  }, [requestedCategory]);
 
   // Determine current active list for Products view
   const getActiveList = () => {
@@ -815,6 +847,14 @@ export default function AdminIndex() {
           {/* ────────────────────────────────────────────────────────── */}
           {view === "products" && (
             <div className="space-y-6">
+              {loadError && (
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs font-semibold text-amber-900">
+                  <span>{loadError}</span>
+                  <button type="button" onClick={fetchData} className="rounded-lg bg-amber-900 px-3 py-1.5 font-bold text-white">
+                    Tải lại
+                  </button>
+                </div>
+              )}
               
               {/* Category selector buttons layout */}
               <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-3">
@@ -827,6 +867,7 @@ export default function AdminIndex() {
                       onClick={() => {
                         setActiveCategory(cat.id);
                         setSearchQuery("");
+                        navigate(`/admin?view=products&category=${cat.id}`, { replace: true });
                       }}
                       className={`flex items-center gap-3 p-3.5 rounded-xl border text-left transition cursor-pointer ${isActive
                           ? `${cat.color} ring-2 ring-zinc-950/5 font-extrabold shadow-sm scale-[1.01]`
@@ -875,7 +916,15 @@ export default function AdminIndex() {
                     return (
                       <div
                         key={originalIndex}
-                        className="flex items-center justify-between bg-white border border-zinc-200 hover:border-zinc-300 rounded-2xl p-4 shadow-sm transition"
+                        role="button"
+                        tabIndex={0}
+                        onClick={() => navigate(`/admin/edit?category=${activeCategory}&index=${originalIndex}`)}
+                        onKeyDown={(event) => {
+                          if (event.key === "Enter" || event.key === " ") {
+                            navigate(`/admin/edit?category=${activeCategory}&index=${originalIndex}`);
+                          }
+                        }}
+                        className="flex items-center justify-between bg-white border border-zinc-200 hover:border-zinc-400 hover:shadow-md rounded-2xl p-4 shadow-sm transition cursor-pointer"
                       >
                         <div className="flex items-center gap-4 min-w-0 flex-1">
                           
@@ -962,7 +1011,7 @@ export default function AdminIndex() {
                         </div>
 
                         {/* Reorder and Delete controls */}
-                        <div className="flex items-center gap-2 ml-4 shrink-0">
+                        <div className="flex items-center gap-2 ml-4 shrink-0" onClick={(event) => event.stopPropagation()}>
                           <div className="flex flex-col">
                             <button
                               onClick={() => handleMove(idx, "up")}

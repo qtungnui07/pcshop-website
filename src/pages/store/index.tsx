@@ -1,7 +1,6 @@
 import StoreHeader from '../../components/StoreHeader';
 import CategoryList from '../../components/CategoryList';
 import ProductCarousel from '../marketing-page/ProductCarousel';
-import { latestProducts, hotProducts } from '../../constants/data';
 
 export default function Store() {
   return (
@@ -15,16 +14,15 @@ export default function Store() {
         <CategoryList />
       </div>
       <ProductCarousel
-        title="Thế hệ mới nhất."
+        title="PC nổi bật."
         subtitle="Xem ngay có gì mới."
-        products={latestProducts}
+        apiEndpoint="/api/featured-pcs"
       />
       <ProductCarousel
-        title="12"
-        subtitle="123"
-        products={hotProducts}
+        title="Laptop bán chạy."
+        subtitle="Chọn ngay cho mình."
+        apiEndpoint="/api/laptops"
       />
     </>
   );
 }
-
