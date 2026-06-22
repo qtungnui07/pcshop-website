@@ -43,6 +43,13 @@ export const pcCategories = [
   { name: 'PC Đồ họa',            imgName: "cat-dohoa.png" },
 ];
 
+export const laptopCategories = [
+  { name: 'Laptop Gaming',        imgName: "cat-laptop-gaming.png" },
+  { name: 'Laptop Văn phòng',     imgName: "cat-laptop-vanphong.png" },
+  { name: 'Laptop Đồ họa',        imgName: "cat-laptop-dohoa.png" },
+  { name: 'MacBook',              imgName: "cat-macbook.png" },
+];
+
 export const featuredProducts = [
   {
     badge: 'Bán chạy',
