@@ -1,10 +1,12 @@
 import { useState, useEffect, useMemo } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
 import { 
   ChevronRight, Shield, Truck, RotateCcw, Star, ArrowLeft, Check, ShoppingBag, Heart, 
   Gift, Sparkles, AlertCircle, Info, ThumbsUp 
 } from "lucide-react";
 import AddToCartButton from "../../components/AddToCartButton";
+import { useAuth } from "../../context/AuthContext";
 import { formatCartPrice, useCart } from "../../context/CartContext";
 
 
@@ -14,6 +16,33 @@ const API_BASE = typeof window !== "undefined"
     ? "https://api-pc.qtitpc.dev"
     : `${window.location.protocol}//${window.location.hostname}:3001`)
   : "http://localhost:3001";
+
+const detailContainerVariants = {
+  hidden: {},
+  show: {
+    transition: {
+      staggerChildren: 0.07,
+      delayChildren: 0.04,
+    },
+  },
+};
+
+const detailItemVariants = {
+  hidden: { opacity: 0, y: 18, scale: 0.97 },
+  show: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: { duration: 0.62, ease: [0.16, 1, 0.3, 1] as const },
+  },
+};
+
+const viewportAnimation = {
+  initial: { opacity: 0, y: 34, scale: 0.965 },
+  whileInView: { opacity: 1, y: 0, scale: 1 },
+  viewport: { once: true, amount: 0.16 },
+  transition: { duration: 0.7, ease: [0.16, 1, 0.3, 1] as const },
+};
 
 interface NormalizedProduct {
   id: string;
@@ -29,6 +58,43 @@ interface NormalizedProduct {
   to?: string;
 }
 
+interface ProductReview {
+  id: string;
+  productId: string;
+  productName: string;
+  category: string;
+  userId: string;
+  userName: string;
+  userEmail: string;
+  rating: number;
+  comment: string;
+  verifiedPurchase: boolean;
+  helpfulUserIds?: string[];
+  helpfulCount?: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface ReviewSummary {
+  average: number;
+  count: number;
+  distribution: { star: number; count: number; percent: number }[];
+}
+
+const parseApiResponse = async (res: Response) => {
+  const text = await res.text();
+  if (!text) return {};
+
+  try {
+    return JSON.parse(text);
+  } catch {
+    if (text === "Not Found") {
+      return { error: "API đánh giá chưa sẵn sàng. Hãy restart/deploy backend mới." };
+    }
+    return { error: text };
+  }
+};
+
 // Helper to compare strings case-insensitively and ignore special characters/spaces
 const isNameMatch = (itemName: string, targetName: string) => {
   if (!itemName || !targetName) return false;
@@ -40,6 +106,7 @@ export default function ProductDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { addItem } = useCart();
+  const { user } = useAuth();
   const [product, setProduct] = useState<NormalizedProduct | null>(null);
   const [relatedProducts, setRelatedProducts] = useState<NormalizedProduct[]>([]);
   const [loading, setLoading] = useState(true);
@@ -47,14 +114,32 @@ export default function ProductDetailPage() {
   const [liked, setLiked] = useState(false);
   const [selectedColor, setSelectedColor] = useState("");
   const [activeImgIdx, setActiveImgIdx] = useState(0);
-
-
+  const [reviews, setReviews] = useState<ProductReview[]>([]);
+  const [reviewSummary, setReviewSummary] = useState<ReviewSummary>({
+    average: 0,
+    count: 0,
+    distribution: [5, 4, 3, 2, 1].map((star) => ({ star, count: 0, percent: 0 }))
+  });
+  const [reviewRating, setReviewRating] = useState<number | null>(null);
+  const [reviewComment, setReviewComment] = useState<string | null>(null);
+  const [reviewSubmitting, setReviewSubmitting] = useState(false);
+  const [helpfulSubmitting, setHelpfulSubmitting] = useState<Set<string>>(new Set());
+  const [reviewError, setReviewError] = useState("");
+  const [reviewSuccess, setReviewSuccess] = useState("");
 
   useEffect(() => {
     if (!id) return;
     setLoading(true);
     setError("");
     setActiveImgIdx(0);
+    setReviews([]);
+    setReviewSummary({
+      average: 0,
+      count: 0,
+      distribution: [5, 4, 3, 2, 1].map((star) => ({ star, count: 0, percent: 0 }))
+    });
+    setReviewRating(null);
+    setReviewComment(null);
 
     const fetchProduct = async () => {
       try {
@@ -106,6 +191,7 @@ export default function ProductDetailPage() {
           // Find matching laptop (by name, ID or index)
           let match = data.find((item: any, idx: number) => 
             isNameMatch(item.name, laptopId) || 
+            String(item.id) === id ||
             String(item.id) === laptopId ||
             String(idx + 1) === laptopId
           );
@@ -131,7 +217,7 @@ export default function ProductDetailPage() {
               .filter((item: any) => item.name !== match.name)
               .slice(0, 4)
               .map((item: any) => ({
-                id: `laptop-${item.name}`,
+                id: item.id || `laptop-${item.name}`,
                 name: item.name,
                 specs: item.specs || "",
                 price: item.price,
@@ -157,6 +243,7 @@ export default function ProductDetailPage() {
           // Find match (by name, ID or index)
           let match = data.find((item: any, idx: number) => 
             isNameMatch(item.name, pcId) || 
+            String(item.id) === id ||
             String(idx) === pcId || 
             item.name?.replace(/\s+/g, '-').toLowerCase() === pcId ||
             item.id === pcId
@@ -185,7 +272,7 @@ export default function ProductDetailPage() {
               .filter((item: any) => item.name !== match.name)
               .slice(0, 4)
               .map((item: any) => ({
-                id: `pc-${item.name}`,
+                id: item.id || `pc-${item.name}`,
                 name: item.name,
                 specs: item.specs || "",
                 price: item.price,
@@ -258,7 +345,7 @@ export default function ProductDetailPage() {
 
           const match = data.find((item: any) => {
             const key = `component-${item.category || "linh-kien"}-${item.name}`;
-            return isNameMatch(key, id);
+            return String(item.id) === id || isNameMatch(key, id);
           });
 
           if (match) {
@@ -278,7 +365,7 @@ export default function ProductDetailPage() {
               .filter((item: any) => item.name !== match.name && item.category === match.category)
               .slice(0, 4)
               .map((item: any) => ({
-                id: `component-${item.category || "linh-kien"}-${item.name}`,
+                id: item.id || `component-${item.category || "linh-kien"}-${item.name}`,
                 name: item.name,
                 specs: item.specs || "",
                 price: item.price,
@@ -302,6 +389,34 @@ export default function ProductDetailPage() {
 
     fetchProduct();
   }, [id]);
+
+  useEffect(() => {
+    if (!id || !product) return;
+
+    const fetchReviews = async () => {
+      setReviewError("");
+      try {
+        const params = new URLSearchParams({
+          productId: id,
+          productName: product.name,
+          category: product.category
+        });
+        const res = await fetch(`${API_BASE}/api/reviews?${params.toString()}`);
+        const data = await parseApiResponse(res);
+        if (!res.ok) throw new Error(data.error || "Không thể tải đánh giá");
+        setReviews(data.reviews || []);
+        setReviewSummary(data.summary || {
+          average: 0,
+          count: 0,
+          distribution: [5, 4, 3, 2, 1].map((star) => ({ star, count: 0, percent: 0 }))
+        });
+      } catch (err: any) {
+        setReviewError(err.message || "Không thể tải đánh giá");
+      }
+    };
+
+    fetchReviews();
+  }, [id, product]);
 
   // Split specs by newlines or bullets for simple bullet view
   const specList = useMemo(() => {
@@ -370,36 +485,101 @@ export default function ProductDetailPage() {
     }
   };
 
-  // Mock feedback/reviews
-  const mockReviews = useMemo(() => {
-    const cat = (product?.category || "").toLowerCase();
-    if (cat.includes("laptop")) {
-      return [
-        { name: "Nguyễn Tiến Hưng", date: "10/06/2026", rating: 5, comment: "Laptop dùng siêu mượt, màn hình màu sắc chuẩn xác, tần số quét 144Hz chơi game không giật lag. Pin trâu xài cả ngày." },
-        { name: "Trần Minh Hoàng", date: "05/06/2026", rating: 5, comment: "Thiết kế mỏng nhẹ, bàn phím gõ rất êm tai. Mua tại cửa hàng được tặng thêm chuột và balo cao cấp." },
-        { name: "Lê Văn Đạt", date: "28/05/2026", rating: 4, comment: "Máy mát, chạy êm. Nói chung rất đáng đồng tiền bát gạo cho phân khúc cấu hình này." }
-      ];
+  const currentUserReview = useMemo(() => {
+    if (!user) return null;
+    return reviews.find((review) => review.userId === user.id) || null;
+  }, [reviews, user]);
+
+  const effectiveReviewRating = reviewRating ?? currentUserReview?.rating ?? 5;
+  const effectiveReviewComment = reviewComment ?? currentUserReview?.comment ?? "";
+
+  const handleSubmitReview = async () => {
+    if (!product || !id || !user) return;
+
+    setReviewSubmitting(true);
+    setReviewError("");
+    setReviewSuccess("");
+    try {
+      const res = await fetch(`${API_BASE}/api/reviews`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          productId: id,
+          productName: product.name,
+          category: product.category,
+          userId: user.id,
+          email: user.email,
+          rating: effectiveReviewRating,
+          comment: effectiveReviewComment
+        })
+      });
+      const data = await parseApiResponse(res);
+      if (!res.ok) throw new Error(data.error || "Không thể gửi đánh giá");
+      setReviews(data.reviews || []);
+      setReviewSummary(data.summary);
+      setReviewRating(null);
+      setReviewComment(null);
+      setReviewSuccess(currentUserReview ? "Đã cập nhật đánh giá của bạn." : "Đã gửi đánh giá của bạn.");
+    } catch (err: any) {
+      setReviewError(err.message || "Không thể gửi đánh giá");
+    } finally {
+      setReviewSubmitting(false);
     }
-    if (cat.includes("pc")) {
-      return [
-        { name: "Nguyễn Tiến Hưng", date: "10/06/2026", rating: 5, comment: "Cấu hình PC quá khủng, chiến mọi game AAA max setting cực mượt. Hệ thống tản nhiệt hoạt động rất mát mẻ." },
-        { name: "Trần Minh Hoàng", date: "05/06/2026", rating: 5, comment: "Dây cáp đi gọn gàng, LED RGB đồng bộ tuyệt đẹp. Nhân viên hỗ trợ lắp ráp và cài đặt sẵn phần mềm rất tận tình." },
-        { name: "Lê Văn Đạt", date: "28/05/2026", rating: 4, comment: "Nguồn khỏe, hiệu năng ổn định khi render 3D và dựng phim. Hài lòng với chính sách bảo hành 3 năm." }
-      ];
+  };
+
+  const getReviewHelpfulCount = (review: ProductReview) => {
+    if (typeof review.helpfulCount === "number") return review.helpfulCount;
+    return review.helpfulUserIds?.length || 0;
+  };
+
+  const isReviewHelpful = (review: ProductReview) => {
+    if (!user) return false;
+    return Boolean(review.helpfulUserIds?.includes(user.id));
+  };
+
+  const handleToggleReviewHelpful = async (review: ProductReview) => {
+    if (!user) {
+      navigate("/auth");
+      return;
     }
-    if (cat.includes("phụ kiện") || cat.includes("accessory")) {
-      return [
-        { name: "Nguyễn Tiến Hưng", date: "10/06/2026", rating: 5, comment: "Phụ kiện hoàn thiện tinh tế, độ nhạy cao và kết nối không dây rất ổn định. Đúng chuẩn hàng chính hãng." },
-        { name: "Trần Minh Hoàng", date: "05/06/2026", rating: 5, comment: "Màu sắc rất đẹp, thiết kế công thái học cầm nắm lâu không bị mỏi tay. Giá cả hợp lý." },
-        { name: "Lê Văn Đạt", date: "28/05/2026", rating: 4, comment: "Đóng gói bọc xốp chống sốc rất kỹ càng, giao hàng nhanh. Dùng rất sướng." }
-      ];
+
+    setHelpfulSubmitting((prev) => new Set(prev).add(review.id));
+    setReviewError("");
+    setReviewSuccess("");
+    try {
+      const res = await fetch(`${API_BASE}/api/reviews/helpful`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          reviewId: review.id,
+          userId: user.id,
+          email: user.email
+        })
+      });
+      const data = await parseApiResponse(res);
+      if (!res.ok) throw new Error(data.error || "Không thể cập nhật hữu ích");
+      setReviews(data.reviews || []);
+      if (data.summary) setReviewSummary(data.summary);
+    } catch (err: any) {
+      setReviewError(err.message || "Không thể cập nhật hữu ích");
+    } finally {
+      setHelpfulSubmitting((prev) => {
+        const next = new Set(prev);
+        next.delete(review.id);
+        return next;
+      });
     }
-    return [
-      { name: "Nguyễn Tiến Hưng", date: "10/06/2026", rating: 5, comment: "Sản phẩm linh kiện chính hãng, đóng gói cẩn thận, test thông số chuẩn chỉnh. Dịch vụ chăm sóc khách hàng tốt!" },
-      { name: "Trần Minh Hoàng", date: "05/06/2026", rating: 5, comment: "Linh kiện chạy ổn định, cắm vào nhận ngay. Rất hài lòng." },
-      { name: "Lê Văn Đạt", date: "28/05/2026", rating: 4, comment: "Hiệu năng tốt, bảo hành chính hãng lâu dài giúp yên tâm sử dụng. Đánh giá 5 sao!" }
-    ];
-  }, [product?.category]);
+  };
+
+  const formatReviewDate = (value: string) => {
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return "";
+    return new Intl.DateTimeFormat("vi-VN", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric"
+    }).format(date);
+  };
 
   // Dynamic visual gallery CSS transformation values depending on thumb clicked
   const getGalleryTransformClass = (_idx: number) => {
@@ -435,11 +615,16 @@ export default function ProductDetailPage() {
     : { background: "linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%)" };
 
   return (
-    <div className="bg-[#f5f5f7] min-h-screen pb-16 pt-6">
+    <motion.div
+      className="bg-[#f5f5f7] min-h-screen pb-16 pt-6"
+      variants={detailContainerVariants}
+      initial="hidden"
+      animate="show"
+    >
       <div className="max-w-[1400px] mx-auto px-4 md:px-8">
         
         {/* Breadcrumbs */}
-        <div className="flex items-center gap-1.5 text-xs text-zinc-500 font-medium mb-6">
+        <motion.div variants={detailItemVariants} className="flex items-center gap-1.5 text-xs text-zinc-500 font-medium mb-6">
           <Link to="/" className="hover:text-black transition-colors">Trang chủ</Link>
           <ChevronRight className="w-3 h-3" />
           <Link to="/store" className="hover:text-black transition-colors">Cửa hàng</Link>
@@ -447,27 +632,31 @@ export default function ProductDetailPage() {
           <span className="text-zinc-400 capitalize">{product.category.replace("Phụ kiện - ", "")}</span>
           <ChevronRight className="w-3 h-3" />
           <span className="text-zinc-900 font-semibold truncate max-w-[200px] md:max-w-none">{product.name}</span>
-        </div>
+        </motion.div>
 
         {/* Back Button */}
-        <button 
+        <motion.button
+          variants={detailItemVariants}
           onClick={() => navigate(-1)}
           className="inline-flex items-center gap-1.5 text-sm text-zinc-600 hover:text-zinc-950 font-bold mb-8 transition-colors cursor-pointer"
         >
           <ArrowLeft className="w-4 h-4" /> Quay lại danh sách
-        </button>
+        </motion.button>
 
         {/* Main Product Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start mb-12">
+        <motion.div variants={detailContainerVariants} className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start mb-12">
           
           {/* Left Column: Interactive Image Gallery */}
-          <div className="lg:col-span-7 flex flex-col md:flex-row gap-4">
+          <motion.div variants={detailItemVariants} className="lg:col-span-7 flex flex-col md:flex-row gap-4">
             
             {/* Gallery Thumbnails List */}
             <div className="order-2 md:order-1 flex md:flex-col gap-3 justify-center md:justify-start">
               {[0, 1, 2, 3].map((idx) => (
-                <button
+                <motion.button
                   key={idx}
+                  initial={{ opacity: 0, x: -12, scale: 0.9 }}
+                  animate={{ opacity: 1, x: 0, scale: 1 }}
+                  transition={{ delay: 0.18 + idx * 0.06, duration: 0.32, ease: [0.16, 1, 0.3, 1] }}
                   onClick={() => setActiveImgIdx(idx)}
                   className={`w-16 h-16 md:w-20 md:h-20 rounded-2xl bg-white border flex items-center justify-center p-2 overflow-hidden transition-all duration-300 cursor-pointer shadow-sm relative shrink-0 ${
                     activeImgIdx === idx 
@@ -486,12 +675,17 @@ export default function ProductDetailPage() {
                     <Sparkles className="w-5 h-5 text-zinc-400" />
                   )}
                   <span className="absolute bottom-1 right-1.5 text-[8px] font-black text-zinc-400">#0{idx + 1}</span>
-                </button>
+                </motion.button>
               ))}
             </div>
 
             {/* Main Interactive Screen */}
-            <div className="order-1 md:order-2 flex-1 bg-white rounded-[2.5rem] p-8 md:p-12 border border-zinc-200/50 shadow-sm relative aspect-[4/3] flex items-center justify-center overflow-hidden select-none">
+            <motion.div
+              initial={{ opacity: 0, y: 20, scale: 0.96 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              transition={{ delay: 0.14, duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+              className="order-1 md:order-2 flex-1 bg-white rounded-[2.5rem] p-8 md:p-12 border border-zinc-200/50 shadow-sm relative aspect-[4/3] flex items-center justify-center overflow-hidden select-none"
+            >
               <div 
                 className="absolute inset-0 opacity-10 blur-3xl pointer-events-none scale-110 transition-transform duration-700"
                 style={bgStyle}
@@ -524,11 +718,11 @@ export default function ProductDetailPage() {
                   {product.badge}
                 </span>
               )}
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
 
           {/* Right Column: Info & Action Box */}
-          <div className="lg:col-span-5 bg-white rounded-[2.5rem] p-8 md:p-10 border border-zinc-200/50 shadow-sm flex flex-col justify-between">
+          <motion.div variants={detailItemVariants} className="lg:col-span-5 bg-white rounded-[2.5rem] p-8 md:p-10 border border-zinc-200/50 shadow-sm flex flex-col justify-between">
             <div>
               {/* Category & Brand */}
               <div className="flex items-center gap-2 mb-3 text-[11px] font-bold text-zinc-400 uppercase tracking-widest">
@@ -545,15 +739,16 @@ export default function ProductDetailPage() {
               {/* Rating */}
               <div className="flex items-center gap-1.5 mb-6">
                 <div className="flex text-amber-400">
-                  <Star className="w-4 h-4 fill-current" />
-                  <Star className="w-4 h-4 fill-current" />
-                  <Star className="w-4 h-4 fill-current" />
-                  <Star className="w-4 h-4 fill-current" />
-                  <Star className="w-4 h-4 fill-current" />
+                  {Array.from({ length: 5 }).map((_, rIdx) => (
+                    <Star
+                      key={rIdx}
+                      className={`w-4 h-4 ${rIdx < Math.round(reviewSummary.average || 0) ? "fill-current" : "text-zinc-200"}`}
+                    />
+                  ))}
                 </div>
-                <span className="text-xs font-bold text-zinc-800">5.0</span>
+                <span className="text-xs font-bold text-zinc-800">{reviewSummary.average.toFixed(1)}</span>
                 <span className="text-xs text-zinc-400">•</span>
-                <span className="text-xs font-semibold text-zinc-500 hover:underline cursor-pointer">3 đánh giá</span>
+                <span className="text-xs font-semibold text-zinc-500 hover:underline cursor-pointer">{reviewSummary.count} đánh giá</span>
               </div>
 
               {/* Price */}
@@ -674,14 +869,20 @@ export default function ProductDetailPage() {
                 </div>
               </div>
             </div>
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
 
         {/* Detailed Specs Block & Warranty Block */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-12">
+        <motion.div
+          className="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-12"
+          initial="hidden"
+          whileInView="show"
+          viewport={{ once: true, amount: 0.18 }}
+          variants={detailContainerVariants}
+        >
           
           {/* Detailed Specifications Table */}
-          <div className="lg:col-span-7 bg-white rounded-[2rem] p-8 border border-zinc-200/50 shadow-sm">
+          <motion.div variants={detailItemVariants} className="lg:col-span-7 bg-white rounded-[2rem] p-8 border border-zinc-200/50 shadow-sm">
             <h2 className="text-lg font-bold text-zinc-950 mb-6 flex items-center gap-2">
               Thông số kỹ thuật chi tiết
             </h2>
@@ -712,10 +913,10 @@ export default function ProductDetailPage() {
                 Không tìm thấy cấu hình chi tiết cho thiết bị này.
               </div>
             )}
-          </div>
+          </motion.div>
 
           {/* Warranty / Delivery policies */}
-          <div className="lg:col-span-5 bg-white rounded-[2rem] p-8 border border-zinc-200/50 shadow-sm flex flex-col justify-between">
+          <motion.div variants={detailItemVariants} className="lg:col-span-5 bg-white rounded-[2rem] p-8 border border-zinc-200/50 shadow-sm flex flex-col justify-between">
             <div>
               <h2 className="text-lg font-bold text-zinc-950 mb-6">Chính sách mua hàng &amp; bảo hành</h2>
               <div className="space-y-5">
@@ -753,42 +954,40 @@ export default function ProductDetailPage() {
               <Info className="w-4.5 h-4.5 shrink-0 text-zinc-400" />
               <span>Giá bán đã bao gồm thuế GTGT (VAT) và được cập nhật liên tục dựa theo chính sách khuyến mãi thị trường của cửa hàng.</span>
             </div>
-          </div>
+          </motion.div>
 
-        </div>
+        </motion.div>
 
         {/* Detailed Reviews tabs block */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-12">
+        <motion.div
+          {...viewportAnimation}
+          className="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-12"
+        >
           
           {/* Reviews column */}
           <div className="lg:col-span-12 bg-white rounded-[2rem] p-8 md:p-10 border border-zinc-200/50 shadow-sm">
             <h2 className="text-lg font-bold text-zinc-950 mb-8 flex items-center gap-2">
-              Khách hàng đánh giá <span className="px-2 py-0.5 text-xs bg-zinc-100 rounded-full font-bold text-zinc-600">3 đánh giá</span>
+              Khách hàng đánh giá <span className="px-2 py-0.5 text-xs bg-zinc-100 rounded-full font-bold text-zinc-600">{reviewSummary.count} đánh giá</span>
             </h2>
             
             {/* Advanced Rating Breakdown */}
             <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-center border-b border-zinc-100 pb-8 mb-8">
               <div className="md:col-span-4 flex flex-col items-center text-center border-r border-zinc-100/80 pr-4">
-                <span className="text-5xl font-black text-zinc-900">5.0</span>
+                <span className="text-5xl font-black text-zinc-900">{reviewSummary.average.toFixed(1)}</span>
                 <div className="flex text-amber-400 my-2">
-                  <Star className="w-5 h-5 fill-current" />
-                  <Star className="w-5 h-5 fill-current" />
-                  <Star className="w-5 h-5 fill-current" />
-                  <Star className="w-5 h-5 fill-current" />
-                  <Star className="w-5 h-5 fill-current" />
+                  {Array.from({ length: 5 }).map((_, rIdx) => (
+                    <Star
+                      key={rIdx}
+                      className={`w-5 h-5 ${rIdx < Math.round(reviewSummary.average || 0) ? "fill-current" : "text-zinc-200"}`}
+                    />
+                  ))}
                 </div>
                 <span className="text-xs font-semibold text-zinc-400">Điểm đánh giá trung bình dựa trên đánh giá thực tế</span>
               </div>
               
               {/* Bars chart */}
               <div className="md:col-span-8 space-y-2 max-w-lg w-full">
-                {[
-                  { star: 5, percent: 92, count: 3 },
-                  { star: 4, percent: 8, count: 0 },
-                  { star: 3, percent: 0, count: 0 },
-                  { star: 2, percent: 0, count: 0 },
-                  { star: 1, percent: 0, count: 0 }
-                ].map((row) => (
+                {reviewSummary.distribution.map((row) => (
                   <div key={row.star} className="flex items-center gap-3 text-xs font-semibold">
                     <span className="w-8 text-zinc-500 shrink-0 text-right">{row.star} sao</span>
                     <div className="flex-1 bg-zinc-100 h-2 rounded-full overflow-hidden">
@@ -803,48 +1002,142 @@ export default function ProductDetailPage() {
               </div>
             </div>
 
+            <div className="border-b border-zinc-100 pb-8 mb-8">
+              {user ? (
+                <div className="rounded-2xl border border-zinc-200 bg-zinc-50/60 p-5">
+                  <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4 mb-4">
+                    <div>
+                      <h3 className="text-sm font-bold text-zinc-900">
+                        {currentUserReview ? "Cập nhật đánh giá của bạn" : "Viết đánh giá của bạn"}
+                      </h3>
+                    </div>
+                    <div className="flex items-center gap-1 text-amber-400">
+                      {Array.from({ length: 5 }).map((_, idx) => {
+                        const starValue = idx + 1;
+                        return (
+                          <button
+                            key={starValue}
+                            type="button"
+                            onClick={() => setReviewRating(starValue)}
+                            className="p-1 rounded-full transition hover:bg-white cursor-pointer"
+                            aria-label={`${starValue} sao`}
+                          >
+                            <Star className={`w-6 h-6 ${starValue <= effectiveReviewRating ? "fill-current" : "text-zinc-300"}`} />
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                  <textarea
+                    value={effectiveReviewComment}
+                    onChange={(event) => setReviewComment(event.target.value)}
+                    rows={4}
+                    maxLength={600}
+                    placeholder="Chia sẻ cảm nhận thật của bạn về sản phẩm..."
+                    className="w-full resize-none rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm font-medium text-zinc-800 outline-none transition focus:border-zinc-400 focus:ring-4 focus:ring-zinc-100"
+                  />
+                  <div className="mt-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                    <div className="text-xs font-semibold">
+                      {reviewError && <span className="text-red-500">{reviewError}</span>}
+                      {reviewSuccess && <span className="text-emerald-600">{reviewSuccess}</span>}
+                      {!reviewError && !reviewSuccess && <span className="text-zinc-400">Tối thiểu 3 ký tự. Mỗi tài khoản có một đánh giá cho mỗi sản phẩm.</span>}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleSubmitReview}
+                      disabled={reviewSubmitting || effectiveReviewComment.trim().length < 3}
+                      className="h-10 inline-flex items-center justify-center rounded-full bg-zinc-950 px-5 text-xs font-bold text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:bg-zinc-300"
+                    >
+                      {reviewSubmitting ? "Đang gửi..." : currentUserReview ? "Cập nhật đánh giá" : "Gửi đánh giá"}
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="rounded-2xl border border-dashed border-zinc-200 bg-zinc-50/60 p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                  <div>
+                    <h3 className="text-sm font-bold text-zinc-900">Đăng nhập để đánh giá sản phẩm</h3>
+                    <p className="text-xs text-zinc-500 mt-1">Bạn vẫn có thể đọc toàn bộ đánh giá khi chưa đăng nhập.</p>
+                  </div>
+                  <Link
+                    to="/auth"
+                    className="h-10 inline-flex items-center justify-center rounded-full bg-zinc-950 px-5 text-xs font-bold text-white transition hover:bg-zinc-800"
+                  >
+                    Đăng nhập
+                  </Link>
+                </div>
+              )}
+            </div>
+
             {/* Reviews list */}
             <div className="space-y-6">
-              {mockReviews.map((rev, idx) => (
-                <div key={idx} className="pb-6 border-b border-zinc-100 last:border-b-0 last:pb-0">
-                  <div className="flex justify-between items-start mb-3">
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <h4 className="text-sm font-bold text-zinc-900">{rev.name}</h4>
-                        <span className="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full bg-emerald-50 text-[9px] font-black text-emerald-600 uppercase tracking-wider">
-                          <Check className="w-2.5 h-2.5" /> Đã mua hàng
-                        </span>
+              {reviews.map((rev) => {
+                const helpful = isReviewHelpful(rev);
+                const helpfulCount = getReviewHelpfulCount(rev);
+                const isSubmittingHelpful = helpfulSubmitting.has(rev.id);
+
+                return (
+                  <div key={rev.id} className="pb-6 border-b border-zinc-100 last:border-b-0 last:pb-0">
+                    <div className="flex justify-between items-start mb-3">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <h4 className="text-sm font-bold text-zinc-900">{rev.userName}</h4>
+                          {rev.verifiedPurchase && (
+                            <span className="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full bg-emerald-50 text-[9px] font-black text-emerald-600 uppercase tracking-wider">
+                              <Check className="w-2.5 h-2.5" /> Đã mua hàng
+                            </span>
+                          )}
+                        </div>
+                        <div className="flex text-amber-400 mt-1">
+                          {Array.from({ length: 5 }).map((_, rIdx) => (
+                            <Star 
+                              key={rIdx} 
+                              className={`w-3.5 h-3.5 ${rIdx < rev.rating ? "fill-current" : "text-zinc-200"}`} 
+                            />
+                          ))}
+                        </div>
                       </div>
-                      <div className="flex text-amber-400 mt-1">
-                        {Array.from({ length: 5 }).map((_, rIdx) => (
-                          <Star 
-                            key={rIdx} 
-                            className={`w-3.5 h-3.5 ${rIdx < rev.rating ? "fill-current" : "text-zinc-200"}`} 
-                          />
-                        ))}
-                      </div>
+                      <span className="text-xs text-zinc-400 font-semibold">{formatReviewDate(rev.updatedAt || rev.createdAt)}</span>
                     </div>
-                    <span className="text-xs text-zinc-400 font-semibold">{rev.date}</span>
+                    <p className="text-sm text-zinc-600 leading-relaxed mb-3">{rev.comment}</p>
+                    <button
+                      type="button"
+                      onClick={() => handleToggleReviewHelpful(rev)}
+                      disabled={isSubmittingHelpful}
+                      className={`inline-flex items-center gap-1.5 text-xs font-bold transition-colors cursor-pointer disabled:cursor-wait disabled:opacity-60 ${
+                        helpful ? "text-blue-600" : "text-zinc-400 hover:text-blue-600"
+                      }`}
+                      aria-pressed={helpful}
+                    >
+                      <ThumbsUp className={`w-3.5 h-3.5 ${helpful ? "fill-current" : ""}`} /> Hữu ích ({helpfulCount})
+                    </button>
                   </div>
-                  <p className="text-sm text-zinc-600 leading-relaxed mb-3">{rev.comment}</p>
-                  <button className="inline-flex items-center gap-1.5 text-xs text-zinc-400 hover:text-blue-600 font-bold transition-colors cursor-pointer">
-                    <ThumbsUp className="w-3.5 h-3.5" /> Hữu ích (1)
-                  </button>
+                );
+              })}
+              {reviews.length === 0 && (
+                <div className="py-8 text-center text-sm font-semibold text-zinc-400">
+                  Chưa có đánh giá nào cho sản phẩm này.
                 </div>
-              ))}
+              )}
             </div>
           </div>
 
-        </div>
+        </motion.div>
 
         {/* Related Products Section */}
         {relatedProducts.length > 0 && (
-          <div className="bg-white rounded-[2rem] p-8 md:p-10 border border-zinc-200/50 shadow-sm">
+          <motion.div
+            {...viewportAnimation}
+            className="bg-white rounded-[2rem] p-8 md:p-10 border border-zinc-200/50 shadow-sm"
+          >
             <h2 className="text-xl font-bold text-zinc-950 mb-6">Sản phẩm liên quan</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
               {relatedProducts.map((p, idx) => (
-                <div 
+                <motion.div
                   key={idx}
+                  initial={{ opacity: 0, y: 22, scale: 0.94 }}
+                  whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                  viewport={{ once: true, amount: 0.2 }}
+                  transition={{ delay: idx * 0.09, duration: 0.58, ease: [0.16, 1, 0.3, 1] }}
                   onClick={() => {
                     navigate(`/san-pham/${p.id}`);
                     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -868,13 +1161,13 @@ export default function ProductDetailPage() {
                       <ShoppingBag className="w-3.5 h-3.5" />
                     </span>
                   </div>
-                </div>
+                </motion.div>
               ))}
             </div>
-          </div>
+          </motion.div>
         )}
 
       </div>
-    </div>
+    </motion.div>
   );
 }

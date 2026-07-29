@@ -22,7 +22,7 @@ import {
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import AddToCartButton from "../../components/AddToCartButton";
 
 /*
@@ -653,6 +653,15 @@ export default function PhuKienIndex() {
     const startIndex = (currentPage - 1) * PRODUCTS_PER_PAGE;
     return filteredProducts.slice(startIndex, startIndex + PRODUCTS_PER_PAGE);
   }, [filteredProducts, currentPage]);
+  const productViewKey = [
+    currentPage,
+    sortBy,
+    [...selectedCategories].sort().join(","),
+    [...selectedBrands].sort().join(","),
+    [...selectedColors].sort().join(","),
+    minPrice,
+    maxPrice,
+  ].join("|");
 
   const paginationItems = useMemo(() => {
     return getPaginationItems(currentPage, totalPages);
@@ -1127,7 +1136,13 @@ export default function PhuKienIndex() {
                 </button>
               </div>
             ) : (
-              <div
+              <AnimatePresence mode="popLayout" initial={false}>
+              <motion.div
+                key={productViewKey}
+                initial={{ opacity: 0, y: 14, scale: 0.985 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -8, scale: 0.985 }}
+                transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
                 className={
                   viewMode === "grid"
                     ? "grid grid-cols-1 gap-x-5 gap-y-8 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-5"
@@ -1142,8 +1157,10 @@ export default function PhuKienIndex() {
                       : product.fallbackIcon || getIconByCategory(product.category);
 
                   return (
-                    <article
+                    <motion.article
                       key={product.id}
+                      whileHover={{ y: -5, scale: 1.025 }}
+                      transition={{ type: "spring", stiffness: 320, damping: 24 }}
                       onClick={() => navigate(`/san-pham/accessory-${product.name}`)}
                       className={`group relative overflow-hidden rounded-[20px] border border-zinc-100 bg-white shadow-[0_4px_18px_rgba(0,0,0,0.04)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_16px_32px_rgba(0,0,0,0.08)] cursor-pointer ${viewMode === "list" ? "grid grid-cols-[210px_1fr] items-center" : ""
                         }`}
@@ -1172,7 +1189,7 @@ export default function PhuKienIndex() {
                           src={product.image}
                           alt={product.name}
                           Icon={Icon}
-                          className="h-full w-full object-cover object-center transition duration-300 group-hover:scale-[1.04]"
+                          className="h-full w-full object-cover object-center transition duration-500 group-hover:scale-[1.1]"
                           iconClassName="h-24 w-24 text-zinc-900"
                         />
                       </div>
@@ -1218,10 +1235,11 @@ export default function PhuKienIndex() {
                           ))}
                         </div>
                       </div>
-                    </article>
+                    </motion.article>
                   );
                 })}
-              </div>
+              </motion.div>
+              </AnimatePresence>
             )}
 
             {!loading && !fetchError && filteredProducts.length > PRODUCTS_PER_PAGE && (

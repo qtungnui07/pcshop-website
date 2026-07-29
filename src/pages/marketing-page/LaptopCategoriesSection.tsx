@@ -52,7 +52,7 @@ export default function LaptopCategoriesSection() {
                 {/* Product image */}
                 <div className="w-full aspect-[4/3] relative overflow-hidden bg-zinc-50">
                   <img
-                    src={`/images/${cat.imgName}`}
+                    src={cat.image}
                     alt={cat.name}
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                   />

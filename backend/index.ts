@@ -12,6 +12,9 @@ const resetTokens = new Map<string, { email: string; expiresAt: number }>();
 
 const defaultOrders: any[] = [];
 const defaultPayments: any[] = [];
+const defaultReviews: any[] = [];
+const defaultFlashcardDesigns: any[] = [];
+const defaultFlashcardAppliedDesigns: Record<string, any> = {};
 
 function getClientIP(req: Request): string {
   const cfConnectingIP = req.headers.get("cf-connecting-ip");
@@ -366,6 +369,95 @@ const defaultAccounts = [
   }
 ];
 
+function buildSeedReviews(productId: string, productName: string, category: string) {
+  const cat = category.toLowerCase();
+  const baseDate = ["2026-06-10T08:30:00.000Z", "2026-06-05T13:15:00.000Z", "2026-05-28T09:45:00.000Z"];
+  const users = [
+    { name: "Nguyễn Tiến Hưng", email: "hung.nt@example.local", userId: "seed-review-1" },
+    { name: "Trần Minh Hoàng", email: "hoang.tm@example.local", userId: "seed-review-2" },
+    { name: "Lê Văn Đạt", email: "dat.lv@example.local", userId: "seed-review-3" }
+  ];
+
+  let comments = [
+    "Sản phẩm chính hãng, đóng gói cẩn thận, test thông số chuẩn chỉnh. Dịch vụ chăm sóc khách hàng tốt.",
+    "Linh kiện chạy ổn định, lắp vào nhận ngay. Rất hài lòng với trải nghiệm mua hàng.",
+    "Hiệu năng tốt, bảo hành rõ ràng nên khá yên tâm sử dụng lâu dài."
+  ];
+
+  if (cat.includes("laptop")) {
+    comments = [
+      "Máy dùng mượt, màn hình màu sắc đẹp, bàn phím gõ êm. Shop hỗ trợ cài đặt ban đầu rất nhanh.",
+      "Thiết kế gọn, hiệu năng đúng mô tả. Mua online nhưng đóng gói chắc chắn, giao đúng hẹn.",
+      "Pin ổn, máy mát khi làm việc văn phòng và chỉnh ảnh nhẹ. Giá hợp lý trong tầm cấu hình này."
+    ];
+  } else if (cat.includes("pc")) {
+    comments = [
+      "Cấu hình đúng như tư vấn, chiến game và render đều ổn định. Dây cáp đi gọn, thùng máy nhìn rất sạch.",
+      "Máy chạy êm, nhiệt độ tốt khi chơi game lâu. Nhân viên bàn giao kỹ và test trước khi gửi.",
+      "Hiệu năng tốt so với giá, bảo hành rõ ràng. Mình thích nhất phần lắp ráp gọn và chắc."
+    ];
+  } else if (cat.includes("phụ kiện") || cat.includes("accessory")) {
+    comments = [
+      "Hoàn thiện tốt, cảm giác sử dụng chắc tay. Hàng đúng mô tả và còn nguyên seal.",
+      "Kết nối ổn định, màu sắc đẹp hơn ảnh. Shop đóng gói kỹ nên nhận hàng rất yên tâm.",
+      "Dùng vài ngày thấy ổn, không lỗi vặt. Giá dễ chịu so với chất lượng."
+    ];
+  }
+
+  return users.map((user, index) => ({
+    id: `REV-SEED-${productId}-${index + 1}`.replace(/[^a-zA-Z0-9-_]/g, "-"),
+    productId,
+    productName,
+    category,
+    userId: user.userId,
+    userName: user.name,
+    userEmail: user.email,
+    rating: index === 2 ? 4 : 5,
+    comment: comments[index],
+    verifiedPurchase: true,
+    helpfulUserIds: [],
+    createdAt: baseDate[index],
+    updatedAt: baseDate[index]
+  }));
+}
+
+function normalizeReviewHelpful(review: any) {
+  const helpfulUserIds = Array.isArray(review.helpfulUserIds)
+    ? Array.from(new Set(review.helpfulUserIds.map((id: any) => String(id || "").trim()).filter(Boolean)))
+    : [];
+  return {
+    ...review,
+    helpfulUserIds,
+    helpfulCount: helpfulUserIds.length
+  };
+}
+
+function summarizeReviews(reviews: any[]) {
+  const count = reviews.length;
+  const average = count
+    ? Number((reviews.reduce((sum, review) => sum + Number(review.rating || 0), 0) / count).toFixed(1))
+    : 0;
+  const distribution = [5, 4, 3, 2, 1].map((star) => {
+    const starCount = reviews.filter((review) => Number(review.rating) === star).length;
+    return {
+      star,
+      count: starCount,
+      percent: count ? Math.round((starCount / count) * 100) : 0
+    };
+  });
+
+  return { average, count, distribution };
+}
+
+function hasPurchasedProduct(orders: any[], userId: string, email: string, productId: string, productName: string) {
+  const normalizedEmail = email.toLowerCase().trim();
+  return (orders || []).some((order: any) => {
+    const sameUser = order.userId === userId || String(order.email || "").toLowerCase().trim() === normalizedEmail;
+    if (!sameUser || !Array.isArray(order.items)) return false;
+    return order.items.some((item: any) => item.id === productId || item.name === productName);
+  });
+}
+
 async function readCollection(name: string, defaultValue: any) {
   const existing = await sql`SELECT data FROM app_collections WHERE name = ${name}`;
   if (existing.length > 0) {
@@ -437,7 +529,7 @@ async function readData() {
     }
   }
 
-  const [pcs, components, laptops, accessories, accessoryCombos, tickets, accounts, orders, payments] = await Promise.all([
+  const [pcs, components, laptops, accessories, accessoryCombos, tickets, accounts, orders, payments, reviews, staff, flashcardDesigns, flashcardAppliedDesigns] = await Promise.all([
     readCollection("pcs", oldDb?.pcs ?? defaultPCs),
     readCollection("components", oldDb?.components ?? defaultComponents),
     readCollection("laptops", oldDb?.laptops ?? defaultLaptops),
@@ -447,6 +539,10 @@ async function readData() {
     readCollection("accounts", oldDb?.accounts ?? defaultAccounts),
     readCollection("orders", oldDb?.orders ?? defaultOrders),
     readCollection("payments", oldDb?.payments ?? defaultPayments),
+    readCollection("reviews", oldDb?.reviews ?? defaultReviews),
+    readCollection("staff", oldDb?.staff ?? []),
+    readCollection("flashcardDesigns", oldDb?.flashcardDesigns ?? defaultFlashcardDesigns),
+    readCollection("flashcardAppliedDesigns", oldDb?.flashcardAppliedDesigns ?? defaultFlashcardAppliedDesigns),
   ]);
 
   // Auto-migrate image URLs to subfolders if they aren't migrated yet
@@ -485,6 +581,7 @@ async function readData() {
     await writeCollection("accounts", accounts);
     await writeCollection("orders", orders);
     await writeCollection("payments", payments);
+    await writeCollection("reviews", reviews);
 
     try {
       await rename("./backend/data.json", "./backend/data.json.bak");
@@ -494,7 +591,7 @@ async function readData() {
     }
   }
 
-  return { pcs, components, laptops, accessories, accessoryCombos, tickets, accounts, orders, payments };
+  return { pcs, components, laptops, accessories, accessoryCombos, tickets, accounts, orders, payments, reviews, staff, flashcardDesigns, flashcardAppliedDesigns };
 }
 
 async function writeData(db: any) {
@@ -508,6 +605,10 @@ async function writeData(db: any) {
     db.accounts && writeCollection("accounts", db.accounts),
     db.orders && writeCollection("orders", db.orders),
     db.payments && writeCollection("payments", db.payments),
+    db.reviews && writeCollection("reviews", db.reviews),
+    db.staff && writeCollection("staff", db.staff),
+    db.flashcardDesigns && writeCollection("flashcardDesigns", db.flashcardDesigns),
+    db.flashcardAppliedDesigns && writeCollection("flashcardAppliedDesigns", db.flashcardAppliedDesigns),
   ]);
 }
 
@@ -557,6 +658,59 @@ serve({
       const filePath = `./backend/public/images/${imageName}`;
       const file = Bun.file(filePath);
       return new Response(file, { headers });
+    }
+
+    // Flashcard Designer — public published designs and admin-only publishing
+    if (url.pathname === "/api/flashcard-designs/applied") {
+      const db = await readData();
+      if (req.method === "GET") {
+        return Response.json(db.flashcardAppliedDesigns || {}, { headers });
+      }
+      if (!verifyAdmin(req, db)) {
+        return Response.json({ error: "Từ chối truy cập. Chỉ dành cho admin." }, { status: 403, headers });
+      }
+      try {
+        const design = await req.json();
+        if (!design || typeof design !== "object" || Array.isArray(design) || !design.target) {
+          return Response.json({ error: "Thiết kế áp dụng không hợp lệ." }, { status: 400, headers });
+        }
+        const sourceKey = String(design.sourceKey || `${design.target}:default`);
+        db.flashcardAppliedDesigns = { ...(db.flashcardAppliedDesigns || {}), [sourceKey]: design };
+        await writeData(db);
+        return Response.json({ success: true, sourceKey }, { headers });
+      } catch {
+        return Response.json({ error: "Thiết kế áp dụng không hợp lệ." }, { status: 400, headers });
+      }
+    }
+
+    // Flashcard Designer — shared draft persistence for admin-created designs
+    if (url.pathname === "/api/flashcard-designs") {
+      const db = await readData();
+      if (req.method === "GET") {
+        if (!verifyAdmin(req, db)) {
+          return Response.json({ error: "Từ chối truy cập. Chỉ dành cho admin." }, { status: 403, headers });
+        }
+        return Response.json(db.flashcardDesigns || [], { headers });
+      }
+      if (!verifyAdmin(req, db)) {
+        return Response.json({ error: "Từ chối truy cập. Chỉ dành cho admin." }, { status: 403, headers });
+      }
+
+      if (req.method === "POST") {
+        try {
+          const body = await req.json();
+          if (!Array.isArray(body)) {
+            return Response.json({ error: "Dữ liệu thiết kế không hợp lệ." }, { status: 400, headers });
+          }
+          db.flashcardDesigns = body;
+          await writeData(db);
+          return Response.json({ success: true, count: body.length }, { headers });
+        } catch {
+          return Response.json({ error: "Dữ liệu thiết kế không hợp lệ." }, { status: 400, headers });
+        }
+      }
+
+      return Response.json({ error: "Method Not Allowed" }, { status: 405, headers });
     }
 
     // GET & POST featured PCs (backward compatible with admin panel)
@@ -875,6 +1029,169 @@ serve({
         db.payments = (db.payments || []).map((item: any) => item.id === payment.id ? payment : item);
         await writeData(db);
         return Response.json({ success: true, session: payment, order }, { headers });
+      }
+    }
+
+    // GET & POST Product Reviews
+    if (url.pathname === "/api/reviews") {
+      const db = await readData();
+
+      if (req.method === "GET") {
+        const productId = url.searchParams.get("productId")?.trim();
+        const productName = url.searchParams.get("productName")?.trim() || "";
+        const category = url.searchParams.get("category")?.trim() || "";
+
+        if (!productId) {
+          return Response.json({ error: "Thiếu mã sản phẩm" }, { status: 400, headers });
+        }
+
+        let productReviews = (db.reviews || []).filter((review: any) => review.productId === productId);
+        if (productReviews.length === 0 && productName) {
+          const seededReviews = buildSeedReviews(productId, productName, category);
+          db.reviews = [...(db.reviews || []), ...seededReviews];
+          await writeData(db);
+          productReviews = seededReviews;
+        }
+
+        const sortedReviews = productReviews
+          .map(normalizeReviewHelpful)
+          .sort((a: any, b: any) =>
+            new Date(b.updatedAt || b.createdAt).getTime() - new Date(a.updatedAt || a.createdAt).getTime()
+          );
+
+        return Response.json({
+          reviews: sortedReviews,
+          summary: summarizeReviews(sortedReviews)
+        }, { headers });
+      }
+
+      if (req.method === "POST") {
+        try {
+          const body = await req.json();
+          const productId = String(body.productId || "").trim();
+          const productName = String(body.productName || "").trim();
+          const category = String(body.category || "").trim();
+          const userId = String(body.userId || "").trim();
+          const email = String(body.email || "").toLowerCase().trim();
+          const rating = Number(body.rating);
+          const comment = String(body.comment || "").trim();
+
+          if (!productId || !productName || !userId || !email) {
+            return Response.json({ error: "Thiếu thông tin đánh giá" }, { status: 400, headers });
+          }
+          if (!Number.isInteger(rating) || rating < 1 || rating > 5) {
+            return Response.json({ error: "Số sao phải từ 1 đến 5" }, { status: 400, headers });
+          }
+          if (comment.length < 3) {
+            return Response.json({ error: "Nội dung đánh giá cần ít nhất 3 ký tự" }, { status: 400, headers });
+          }
+
+          const account = (db.accounts || []).find((user: any) =>
+            user.id === userId && String(user.email || "").toLowerCase().trim() === email
+          );
+          if (!account) {
+            return Response.json({ error: "Vui lòng đăng nhập để đánh giá" }, { status: 401, headers });
+          }
+
+          const now = new Date().toISOString();
+          const existingReview = (db.reviews || []).find((review: any) =>
+            review.productId === productId && review.userId === userId
+          );
+          const review = {
+            id: existingReview?.id || `REV-${Date.now()}-${Math.random().toString(36).slice(2, 8).toUpperCase()}`,
+            productId,
+            productName,
+            category,
+            userId,
+            userName: account.name,
+            userEmail: email,
+            rating,
+            comment,
+            verifiedPurchase: hasPurchasedProduct(db.orders || [], userId, email, productId, productName),
+            helpfulUserIds: existingReview?.helpfulUserIds || [],
+            createdAt: existingReview?.createdAt || now,
+            updatedAt: now
+          };
+
+          db.reviews = existingReview
+            ? (db.reviews || []).map((item: any) => item.id === existingReview.id ? review : item)
+            : [review, ...(db.reviews || [])];
+
+          await writeData(db);
+
+          const productReviews = (db.reviews || [])
+            .filter((item: any) => item.productId === productId)
+            .map(normalizeReviewHelpful)
+            .sort((a: any, b: any) => new Date(b.updatedAt || b.createdAt).getTime() - new Date(a.updatedAt || a.createdAt).getTime());
+
+          return Response.json({
+            success: true,
+            review: normalizeReviewHelpful(review),
+            reviews: productReviews,
+            summary: summarizeReviews(productReviews)
+          }, { headers });
+        } catch (err) {
+          return Response.json({ error: "Invalid JSON body" }, { status: 400, headers });
+        }
+      }
+    }
+
+    if (url.pathname === "/api/reviews/helpful" && req.method === "POST") {
+      const db = await readData();
+
+      try {
+        const body = await req.json();
+        const reviewId = String(body.reviewId || "").trim();
+        const userId = String(body.userId || "").trim();
+        const email = String(body.email || "").toLowerCase().trim();
+
+        if (!reviewId || !userId || !email) {
+          return Response.json({ error: "Thiếu thông tin hữu ích" }, { status: 400, headers });
+        }
+
+        const account = (db.accounts || []).find((user: any) =>
+          user.id === userId && String(user.email || "").toLowerCase().trim() === email
+        );
+        if (!account) {
+          return Response.json({ error: "Vui lòng đăng nhập để đánh dấu hữu ích" }, { status: 401, headers });
+        }
+
+        const existingReview = (db.reviews || []).find((review: any) => review.id === reviewId);
+        if (!existingReview) {
+          return Response.json({ error: "Không tìm thấy đánh giá" }, { status: 404, headers });
+        }
+
+        const helpfulUserIds = Array.isArray(existingReview.helpfulUserIds)
+          ? existingReview.helpfulUserIds.map((id: any) => String(id || "").trim()).filter(Boolean)
+          : [];
+        const hasMarkedHelpful = helpfulUserIds.includes(userId);
+        const nextHelpfulUserIds = hasMarkedHelpful
+          ? helpfulUserIds.filter((id: string) => id !== userId)
+          : [...helpfulUserIds, userId];
+        const updatedReview = {
+          ...existingReview,
+          helpfulUserIds: Array.from(new Set(nextHelpfulUserIds))
+        };
+
+        db.reviews = (db.reviews || []).map((review: any) =>
+          review.id === reviewId ? updatedReview : review
+        );
+        await writeData(db);
+
+        const productReviews = (db.reviews || [])
+          .filter((review: any) => review.productId === updatedReview.productId)
+          .map(normalizeReviewHelpful)
+          .sort((a: any, b: any) => new Date(b.updatedAt || b.createdAt).getTime() - new Date(a.updatedAt || a.createdAt).getTime());
+
+        return Response.json({
+          success: true,
+          helpful: !hasMarkedHelpful,
+          review: normalizeReviewHelpful(updatedReview),
+          reviews: productReviews,
+          summary: summarizeReviews(productReviews)
+        }, { headers });
+      } catch (err) {
+        return Response.json({ error: "Invalid JSON body" }, { status: 400, headers });
       }
     }
 
@@ -1239,6 +1556,15 @@ serve({
     }
 
     // ── ACCOUNTS MANAGEMENT ENDPOINTS (ADMIN ONLY) ───────────────────
+
+    // GET /api/staff
+    if (url.pathname === "/api/staff" && req.method === "GET") {
+      const db = await readData();
+      if (!verifyAdmin(req, db)) {
+        return Response.json({ error: "Từ chối truy cập. Chỉ dành cho admin." }, { status: 403, headers });
+      }
+      return Response.json(db.staff || [], { headers });
+    }
 
     // GET /api/accounts
     if (url.pathname === "/api/accounts" && req.method === "GET") {

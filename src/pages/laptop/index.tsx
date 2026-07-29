@@ -161,7 +161,7 @@ type LaptopScreen = "13 - 14 inch" | "15 - 15.6 inch" | "16 inch trở lên";
 type LaptopGPU = "Intel Iris Xe" | "AMD Radeon" | "NVIDIA RTX 4060" | "NVIDIA RTX 4070";
 
 interface LaptopProduct {
-  id: number;
+  id: string;
   brand: LaptopBrand;
   name: string;
   cpu: LaptopCPU;
@@ -218,21 +218,6 @@ const categories = [
     img: "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?q=80&w=800&auto=format&fit=crop",
     filterBrands: ["Apple", "Lenovo", "HP"] as LaptopBrand[],
   },
-];
-
-const defaultProducts: LaptopProduct[] = [
-  { id: 1,  brand: "ASUS",   name: "ASUS ROG Zephyrus G14 2024",  cpu: "AMD Ryzen 9",    ram: "16GB", screen: "13 - 14 inch",   gpu: "NVIDIA RTX 4060", specs: "Ryzen 9 8945HS / 16GB /\n1TB SSD / RTX 4060 / 14\" OLED",        price: 28990000, badge: "Bán chạy", img: "https://dlcdnwebimgs.asus.com/gain/97f4b8da-e77d-418c-8515-3850123533be/w800" },
-  { id: 2,  brand: "Apple",  name: "MacBook Air M3 13 inch",       cpu: "Apple M Series", ram: "16GB", screen: "13 - 14 inch",   gpu: "Apple M Series" as any, specs: "Apple M3 / 16GB / 512GB SSD /\n13.6\" Liquid Retina",               price: 24990000, img: "https://store.storeimages.cdn-apple.com/8756/as-images.apple.com/is/mba13-midnight-select-202402?wid=904&hei=840&fmt=jpeg&qlt=90&.v=1708367688034" },
-  { id: 3,  brand: "Dell",   name: "Dell XPS 13 Plus 9320",        cpu: "Intel Core i7",  ram: "16GB", screen: "13 - 14 inch",   gpu: "Intel Iris Xe",   specs: "Intel Core i7-1360P / 16GB /\n512GB SSD / 13.4\" FHD+",             price: 27490000, img: "https://i.dell.com/is/image/DellContent/content/dam/ss2/product-images/dell-client-products/notebooks/xps-notebooks/xps-13-9320/media-gallery/xs9320nt-cnb-00000ff090-gy.psd?fmt=png-alpha&pscan=auto&scl=1&hei=402&wid=555&qlt=100,1&resMode=sharp2&size=555,402&chrss=full" },
-  { id: 4,  brand: "Lenovo", name: "Lenovo Yoga Slim 7i Pro",      cpu: "Intel Core i7",  ram: "16GB", screen: "13 - 14 inch",   gpu: "Intel Iris Xe",   specs: "Intel Core i7-13700H / 16GB /\n1TB SSD / 14.5\" 3K",               price: 24490000, img: "https://p1-ofp.static.pub/fes/cms/2022/07/12/3og7y6a14mve0h7m99a4zcwf47u10v359190.png" },
-  { id: 5,  brand: "HP",     name: "HP Spectre x360 14",           cpu: "Intel Core i7",  ram: "16GB", screen: "13 - 14 inch",   gpu: "Intel Iris Xe",   specs: "Intel Core i7-1355U / 16GB /\n1TB SSD / 14\" 2.8K OLED",           price: 26990000, img: "https://ssl-product-images.www8-hp.com/digmedialib/prodimg/lowres/c08404555.png" },
-  { id: 6,  brand: "Acer",   name: "Acer Swift Go 14 OLED",        cpu: "Intel Core i5",  ram: "16GB", screen: "13 - 14 inch",   gpu: "Intel Iris Xe",   specs: "Intel Core Ultra 5 125H / 16GB /\n512GB SSD / 14\" 2.8K OLED",      price: 20990000, img: "https://images.acer.com/is/image/acer/swift-go-14-sfg14-72-sfg14-73-glare-silver-ui-01?$Product-Cards-XL$" },
-  { id: 7,  brand: "ASUS",   name: "ASUS TUF Gaming A15",          cpu: "AMD Ryzen 7",    ram: "16GB", screen: "15 - 15.6 inch", gpu: "NVIDIA RTX 4060", specs: "AMD Ryzen 7 7735HS / 16GB /\n512GB SSD / RTX 4060 / 15.6\" 144Hz", price: 24490000, badge: "Mới", img: "https://dlcdnwebimgs.asus.com/gain/d3ad557c-864a-4d7a-8f4b-2d7c58ed00ee/w800" },
-  { id: 8,  brand: "MSI",    name: "MSI Stealth 16 Studio",        cpu: "Intel Core i7",  ram: "32GB", screen: "16 inch trở lên",gpu: "NVIDIA RTX 4070", specs: "Intel Core i7-13700H / 32GB /\n1TB SSD / RTX 4070 / 16\" 16:10",    price: 37990000, img: "https://asset.msi.com/resize/image/global/product/product_1672728476839352c3c97db317e0b510ed9c882193.png62405b38c58fe0f07fcef2367d8a9ba1/1024.png" },
-  { id: 9,  brand: "Apple",  name: "MacBook Pro M3 Pro 14 inch",   cpu: "Apple M Series", ram: "32GB", screen: "13 - 14 inch",   gpu: "Apple M Series" as any, specs: "Apple M3 Pro / 32GB / 1TB SSD /\n14.2\" Liquid Retina XDR",          price: 49990000, badge: "Mới", img: "https://store.storeimages.cdn-apple.com/8756/as-images.apple.com/is/mbp14-spacegray-select-202310?wid=904&hei=840&fmt=jpeg&qlt=90&.v=1697230830200" },
-  { id: 10, brand: "Dell",   name: "Dell Alienware m16 R2",        cpu: "Intel Core i9",  ram: "32GB", screen: "16 inch trở lên",gpu: "NVIDIA RTX 4070", specs: "Intel Core i9-14900HX / 32GB /\n1TB SSD / RTX 4070 / 16\" QHD+",    price: 52990000, img: "https://i.dell.com/is/image/DellContent/content/dam/ss2/product-images/dell-client-products/notebooks/alienware-notebooks/alienware-m16-r2/spi/notebook-alienware-m16-r2-nt-front-open-hero.psd?fmt=png-alpha&pscan=auto&scl=1&hei=402&wid=555&qlt=100,1&resMode=sharp2&size=555,402" },
-  { id: 11, brand: "HP",     name: "HP OMEN 16",                   cpu: "AMD Ryzen 7",    ram: "16GB", screen: "16 inch trở lên",gpu: "NVIDIA RTX 4060", specs: "AMD Ryzen 7 7745HX / 16GB /\n512GB SSD / RTX 4060 / 16.1\" 165Hz", price: 26490000, img: "https://ssl-product-images.www8-hp.com/digmedialib/prodimg/lowres/c08538591.png" },
-  { id: 12, brand: "Lenovo", name: "Lenovo ThinkPad X1 Carbon",    cpu: "Intel Core i7",  ram: "16GB", screen: "13 - 14 inch",   gpu: "Intel Iris Xe",   specs: "Intel Core i7-1365U / 16GB /\n512GB SSD / 14\" 2.8K OLED",         price: 42990000, img: "https://p4-ofp.static.pub/fes/cms/2023/02/08/jf0hbfmfrlprkbgkm8v9oalz1twvix693003.png" },
 ];
 
 const perks = [
@@ -344,7 +329,7 @@ function parseLaptopProduct(raw: any, index: number): LaptopProduct {
   else if (specsStr.includes('16"') || specsStr.includes('16 inch') || specsStr.includes('16.1"')) screenVal = "16 inch trở lên";
 
   return {
-    id: raw.id || (index + 1),
+    id: String(raw.id || `laptop-${index + 1}`),
     brand: brandVal,
     name: raw.name || "",
     cpu: cpuVal,
@@ -368,7 +353,7 @@ export default function LaptopIndex() {
         : `${window.location.protocol}//${window.location.hostname}:3001`)
       : "http://localhost:3001";
 
-  const [products, setProducts] = useState<LaptopProduct[]>(defaultProducts);
+  const [products, setProducts] = useState<LaptopProduct[]>([]);
 
   useEffect(() => {
     fetch(`${API_BASE}/api/laptops`)
@@ -394,6 +379,24 @@ export default function LaptopIndex() {
   const [selCPUs,    setSelCPUs]    = useState<Set<LaptopCPU>>(new Set());
   const [selScreens, setSelScreens] = useState<Set<LaptopScreen>>(new Set());
   const [selGPUs,    setSelGPUs]    = useState<Set<LaptopGPU>>(new Set());
+
+  /* Read ?filter= from URL on mount */
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const filter = params.get('filter');
+    if (filter) {
+      const filterMap: Record<string, LaptopBrand[]> = {
+        'laptop-gaming': ['ASUS', 'MSI', 'Acer'],
+        'laptop-van-phong': ['Dell', 'Lenovo', 'HP'],
+        'laptop-do-hoa': ['Apple', 'ASUS', 'Dell'],
+        'macbook': ['Apple'],
+      };
+      const brands = filterMap[filter];
+      if (brands) {
+        setSelBrands(new Set(brands));
+      }
+    }
+  }, []);
   const [minPrice,   setMinPrice]   = useState(MIN_PRICE);
   const [maxPrice,   setMaxPrice]   = useState(MAX_PRICE);
   const [activeInput, setActiveInput] = useState<'min' | 'max'>('min');
@@ -405,7 +408,7 @@ export default function LaptopIndex() {
     setCurrentPage(1);
   }, [selBrands, selRAMs, selCPUs, selScreens, selGPUs, minPrice, maxPrice, sortBy, activeCategory]);
 
-  const toggleLike = (id: number) =>
+  const toggleLike = (id: string) =>
     setLiked(p => toggleSet(p, id));
 
   const hasActiveFilter =
@@ -930,7 +933,7 @@ export default function LaptopIndex() {
                   viewMode === "grid" ? (
                     <div
                        key={p.id}
-                      onClick={() => navigate(`/san-pham/laptop-${p.name}`)}
+                      onClick={() => navigate(`/san-pham/${p.id}`)}
                       className="group bg-white rounded-2xl border border-zinc-100 p-4 shadow-sm hover:shadow-md hover:border-zinc-200 hover:-translate-y-0.5 transition-all duration-300 flex flex-col relative cursor-pointer"
                     >
                       <button
@@ -957,7 +960,7 @@ export default function LaptopIndex() {
                           <div className="text-[15px] font-bold text-zinc-900">{formatPrice(p.price)}</div>
                           <AddToCartButton
                             product={{
-                              id: `laptop-${p.name}`,
+                              id: p.id,
                               name: p.name,
                               specs: p.specs,
                               price: p.price,
@@ -971,7 +974,7 @@ export default function LaptopIndex() {
                   ) : (
                     <div
                       key={p.id}
-                      onClick={() => navigate(`/san-pham/laptop-${p.name}`)}
+                      onClick={() => navigate(`/san-pham/${p.id}`)}
                       className="group bg-white rounded-xl border border-zinc-100 p-3 shadow-sm hover:shadow-md transition-all duration-300 flex items-center gap-4 relative cursor-pointer"
                     >
                       <div className="w-24 h-20 shrink-0 flex items-center justify-center p-2">
@@ -986,7 +989,7 @@ export default function LaptopIndex() {
                       </div>
                       <AddToCartButton
                         product={{
-                          id: `laptop-${p.name}`,
+                          id: p.id,
                           name: p.name,
                           specs: p.specs,
                           price: p.price,

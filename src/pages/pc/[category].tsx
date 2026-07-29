@@ -716,7 +716,7 @@ export default function PCCategoryPage() {
                 {filteredProducts.map((p) => (
                   <div 
                     key={p.id} 
-                    onClick={() => navigate(`/san-pham/pc-${p.name}`)}
+                    onClick={() => navigate(`/san-pham/${p.id}`)}
                     className="group bg-white rounded-2xl border border-zinc-200/40 p-4 shadow-sm hover:shadow-md hover:border-zinc-250 transition-all duration-300 flex flex-col relative cursor-pointer"
                   >
                     {/* Favorite Heart Button */}
@@ -768,7 +768,7 @@ export default function PCCategoryPage() {
                       <AddToCartButton
                         className="absolute bottom-4 right-4"
                         product={{
-                          id: `pc-${p.name}`,
+                          id: p.id,
                           name: p.name,
                           specs: p.specs,
                           price: p.price,
@@ -787,7 +787,7 @@ export default function PCCategoryPage() {
                 {filteredProducts.map((p) => (
                   <div 
                     key={p.id} 
-                    onClick={() => navigate(`/san-pham/pc-${p.name}`)}
+                    onClick={() => navigate(`/san-pham/${p.id}`)}
                     className="group bg-white rounded-2xl border border-zinc-200/40 p-4 shadow-sm hover:shadow-md hover:border-zinc-250 transition-all duration-300 flex flex-row items-center gap-6 relative cursor-pointer"
                   >
                     {/* Badge */}
@@ -843,7 +843,7 @@ export default function PCCategoryPage() {
                         onClick={(e) => {
                           e.stopPropagation();
                           const success = addItem({
-                            id: `pc-${p.name}`,
+                            id: p.id,
                             name: p.name,
                             specs: p.specs,
                             price: p.price,
@@ -861,7 +861,7 @@ export default function PCCategoryPage() {
                       <AddToCartButton
                         label="Thêm"
                         product={{
-                          id: `pc-${p.name}`,
+                          id: p.id,
                           name: p.name,
                           specs: p.specs,
                           price: p.price,

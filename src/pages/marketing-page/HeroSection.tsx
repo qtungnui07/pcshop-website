@@ -13,7 +13,7 @@ export default function HeroSection() {
   const current = heroSlides[slide];
 
   return (
-    <section className="relative overflow-hidden w-full h-[350px] sm:h-[450px] md:h-[500px] lg:h-[550px]">
+    <section className="relative overflow-hidden w-full h-[350px] sm:h-[450px] md:h-[500px] lg:h-[550px] bg-[#eef4ff]">
       <AnimatePresence mode="wait">
         <motion.div
           key={`img-${slide}`}
@@ -23,12 +23,10 @@ export default function HeroSection() {
           transition={{ duration: 0.7, ease: 'easeInOut' }}
           className="absolute inset-0 w-full h-full"
         >
-          {/* Thay thế bằng thẻ <img src="..." className="w-full h-full object-cover" /> sau này */}
-          <div
-            className="w-full h-full"
-            style={{
-              background: `linear-gradient(135deg, ${current.from}, ${current.to})`,
-            }}
+          <img
+            src={current.image}
+            alt={current.title.join(' ')}
+            className="w-full h-full object-cover"
           />
         </motion.div>
       </AnimatePresence>

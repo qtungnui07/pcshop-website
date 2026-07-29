@@ -1,0 +1,25 @@
+tunnel: 4db27418-b931-4e06-960b-3e8055407707
+credentials-file: /etc/cloudflared/4db27418-b931-4e06-960b-3e8055407707.json
+
+originRequest:
+  connectTimeout: 30s
+  noHappyEyeballs: true
+
+ingress:
+  - hostname: pc.qtitpc.dev
+    service: http://127.0.0.1:5174
+  - hostname: api-pc.qtitpc.dev
+    service: http://127.0.0.1:3001
+  - hostname: opencode.qtitpc.dev
+    service: http://127.0.0.1:11808
+  - hostname: drive.qtitpc.dev
+    service: http://127.0.0.1:3010
+  - hostname: robogo.qtitpc.dev
+    service: http://127.0.0.1:3000
+  - hostname: shortlink.qtitpc.dev
+    service: http://127.0.0.1:8099
+  - hostname: embed.qtitpc.dev
+    service: http://127.0.0.1:3002
+  - hostname: fb.qtitpc.dev
+    service: http://127.0.0.1:9812
+  - service: http_status:404

@@ -543,6 +543,7 @@ html, body {
 .designer-name-input { width: 240px; border: 0; outline: 0; background: transparent; color: #172033; font-size: 18px; font-weight: 750; letter-spacing: -.025em; }
 .designer-save-state { padding: 3px 7px; border-radius: 6px; background: #fff7ed; color: #c2410c; font-size: 9px; font-weight: 700; }
 .designer-save-state.is-saved { background: #ecfdf3; color: #15803d; }
+.designer-save-state.is-error { background: #fef2f2; color: #b91c1c; }
 .designer-actions { display: flex; align-items: center; gap: 7px; }
 .designer-actions button, .designer-add-row button, .designer-add-row label, .designer-order-row button {
   height: 36px; display: inline-flex; align-items: center; justify-content: center; gap: 7px;

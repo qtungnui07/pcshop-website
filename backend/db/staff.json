@@ -1,0 +1,52 @@
+[
+  {
+    "id": "staff-dinh-quang-tung",
+    "name": "Đinh Quang Tùng",
+    "role": "CEO & Director",
+    "email": "tungdq@pcshop.vn",
+    "phone": "0912 345 678",
+    "avatar": "https://api.dicebear.com/7.x/pixel-art/svg?seed=tung",
+    "department": "Ban Giám Đốc",
+    "status": "online"
+  },
+  {
+    "id": "staff-trinh-phan-tuan-anh",
+    "name": "Trịnh Phan Tuấn Anh",
+    "role": "Technical Lead",
+    "email": "anhtp@pcshop.vn",
+    "phone": "0987 654 321",
+    "avatar": "https://api.dicebear.com/7.x/pixel-art/svg?seed=tuananh",
+    "department": "Phòng Công Nghệ",
+    "status": "online"
+  },
+  {
+    "id": "staff-nguyen-tuan-dung",
+    "name": "Nguyễn Tuấn Dũng",
+    "role": "Customer Support Lead",
+    "email": "dungnt@pcshop.vn",
+    "phone": "1900 8198 (Ext 101)",
+    "avatar": "https://api.dicebear.com/7.x/pixel-art/svg?seed=tuandung",
+    "department": "Chăm sóc khách hàng",
+    "status": "busy"
+  },
+  {
+    "id": "staff-doan-tran-gia-phong",
+    "name": "Đoàn Trần Gia Phong",
+    "role": "Warehouse Co-Manager",
+    "email": "phongdt@pcshop.vn",
+    "phone": "0909 999 888",
+    "avatar": "https://api.dicebear.com/7.x/pixel-art/svg?seed=phong",
+    "department": "Quản Lý Kho Hàng",
+    "status": "online"
+  },
+  {
+    "id": "staff-le-tien-hung",
+    "name": "Lê Tiến Hưng",
+    "role": "Warehouse Co-Manager",
+    "email": "hunglt@pcshop.vn",
+    "phone": "0909 111 222",
+    "avatar": "https://api.dicebear.com/7.x/pixel-art/svg?seed=hung",
+    "department": "Quản Lý Kho Hàng",
+    "status": "online"
+  }
+]

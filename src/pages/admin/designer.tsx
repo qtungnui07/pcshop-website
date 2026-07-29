@@ -4,6 +4,7 @@ import {
   Eye, EyeOff, ImagePlus, Layers3, Lock, LockOpen, Play, Plus,
   Redo2, RotateCcw, Save, Sparkles, Trash2, Type, Undo2, GripVertical
 } from "lucide-react";
+import { useAuth } from "../../context/AuthContext";
 
 type LayerType = "text" | "image";
 type AnimationType = "none" | "fade" | "slide-up" | "slide-left" | "scale" | "blur";
@@ -119,11 +120,13 @@ function loadDesigns() {
 }
 
 export default function FlashcardDesigner() {
+  const { user } = useAuth();
   const [designs, setDesigns] = useState<FlashcardDesign[]>(loadDesigns);
   const [activeId, setActiveId] = useState(designs[0]?.id || "");
   const [selectedId, setSelectedId] = useState(designs[0]?.layers[0]?.id || "");
   const [previewKey, setPreviewKey] = useState(0);
-  const [saved, setSaved] = useState(true);
+  const [saveState, setSaveState] = useState<"saved" | "published" | "unsaved" | "saving" | "error">("saved");
+  const [saveError, setSaveError] = useState("");
   const [history, setHistory] = useState<FlashcardDesign[]>([]);
   const [future, setFuture] = useState<FlashcardDesign[]>([]);
   const [catalogLoading, setCatalogLoading] = useState(true);
@@ -142,7 +145,7 @@ export default function FlashcardDesigner() {
     setHistory((items) => [...items.slice(-29), design]);
     setFuture([]);
     setDesigns((items) => items.map((item) => item.id === design.id ? updater(item) : item));
-    setSaved(false);
+    setSaveState("unsaved");
   };
 
   const updateLayer = (patch: Partial<DesignerLayer>) => {
@@ -165,14 +168,64 @@ export default function FlashcardDesigner() {
     });
   };
 
-  const save = () => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(designs));
-    setSaved(true);
+  const save = async (designsToSave = designs) => {
+    if (!user || user.role !== "admin") {
+      setSaveError("Bạn cần đăng nhập bằng tài khoản quản trị để lưu thiết kế.");
+      setSaveState("error");
+      return false;
+    }
+
+    setSaveState("saving");
+    setSaveError("");
+    try {
+      let browserCacheWarning = "";
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(designsToSave));
+      } catch {
+        browserCacheWarning = "Bản sao trên trình duyệt không lưu được, nhưng dữ liệu vẫn được lưu trên máy chủ.";
+      }
+      const response = await fetch(`${API_BASE}/api/flashcard-designs`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${user.email}`,
+        },
+        body: JSON.stringify(designsToSave),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Máy chủ không thể lưu thiết kế.");
+      setSaveError(browserCacheWarning);
+      setSaveState("saved");
+      return true;
+    } catch (error: any) {
+      setSaveError(error.message || "Không thể lưu thiết kế. Vui lòng thử lại.");
+      setSaveState("error");
+      return false;
+    }
   };
 
-  const applyDesign = () => {
+  const applyDesign = async () => {
     if (!design) return;
-    save();
+    if (!(await save())) return;
+    setSaveState("saving");
+    setSaveError("");
+    try {
+      const response = await fetch(`${API_BASE}/api/flashcard-designs/applied`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${user?.email || ""}`,
+        },
+        body: JSON.stringify(design),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Không thể áp dụng thiết kế lên website.");
+      setSaveState("published");
+    } catch (error: any) {
+      setSaveError(error.message || "Không thể áp dụng thiết kế lên website.");
+      setSaveState("error");
+      return;
+    }
     localStorage.setItem(ACTIVE_KEY, JSON.stringify(design));
     const sourceKey = design.sourceKey || `${design.target}:default`;
     let applied: Record<string, FlashcardDesign>;
@@ -211,7 +264,7 @@ export default function FlashcardDesigner() {
     setDesigns((items) => [...items, copy]);
     setActiveId(copy.id);
     setSelectedId(copy.layers[0]?.id || "");
-    setSaved(false);
+    setSaveState("unsaved");
   };
 
   const undo = () => {
@@ -289,6 +342,33 @@ export default function FlashcardDesigner() {
   }, []);
 
   useEffect(() => {
+    if (!user || user.role !== "admin") return;
+    let active = true;
+    fetch(`${API_BASE}/api/flashcard-designs`, {
+      headers: { "Authorization": `Bearer ${user.email}` },
+    })
+      .then(async (response) => {
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || "Không thể tải thiết kế đã lưu.");
+        return data;
+      })
+      .then((savedDesigns: FlashcardDesign[]) => {
+        if (!active || !Array.isArray(savedDesigns) || savedDesigns.length === 0) return;
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(savedDesigns));
+        setDesigns(savedDesigns);
+        setActiveId(savedDesigns[0].id);
+        setSelectedId(savedDesigns[0].layers[0]?.id || "");
+        setSaveState("saved");
+      })
+      .catch((error: any) => {
+        if (active) {
+          setSaveError(error.message || "Không thể tải thiết kế đã lưu.");
+        }
+      });
+    return () => { active = false; };
+  }, [user]);
+
+  useEffect(() => {
     const onMove = (event: PointerEvent) => {
       const drag = dragRef.current;
       if (!drag || !design) return;
@@ -317,15 +397,17 @@ export default function FlashcardDesigner() {
           <p className="designer-kicker">NovaPC Studio</p>
           <div className="flex items-center gap-3">
             <input className="designer-name-input" value={design.name} onChange={(event) => commit((current) => ({ ...current, name: event.target.value }))} />
-            <span className={`designer-save-state ${saved ? "is-saved" : ""}`}>{saved ? "Đã lưu" : "Chưa lưu"}</span>
+            <span className={`designer-save-state ${saveState === "saved" || saveState === "published" ? "is-saved" : ""} ${saveState === "error" ? "is-error" : ""}`} title={saveError}>
+              {saveState === "published" ? "Đã áp dụng" : saveState === "saved" ? "Đã lưu nháp" : saveState === "saving" ? "Đang lưu..." : saveState === "error" ? "Không lưu được" : "Chưa lưu"}
+            </span>
           </div>
         </div>
         <div className="designer-actions">
           <button onClick={undo} disabled={!history.length} title="Hoàn tác"><Undo2 /></button>
           <button onClick={redo} disabled={!future.length} title="Làm lại"><Redo2 /></button>
           <button onClick={() => setPreviewKey((key) => key + 1)}><Play /> Xem animation</button>
-          <button onClick={save}><Save /> Lưu</button>
-          <button className="is-primary" onClick={applyDesign}><Sparkles /> Áp dụng</button>
+          <button onClick={() => { void save(); }} disabled={saveState === "saving"}><Save /> {saveState === "saving" ? "Đang lưu" : "Lưu nháp"}</button>
+          <button className="is-primary" onClick={applyDesign} disabled={saveState === "saving"}><Sparkles /> Áp dụng</button>
         </div>
       </header>
 
@@ -353,7 +435,7 @@ export default function FlashcardDesigner() {
             <button onClick={duplicateDesign}><Copy /> Nhân bản</button>
             <button onClick={() => {
               const blank: FlashcardDesign = { ...starterDesigns[0], id: createId(), name: "Flashcard mới", target: "product", updatedAt: new Date().toISOString(), layers: [] };
-              setDesigns((items) => [...items, blank]); setActiveId(blank.id); setSelectedId(""); setSaved(false);
+              setDesigns((items) => [...items, blank]); setActiveId(blank.id); setSelectedId(""); setSaveState("unsaved");
             }}><Plus /> Tạo mới</button>
           </div>
 
@@ -514,7 +596,7 @@ export default function FlashcardDesigner() {
               </div>
             </section>
           ) : <div className="designer-empty-properties"><Layers3 /><p>Chọn một layer để chỉnh thuộc tính.</p></div>}
-          <button className="designer-reset" onClick={() => { setDesigns(starterDesigns); setActiveId(starterDesigns[0].id); setSelectedId(starterDesigns[0].layers[0].id); setSaved(false); }}><RotateCcw /> Khôi phục preset mặc định</button>
+          <button className="designer-reset" onClick={() => { setDesigns(starterDesigns); setActiveId(starterDesigns[0].id); setSelectedId(starterDesigns[0].layers[0].id); setSaveState("unsaved"); }}><RotateCcw /> Khôi phục preset mặc định</button>
         </aside>
       </div>
     </div>

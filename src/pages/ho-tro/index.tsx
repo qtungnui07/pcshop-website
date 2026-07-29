@@ -23,47 +23,6 @@ interface Ticket {
   createdAt: string;
 }
 
-const INITIAL_MOCK_TICKETS: Ticket[] = [
-  {
-    id: "TK-1024",
-    category: "warranty",
-    categoryLabel: "Bảo hành",
-    productCategory: "pc",
-    productName: "PC Showcase Ultra White AMD",
-    serialNumber: "SN-982736154",
-    purchaseDate: "2026-01-15",
-    purchaseLocation: "online",
-    contactName: "Nguyễn Hoàng Long",
-    contactPhone: "0901234567",
-    contactEmail: "long.nh@gmail.com",
-    contactAddress: "123 Đường Láng, Đống Đa, Hà Nội",
-    title: "Lỗi đèn LED quạt tản nhiệt không sáng",
-    description: "Máy tính mình mua về chạy rất tốt nhưng hôm qua tự dưng bộ 3 quạt tản nhiệt phía trước bị mất đèn LED ARGB, cánh quạt vẫn quay bình thường. Mình đã kiểm tra phần mềm điều khiển LED nhưng không thấy nhận diện quạt.",
-    attachments: ["led_loi.png", "mat_sau_case.jpg"],
-    status: "processing",
-    createdAt: "2026-06-08T10:30:00.000Z"
-  },
-  {
-    id: "TK-1023",
-    category: "consulting",
-    categoryLabel: "Tư vấn kỹ thuật",
-    productCategory: "laptop",
-    productName: "Laptop ASUS ROG Strix G16",
-    serialNumber: "ASUS-ROG-G16-2025",
-    purchaseDate: "2025-11-20",
-    purchaseLocation: "hcm_store",
-    contactName: "Trần Minh Quân",
-    contactPhone: "0987654321",
-    contactEmail: "tmquan@yahoo.com",
-    contactAddress: "456 Nguyễn Thị Minh Khai, Quận 1, TP. HCM",
-    title: "Tư vấn nâng cấp RAM lên 32GB",
-    description: "Mình đang sử dụng bản RAM 16GB (8GBx2) bus 4800MHz. Muốn hỏi bên kỹ thuật xem laptop này hỗ trợ nâng lên tối đa bao nhiêu GB? Nên lắp 1 thanh 32GB hay chạy dual channel 16GBx2? Bên cửa hàng có sẵn hàng không để mình mang qua nâng cấp lấy ngay.",
-    attachments: [],
-    status: "completed",
-    createdAt: "2026-06-05T14:15:00.000Z"
-  }
-];
-
 const API_BASE = typeof window !== "undefined"
   ? (window.location.hostname.includes("qtitpc.dev")
     ? "https://api-pc.qtitpc.dev"
@@ -114,20 +73,13 @@ export default function HoTroIndex() {
         setTickets(data);
       })
       .catch((err) => {
-        console.error("Failed to fetch tickets from backend, falling back to localStorage:", err);
-        const localData = localStorage.getItem("pcstore_tickets");
-        if (localData) {
-          setTickets(JSON.parse(localData));
-        } else {
-          setTickets(INITIAL_MOCK_TICKETS);
-          localStorage.setItem("pcstore_tickets", JSON.stringify(INITIAL_MOCK_TICKETS));
-        }
+        console.error("Failed to fetch tickets from backend:", err);
+        setTickets([]);
       });
   }, []);
 
   const saveTickets = (updated: Ticket[]) => {
     setTickets(updated);
-    localStorage.setItem("pcstore_tickets", JSON.stringify(updated));
   };
 
   const showToast = (message: string) => {
@@ -185,7 +137,7 @@ export default function HoTroIndex() {
     setActiveFiles(activeFiles.filter((_, i) => i !== idx));
   };
 
-  const submitTicket = (e: React.FormEvent) => {
+  const submitTicket = async (e: React.FormEvent) => {
     e.preventDefault();
     
     // Validations
@@ -244,14 +196,24 @@ export default function HoTroIndex() {
       createdAt: new Date().toISOString()
     };
 
-    const updatedList = [newTicket, ...tickets];
-    saveTickets(updatedList);
+    try {
+      const response = await fetch(`${API_BASE}/api/tickets`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newTicket)
+      });
 
-    fetch(`${API_BASE}/api/tickets`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(newTicket)
-    }).catch(err => console.error("Error submitting ticket to backend:", err));
+      if (!response.ok) {
+        throw new Error("Không thể gửi yêu cầu tới backend");
+      }
+
+      const data = await response.json();
+      saveTickets([data.ticket || newTicket, ...tickets]);
+    } catch (err) {
+      console.error("Error submitting ticket to backend:", err);
+      showToast("Không thể gửi yêu cầu. Vui lòng thử lại sau.");
+      return;
+    }
 
     showToast(`Yêu cầu ${newTicketId} của bạn đã được gửi thành công!`);
 
@@ -263,13 +225,17 @@ export default function HoTroIndex() {
   const handleCancelTicket = (ticketId: string) => {
     if (confirm(`Bạn có chắc chắn muốn hủy bỏ yêu cầu hỗ trợ #${ticketId}?`)) {
       const updated = tickets.map(t => t.id === ticketId ? { ...t, status: "cancelled" } : t);
-      saveTickets(updated);
 
       fetch(`${API_BASE}/api/tickets/update`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id: ticketId, status: "cancelled" })
-      }).catch(err => console.error("Error updating ticket on backend:", err));
+      })
+        .then((res) => {
+          if (!res.ok) throw new Error("Không thể cập nhật ticket");
+          saveTickets(updated);
+        })
+        .catch(err => console.error("Error updating ticket on backend:", err));
 
       showToast(`Đã hủy yêu cầu #${ticketId}`);
       setIsModalOpen(false);

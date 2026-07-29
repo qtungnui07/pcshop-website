@@ -12,6 +12,9 @@ const COLLECTIONS = [
   "accounts",
   "orders",
   "payments",
+  "reviews",
+  "staff",
+  "flashcardDesigns",
 ] as const;
 
 const sql = new SQL(DATABASE_URL);

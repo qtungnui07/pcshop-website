@@ -11,6 +11,7 @@ export const heroSlides = [
     link2: '/tu-build-pc',
     from: '#d1d1d6',
     to: '#a8a8b3',
+    image: '/banner/ChatGPT Image Jul 28, 2026, 06_59_09 AM (1).png',
   },
   {
     label: 'WORKSTATION SERIES',
@@ -22,6 +23,7 @@ export const heroSlides = [
     link2: '/ho-tro',
     from: '#AEE2FF',
     to: '#B5BAFF',
+    image: '/banner/ChatGPT Image Jul 28, 2026, 06_59_09 AM (2).png',
   },
   {
     label: 'LINH KIỆN CAO CẤP',
@@ -33,6 +35,7 @@ export const heroSlides = [
     link2: '/ho-tro',
     from: '#D9F9DF',
     to: '#AEE2FF',
+    image: '/banner/ChatGPT Image Jul 28, 2026, 06_59_09 AM (3).png',
   },
 ];
 
@@ -44,10 +47,10 @@ export const pcCategories = [
 ];
 
 export const laptopCategories = [
-  { name: 'Laptop Gaming',        imgName: "cat-laptop-gaming.png" },
-  { name: 'Laptop Văn phòng',     imgName: "cat-laptop-vanphong.png" },
-  { name: 'Laptop Đồ họa',        imgName: "cat-laptop-dohoa.png" },
-  { name: 'MacBook',              imgName: "cat-macbook.png" },
+  { name: 'Laptop Gaming',        image: "/banner/laptop_gaming.png" },
+  { name: 'Laptop Văn phòng',     image: "/banner/laptop_van_phong.png" },
+  { name: 'Laptop Đồ họa',        image: "/banner/laptop_do_hoa.png" },
+  { name: 'MacBook',              image: "/banner/macbook.png" },
 ];
 
 export const trustBadges = [

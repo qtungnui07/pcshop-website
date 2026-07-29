@@ -7,6 +7,7 @@ import { motion } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
 
 interface PCItem {
+  id: string;
   badge: string;
   badgeColor: string;
   name: string;
@@ -50,13 +51,6 @@ const brands = [
   { name: "Logitech", logo: "https://upload.wikimedia.org/wikipedia/commons/e/eb/Logitech_G_logo_stack_blue.svg" },
   { name: "Apple", logo: "https://upload.wikimedia.org/wikipedia/commons/f/fa/Apple_logo_black.svg" },
 ];
-
-// const perks = [
-//   { icon: ShieldCheck, title: "Bảo hành 36 tháng",      desc: "An tâm sử dụng dài lâu" },
- 
-//   { icon: Truck,       title: "Giao hàng toàn quốc",    desc: "Nhanh chóng & an toàn" },
-//   { icon: CreditCard,  title: "Trả góp 0% lãi suất",    desc: "Dễ dàng & linh hoạt" },
-// ];
 
 /* ── GRADIENT BLOCK placeholder ───────────────────────────────────── */
 function Grad({ from, to, glow, className = "", children }: {
@@ -321,8 +315,8 @@ export default function PCIndex() {
             ) : (
               pcs.map((pc, i) => (
                 <div
-                  key={i}
-                  onClick={() => navigate(`/san-pham/pc-${pc.name}`)}
+                  key={pc.id}
+                  onClick={() => navigate(`/san-pham/${pc.id}`)}
                   className="w-full bg-white rounded-2xl border border-zinc-100 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 overflow-hidden group/card cursor-pointer"
                 >
                   <div className="relative">

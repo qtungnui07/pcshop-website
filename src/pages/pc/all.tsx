@@ -381,7 +381,7 @@ export default function AllPCsPage() {
               {paginatedProducts.map((p, i) => (
                 <div
                   key={i}
-                  onClick={() => navigate(`/san-pham/pc-${p.name}`)}
+                  onClick={() => navigate(`/san-pham/${p.id}`)}
                   className="group bg-white rounded-2xl border border-zinc-100 p-4 shadow-sm hover:shadow-md hover:border-zinc-200 transition-all duration-300 flex flex-col relative cursor-pointer"
                 >
                   <button
@@ -422,7 +422,7 @@ export default function AllPCsPage() {
                       <div className="text-[15px] font-bold text-zinc-900">{p.priceStr}</div>
                       <AddToCartButton
                         product={{
-                          id: `pc-${p.name}`,
+                          id: p.id,
                           name: p.name,
                           specs: p.specs,
                           price: p.price,

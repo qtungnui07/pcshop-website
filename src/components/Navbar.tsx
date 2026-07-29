@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, ShoppingBag, Monitor, User, LogOut, Shield, UserCheck, X, ImageIcon, PackageCheck } from 'lucide-react';
+import { Search, ShoppingBag, User, LogOut, Shield, UserCheck, X, ImageIcon, PackageCheck } from 'lucide-react';
 import { navItems, containerVariants, itemVariants } from '../constants/data';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
@@ -181,35 +181,35 @@ export default function Navbar() {
     ])
       .then(([pcs, laptops, components, accessories]) => {
         const normalized: SearchProduct[] = [
-          ...pcs.map((item: any, index: number) => ({
-            id: `pc-${index}-${item.name}`,
+          ...pcs.map((item: any) => ({
+            id: item.id,
             name: item.name || "PC",
             specs: item.specs || "",
             category: "PC",
             price: normalizePrice(item.price),
             image: item.image,
-            href: `/san-pham/pc-${item.name}`,
+            href: `/san-pham/${item.id}`,
           })),
-          ...laptops.map((item: any, index: number) => ({
-            id: `laptop-${index}-${item.name}`,
+          ...laptops.map((item: any) => ({
+            id: item.id,
             name: item.name || "Laptop",
             specs: item.specs || item.brand || "",
             category: "Laptop",
             price: normalizePrice(item.price),
             image: item.img || item.image,
-            href: `/san-pham/laptop-${item.name}`,
+            href: `/san-pham/${item.id}`,
           })),
-          ...components.map((item: any, index: number) => ({
-            id: `component-${index}-${item.name}`,
+          ...components.map((item: any) => ({
+            id: item.id,
             name: item.name || "Linh kiện",
             specs: item.specs || "",
             category: item.category || "Linh kiện",
             price: normalizePrice(item.price),
             image: item.image,
-            href: `/san-pham/component-${item.category || "linh-kien"}-${item.name}`,
+            href: `/san-pham/${item.id}`,
           })),
-          ...accessories.map((item: any, index: number) => ({
-            id: `accessory-${index}-${item.name}`,
+          ...accessories.map((item: any) => ({
+            id: `accessory-${item.id}`,
             name: item.name || "Phụ kiện",
             specs: [item.brand, item.category].filter(Boolean).join(" • "),
             category: item.category || "Phụ kiện",
@@ -315,7 +315,20 @@ export default function Navbar() {
       >
         <div className="max-w-[1200px] mx-auto px-4 md:px-8">
           <ul className="flex items-center justify-between h-16 text-[15px] text-[#1d1d1f]/80 font-medium tracking-wide">
-            <li><Link to="/" className="hover:text-black transition-colors"><Monitor className="w-5 h-5" /></Link></li>
+            <li>
+              <Link
+                to="/"
+                aria-label="Trang chủ"
+                className="group inline-flex h-10 w-10 items-center justify-center overflow-hidden rounded-lg bg-transparent transition-transform hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1d1d1f]/40"
+              >
+                <img
+                  src="/ChatGPT%20Image%20Jul%2028,%202026,%2008_11_50%20AM.png"
+                  alt=""
+                  aria-hidden="true"
+                  className="h-full w-full scale-[1.25] object-cover"
+                />
+              </Link>
+            </li>
 
             {navItems.map((item) => (
               <li

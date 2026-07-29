@@ -23,6 +23,14 @@ const formatPrice = (val: number | string) => {
   return new Intl.NumberFormat("vi-VN").format(num) + "đ";
 };
 
+const slugify = (value: string) => value
+  .normalize("NFD")
+  .replace(/[\u0300-\u036f]/g, "")
+  .replace(/đ/g, "d")
+  .toLowerCase()
+  .replace(/[^a-z0-9]+/g, "-")
+  .replace(/^-|-$/g, "");
+
 const PORT = 3001;
 const API_BASE = typeof window !== "undefined"
   ? (window.location.hostname.includes("qtitpc.dev")
@@ -434,6 +442,7 @@ export default function AdminEdit() {
       } else if (category === "pc") {
         const imgUrl = isCustomImage ? customImageUrl : formImage;
         newItem = {
+          id: isNew ? `pc-${slugify(formName)}` : currentList[editIndex].id,
           name: formName.trim(),
           specs: formSpecs.trim(),
           price: formPrice.trim(),
@@ -445,6 +454,7 @@ export default function AdminEdit() {
         };
       } else if (category === "laptop") {
         newItem = {
+          id: isNew ? `laptop-${slugify(formName)}` : currentList[editIndex].id,
           brand: formBrand.trim(),
           name: formName.trim(),
           specs: formSpecs.trim(),
@@ -454,6 +464,9 @@ export default function AdminEdit() {
         };
       } else if (category === "linh-kien") {
         newItem = {
+          id: isNew
+            ? `component-${slugify(formLinhKienCategory || "linh-kien")}-${slugify(formName)}`
+            : currentList[editIndex].id,
           name: formName.trim(),
           specs: formSpecs.trim(),
           price: formPrice.trim(),

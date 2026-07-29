@@ -1,78 +1,96 @@
 [
-  {
-    "id": "acc-1001",
-    "name": "Quản trị viên",
-    "email": "admin@qtitpc.dev",
-    "password": "admin123",
-    "role": "admin",
-    "avatar": "",
-    "provider": "local"
-  },
-  {
-    "id": "acc-1002",
-    "name": "Nguyễn Hoàng Long",
-    "email": "long.nh@gmail.com",
-    "password": "user123",
-    "role": "user",
-    "avatar": "",
-    "provider": "local"
-  },
-  {
-    "id": "acc-1781172670725",
-    "name": "Đinh Quang Tùng",
-    "email": "qtung.07.dt@gmail.com",
-    "password": "@21107Qtt",
-    "role": "user",
-    "avatar": "https://api-pc.qtitpc.dev/images/users/avatar-1781175842456-42v6mkx.png",
-    "provider": "local",
-    "phone": "",
-    "address": ""
-  },
-  {
-    "id": "acc-1781174867102",
-    "name": "Đinh Quang Tùng",
-    "email": "tungproxtv2007yt@gmail.com",
-    "password": "",
-    "role": "user",
-    "avatar": "https://img.clerk.com/eyJ0eXBlIjoicHJveHkiLCJzcmMiOiJodHRwczovL2ltYWdlcy5jbGVyay5kZXYvb2F1dGhfZ29vZ2xlL2ltZ18zRXpJRkRmbTc1aW5sVVZ4bTg5ajJsSVdoVVEifQ",
-    "provider": "google"
-  },
-  {
-    "id": "acc-1781177364659",
-    "name": "jasdolhasd1082",
-    "email": "asdasdjo2q12@asasdkj.com",
-    "password": "jqoldh821045@jasdA",
-    "role": "user",
-    "avatar": "",
-    "provider": "local"
-  },
-  {
-    "id": "acc-1781188575514",
-    "name": "Tung Dinh Quang",
-    "email": "21107.qt.vn@gmail.com",
-    "password": "",
-    "role": "user",
-    "avatar": "https://api-pc.qtitpc.dev/images/users/avatar-1781188621794-nd0bdat.png",
-    "provider": "google",
-    "phone": "",
-    "address": ""
-  },
-  {
-    "id": "acc-1781188967064",
-    "name": "Quang Tung Dinh",
-    "email": "samsunga03qtx2@gmail.com",
-    "password": "",
-    "role": "user",
-    "avatar": "https://img.clerk.com/eyJ0eXBlIjoicHJveHkiLCJzcmMiOiJodHRwczovL2ltYWdlcy5jbGVyay5kZXYvb2F1dGhfZ29vZ2xlL2ltZ18zRXprb0ZhUEw1djBFUU5Fb1AzZlhtZ3Y4alEifQ",
-    "provider": "google"
-  },
-  {
-    "id": "acc-1781570629579",
-    "name": "Nguyễn Tuấn Dũng",
-    "email": "1@1.1",
-    "password": "11111111",
-    "role": "admin",
-    "avatar": "https://api.dicebear.com/7.x/pixel-art/svg?seed=Nguy%E1%BB%85n%20Tu%E1%BA%A5n%20D%C5%A9ng",
-    "provider": "local"
-  }
+    {
+        "id": "acc-1001",
+        "name": "Quản trị viên",
+        "role": "admin",
+        "email": "admin@qtitpc.dev",
+        "avatar": "",
+        "password": "admin123",
+        "provider": "local"
+    },
+    {
+        "id": "acc-1002",
+        "name": "Nguyễn Hoàng Long",
+        "role": "user",
+        "email": "long.nh@gmail.com",
+        "avatar": "",
+        "password": "user123",
+        "provider": "local"
+    },
+    {
+        "id": "acc-1781172670725",
+        "name": "Đinh Quang Tùng",
+        "role": "user",
+        "email": "qtung.07.dt@gmail.com",
+        "phone": "",
+        "avatar": "https://api-pc.qtitpc.dev/images/users/avatar-1781175842456-42v6mkx.png",
+        "address": "",
+        "password": "@21107Qtt",
+        "provider": "local"
+    },
+    {
+        "id": "acc-1781174867102",
+        "name": "Đinh Quang Tùng",
+        "role": "user",
+        "email": "tungproxtv2007yt@gmail.com",
+        "avatar": "https://img.clerk.com/eyJ0eXBlIjoicHJveHkiLCJzcmMiOiJodHRwczovL2ltYWdlcy5jbGVyay5kZXYvb2F1dGhfZ29vZ2xlL2ltZ18zRXpJRkRmbTc1aW5sVVZ4bTg5ajJsSVdoVVEifQ",
+        "password": "",
+        "provider": "google"
+    },
+    {
+        "id": "acc-1781177364659",
+        "name": "jasdolhasd1082",
+        "role": "user",
+        "email": "asdasdjo2q12@asasdkj.com",
+        "avatar": "",
+        "password": "jqoldh821045@jasdA",
+        "provider": "local"
+    },
+    {
+        "id": "acc-1781188575514",
+        "name": "Tung Dinh Quang",
+        "role": "user",
+        "email": "21107.qt.vn@gmail.com",
+        "phone": "",
+        "avatar": "https://api-pc.qtitpc.dev/images/users/avatar-1781188621794-nd0bdat.png",
+        "address": "",
+        "password": "",
+        "provider": "google"
+    },
+    {
+        "id": "acc-1781188967064",
+        "name": "Quang Tung Dinh",
+        "role": "user",
+        "email": "samsunga03qtx2@gmail.com",
+        "avatar": "https://img.clerk.com/eyJ0eXBlIjoicHJveHkiLCJzcmMiOiJodHRwczovL2ltYWdlcy5jbGVyay5kZXYvb2F1dGhfZ29vZ2xlL2ltZ18zRXprb0ZhUEw1djBFUU5Fb1AzZlhtZ3Y4alEifQ",
+        "password": "",
+        "provider": "google"
+    },
+    {
+        "id": "acc-1781570629579",
+        "name": "Nguyễn Tuấn Dũng",
+        "role": "admin",
+        "email": "1@1.1",
+        "avatar": "https://api.dicebear.com/7.x/pixel-art/svg?seed=Nguy%E1%BB%85n%20Tu%E1%BA%A5n%20D%C5%A9ng",
+        "password": "11111111",
+        "provider": "local"
+    },
+    {
+        "id": "acc-1782399204860",
+        "name": "Tri van",
+        "role": "user",
+        "email": "admin@admin.admin",
+        "avatar": "",
+        "password": "Adminadmin@",
+        "provider": "local"
+    },
+    {
+        "id": "acc-1782432638530",
+        "name": "TP Tuấn Anh",
+        "role": "admin",
+        "email": "2@2.2",
+        "avatar": "https://api.dicebear.com/7.x/pixel-art/svg?seed=TP%20Tu%E1%BA%A5n%20Anh",
+        "password": "11111111",
+        "provider": "local"
+    }
 ]

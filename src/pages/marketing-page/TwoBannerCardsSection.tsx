@@ -3,6 +3,11 @@ import { motion, type Variants } from 'framer-motion';
 import type { FlashcardDesign } from '../admin/designer';
 
 const APPLIED_DESIGNS_KEY = "novapc-applied-flashcard-designs";
+const API_BASE = typeof window !== "undefined"
+  ? (window.location.hostname.includes("qtitpc.dev")
+    ? "https://api-pc.qtitpc.dev"
+    : `${window.location.protocol}//${window.location.hostname}:3001`)
+  : "http://localhost:3001";
 
 const itemVariants: Variants = {
   hidden: { opacity: 0, y: 20 },
@@ -43,6 +48,23 @@ export default function TwoBannerCardsSection() {
       window.removeEventListener("novapc-flashcard-design-updated", sync);
       window.removeEventListener("storage", sync);
     };
+  }, []);
+
+  useEffect(() => {
+    fetch(`${API_BASE}/api/flashcard-designs/applied`)
+      .then(async (response) => {
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || "Không thể tải thiết kế đã áp dụng.");
+        return data;
+      })
+      .then((designs) => {
+        if (designs && typeof designs === "object" && !Array.isArray(designs)) {
+          setAppliedDesigns(designs as Record<string, FlashcardDesign>);
+        }
+      })
+      .catch(() => {
+        // Keep the browser-local version as an offline fallback.
+      });
   }, []);
 
   return (

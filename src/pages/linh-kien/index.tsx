@@ -5,14 +5,14 @@ import {
   ArrowRight
 } from "lucide-react";
 import { useState, useEffect, useMemo } from "react";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { useSearchParams, useNavigate } from "react-router-dom";
-// import componentsHeroImage from "../../assets/rtx_5090.png";
 const componentsHeroImage = "/images/pc.png";
 import AddToCartButton from "../../components/AddToCartButton";
 
 /* ── TYPES ─────────────────────────────────────────────────────────── */
 interface Product {
+  id: string;
   name: string;
   specs: string;
   price: string;
@@ -35,138 +35,6 @@ const componentCategories = [
   { id: "cooling",   label: "Tản Nhiệt",        glow: "rgba(6,182,212,0.30)", image: "tannhiet.webp" },
   { id: "case",      label: "Case / Vỏ Máy",     glow: "rgba(68,64,60,0.40)", image: "case.webp" },
 ];
-
-const defaultProducts: Product[] = [
-  // --- RAM ---
-  { name: "G.Skill Trident Z5 RGB", specs: "16GB (2x8GB) DDR5 6000MHz", price: "2.890.000đ", badge: "Mới", badgeColor: "#22c55e", color: "#e0e7ef", category: "RAM" },
-  { name: "Corsair Vengeance RGB", specs: "16GB (2x8GB) DDR5 5600MHz", price: "2.290.000đ", badge: "Bán chạy", badgeColor: "#f97316", color: "#1a1a2e", category: "RAM" },
-  { name: "Kingston Fury Beast DDR4", specs: "16GB (2x8GB) DDR4 3200MHz", price: "990.000đ", color: "#1a1a2e", category: "RAM" },
-  { name: "G.Skill Ripjaws V DDR4", specs: "16GB (2x8GB) DDR4 3600MHz", price: "1.290.000đ", color: "#2d2d2d", category: "RAM" },
-  { name: "Corsair Dominator Platinum", specs: "32GB (2x16GB) DDR5 6000MHz", price: "5.990.000đ", color: "#c8d0dc", category: "RAM" },
-  { name: "Kingston Fury Beast DDR5", specs: "32GB (2x16GB) DDR5 6000MHz", price: "4.290.000đ", color: "#1a1a2e", category: "RAM" },
-
-  // --- CPU ---
-  { name: "Intel Core i5-14600K", specs: "14 Cores / 20 Threads up to 5.3GHz LGA1700", price: "7.890.000đ", badge: "Bán chạy", badgeColor: "#2563eb", color: "#1a1a2e", category: "CPU" },
-  { name: "Intel Core i7-14700K", specs: "20 Cores / 28 Threads up to 5.6GHz LGA1700", price: "10.490.000đ", badge: "Hot", badgeColor: "#dc2626", color: "#1a1a2e", category: "CPU" },
-  { name: "Intel Core i9-14900K", specs: "24 Cores / 32 Threads up to 6.0GHz LGA1700", price: "15.990.000đ", color: "#1a1a2e", category: "CPU" },
-  { name: "AMD Ryzen 5 7600X", specs: "6 Cores / 12 Threads up to 5.3GHz AM5", price: "5.890.000đ", color: "#1f2937", category: "CPU" },
-  { name: "AMD Ryzen 7 7800X3D", specs: "8 Cores / 16 Threads up to 5.0GHz 96MB AM5", price: "10.890.000đ", badge: "Cực hot", badgeColor: "#8b5cf6", color: "#1f2937", category: "CPU" },
-  { name: "AMD Ryzen 9 7900X", specs: "12 Cores / 24 Threads up to 5.6GHz AM5", price: "11.490.000đ", color: "#1f2937", category: "CPU" },
-
-  // --- VGA ---
-  { name: "ASUS Dual GeForce RTX 4060 White", specs: "8GB GDDR6 / 128-bit / 2 Fan / White", price: "8.490.000đ", badge: "Mới", badgeColor: "#10b981", color: "#e0e7ef", category: "VGA" },
-  { name: "MSI GeForce RTX 4060 VENTUS 2X", specs: "8GB GDDR6 / 128-bit / 2 Fan / Black", price: "8.590.000đ", badge: "Bán chạy", badgeColor: "#f97316", color: "#111", category: "VGA" },
-  { name: "Gigabyte RTX 4070 SUPER EAGLE", specs: "12GB GDDR6X / 192-bit / 3 Fan", price: "19.490.000đ", color: "#c8d0dc", category: "VGA" },
-  { name: "ASUS ROG Strix RTX 4080 SUPER", specs: "16GB GDDR6X / 256-bit / RGB", price: "34.990.000đ", color: "#2d2d2d", category: "VGA" },
-  { name: "MSI GeForce RTX 4090 SUPRIM X", specs: "24GB GDDR6X / 384-bit / Premium Design", price: "64.990.000đ", color: "#cbd5e1", category: "VGA" },
-
-  // --- Mainboard ---
-  { name: "ASUS TUF GAMING B760M-PLUS", specs: "LGA1700 / DDR5 / Intel B760 Micro-ATX", price: "4.490.000đ", color: "#1f2937", category: "Mainboard" },
-  { name: "ASUS ROG STRIX B760-F GAMING", specs: "LGA1700 / DDR5 / Intel Chipset B760 ATX", price: "5.490.000đ", color: "#2d2d2d", category: "Mainboard" },
-  { name: "Gigabyte Z790 AORUS ELITE AX", specs: "LGA1700 / DDR5 / Intel Chipset Z790 ATX", price: "7.990.000đ", badge: "Cao cấp", badgeColor: "#d97706", color: "#374151", category: "Mainboard" },
-  { name: "MSI MAG B650 TOMAHAWK WIFI", specs: "Socket AM5 / DDR5 / AMD Chipset B650 ATX", price: "5.890.000đ", color: "#1a1a2e", category: "Mainboard" },
-  { name: "ASUS ROG CROSSHAIR X670E HERO", specs: "Socket AM5 / DDR5 / AMD Chipset X670E ATX", price: "18.990.000đ", color: "#2d2d2d", category: "Mainboard" },
-
-  // --- SSD ---
-  { name: "Samsung 990 Pro 1TB NVMe", specs: "PCIe Gen 4.0 x4 M.2 2280 up to 7450MB/s", price: "2.990.000đ", badge: "Cực nhanh", badgeColor: "#2563eb", color: "#1e40af", category: "SSD" },
-  { name: "Crucial P3 Plus 2TB NVMe", specs: "PCIe Gen 4.0 x4 M.2 2280 up to 5000MB/s", price: "3.290.000đ", color: "#38bdf8", category: "SSD" },
-  { name: "Kingston NV2 500GB NVMe", specs: "PCIe Gen 4.0 x4 M.2 2280 up to 3500MB/s", price: "1.190.000đ", color: "#111827", category: "SSD" },
-  { name: "Samsung 980 500GB NVMe", specs: "PCIe Gen 3.0 x4 M.2 2280 up to 3100MB/s", price: "1.490.000đ", color: "#1e40af", category: "SSD" },
-  { name: "Western Digital Blue 1TB SATA III", specs: "2.5\" SSD read up to 560MB/s", price: "1.990.000đ", color: "#1f2937", category: "SSD" },
-
-  // --- HDD ---
-  { name: "Seagate Barracuda 2TB HDD", specs: "3.5\" SATA 3 7200RPM 256MB Cache", price: "1.590.000đ", color: "#374151", category: "HDD" },
-  { name: "Western Digital Blue 1TB HDD", specs: "3.5\" SATA 3 7200RPM 64MB Cache", price: "1.190.000đ", color: "#1f2937", category: "HDD" },
-  { name: "Seagate IronWolf 4TB NAS", specs: "3.5\" SATA 3 5900RPM 64MB Cache", price: "3.490.000đ", badge: "Dành cho NAS", badgeColor: "#2563eb", color: "#374151", category: "HDD" },
-  { name: "Western Digital Red Pro 8TB NAS", specs: "3.5\" SATA 3 7200RPM 256MB Cache", price: "7.290.000đ", color: "#1f2937", category: "HDD" },
-
-  // --- PSU ---
-  { name: "Corsair RM750e 750W", specs: "750 Watt / 80 Plus Gold / Full Modular / ATX", price: "2.890.000đ", badge: "Bán chạy", badgeColor: "#f97316", color: "#78350f", category: "PSU" },
-  { name: "MSI MAG A650BN 650W", specs: "650 Watt / 80 Plus Bronze / Non-Modular", price: "1.390.000đ", color: "#1a1a2e", category: "PSU" },
-  { name: "ASUS ROG THOR 850P 850W", specs: "850 Watt / 80 Plus Platinum / OLED Screen", price: "6.490.000đ", badge: "Cao cấp", badgeColor: "#8b5cf6", color: "#2d2d2d", category: "PSU" },
-  { name: "Corsair RM1000x 1000W", specs: "1000 Watt / 80 Plus Gold / Full Modular", price: "4.890.000đ", color: "#78350f", category: "PSU" },
-
-  // --- Cooling ---
-  { name: "Thermalright Peerless Assassin 120", specs: "Dual Fan Air Cooler / 6 Heatpipes / Black", price: "990.000đ", color: "#164e63", category: "Cooling" },
-  { name: "Corsair iCUE H150i Elite White", specs: "360mm AIO Liquid Cooler / White Design / ARGB", price: "5.490.000đ", badge: "ARGB", badgeColor: "#ec4899", color: "#e0e7ef", category: "Cooling" },
-  { name: "Lian Li Galahad II Trinity 360", specs: "360mm AIO Liquid Cooler / ARGB / Black", price: "4.190.000đ", color: "#1c1917", category: "Cooling" },
-  { name: "Noctua NH-D15", specs: "Premium Dual-Tower Air Cooler / Quiet / Brown", price: "2.890.000đ", color: "#78350f", category: "Cooling" },
-
-  // --- Case ---
-  { name: "Lian Li O11 Dynamic EVO", specs: "Mid Tower Case / Dual Chamber / White", price: "4.290.000đ", badge: "Hot", badgeColor: "#8b5cf6", color: "#e0e7ef", category: "Case" },
-  { name: "Corsair 4000D Airflow", specs: "Mid Tower Case / High-Airflow / Black", price: "2.190.000đ", color: "#111", category: "Case" },
-  { name: "NZXT H9 Flow", specs: "Dual-Chamber Mid Tower / Glass Panel / Black", price: "4.490.000đ", color: "#1c1917", category: "Case" },
-  { name: "ASUS ROG Hyperion GR701", specs: "Flagship Full Tower / E-ATX / RGB / Black", price: "10.990.000đ", color: "#2d2d2d", category: "Case" },
-
-  // --- Extra RAM ---
-  { name: "G.Skill Ripjaws S5", specs: "32GB (2x16GB) DDR5 5600MHz", price: "3.490.000đ", color: "#2d2d2d", category: "RAM" },
-  { name: "Kingston Fury Renegade", specs: "32GB (2x16GB) DDR5 6400MHz", price: "4.990.000đ", badge: "Mới", badgeColor: "#22c55e", color: "#1a1a2e", category: "RAM" },
-
-  // --- Extra CPU ---
-  { name: "Intel Core i3-14100", specs: "4 Cores / 8 Threads up to 4.7GHz LGA1700", price: "3.290.000đ", color: "#1a1a2e", category: "CPU" },
-  { name: "AMD Ryzen 5 7600", specs: "6 Cores / 12 Threads up to 5.1GHz AM5", price: "5.290.000đ", color: "#1f2937", category: "CPU" },
-
-  // --- Extra VGA ---
-  { name: "ASUS TUF RTX 4070 Ti SUPER", specs: "16GB GDDR6X / 256-bit / 3 Fan", price: "24.990.000đ", badge: "Cao cấp", badgeColor: "#d97706", color: "#2d2d2d", category: "VGA" },
-  { name: "Gigabyte RX 7600 XT GAMING OC", specs: "16GB GDDR6 / 128-bit / 3 Fan", price: "9.990.000đ", color: "#c8d0dc", category: "VGA" },
-
-  // --- Extra Mainboard ---
-  { name: "MSI PRO Z790-P WIFI", specs: "LGA1700 / DDR5 / Intel Chipset Z790 ATX", price: "6.290.000đ", color: "#1a1a2e", category: "Mainboard" },
-  { name: "Gigabyte B650M AORUS ELITE AX", specs: "Socket AM5 / DDR5 / AMD Chipset B650 Micro-ATX", price: "5.190.000đ", color: "#374151", category: "Mainboard" },
-
-  // --- Extra SSD ---
-  { name: "Samsung 980 Pro 2TB NVMe", specs: "PCIe Gen 4.0 x4 M.2 2280 up to 7000MB/s", price: "4.590.000đ", badge: "Bán chạy", badgeColor: "#f97316", color: "#1e40af", category: "SSD" },
-  { name: "Kingston NV2 2TB NVMe", specs: "PCIe Gen 4.0 x4 M.2 2280 up to 3500MB/s", price: "3.390.000đ", color: "#111827", category: "SSD" },
-
-  // --- Extra HDD ---
-  { name: "Western Digital Purple 4TB", specs: "3.5\" SATA 3 5400RPM 64MB Cache", price: "2.990.000đ", color: "#1f2937", category: "HDD" },
-  { name: "Seagate IronWolf Pro 12TB NAS", specs: "3.5\" SATA 3 7200RPM 256MB Cache", price: "9.490.000đ", color: "#374151", category: "HDD" },
-
-  // --- Extra PSU ---
-  { name: "ASUS ROG Strix 750W Gold", specs: "750 Watt / 80 Plus Gold / Full Modular", price: "3.290.000đ", color: "#2d2d2d", category: "PSU" },
-  { name: "MSI MAG A850GL 850W", specs: "850 Watt / 80 Plus Gold / Full Modular / ATX 3.0", price: "3.390.000đ", color: "#1a1a2e", category: "PSU" },
-
-  // --- Extra Cooling ---
-  { name: "Deepcool AK400 Digital", specs: "Single Fan Air Cooler / Digital Screen / Black", price: "850.000đ", color: "#164e63", category: "Cooling" },
-  { name: "NZXT Kraken 360 RGB", specs: "360mm AIO Liquid Cooler / LCD Screen / Black", price: "6.290.000đ", badge: "Màn hình LCD", badgeColor: "#8b5cf6", color: "#1c1917", category: "Cooling" },
-
-  // --- Extra Case ---
-  { name: "NZXT H5 Flow", specs: "Compact Mid Tower / High-Airflow / Black", price: "2.390.000đ", color: "#1c1917", category: "Case" },
-  { name: "Corsair 3000D RGB Airflow White", specs: "Mid Tower Case / 3x ARGB Fans / White", price: "2.290.000đ", color: "#e0e7ef", category: "Case" },
-
-  // --- 10 more RAM ---
-  { name: "Corsair Vengeance LPX DDR4 8G", specs: "8GB DDR4 3200MHz Black", price: "550.000đ", color: "#111", category: "RAM" },
-  { name: "Corsair Vengeance LPX DDR4 16G", specs: "16GB (2x8GB) DDR4 3200MHz Black", price: "1.090.000đ", color: "#111", category: "RAM" },
-  { name: "Kingston Fury Beast RGB DDR4", specs: "16GB (2x8GB) DDR4 3600MHz RGB", price: "1.390.000đ", color: "#1a1a2e", category: "RAM" },
-  { name: "G.Skill Trident Z Royal Gold", specs: "16GB (2x8GB) DDR4 3600MHz Gold", price: "2.490.000đ", badge: "Premium", badgeColor: "#f59e0b", color: "#fca5a5", category: "RAM" },
-  { name: "G.Skill Trident Z Royal Silver", specs: "32GB (2x16GB) DDR4 3600MHz Silver", price: "3.990.000đ", badge: "Premium", badgeColor: "#64748b", color: "#e2e8f0", category: "RAM" },
-  { name: "TeamGroup T-Force Delta DDR5 16G", specs: "16GB (2x8GB) DDR5 5200MHz RGB", price: "1.990.000đ", color: "#111827", category: "RAM" },
-  { name: "TeamGroup T-Force Delta DDR5 32G", specs: "32GB (2x16GB) DDR5 6000MHz RGB", price: "3.790.000đ", color: "#111827", category: "RAM" },
-  { name: "Crucial Pro DDR5", specs: "32GB (2x16GB) DDR5 5600MHz Black", price: "2.690.000đ", color: "#1f2937", category: "RAM" },
-  { name: "Corsair Dominator Titanium", specs: "32GB (2x16GB) DDR5 7200MHz White", price: "6.990.000đ", badge: "Siêu cấp", badgeColor: "#dc2626", color: "#e0e7ef", category: "RAM" },
-  { name: "G.Skill Trident Z5 Neo", specs: "64GB (2x32GB) DDR5 6000MHz RGB", price: "6.490.000đ", color: "#2d2d2d", category: "RAM" },
-
-  // --- 8 more CPU ---
-  { name: "Intel Core i3-12100F", specs: "4 Cores / 8 Threads up to 4.3GHz LGA1700", price: "1.990.000đ", color: "#1a1a2e", category: "CPU" },
-  { name: "Intel Core i5-12400F", specs: "6 Cores / 12 Threads up to 4.4GHz LGA1700", price: "3.490.000đ", badge: "Bán chạy", badgeColor: "#f97316", color: "#1a1a2e", category: "CPU" },
-  { name: "Intel Core i5-13400F", specs: "10 Cores / 16 Threads up to 4.6GHz LGA1700", price: "4.990.000đ", color: "#1a1a2e", category: "CPU" },
-  { name: "Intel Core i7-13700K", specs: "16 Cores / 24 Threads up to 5.4GHz LGA1700", price: "8.990.000đ", color: "#1a1a2e", category: "CPU" },
-  { name: "AMD Ryzen 5 5600X", specs: "6 Cores / 12 Threads up to 4.6GHz AM4", price: "3.890.000đ", color: "#1f2937", category: "CPU" },
-  { name: "AMD Ryzen 5 7600X", specs: "6 Cores / 12 Threads up to 5.3GHz AM5", price: "5.790.000đ", color: "#1f2937", category: "CPU" },
-  { name: "AMD Ryzen 7 5700X", specs: "8 Cores / 16 Threads up to 4.6GHz AM4", price: "4.890.000đ", color: "#1f2937", category: "CPU" },
-  { name: "AMD Ryzen 9 7950X", specs: "16 Cores / 32 Threads up to 5.7GHz AM5", price: "14.990.000đ", badge: "Flagship", badgeColor: "#8b5cf6", color: "#1f2937", category: "CPU" },
-
-  // --- 8 more VGA ---
-  { name: "MSI GTX 1650 D6 VENTUS XS", specs: "4GB GDDR6 / 128-bit / 2 Fan", price: "3.690.000đ", color: "#111", category: "VGA" },
-  { name: "ASUS Dual Radeon RX 6600", specs: "8GB GDDR6 / 128-bit / 2 Fan", price: "5.990.000đ", color: "#2d2d2d", category: "VGA" },
-  { name: "Gigabyte RTX 3060 WINDFORCE", specs: "12GB GDDR6 / 192-bit / 2 Fan", price: "7.990.000đ", color: "#c8d0dc", category: "VGA" },
-  { name: "MSI RTX 4060 Ti GAMING X", specs: "8GB GDDR6 / 128-bit / Twin Frozr", price: "11.490.000đ", badge: "RGB", badgeColor: "#22c55e", color: "#111", category: "VGA" },
-  { name: "Gigabyte RTX 4070 WINDFORCE", specs: "12GB GDDR6X / 192-bit / 3 Fan", price: "16.990.000đ", color: "#c8d0dc", category: "VGA" },
-  { name: "ASUS TUF RTX 4070 Ti SUPER OC", specs: "16GB GDDR6X / 256-bit / 3 Fan", price: "25.990.000đ", color: "#2d2d2d", category: "VGA" },
-  { name: "ASUS ROG Strix RTX 4090 OC", specs: "24GB GDDR6X / 384-bit / Flagship GPU", price: "69.990.000đ", badge: "Khủng", badgeColor: "#dc2626", color: "#cbd5e1", category: "VGA" },
-  { name: "PowerColor Hellhound RX 7800 XT", specs: "16GB GDDR6 / 256-bit / Led Ice Blue", price: "14.490.000đ", color: "#1c1917", category: "VGA" }
-];
-
 
 const getCategoryBrands = (category: string) => {
   const cat = category.toLowerCase();
@@ -300,10 +168,11 @@ const API_BASE = typeof window !== "undefined"
 /* ── PAGE ──────────────────────────────────────────────────────────── */
 export default function LinhKienIndex() {
   const navigate = useNavigate();
+  const reduceMotion = useReducedMotion();
   const [liked, setLiked] = useState<Set<string>>(new Set());
   const [activeCategory, setActiveCategory] = useState("ram");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
-  const [products, setProducts] = useState<Product[]>(defaultProducts);
+  const [products, setProducts] = useState<Product[]>([]);
 
   const [sortBy, setSortBy] = useState("newest");
   const [showMobileFilter, setShowMobileFilter] = useState(false);
@@ -503,6 +372,70 @@ export default function LinhKienIndex() {
     const start = (currentPage - 1) * ITEMS_PER_PAGE;
     return filteredProducts.slice(start, start + ITEMS_PER_PAGE);
   }, [filteredProducts, currentPage]);
+
+  const productAnimationKey = useMemo(() => [
+    activeCategory,
+    sortBy,
+    viewMode,
+    currentPage,
+    minPrice,
+    maxPrice,
+    [...selBrands].sort().join(","),
+    [...selCapacities].sort().join(","),
+    [...selTypes].sort().join(","),
+    [...selBuses].sort().join(","),
+    [...selSeries].sort().join(","),
+    [...selWattages].sort().join(","),
+    [...selSizes].sort().join(","),
+    paginatedProducts.map(product => product.id).join(","),
+  ].join("|"), [
+    activeCategory,
+    sortBy,
+    viewMode,
+    currentPage,
+    minPrice,
+    maxPrice,
+    selBrands,
+    selCapacities,
+    selTypes,
+    selBuses,
+    selSeries,
+    selWattages,
+    selSizes,
+    paginatedProducts,
+  ]);
+
+  const productListVariants = {
+    hidden: {},
+    show: {
+      transition: reduceMotion
+        ? { duration: 0 }
+        : { staggerChildren: 0.045, delayChildren: 0.035 },
+    },
+    exit: {
+      opacity: reduceMotion ? 1 : 0,
+      transition: { duration: reduceMotion ? 0 : 0.1 },
+    },
+  };
+
+  const productCardVariants = {
+    hidden: reduceMotion
+      ? { opacity: 1 }
+      : { opacity: 0, y: 22, scale: 0.93 },
+    show: reduceMotion
+      ? { opacity: 1 }
+      : {
+          opacity: 1,
+          y: 0,
+          scale: 1,
+          transition: {
+            type: "spring" as const,
+            stiffness: 390,
+            damping: 26,
+            mass: 0.72,
+          },
+        },
+  };
 
   const heroContainer = {
     hidden: {},
@@ -934,9 +867,7 @@ export default function LinhKienIndex() {
                 {/* Gradient block */}
                 <div
                   className="w-full aspect-[4/3] relative flex items-center justify-center overflow-hidden"
-                  style={{
-                    // background: `linear-gradient(135deg, ${cat.from} 0%, ${cat.to} 100%)`,
-                  }}
+                  style={{}}
                 >
                   <div style={{
                     position: "absolute", inset: 0,
@@ -1077,28 +1008,45 @@ export default function LinhKienIndex() {
             </div>
 
             {/* Empty state */}
-            {filteredProducts.length === 0 ? (
-              <div className="flex min-h-[420px] flex-col items-center justify-center rounded-2xl bg-white border border-zinc-100 shadow-sm text-center">
-                <Search className="mb-4 h-10 w-10 text-zinc-300" />
-                <h3 className="text-lg font-bold text-zinc-900">Không tìm thấy sản phẩm phù hợp</h3>
-                <p className="mt-2 text-sm text-zinc-500">Thử xóa bớt bộ lọc hoặc điều chỉnh mức giá.</p>
-                <button
-                  onClick={resetFilters}
-                  className="mt-5 rounded-full bg-zinc-950 px-5 py-2.5 text-sm font-semibold text-white hover:bg-zinc-800 transition-colors cursor-pointer"
+            <AnimatePresence mode="popLayout" initial={false}>
+              {filteredProducts.length === 0 ? (
+                <motion.div
+                  key={`empty-${productAnimationKey}`}
+                  initial={reduceMotion ? false : { opacity: 0, y: 18, scale: 0.98 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={reduceMotion ? undefined : { opacity: 0, scale: 0.98 }}
+                  transition={{ duration: reduceMotion ? 0 : 0.32, ease: [0.16, 1, 0.3, 1] }}
+                  className="flex min-h-[420px] flex-col items-center justify-center rounded-2xl bg-white border border-zinc-100 shadow-sm text-center"
                 >
-                  Xóa bộ lọc
-                </button>
-              </div>
-            ) : (
-              <div className={viewMode === "grid"
-                ? "grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-3.5"
-                : "flex flex-col gap-3"
-              }>
-                {paginatedProducts.map((p, i) => (
+                  <Search className="mb-4 h-10 w-10 text-zinc-300" />
+                  <h3 className="text-lg font-bold text-zinc-900">Không tìm thấy sản phẩm phù hợp</h3>
+                  <p className="mt-2 text-sm text-zinc-500">Thử xóa bớt bộ lọc hoặc điều chỉnh mức giá.</p>
+                  <button
+                    onClick={resetFilters}
+                    className="mt-5 rounded-full bg-zinc-950 px-5 py-2.5 text-sm font-semibold text-white hover:bg-zinc-800 transition-colors cursor-pointer"
+                  >
+                    Xóa bộ lọc
+                  </button>
+                </motion.div>
+              ) : (
+              <motion.div
+                key={productAnimationKey}
+                variants={productListVariants}
+                initial="hidden"
+                animate="show"
+                exit="exit"
+                className={viewMode === "grid"
+                  ? "grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-3.5"
+                  : "flex flex-col gap-3"
+                }
+              >
+                {paginatedProducts.map((p) => (
                   viewMode === "grid" ? (
-                    <div
-                      key={i}
-                      onClick={() => navigate(`/san-pham/component-${p.category || "linh-kien"}-${p.name}`)}
+                    <motion.article
+                      key={p.id}
+                      variants={productCardVariants}
+                      whileTap={reduceMotion ? undefined : { scale: 0.985 }}
+                      onClick={() => navigate(`/san-pham/${p.id}`)}
                       className="group bg-white rounded-2xl border border-zinc-100 p-3.5 shadow-sm hover:shadow-md hover:border-zinc-200 transition-all duration-300 flex flex-col relative cursor-pointer"
                     >
                       {/* Badge */}
@@ -1129,7 +1077,7 @@ export default function LinhKienIndex() {
                           <p className="text-[14px] font-extrabold text-zinc-900">{p.price}</p>
                           <AddToCartButton
                             product={{
-                              id: `component-${p.category || "linh-kien"}-${p.name}`,
+                              id: p.id,
                               name: p.name,
                               specs: p.specs,
                               price: p.price,
@@ -1139,11 +1087,13 @@ export default function LinhKienIndex() {
                           />
                         </div>
                       </div>
-                    </div>
+                    </motion.article>
                   ) : (
-                    <div
-                      key={i}
-                      onClick={() => navigate(`/san-pham/component-${p.category || "linh-kien"}-${p.name}`)}
+                    <motion.article
+                      key={p.id}
+                      variants={productCardVariants}
+                      whileTap={reduceMotion ? undefined : { scale: 0.99 }}
+                      onClick={() => navigate(`/san-pham/${p.id}`)}
                       className="group bg-white rounded-xl border border-zinc-100 p-3 shadow-sm hover:shadow-md transition-all duration-300 flex items-center gap-4 relative cursor-pointer"
                     >
                       <div className="w-20 h-16 shrink-0">
@@ -1161,7 +1111,7 @@ export default function LinhKienIndex() {
                       </div>
                       <AddToCartButton
                         product={{
-                          id: `component-${p.category || "linh-kien"}-${p.name}`,
+                          id: p.id,
                           name: p.name,
                           specs: p.specs,
                           price: p.price,
@@ -1178,11 +1128,12 @@ export default function LinhKienIndex() {
                       >
                         <Heart className={`w-3.5 h-3.5 transition-colors ${liked.has(p.name) ? "fill-red-500 text-red-500" : "text-zinc-300"}`} />
                       </button>
-                    </div>
+                    </motion.article>
                   )
                 ))}
-              </div>
-            )}
+              </motion.div>
+              )}
+            </AnimatePresence>
 
             {/* Pagination */}
             {totalPages > 1 && (

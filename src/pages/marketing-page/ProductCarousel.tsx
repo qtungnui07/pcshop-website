@@ -120,6 +120,23 @@ export default function ProductCarousel({
   }, []);
 
   useEffect(() => {
+    fetch(`${API_BASE}/api/flashcard-designs/applied`)
+      .then(async (response) => {
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || "Không thể tải thiết kế đã áp dụng.");
+        return data;
+      })
+      .then((designs) => {
+        if (designs && typeof designs === "object" && !Array.isArray(designs)) {
+          setAppliedDesigns(designs as Record<string, FlashcardDesign>);
+        }
+      })
+      .catch(() => {
+        // Keep the browser-local version as an offline fallback.
+      });
+  }, []);
+
+  useEffect(() => {
     const syncDesign = () => {
       try {
         const value = localStorage.getItem(ACTIVE_DESIGN_KEY);

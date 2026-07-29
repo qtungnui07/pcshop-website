@@ -13,6 +13,7 @@ type BuildProduct = {
 };
 
 type RawComponent = {
+  id?: string | number;
   name?: string;
   specs?: string;
   price?: string | number;
@@ -161,7 +162,7 @@ export default function TuBuildPcIndex() {
     ])
       .then(([components, accessories]: [RawComponent[], RawAccessory[]]) => {
         const componentItems = components.map((item, index): BuildProduct => ({
-          id: `component-${index}-${item.name || "item"}`,
+          id: String(item.id || `component-${index}-${item.name || "item"}`),
           name: item.name || "Linh kiện",
           specs: item.specs || "",
           price: normalizePrice(item.price),

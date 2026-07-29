@@ -66,12 +66,13 @@ services:
         condition: service_healthy
 
   tunnel:
+    profiles: ["legacy-tunnel"]
     image: cloudflare/cloudflared:latest
     container_name: pcshop-tunnel
     network_mode: host
     user: "1000:1000"
     volumes:
-      - /home/q/.cloudflared:/home/q/.cloudflared
+      - /home/qtitpc/.cloudflared:/home/q/.cloudflared:ro
     command: tunnel --config /home/q/.cloudflared/pc-shop.yml run
     restart: always
     depends_on:
