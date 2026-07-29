@@ -1,0 +1,50 @@
+flowchart LR
+    guest["Khách vãng lai"]
+    customer["Khách hàng"]
+    admin["Quản trị viên"]
+    clerk["Clerk / Google OAuth"]
+    resend["Resend Email"]
+
+    subgraph pcshop["HỆ THỐNG PC SHOP"]
+        direction TB
+        subgraph common["Tra cứu và mua hàng"]
+            browse(("Xem danh mục và sản phẩm"))
+            search(("Tìm kiếm, lọc sản phẩm"))
+            detail(("Xem chi tiết và đánh giá"))
+            register(("Đăng ký tài khoản"))
+            login(("Đăng nhập"))
+            googleLogin(("Đăng nhập Google"))
+            forgot(("Khôi phục mật khẩu"))
+        end
+        subgraph shopping["Nghiệp vụ khách hàng"]
+            cart(("Quản lý giỏ hàng"))
+            checkout(("Nhập thông tin giao hàng"))
+            cod(("Đặt hàng COD"))
+            qr(("Thanh toán QR mô phỏng"))
+            orders(("Theo dõi đơn hàng"))
+            review(("Viết / cập nhật đánh giá"))
+            helpful(("Đánh dấu đánh giá hữu ích"))
+            ticket(("Gửi yêu cầu hỗ trợ"))
+            profile(("Cập nhật hồ sơ"))
+            build(("Tự build cấu hình PC"))
+        end
+        subgraph management["Nghiệp vụ quản trị"]
+            dashboard(("Xem dashboard"))
+            products(("Quản lý sản phẩm"))
+            combos(("Quản lý combo phụ kiện"))
+            manageOrders(("Quản lý đơn hàng"))
+            accounts(("Quản lý tài khoản và nhân sự"))
+            tickets(("Xử lý ticket"))
+            designs(("Thiết kế giao diện flashcard"))
+        end
+    end
+
+    guest --> browse & search & detail & register & login & googleLogin & forgot
+    customer --> browse & search & detail & cart & checkout & orders & review & helpful & ticket & profile & build
+    admin --> dashboard & products & combos & manageOrders & accounts & tickets & designs
+    googleLogin -. "ủy quyền OAuth" .-> clerk
+    forgot -. "gửi liên kết đặt lại" .-> resend
+    checkout --> cod & qr
+    cart --> checkout
+    review -. "yêu cầu đã mua hàng" .-> orders
+

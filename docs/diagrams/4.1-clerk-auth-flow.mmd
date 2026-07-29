@@ -1,0 +1,32 @@
+sequenceDiagram
+    autonumber
+    actor ND as Người dùng
+    participant FE as React AuthContext
+    participant SDK as Clerk React SDK
+    participant CL as Clerk Auth
+    participant GG as Google OAuth
+    participant API as Bun API
+    participant PG as PostgreSQL JSONB
+    participant LS as localStorage
+
+    ND->>FE: Đăng nhập Google
+    FE->>SDK: authenticateWithRedirect(oauth_google)
+    SDK->>CL: Bắt đầu OAuth
+    CL->>GG: Chuyển hướng Google
+    ND->>GG: Xác thực và cấp quyền
+    GG-->>CL: OAuth response
+    CL->>CL: Xác minh và tạo Clerk session
+    Note over CL,SDK: Clerk quản lý session token/JWT
+    CL-->>SDK: Redirect /sso-callback
+    SDK-->>FE: isSignedIn + clerkUser
+    FE->>API: POST /api/auth/google-login {email, name, avatar}
+    Note right of FE: Không gửi Bearer Clerk JWT
+    API->>PG: Tìm hoặc tạo account theo email
+    PG-->>API: Account
+    API-->>FE: User không chứa password
+    FE->>LS: Lưu pcshop_user
+    Note over FE,API: Backend hiện chưa xác minh chữ ký JWT Clerk
+    ND->>FE: Đăng xuất
+    FE->>LS: Xóa pcshop_user
+    FE->>SDK: signOut()
+    SDK->>CL: Hủy session

@@ -1,0 +1,36 @@
+sequenceDiagram
+    autonumber
+    actor KH as Khách hàng
+    participant FE as React Checkout
+    participant QR as QRCode
+    participant API as Bun API
+    participant PG as PostgreSQL JSONB
+    participant PAY as Trang thanh toán ảo
+
+    KH->>FE: Chọn hàng và nhập thông tin giao hàng
+    KH->>FE: Chọn MoMo/Bank QR giả lập
+    FE->>API: POST /api/payments
+    API->>PG: Lưu Payment pending, TTL 5 phút
+    API-->>FE: PaymentSession
+    FE->>QR: Tạo QR từ /thanh-toan-ao/{id}
+    QR-->>FE: QR data URL
+    FE-->>KH: Hiển thị QR
+    loop Mỗi 2 giây
+        FE->>API: GET /api/payments/{id}
+        API-->>FE: pending / paid / expired
+    end
+    KH->>PAY: Quét hoặc mở QR
+    PAY->>API: GET /api/payments/{id}
+    KH->>PAY: Tôi đã thanh toán
+    PAY->>API: POST /api/payments/{id}/confirm
+    alt Hợp lệ
+        API->>PG: Tạo Order, cập nhật Payment paid
+        API-->>PAY: Thành công + orderId
+        FE->>API: Poll
+        API-->>FE: paid
+        FE->>FE: Xóa mặt hàng và phiên chờ
+        FE-->>KH: Chuyển đến Đơn hàng
+    else Hết hạn
+        API-->>PAY: 400 - QR hết hạn
+    end
+

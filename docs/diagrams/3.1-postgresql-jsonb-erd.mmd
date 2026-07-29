@@ -1,0 +1,60 @@
+erDiagram
+    APP_COLLECTIONS {
+        TEXT name PK
+        JSONB data
+        TIMESTAMPTZ updated_at
+    }
+    ACCOUNT {
+        STRING id PK
+        STRING email
+        STRING role
+        STRING provider
+    }
+    ORDER {
+        STRING id PK
+        STRING userId FK
+        JSON items
+        NUMBER totalPrice
+        STRING paymentStatus
+    }
+    PAYMENT {
+        STRING id PK
+        STRING orderId FK
+        STRING status
+        JSON orderPayload
+    }
+    PRODUCT {
+        STRING id PK
+        STRING name
+        STRING category
+        NUMBER_OR_STRING price
+    }
+    REVIEW {
+        STRING id PK
+        STRING productId FK
+        STRING userId FK
+        NUMBER rating
+    }
+    ACCESSORY_COMBO {
+        STRING id PK
+        JSON productIds FK
+    }
+    TICKET {
+        STRING id PK
+        STRING email
+        STRING status
+    }
+
+    APP_COLLECTIONS ||--o{ ACCOUNT : accounts
+    APP_COLLECTIONS ||--o{ ORDER : orders
+    APP_COLLECTIONS ||--o{ PAYMENT : payments
+    APP_COLLECTIONS ||--o{ PRODUCT : product_collections
+    APP_COLLECTIONS ||--o{ REVIEW : reviews
+    APP_COLLECTIONS ||--o{ ACCESSORY_COMBO : accessoryCombos
+    APP_COLLECTIONS ||--o{ TICKET : tickets
+    ACCOUNT ||--o{ ORDER : "userId logic"
+    ACCOUNT ||--o{ REVIEW : "userId logic"
+    ORDER o|--o| PAYMENT : "orderId logic"
+    PRODUCT ||--o{ REVIEW : "productId logic"
+    PRODUCT }o--o{ ACCESSORY_COMBO : "productIds logic"
+
