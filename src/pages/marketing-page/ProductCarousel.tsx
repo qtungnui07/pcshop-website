@@ -4,6 +4,10 @@ import { motion } from 'framer-motion';
 import { containerVariants, itemVariants } from '../../constants/data';
 import AddToCartButton from '../../components/AddToCartButton';
 import { useNavigate } from 'react-router-dom';
+import type { FlashcardDesign } from '../admin/designer';
+
+const ACTIVE_DESIGN_KEY = "novapc-active-flashcard-design";
+const APPLIED_DESIGNS_KEY = "novapc-applied-flashcard-designs";
 
 const API_BASE = typeof window !== "undefined"
   ? (window.location.hostname.includes("qtitpc.dev")
@@ -30,8 +34,20 @@ interface ProductCarouselProps {
   apiEndpoint?: string;
 }
 
+interface APIProduct {
+  badge?: string;
+  name?: string;
+  title?: string;
+  specs?: string;
+  description?: string;
+  price?: string;
+  from?: string;
+  to?: string;
+  image?: string;
+}
+
 /** Map API PC data → carousel product format */
-function mapPCToCarouselProduct(pc: any): Product {
+function mapPCToCarouselProduct(pc: APIProduct): Product {
   return {
     badge: pc.badge || "",
     title: pc.name || pc.title || "",
@@ -56,17 +72,24 @@ export default function ProductCarousel({
   const [canScrollRight, setCanScrollRight] = useState(true);
   const [fetchedProducts, setFetchedProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(!products);
+  const [activeDesign, setActiveDesign] = useState<FlashcardDesign | null>(() => {
+    try {
+      const value = localStorage.getItem(ACTIVE_DESIGN_KEY);
+      return value ? JSON.parse(value) : null;
+    } catch { return null; }
+  });
+  const [appliedDesigns, setAppliedDesigns] = useState<Record<string, FlashcardDesign>>(() => {
+    try { return JSON.parse(localStorage.getItem(APPLIED_DESIGNS_KEY) || "{}"); }
+    catch { return {}; }
+  });
   const navigate = useNavigate();
 
   // Fetch from API if no products passed as prop
   useEffect(() => {
     if (products) {
-      setFetchedProducts(products);
-      setLoading(false);
       return;
     }
 
-    setLoading(true);
     fetch(`${API_BASE}${apiEndpoint}`)
       .then((res) => res.json())
       .then((data) => {
@@ -80,7 +103,7 @@ export default function ProductCarousel({
       .finally(() => setLoading(false));
   }, [products, apiEndpoint]);
 
-  const displayProducts = fetchedProducts;
+  const displayProducts = products || fetchedProducts;
 
   const checkScroll = () => {
     if (scrollRef.current) {
@@ -95,6 +118,25 @@ export default function ProductCarousel({
     window.addEventListener('resize', checkScroll);
     return () => window.removeEventListener('resize', checkScroll);
   }, []);
+
+  useEffect(() => {
+    const syncDesign = () => {
+      try {
+        const value = localStorage.getItem(ACTIVE_DESIGN_KEY);
+        setActiveDesign(value ? JSON.parse(value) : null);
+        setAppliedDesigns(JSON.parse(localStorage.getItem(APPLIED_DESIGNS_KEY) || "{}"));
+      } catch { setActiveDesign(null); }
+    };
+    window.addEventListener("novapc-flashcard-design-updated", syncDesign);
+    window.addEventListener("storage", syncDesign);
+    return () => {
+      window.removeEventListener("novapc-flashcard-design-updated", syncDesign);
+      window.removeEventListener("storage", syncDesign);
+    };
+  }, []);
+
+  const defaultProductDesign = appliedDesigns["product:default"]
+    || (activeDesign?.target === "product" && !activeDesign.sourceKey ? activeDesign : null);
 
   const scrollRight = () => {
     if (scrollRef.current && scrollRef.current.children.length > 1) {
@@ -170,44 +212,88 @@ export default function ProductCarousel({
           <div className="shrink-0 snap-start [--page-padding:16px] md:[--page-padding:32px] lg:[--page-padding:40px] xl:[--page-padding:48px] 2xl:[--page-padding:64px]" style={{ width: 'max(var(--page-padding), calc(50vw - 900px + var(--page-padding)))' }}></div>
 
           {displayProducts.map((product, idx) => (
-            <motion.div
+            (() => {
+              const appliedProductDesign = appliedDesigns[`product:${product.name || product.title}`] || defaultProductDesign;
+              return <motion.div
               variants={itemVariants}
               key={idx}
               onClick={() => navigate(getProductLink(product))}
               className="min-w-[280px] md:min-w-[300px] lg:min-w-[320px] xl:min-w-[360px] 2xl:min-w-[400px] h-[360px] md:h-[400px] lg:h-[420px] xl:h-[460px] 2xl:h-[500px] rounded-[2rem] snap-start relative overflow-hidden cursor-pointer shadow-[2px_4px_16px_rgba(0,0,0,0.04)] hover:shadow-xl hover:scale-[1.02] transition-all duration-300 p-6 md:p-8 flex flex-col justify-between"
-              style={{ background: `linear-gradient(135deg, #${product.from}, #${product.to})` }}
+              style={{
+                background: appliedProductDesign
+                  ? `linear-gradient(${appliedProductDesign.backgroundAngle}deg, ${appliedProductDesign.backgroundFrom}, ${appliedProductDesign.backgroundTo})`
+                  : `linear-gradient(135deg, #${product.from}, #${product.to})`,
+                borderRadius: appliedProductDesign?.radius,
+              }}
             >
-              {/* Nội dung chữ ở trên */}
-              <div className="flex flex-col text-[#1d1d1f]">
-                {product.badge && (
-                  <span className="text-[10px] md:text-xs font-semibold tracking-widest uppercase mb-2 md:mb-3 opacity-80">
-                    {product.badge}
-                  </span>
-                )}
-                <h3 className="text-2xl md:text-3xl font-semibold tracking-tight mb-2">
-                  {product.title}
-                </h3>
-                <p className="text-sm md:text-base opacity-80 max-w-[80%] leading-relaxed whitespace-pre-line">
-                  {product.description}
-                </p>
-              </div>
-
-              {/* Phần thông tin ở dưới cùng */}
-              <div className="flex justify-between items-end">
-                <p className="text-sm md:text-base font-medium">
-                  {product.price}
-                </p>
-                <AddToCartButton
-                  product={{
-                    id: `${getPrefix()}-${product.name || product.title}`,
-                    name: product.name || product.title,
-                    specs: product.specs || product.description,
-                    price: product.price,
-                    category: getPrefix() === "laptop" ? "Laptop" : "PC",
-                  }}
-                />
-              </div>
-            </motion.div>
+              {appliedProductDesign ? (
+                <>
+                  <div className="absolute inset-0">
+                    {appliedProductDesign.layers.map((layer) => {
+                      if (layer.hidden) return null;
+                      const content = layer.name === "Nhãn" ? product.badge
+                        : layer.name === "Tên sản phẩm" ? product.title
+                        : layer.name === "Cấu hình" ? product.description
+                        : layer.name === "Giá" ? product.price
+                        : layer.text;
+                      return (
+                        <div
+                          key={layer.id}
+                          className={`absolute overflow-hidden whitespace-pre-line designer-animation-${layer.animation}`}
+                          style={{
+                            left: `${layer.x / appliedProductDesign.width * 100}%`,
+                            top: `${layer.y / appliedProductDesign.height * 100}%`,
+                            width: `${layer.width / appliedProductDesign.width * 100}%`,
+                            height: `${layer.height / appliedProductDesign.height * 100}%`,
+                            color: layer.color,
+                            fontSize: `clamp(10px, ${layer.fontSize || 16}px, ${layer.fontSize || 16}px)`,
+                            fontWeight: layer.fontWeight,
+                            textAlign: layer.align,
+                            opacity: layer.opacity,
+                            borderRadius: layer.radius,
+                            lineHeight: 1.25,
+                          }}
+                        >
+                          {layer.type === "image" ? <img src={layer.src} alt="" className="w-full h-full object-cover" /> : content}
+                        </div>
+                      );
+                    })}
+                  </div>
+                  <div className="absolute right-6 bottom-6 z-10">
+                    <AddToCartButton
+                      product={{
+                        id: `${getPrefix()}-${product.name || product.title}`,
+                        name: product.name || product.title,
+                        specs: product.specs || product.description,
+                        price: product.price,
+                        category: getPrefix() === "laptop" ? "Laptop" : "PC",
+                      }}
+                    />
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="flex flex-col text-[#1d1d1f]">
+                    {product.badge && <span className="text-[10px] md:text-xs font-semibold tracking-widest uppercase mb-2 md:mb-3 opacity-80">{product.badge}</span>}
+                    <h3 className="text-2xl md:text-3xl font-semibold tracking-tight mb-2">{product.title}</h3>
+                    <p className="text-sm md:text-base opacity-80 max-w-[80%] leading-relaxed whitespace-pre-line">{product.description}</p>
+                  </div>
+                  <div className="flex justify-between items-end">
+                    <p className="text-sm md:text-base font-medium">{product.price}</p>
+                    <AddToCartButton
+                      product={{
+                        id: `${getPrefix()}-${product.name || product.title}`,
+                        name: product.name || product.title,
+                        specs: product.specs || product.description,
+                        price: product.price,
+                        category: getPrefix() === "laptop" ? "Laptop" : "PC",
+                      }}
+                    />
+                  </div>
+                </>
+              )}
+            </motion.div>;
+            })()
           ))}
           <div className="shrink-0 snap-end [--page-padding:16px] md:[--page-padding:32px] lg:[--page-padding:40px] xl:[--page-padding:48px] 2xl:[--page-padding:64px]" style={{ width: 'max(var(--page-padding), calc(50vw - 900px + var(--page-padding)))' }}></div>
         </motion.div>

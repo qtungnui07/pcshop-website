@@ -117,54 +117,6 @@ const ACCESSORY_ICONS: Record<string, React.ElementType> = {
   HelpCircle
 };
 
-const staffMembers = [
-  {
-    name: "Đinh Quang Tùng",
-    role: "CEO & Director",
-    email: "tungdq@pcshop.vn",
-    phone: "0912 345 678",
-    avatar: "https://api.dicebear.com/7.x/pixel-art/svg?seed=tung",
-    department: "Ban Giám Đốc",
-    status: "online"
-  },
-  {
-    name: "Trịnh Phan Tuấn Anh",
-    role: "Technical Lead",
-    email: "anhtp@pcshop.vn",
-    phone: "0987 654 321",
-    avatar: "https://api.dicebear.com/7.x/pixel-art/svg?seed=tuananh",
-    department: "Phòng Công Nghệ",
-    status: "online"
-  },
-  {
-    name: "Nguyễn Tuấn Dũng",
-    role: "Customer Support Lead",
-    email: "dungnt@pcshop.vn",
-    phone: "1900 8198 (Ext 101)",
-    avatar: "https://api.dicebear.com/7.x/pixel-art/svg?seed=tuandung",
-    department: "Chăm sóc khách hàng",
-    status: "busy"
-  },
-  {
-    name: "Đoàn Trần Gia Phong",
-    role: "Warehouse Co-Manager",
-    email: "phongdt@pcshop.vn",
-    phone: "0909 999 888",
-    avatar: "https://api.dicebear.com/7.x/pixel-art/svg?seed=phong",
-    department: "Quản Lý Kho Hàng",
-    status: "online"
-  },
-  {
-    name: "Lê Tiến Hưng",
-    role: "Warehouse Co-Manager",
-    email: "hunglt@pcshop.vn",
-    phone: "0909 111 222",
-    avatar: "https://api.dicebear.com/7.x/pixel-art/svg?seed=hung",
-    department: "Quản Lý Kho Hàng",
-    status: "online"
-  }
-];
-
 export default function AdminIndex() {
   const { user, loading: authLoading } = useAuth();
   const [searchParams] = useSearchParams();
@@ -184,6 +136,7 @@ export default function AdminIndex() {
   const [tickets, setTickets] = useState<any[]>([]);
   const [accounts, setAccounts] = useState<any[]>([]);
   const [orders, setOrders] = useState<any[]>([]);
+  const [staffMembers, setStaffMembers] = useState<any[]>([]);
 
   // UI States
   const [loading, setLoading] = useState(true);
@@ -221,7 +174,7 @@ export default function AdminIndex() {
         }
       };
 
-      const [pcsRes, laptopsRes, componentsRes, accessoriesRes, accessoryCombosRes, ticketsRes, accountsRes, ordersRes] = await Promise.all([
+      const [pcsRes, laptopsRes, componentsRes, accessoriesRes, accessoryCombosRes, ticketsRes, accountsRes, ordersRes, staffRes] = await Promise.all([
         fetchList("PC", `${API_BASE}/api/featured-pcs`),
         fetchList("laptop", `${API_BASE}/api/laptops`),
         fetchList("linh kiện", `${API_BASE}/api/components`),
@@ -229,7 +182,8 @@ export default function AdminIndex() {
         fetchList("combo phụ kiện", `${API_BASE}/api/accessory-combos`),
         fetchList("ticket", `${API_BASE}/api/tickets`, { headers: authHeader }),
         fetchList("tài khoản", `${API_BASE}/api/accounts`, { headers: authHeader }),
-        fetchList("đơn hàng", `${API_BASE}/api/orders`, { headers: authHeader })
+        fetchList("đơn hàng", `${API_BASE}/api/orders`, { headers: authHeader }),
+        fetchList("nhân sự", `${API_BASE}/api/staff`, { headers: authHeader })
       ]);
 
       setPcs(pcsRes);
@@ -240,6 +194,7 @@ export default function AdminIndex() {
       setTickets(ticketsRes);
       setAccounts(accountsRes);
       setOrders(ordersRes);
+      setStaffMembers(staffRes);
 
       if (failedSources.length > 0) {
         setLoadError(`Không tải được: ${failedSources.join(", ")}. Các danh mục còn lại vẫn hoạt động.`);
@@ -605,19 +560,19 @@ export default function AdminIndex() {
   };
 
   return (
-    <div className="w-full">
+    <div className="admin-page w-full h-full flex flex-col min-h-0">
       {/* HEADER SECTION */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-zinc-200 pb-5 mb-8">
+      <div className="admin-page-header flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-6 mb-7">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <span className="bg-blue-600 text-white text-[9px] font-black tracking-widest uppercase px-2 py-0.5 rounded">
-              Hệ Thống Admin
+            <span className="admin-eyebrow text-[10px] font-bold tracking-wide px-2.5 py-1 rounded-md">
+              Trung tâm điều hành
             </span>
-            <span className="bg-zinc-100 text-zinc-600 text-[9px] font-bold px-2 py-0.5 rounded flex items-center gap-1">
-              ⚡️ Tự động lưu hoạt động
+            <span className="admin-live-status text-[10px] font-semibold px-2.5 py-1 rounded-md flex items-center gap-1.5">
+              <span className="admin-live-dot" /> Tự động lưu
             </span>
           </div>
-          <h1 className="text-2xl md:text-3xl font-black tracking-tight text-zinc-900 capitalize">
+          <h1 className="admin-title text-3xl md:text-[2.15rem] font-black tracking-[-0.04em] text-zinc-950 mt-2">
             {view === "dashboard" ? "Bảng giám sát hoạt động" : 
              view === "products" ? "Quản lý dữ liệu sản phẩm" : 
              view === "orders" ? "Quản lý hóa đơn mua hàng" : 
@@ -629,7 +584,7 @@ export default function AdminIndex() {
         <button
           onClick={fetchData}
           disabled={loading}
-          className="flex items-center gap-1.5 px-4 py-2 border border-zinc-200 hover:bg-zinc-100 text-zinc-700 disabled:opacity-50 text-xs font-bold rounded-xl transition cursor-pointer active:scale-95 bg-white shadow-sm"
+          className="admin-refresh flex items-center gap-2 px-4 py-2.5 disabled:opacity-50 text-xs font-bold rounded-xl transition cursor-pointer active:scale-95"
         >
           <RotateCcw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
           Tải lại dữ liệu
@@ -637,12 +592,12 @@ export default function AdminIndex() {
       </div>
 
       {loading ? (
-        <div className="flex flex-col items-center justify-center py-24 text-zinc-400 gap-3">
+        <div className="admin-content-scroll flex-1 min-h-0 flex flex-col items-center justify-center py-24 text-zinc-400 gap-3">
           <div className="w-9 h-9 border-4 border-zinc-200 border-t-blue-600 rounded-full animate-spin" />
           <p className="text-xs font-bold">Đang tải cơ sở dữ liệu...</p>
         </div>
       ) : (
-        <div className="w-full">
+        <div className="admin-content-scroll w-full flex-1 min-h-0 overflow-y-auto">
           
           {/* ────────────────────────────────────────────────────────── */}
           {/* VIEW: DASHBOARD                                            */}
@@ -651,44 +606,44 @@ export default function AdminIndex() {
             <div className="space-y-6">
               
               {/* Stat Cards Grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-                <div className="bg-white border border-zinc-200 p-5 rounded-2xl shadow-sm flex items-center gap-4">
-                  <div className="p-3 bg-emerald-50 rounded-xl text-emerald-600 border border-emerald-100">
+              <div className="admin-stat-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="admin-stat-card admin-stat-primary p-5 rounded-2xl flex items-center gap-4">
+                  <div className="admin-stat-icon p-3 rounded-xl">
                     <DollarSign className="w-6 h-6" />
                   </div>
                   <div>
-                    <p className="text-xs text-zinc-400 font-bold uppercase tracking-wider">Doanh Thu</p>
-                    <p className="text-xl font-black text-zinc-900 mt-0.5">{formatPrice(totalRevenue)}</p>
+                    <p className="text-xs font-semibold">Doanh thu đã ghi nhận</p>
+                    <p className="text-xl font-black mt-1 tabular-nums">{formatPrice(totalRevenue)}</p>
                   </div>
                 </div>
 
-                <div className="bg-white border border-zinc-200 p-5 rounded-2xl shadow-sm flex items-center gap-4">
-                  <div className="p-3 bg-blue-50 rounded-xl text-blue-600 border border-blue-100">
+                <div className="admin-stat-card p-5 rounded-2xl flex items-center gap-4">
+                  <div className="admin-stat-icon p-3 rounded-xl">
                     <Receipt className="w-6 h-6" />
                   </div>
                   <div>
-                    <p className="text-xs text-zinc-400 font-bold uppercase tracking-wider">Số Đơn Hàng</p>
-                    <p className="text-xl font-black text-zinc-900 mt-0.5">{orders.length} đơn</p>
+                    <p className="text-xs text-zinc-500 font-semibold">Tổng đơn hàng</p>
+                    <p className="text-xl font-black text-zinc-950 mt-1 tabular-nums">{orders.length} đơn</p>
                   </div>
                 </div>
 
-                <div className="bg-white border border-zinc-200 p-5 rounded-2xl shadow-sm flex items-center gap-4">
-                  <div className="p-3 bg-purple-50 rounded-xl text-purple-600 border border-purple-100">
+                <div className="admin-stat-card p-5 rounded-2xl flex items-center gap-4">
+                  <div className="admin-stat-icon p-3 rounded-xl">
                     <TrendingUp className="w-6 h-6" />
                   </div>
                   <div>
-                    <p className="text-xs text-zinc-400 font-bold uppercase tracking-wider">Giá Trị Trung Bình</p>
-                    <p className="text-xl font-black text-zinc-900 mt-0.5">{formatPrice(avgOrderValue)}</p>
+                    <p className="text-xs text-zinc-500 font-semibold">Giá trị trung bình</p>
+                    <p className="text-xl font-black text-zinc-950 mt-1 tabular-nums">{formatPrice(avgOrderValue)}</p>
                   </div>
                 </div>
 
-                <div className="bg-white border border-zinc-200 p-5 rounded-2xl shadow-sm flex items-center gap-4">
-                  <div className="p-3 bg-amber-50 rounded-xl text-amber-600 border border-amber-100">
+                <div className="admin-stat-card p-5 rounded-2xl flex items-center gap-4">
+                  <div className="admin-stat-icon p-3 rounded-xl">
                     <ShoppingBag className="w-6 h-6" />
                   </div>
                   <div>
-                    <p className="text-xs text-zinc-400 font-bold uppercase tracking-wider">Tổng Sản Phẩm</p>
-                    <p className="text-xl font-black text-zinc-900 mt-0.5">{totalProducts} sản phẩm</p>
+                    <p className="text-xs text-zinc-500 font-semibold">Sản phẩm đang quản lý</p>
+                    <p className="text-xl font-black text-zinc-950 mt-1 tabular-nums">{totalProducts} sản phẩm</p>
                   </div>
                 </div>
               </div>
@@ -697,9 +652,9 @@ export default function AdminIndex() {
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
                 
                 {/* Order Status conversion Donut Chart */}
-                <div className="lg:col-span-5 bg-white border border-zinc-200 p-6 rounded-2xl shadow-sm flex flex-col justify-between">
+                <div className="admin-panel lg:col-span-5 p-6 rounded-2xl flex flex-col justify-between">
                   <div>
-                    <h3 className="font-extrabold text-sm text-zinc-900 uppercase tracking-wider mb-1">Tỷ lệ đặt đơn</h3>
+                    <h3 className="admin-panel-title font-extrabold text-sm text-zinc-950 mb-1">Trạng thái đơn hàng</h3>
                     <p className="text-xs text-zinc-400">Tỷ lệ chia theo trạng thái hoạt động hiện thời</p>
                   </div>
                   
@@ -769,9 +724,9 @@ export default function AdminIndex() {
                 </div>
 
                 {/* Best Sellers Horizontal Bar Chart */}
-                <div className="lg:col-span-7 bg-white border border-zinc-200 p-6 rounded-2xl shadow-sm flex flex-col justify-between">
+                <div className="admin-panel lg:col-span-7 p-6 rounded-2xl flex flex-col justify-between">
                   <div>
-                    <h3 className="font-extrabold text-sm text-zinc-900 uppercase tracking-wider mb-1">Hàng được mua nhiều nhất</h3>
+                    <h3 className="admin-panel-title font-extrabold text-sm text-zinc-950 mb-1">Sản phẩm bán chạy</h3>
                     <p className="text-xs text-zinc-400">Top 5 sản phẩm bán chạy nhất được đặt mua</p>
                   </div>
 
@@ -792,7 +747,7 @@ export default function AdminIndex() {
                               initial={{ width: 0 }}
                               animate={{ width: `${(item.count / maxSalesCount) * 100}%` }}
                               transition={{ duration: 0.8, ease: "easeOut" }}
-                              className="bg-gradient-to-r from-blue-500 to-indigo-600 h-full rounded-full"
+                              className="admin-chart-bar h-full rounded-full"
                             />
                           </div>
                         </div>
@@ -809,31 +764,31 @@ export default function AdminIndex() {
               </div>
 
               {/* Stock Inventory level cards layout */}
-              <div className="bg-white border border-zinc-200 p-6 rounded-2xl shadow-sm">
-                <h3 className="font-extrabold text-sm text-zinc-900 uppercase tracking-wider mb-4">Mức độ dự trữ kho</h3>
+              <div className="admin-panel p-6 rounded-2xl">
+                <h3 className="admin-panel-title font-extrabold text-sm text-zinc-950 mb-4">Tổng quan danh mục kho</h3>
                 
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-5 text-center">
-                  <div className="p-4 bg-purple-50/50 border border-purple-100 rounded-xl">
-                    <p className="text-xs text-purple-600 font-bold uppercase">Máy bàn (PC)</p>
-                    <p className="text-2xl font-black text-purple-900 mt-1">{pcs.length}</p>
+                  <div className="admin-stock-cell p-4 rounded-xl">
+                    <p className="text-xs font-bold">Máy bàn (PC)</p>
+                    <p className="text-2xl font-black mt-1">{pcs.length}</p>
                     <span className="text-[10px] text-zinc-400 font-semibold">cấu hình bán ra</span>
                   </div>
 
-                  <div className="p-4 bg-blue-50/50 border border-blue-100 rounded-xl">
-                    <p className="text-xs text-blue-600 font-bold uppercase">Laptop</p>
-                    <p className="text-2xl font-black text-blue-900 mt-1">{laptops.length}</p>
+                  <div className="admin-stock-cell p-4 rounded-xl">
+                    <p className="text-xs font-bold">Laptop</p>
+                    <p className="text-2xl font-black mt-1">{laptops.length}</p>
                     <span className="text-[10px] text-zinc-400 font-semibold">mã máy sẵn kho</span>
                   </div>
 
-                  <div className="p-4 bg-emerald-50/50 border border-emerald-100 rounded-xl">
-                    <p className="text-xs text-emerald-600 font-bold uppercase">Linh kiện</p>
-                    <p className="text-2xl font-black text-emerald-900 mt-1">{components.length}</p>
+                  <div className="admin-stock-cell p-4 rounded-xl">
+                    <p className="text-xs font-bold">Linh kiện</p>
+                    <p className="text-2xl font-black mt-1">{components.length}</p>
                     <span className="text-[10px] text-zinc-400 font-semibold">mã bộ phận thay thế</span>
                   </div>
 
-                  <div className="p-4 bg-orange-50/50 border border-orange-100 rounded-xl">
-                    <p className="text-xs text-orange-600 font-bold uppercase">Phụ kiện</p>
-                    <p className="text-2xl font-black text-zinc-900 mt-1">{accessories.length}</p>
+                  <div className="admin-stock-cell p-4 rounded-xl">
+                    <p className="text-xs font-bold">Phụ kiện</p>
+                    <p className="text-2xl font-black mt-1">{accessories.length}</p>
                     <span className="text-[10px] text-zinc-400 font-semibold">phụ kiện ghép đôi</span>
                   </div>
                 </div>

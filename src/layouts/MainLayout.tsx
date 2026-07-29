@@ -2,7 +2,7 @@ import { Outlet, useLocation, Link, useNavigate, useSearchParams } from 'react-r
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { useAuth } from '../context/AuthContext';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { 
   LayoutDashboard, 
   ShoppingBag, 
@@ -14,21 +14,19 @@ import {
   ArrowLeft, 
   Menu, 
   X,
-  Shield
+  Palette
 } from 'lucide-react';
 
 function AdminFooter() {
   return (
-    <footer className="w-full bg-white border-t border-zinc-200 py-4 px-6 md:px-8 text-center text-xs font-semibold text-zinc-500 flex flex-col sm:flex-row justify-between items-center gap-2">
+    <footer className="admin-footer w-full py-4 px-6 md:px-8 text-center text-xs font-semibold flex flex-col sm:flex-row justify-between items-center gap-2">
       <div>
-        © 2026 <span className="font-extrabold text-zinc-800">PCshop Control Panel</span>. All rights reserved.
+        © 2026 <span className="font-extrabold">NovaPC Admin</span>
       </div>
       <div className="flex gap-4 items-center">
-        <span>Hỗ trợ kỹ thuật: <a href="tel:19008198" className="hover:text-zinc-800 transition">1900 8198</a></span>
-        <span className="hidden sm:inline text-zinc-300">|</span>
-        <span>Email: <a href="mailto:support@pcshop.vn" className="hover:text-zinc-800 transition">support@pcshop.vn</a></span>
-        <span className="hidden sm:inline text-zinc-300">|</span>
-        <span className="bg-zinc-100 text-zinc-600 px-2 py-0.5 rounded font-mono font-bold">v1.4.2</span>
+        <span>Hỗ trợ: <a href="tel:19008198" className="admin-footer-link transition">1900 8198</a></span>
+        <span className="hidden sm:inline opacity-30">/</span>
+        <span><a href="mailto:support@novapc.vn" className="admin-footer-link transition">support@novapc.vn</a></span>
       </div>
     </footer>
   );
@@ -45,6 +43,34 @@ export default function MainLayout() {
   const isAuth = location.pathname.startsWith('/auth');
   const isAdmin = location.pathname.startsWith('/admin');
 
+  useEffect(() => {
+    const favicon = document.querySelector<HTMLLinkElement>('link[rel="icon"]');
+    const faviconSource = new Image();
+
+    if (isAdmin) {
+      document.title = 'NovaPC Admin';
+    } else {
+      document.title = 'NovaPC';
+    }
+
+    faviconSource.onload = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = 128;
+      canvas.height = 128;
+      const context = canvas.getContext('2d');
+      if (!context || !favicon) return;
+
+      context.drawImage(faviconSource, 468, 175, 600, 600, 0, 0, 128, 128);
+      favicon.href = canvas.toDataURL('image/png');
+      favicon.type = 'image/png';
+    };
+    faviconSource.src = '/ChatGPT Image Jul 28, 2026, 08_11_50 AM.png';
+
+    return () => {
+      faviconSource.onload = null;
+    };
+  }, [isAdmin]);
+
   // Determine active view to highlight sidebar item correctly
   const getActiveView = () => {
     if (location.pathname === '/admin/edit') {
@@ -52,6 +78,7 @@ export default function MainLayout() {
       if (category === 'accounts') return 'accounts';
       return 'products'; // Editing products maps to product management
     }
+    if (location.pathname === '/admin/designer') return 'designer';
     return searchParams.get('view') || 'dashboard';
   };
 
@@ -61,6 +88,7 @@ export default function MainLayout() {
   const menuItems = [
     { label: 'Dashboard', icon: LayoutDashboard, view: 'dashboard' },
     { label: 'Quản lý sản phẩm', icon: ShoppingBag, view: 'products' },
+    { label: 'Flashcard Designer', icon: Palette, view: 'designer' },
     { label: 'Quản lý hóa đơn', icon: Receipt, view: 'orders' },
     { label: 'Hỗ trợ (Tickets)', icon: HelpCircle, view: 'tickets' },
     { label: 'Quản lý tài khoản', icon: Users, view: 'accounts' },
@@ -75,15 +103,15 @@ export default function MainLayout() {
   // 1. Admin Layout Rendering
   if (showAdminSidebar) {
     return (
-      <div className="min-h-screen flex flex-col lg:flex-row bg-[#f8fafc] text-zinc-900 font-sans antialiased relative">
+      <div className="admin-shell min-h-screen lg:h-[100dvh] lg:overflow-hidden flex flex-col lg:flex-row text-zinc-900 font-sans antialiased relative">
         
         {/* Mobile Header Bar */}
-        <header className="lg:hidden flex items-center justify-between px-4 py-3.5 bg-zinc-950 text-white sticky top-0 z-40 border-b border-zinc-800 shadow-md">
+        <header className="admin-mobile-header lg:hidden flex items-center justify-between px-4 py-3.5 text-white sticky top-0 z-40">
           <div className="flex items-center gap-2">
-            <div className="bg-blue-600 p-1.5 rounded-lg">
-              <Shield className="w-4.5 h-4.5 text-white" />
-            </div>
-            <span className="font-extrabold tracking-tight text-sm">PCshop Admin</span>
+            <span className="admin-logo-symbol admin-logo-symbol-mobile" aria-hidden="true">
+              <img src="/ChatGPT Image Jul 28, 2026, 08_11_50 AM.png" alt="" />
+            </span>
+            <span className="font-extrabold tracking-tight text-sm">NovaPC Admin</span>
           </div>
           <button 
             onClick={() => setMobileSidebarOpen(!mobileSidebarOpen)} 
@@ -104,20 +132,21 @@ export default function MainLayout() {
 
         {/* Responsive Sidebar */}
         <aside className={`
-          fixed top-0 bottom-0 left-0 z-30 w-[260px] bg-zinc-950 text-zinc-400 border-r border-zinc-900 
+          admin-sidebar fixed top-0 bottom-0 left-0 z-30 w-[264px] text-zinc-400
           flex flex-col justify-between transition-transform duration-300 lg:translate-x-0
           ${mobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
-          lg:sticky lg:h-screen
+          lg:fixed lg:h-[100dvh]
         `}>
           {/* Top Logo Section */}
           <div>
-            <div className="flex items-center gap-3.5 px-6 py-5 border-b border-zinc-900">
-              <div className="bg-gradient-to-tr from-blue-600 to-indigo-500 p-2 rounded-xl text-white shadow-lg shadow-blue-500/20">
-                <Shield className="w-5 h-5" />
-              </div>
-              <div>
-                <h1 className="font-black text-white text-base tracking-tight leading-tight">PCshop Portal</h1>
-                <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider">Hệ thống quản trị</p>
+            <div className="admin-brand flex items-center gap-3.5 px-6 py-5">
+              <div className="admin-wordmark" role="img" aria-label="NovaPC Admin">
+                <span className="admin-logo-symbol" aria-hidden="true">
+                  <img src="/ChatGPT Image Jul 28, 2026, 08_11_50 AM.png" alt="" />
+                </span>
+                <span className="admin-wordmark-nova">Nova</span>
+                <span className="admin-wordmark-pc">PC</span>
+                <span className="admin-logo-label">Admin</span>
               </div>
             </div>
 
@@ -129,12 +158,12 @@ export default function MainLayout() {
                 return (
                   <Link
                     key={item.view}
-                    to={`/admin?view=${item.view}`}
+                    to={item.view === 'designer' ? '/admin/designer' : `/admin?view=${item.view}`}
                     onClick={() => setMobileSidebarOpen(false)}
-                    className={`flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-bold transition-all cursor-pointer ${
+                    className={`admin-nav-item flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-bold transition-all cursor-pointer ${
                       isActive 
-                        ? 'bg-zinc-900 text-white shadow-sm ring-1 ring-white/5' 
-                        : 'hover:bg-zinc-900/50 hover:text-zinc-200'
+                        ? 'is-active text-white'
+                        : 'hover:text-zinc-200'
                     }`}
                   >
                     <Icon className={`w-4.5 h-4.5 ${isActive ? 'text-blue-400' : 'text-zinc-500 group-hover:text-zinc-300'}`} />
@@ -146,7 +175,7 @@ export default function MainLayout() {
           </div>
 
           {/* Bottom Profile and Sign Out Section */}
-          <div className="p-4 border-t border-zinc-900 bg-zinc-900/10">
+          <div className="admin-profile-zone p-4">
             {/* User Profile Summary */}
             {user && (
               <div className="flex items-center gap-3 mb-4 px-2">
@@ -183,8 +212,8 @@ export default function MainLayout() {
         </aside>
 
         {/* Main Content Area */}
-        <div className="flex-1 flex flex-col min-h-screen min-w-0">
-          <main className="flex-1 p-4 md:p-6 lg:p-8">
+        <div className="admin-workspace flex-1 flex flex-col min-h-screen lg:min-h-0 lg:h-[100dvh] min-w-0 lg:ml-[264px]">
+          <main className="admin-main flex-1 p-4 md:p-6 lg:p-8">
             <Outlet />
           </main>
           <AdminFooter />
@@ -225,4 +254,3 @@ export default function MainLayout() {
     </div>
   );
 }
-

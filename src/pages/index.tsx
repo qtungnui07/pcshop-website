@@ -28,11 +28,11 @@ export default function Home() {
       {/* ══════════════════ LAPTOP CATEGORIES ══════════════════ */}
       <LaptopCategoriesSection />
 
-      {/* ══════════════════ TRUST BADGES ══════════════════ */}
-      <TrustBadgesSection />
-
       {/* ══════════════════ BRAND / VIDEO ══════════════════ */}
       <BrandSection />
+
+      {/* ══════════════════ TRUST BADGES ══════════════════ */}
+      <TrustBadgesSection />
     </div>
   );
 }

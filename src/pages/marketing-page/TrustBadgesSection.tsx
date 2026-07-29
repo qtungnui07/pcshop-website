@@ -3,7 +3,7 @@ import { trustBadges } from './data';
 
 export default function TrustBadgesSection() {
   return (
-    <section className="border-t border-[#d2d2d7] bg-white py-14">
+    <section className="bg-white pt-6 pb-14">
       <div className="max-w-[1200px] mx-auto px-6 lg:px-10">
         <div className="grid grid-cols-2 lg:grid-cols-4 divide-y lg:divide-y-0 lg:divide-x divide-[#e8e8ed]">
           {trustBadges.map(({ Icon, title, desc }, i) => (
