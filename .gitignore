@@ -25,3 +25,10 @@ dist-ssr
 
 .env
 .env.local
+
+# Local agent workspace metadata and generated skill lockfile
+.agents/
+skills-lock.json
+
+# Crash dumps (core.1 is a ~1 GB dump, never commit it)
+core.[0-9]*
