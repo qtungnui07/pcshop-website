@@ -1,4 +1,4 @@
-# PC Shop
+# NovaPC
 
 Website thương mại điện tử cho PC, laptop, linh kiện và phụ kiện. Project gồm React/Vite ở frontend, Bun API ở backend, PostgreSQL để lưu dữ liệu JSONB, Clerk cho đăng nhập Google và Resend cho luồng đặt lại mật khẩu.
 
