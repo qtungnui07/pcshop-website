@@ -9,6 +9,7 @@ import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { useSearchParams, useNavigate } from "react-router-dom";
 const componentsHeroImage = "/images/pc.png";
 import AddToCartButton from "../../components/AddToCartButton";
+import { ProductSkeletonGrid } from "../../components/ui/skeleton";
 
 /* ── TYPES ─────────────────────────────────────────────────────────── */
 interface Product {
@@ -173,6 +174,7 @@ export default function LinhKienIndex() {
   const [activeCategory, setActiveCategory] = useState("ram");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
 
   const [sortBy, setSortBy] = useState("newest");
   const [showMobileFilter, setShowMobileFilter] = useState(false);
@@ -193,10 +195,12 @@ export default function LinhKienIndex() {
 
   // Load from API on mount
   useEffect(() => {
+    setLoading(true);
     fetch(`${API_BASE}/api/components`)
       .then((res) => res.json())
       .then((data) => setProducts(data))
-      .catch((err) => console.error("Error fetching components:", err));
+      .catch((err) => console.error("Error fetching components:", err))
+      .finally(() => setLoading(false));
   }, []);
 
   // Sync from URL params to React states
@@ -239,7 +243,11 @@ export default function LinhKienIndex() {
   const toggleLike = (name: string) => {
     setLiked(p => {
       const next = new Set(p);
-      next.has(name) ? next.delete(name) : next.add(name);
+      if (next.has(name)) {
+        next.delete(name);
+      } else {
+        next.add(name);
+      }
       return next;
     });
   };
@@ -767,8 +775,51 @@ export default function LinhKienIndex() {
                   Linh kiện chính hãng
                 </span>
               </motion.div>
-              <motion.h1 variants={heroItem} className="text-[3.1rem] md:text-[4.2rem] lg:text-[4.35rem] font-bold tracking-tight text-zinc-900 leading-[1.08] mb-6">
-                Linh kiện PC<br /><span className="whitespace-nowrap">cho mọi cấu hình.</span>
+              <motion.h1
+                variants={{
+                  hidden: {},
+                  show: { transition: { staggerChildren: 0.08, delayChildren: 0.1 } }
+                }}
+                className="text-[3.1rem] md:text-[4.2rem] lg:text-[4.35rem] font-bold tracking-tight text-zinc-900 leading-[1.08] mb-6"
+              >
+                <span className="block">
+                  {["Linh", "kiện", "PC"].map((word, idx) => (
+                    <motion.span
+                      key={`w1-${idx}`}
+                      variants={{
+                        hidden: { opacity: 0, y: 28, filter: "blur(4px)" },
+                        show: {
+                          opacity: 1,
+                          y: 0,
+                          filter: "blur(0px)",
+                          transition: { type: "spring", stiffness: 350, damping: 24 }
+                        }
+                      }}
+                      className="inline-block mr-[0.25em] last:mr-0 cursor-default transition-transform duration-200 hover:scale-105"
+                    >
+                      {word}
+                    </motion.span>
+                  ))}
+                </span>
+                <span className="block">
+                  {["cho", "mọi", "cấu", "hình."].map((word, idx) => (
+                    <motion.span
+                      key={`w2-${idx}`}
+                      variants={{
+                        hidden: { opacity: 0, y: 28, filter: "blur(4px)" },
+                        show: {
+                          opacity: 1,
+                          y: 0,
+                          filter: "blur(0px)",
+                          transition: { type: "spring", stiffness: 350, damping: 24 }
+                        }
+                      }}
+                      className="inline-block mr-[0.25em] last:mr-0 cursor-default transition-transform duration-200 hover:scale-105"
+                    >
+                      {word}
+                    </motion.span>
+                  ))}
+                </span>
               </motion.h1>
               <motion.p variants={heroItem} className="text-[17px] text-zinc-500 leading-relaxed mb-10">
                 Đa dạng linh kiện chính hãng, chất lượng cao.<br />
@@ -1007,7 +1058,10 @@ export default function LinhKienIndex() {
               </div>
             </div>
 
-            {/* Empty state */}
+            {/* Loading state or Empty state */}
+            {loading ? (
+              <ProductSkeletonGrid count={8} />
+            ) : (
             <AnimatePresence mode="popLayout" initial={false}>
               {filteredProducts.length === 0 ? (
                 <motion.div
@@ -1134,6 +1188,7 @@ export default function LinhKienIndex() {
               </motion.div>
               )}
             </AnimatePresence>
+            )}
 
             {/* Pagination */}
             {totalPages > 1 && (

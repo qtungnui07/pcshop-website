@@ -112,7 +112,15 @@ export default function PCIndex() {
   }, []);
 
   const toggleLike = (i: number) =>
-    setLiked(p => { const n = new Set(p); n.has(i) ? n.delete(i) : n.add(i); return n; });
+    setLiked(p => {
+      const n = new Set(p);
+      if (n.has(i)) {
+        n.delete(i);
+      } else {
+        n.add(i);
+      }
+      return n;
+    });
 
 
 
@@ -172,8 +180,51 @@ export default function PCIndex() {
               <motion.span variants={heroItem} className="inline-block px-3 py-1 bg-white/70 text-zinc-500 rounded-full text-[11px] font-semibold uppercase tracking-widest mb-6 border border-zinc-200/60">
                 PC Gaming &amp; Workstation
               </motion.span>
-              <motion.h1 variants={heroItem} className="text-[3.2rem] md:text-[4.2rem] lg:text-[5rem] font-bold tracking-tight text-zinc-900 leading-[1.08] mb-6">
-                PC mạnh mẽ<br />cho mọi nhu cầu.
+              <motion.h1
+                variants={{
+                  hidden: {},
+                  show: { transition: { staggerChildren: 0.08, delayChildren: 0.1 } }
+                }}
+                className="text-[3.2rem] md:text-[4.2rem] lg:text-[5rem] font-bold tracking-tight text-zinc-900 leading-[1.08] mb-6"
+              >
+                <span className="block">
+                  {["PC", "mạnh", "mẽ"].map((word, idx) => (
+                    <motion.span
+                      key={`w1-${idx}`}
+                      variants={{
+                        hidden: { opacity: 0, y: 28, filter: "blur(4px)" },
+                        show: {
+                          opacity: 1,
+                          y: 0,
+                          filter: "blur(0px)",
+                          transition: { type: "spring", stiffness: 350, damping: 24 }
+                        }
+                      }}
+                      className="inline-block mr-[0.25em] last:mr-0 cursor-default transition-transform duration-200 hover:scale-105"
+                    >
+                      {word}
+                    </motion.span>
+                  ))}
+                </span>
+                <span className="block">
+                  {["cho", "mọi", "nhu", "cầu."].map((word, idx) => (
+                    <motion.span
+                      key={`w2-${idx}`}
+                      variants={{
+                        hidden: { opacity: 0, y: 28, filter: "blur(4px)" },
+                        show: {
+                          opacity: 1,
+                          y: 0,
+                          filter: "blur(0px)",
+                          transition: { type: "spring", stiffness: 350, damping: 24 }
+                        }
+                      }}
+                      className="inline-block mr-[0.25em] last:mr-0 cursor-default transition-transform duration-200 hover:scale-105"
+                    >
+                      {word}
+                    </motion.span>
+                  ))}
+                </span>
               </motion.h1>
               <motion.p variants={heroItem} className="text-[17px] text-zinc-500 mb-10 leading-relaxed">
                 Hiệu năng đỉnh cao, thiết kế tinh tế.<br />

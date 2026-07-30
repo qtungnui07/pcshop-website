@@ -6,8 +6,9 @@ import {
 } from "lucide-react";
 import { useMemo, useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import AddToCartButton from "../../components/AddToCartButton";
+import { ProductSkeletonGrid } from "../../components/ui/skeleton";
 import * as THREE from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 
@@ -154,11 +155,24 @@ function MacBookNeoViewer() {
 }
 
 /* ── TYPES ─────────────────────────────────────────────────────────── */
-type LaptopBrand = "ASUS" | "Apple" | "Dell" | "Lenovo" | "HP" | "Acer" | "MSI";
-type LaptopCPU = "Intel Core i5" | "Intel Core i7" | "Intel Core i9" | "AMD Ryzen 7" | "AMD Ryzen 9" | "Apple M Series";
-type LaptopRAM = "8GB" | "16GB" | "32GB";
-type LaptopScreen = "13 - 14 inch" | "15 - 15.6 inch" | "16 inch trở lên";
-type LaptopGPU = "Intel Iris Xe" | "AMD Radeon" | "NVIDIA RTX 4060" | "NVIDIA RTX 4070";
+type LaptopBrand = "ASUS" | "Apple" | "Dell" | "Lenovo" | "HP" | "Acer" | "MSI" | "Gigabyte";
+type LaptopCPU =
+  | "Intel Core i3" | "Intel Core i5" | "Intel Core i7" | "Intel Core i9"
+  | "Intel Core Ultra 5" | "Intel Core Ultra 7" | "Intel Core Ultra 9"
+  | "AMD Ryzen 5" | "AMD Ryzen 7" | "AMD Ryzen 9"
+  | "AMD Ryzen AI 7" | "AMD Ryzen AI 9"
+  | "Apple M Series";
+type LaptopRAM = "8GB" | "16GB" | "32GB" | "64GB";
+type LaptopScreen =
+  | "14 inch" | "15.6 inch" | "16 inch trở lên" | "17.3 inch"
+  | "60Hz" | "120Hz" | "144Hz" | "165Hz" | "240Hz"
+  | "Màn hình OLED" | "Màn hình Mini-LED" | "Màn hình cảm ứng";
+type LaptopGPU =
+  | "Intel Iris Xe" | "AMD Radeon" | "Intel Arc Graphics"
+  | "NVIDIA RTX 3050" | "NVIDIA RTX 4050"
+  | "NVIDIA RTX 4060" | "NVIDIA RTX 4070" | "NVIDIA RTX 4080" | "NVIDIA RTX 4090"
+  | "NVIDIA RTX 5060" | "NVIDIA RTX 5070" | "NVIDIA RTX 5080" | "NVIDIA RTX 5090"
+  | "AMD Radeon RX 7000";
 
 interface LaptopProduct {
   id: string;
@@ -227,14 +241,30 @@ const perks = [
   { icon: CheckCircle2, title: "Tư vấn tận tâm",       desc: "Hỗ trợ 24/7" },
 ];
 
-const BRANDS: LaptopBrand[]   = ["ASUS", "Apple", "Dell", "Lenovo", "HP", "Acer", "MSI"];
-const RAMS:   LaptopRAM[]     = ["8GB", "16GB", "32GB"];
-const CPUS:   LaptopCPU[]     = ["Intel Core i5", "Intel Core i7", "Intel Core i9", "AMD Ryzen 7", "AMD Ryzen 9", "Apple M Series"];
-const SCREENS: LaptopScreen[] = ["13 - 14 inch", "15 - 15.6 inch", "16 inch trở lên"];
-const GPUS:   LaptopGPU[]     = ["Intel Iris Xe", "AMD Radeon", "NVIDIA RTX 4060", "NVIDIA RTX 4070"];
+const BRANDS: LaptopBrand[]   = ["ASUS", "Apple", "Dell", "Lenovo", "HP", "Acer", "MSI", "Gigabyte"];
+const RAMS:   LaptopRAM[]     = ["8GB", "16GB", "32GB", "64GB"];
+const CPUS:   LaptopCPU[]     = [
+  "Intel Core i3", "Intel Core i5", "Intel Core i7", "Intel Core i9",
+  "Intel Core Ultra 5", "Intel Core Ultra 7", "Intel Core Ultra 9",
+  "AMD Ryzen 5", "AMD Ryzen 7", "AMD Ryzen 9",
+  "AMD Ryzen AI 7", "AMD Ryzen AI 9",
+  "Apple M Series",
+];
+const SCREENS: LaptopScreen[] = [
+  "14 inch", "15.6 inch", "16 inch trở lên", "17.3 inch",
+  "60Hz", "120Hz", "144Hz", "165Hz", "240Hz",
+  "Màn hình OLED", "Màn hình Mini-LED", "Màn hình cảm ứng",
+];
+const GPUS:   LaptopGPU[]     = [
+  "Intel Iris Xe", "Intel Arc Graphics",
+  "AMD Radeon", "AMD Radeon RX 7000",
+  "NVIDIA RTX 3050", "NVIDIA RTX 4050",
+  "NVIDIA RTX 4060", "NVIDIA RTX 4070", "NVIDIA RTX 4080", "NVIDIA RTX 4090",
+  "NVIDIA RTX 5060", "NVIDIA RTX 5070", "NVIDIA RTX 5080", "NVIDIA RTX 5090",
+];
 
 const MAX_PRICE = 55_000_000;
-const MIN_PRICE = 10_000_000;
+const MIN_PRICE = 0;
 
 /* ── HELPERS ────────────────────────────────────────────────────────── */
 function formatPrice(p: number) {
@@ -243,7 +273,11 @@ function formatPrice(p: number) {
 
 function toggleSet<T>(set: Set<T>, value: T): Set<T> {
   const next = new Set(set);
-  next.has(value) ? next.delete(value) : next.add(value);
+  if (next.has(value)) {
+    next.delete(value);
+  } else {
+    next.add(value);
+  }
   return next;
 }
 
@@ -310,23 +344,51 @@ function parseLaptopProduct(raw: any, index: number): LaptopProduct {
   else if (specsStr.includes("8GB")) ramVal = "8GB";
 
   let cpuVal: LaptopCPU = "Intel Core i7";
-  if (specsStr.includes("M3 Pro")) cpuVal = "Apple M Series";
-  else if (specsStr.includes("M3")) cpuVal = "Apple M Series";
+  const specsUpper = specsStr.toUpperCase();
+  if (specsStr.includes("M4") || specsStr.includes("M3 Pro") || specsStr.includes("M3")) cpuVal = "Apple M Series";
   else if (specsStr.includes("M2")) cpuVal = "Apple M Series";
   else if (specsStr.includes("M1")) cpuVal = "Apple M Series";
-  else if (specsStr.includes("i9") || specsStr.includes("14900")) cpuVal = "Intel Core i9";
-  else if (specsStr.includes("i5") || specsStr.includes("125H")) cpuVal = "Intel Core i5";
+  else if (specsUpper.includes("ULTRA 9") || specsStr.includes("285K") || specsStr.includes("275HX")) cpuVal = "Intel Core Ultra 9";
+  else if (specsUpper.includes("ULTRA 7") || specsStr.includes("265HX") || specsStr.includes("258V")) cpuVal = "Intel Core Ultra 7";
+  else if (specsUpper.includes("ULTRA 5") || specsStr.includes("225H")) cpuVal = "Intel Core Ultra 5";
+  else if (specsStr.includes("i9") || specsStr.includes("14900") || specsStr.includes("13900") || specsStr.includes("12900")) cpuVal = "Intel Core i9";
+  else if (specsStr.includes("i7") || specsStr.includes("13700") || specsStr.includes("12700")) cpuVal = "Intel Core i7";
+  else if (specsStr.includes("i5") || specsStr.includes("125H") || specsStr.includes("13500")) cpuVal = "Intel Core i5";
+  else if (specsStr.includes("i3")) cpuVal = "Intel Core i3";
+  else if (specsStr.includes("Ryzen AI 9") || specsUpper.includes("HX 370")) cpuVal = "AMD Ryzen AI 9";
+  else if (specsStr.includes("Ryzen AI 7") || specsUpper.includes("PRO 360")) cpuVal = "AMD Ryzen AI 7";
   else if (specsStr.includes("Ryzen 9")) cpuVal = "AMD Ryzen 9";
   else if (specsStr.includes("Ryzen 7")) cpuVal = "AMD Ryzen 7";
+  else if (specsStr.includes("Ryzen 5")) cpuVal = "AMD Ryzen 5";
 
   let gpuVal: LaptopGPU = "Intel Iris Xe";
-  if (specsStr.includes("4070")) gpuVal = "NVIDIA RTX 4070";
+  if (specsStr.includes("5090")) gpuVal = "NVIDIA RTX 5090";
+  else if (specsStr.includes("5080")) gpuVal = "NVIDIA RTX 5080";
+  else if (specsStr.includes("5070")) gpuVal = "NVIDIA RTX 5070";
+  else if (specsStr.includes("5060")) gpuVal = "NVIDIA RTX 5060";
+  else if (specsStr.includes("4090")) gpuVal = "NVIDIA RTX 4090";
+  else if (specsStr.includes("4080")) gpuVal = "NVIDIA RTX 4080";
+  else if (specsStr.includes("4070")) gpuVal = "NVIDIA RTX 4070";
   else if (specsStr.includes("4060")) gpuVal = "NVIDIA RTX 4060";
+  else if (specsStr.includes("4050")) gpuVal = "NVIDIA RTX 4050";
+  else if (specsStr.includes("3050")) gpuVal = "NVIDIA RTX 3050";
+  else if (specsStr.toLowerCase().includes("arc")) gpuVal = "Intel Arc Graphics";
   else if (specsStr.toLowerCase().includes("radeon")) gpuVal = "AMD Radeon";
 
-  let screenVal: LaptopScreen = "13 - 14 inch";
-  if (specsStr.includes('15.6"') || specsStr.includes('15.6 inch')) screenVal = "15 - 15.6 inch";
+  let screenVal: LaptopScreen = "14 inch";
+  if (specsStr.includes('17.3"') || specsStr.includes('17.3 inch') || specsStr.includes('18"')) screenVal = "17.3 inch";
+  else if (specsStr.includes('15.6"') || specsStr.includes('15.6 inch')) screenVal = "15.6 inch";
   else if (specsStr.includes('16"') || specsStr.includes('16 inch') || specsStr.includes('16.1"')) screenVal = "16 inch trở lên";
+  else if (specsStr.includes('14"') || specsStr.includes('14 inch')) screenVal = "14 inch";
+  // Detect refresh rate nếu có trong specs
+  if (specsUpper.includes("240HZ") || specsStr.includes("240Hz")) screenVal = "240Hz";
+  else if (specsUpper.includes("165HZ") || specsStr.includes("165Hz")) screenVal = "165Hz";
+  else if (specsUpper.includes("144HZ") || specsStr.includes("144Hz")) screenVal = "144Hz";
+  else if (specsUpper.includes("120HZ") || specsStr.includes("120Hz")) screenVal = "120Hz";
+  // Detect công nghệ màn hình
+  if (specsUpper.includes("OLED") && !specsUpper.includes("MINI-LED")) screenVal = "Màn hình OLED";
+  else if (specsUpper.includes("MINI-LED") || specsUpper.includes("MINILED")) screenVal = "Màn hình Mini-LED";
+  else if (specsUpper.includes("TOUCH") || specsStr.includes("cảm ứng") || specsStr.includes("Touch")) screenVal = "Màn hình cảm ứng";
 
   return {
     id: String(raw.id || `laptop-${index + 1}`),
@@ -346,6 +408,7 @@ function parseLaptopProduct(raw: any, index: number): LaptopProduct {
 /* ── PAGE ───────────────────────────────────────────────────────────── */
 export default function LaptopIndex() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const API_BASE =
     typeof window !== "undefined"
       ? (window.location.hostname.includes("qtitpc.dev")
@@ -354,8 +417,10 @@ export default function LaptopIndex() {
       : "http://localhost:3001";
 
   const [products, setProducts] = useState<LaptopProduct[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    setLoading(true);
     fetch(`${API_BASE}/api/laptops`)
       .then((res) => res.json())
       .then((data) => {
@@ -364,7 +429,8 @@ export default function LaptopIndex() {
           setProducts(parsed);
         }
       })
-      .catch((err) => console.error("Error fetching laptops from backend:", err));
+      .catch((err) => console.error("Error fetching laptops from backend:", err))
+      .finally(() => setLoading(false));
   }, []);
 
   const [liked, setLiked] = useState<Set<any>>(new Set());
@@ -379,27 +445,177 @@ export default function LaptopIndex() {
   const [selCPUs,    setSelCPUs]    = useState<Set<LaptopCPU>>(new Set());
   const [selScreens, setSelScreens] = useState<Set<LaptopScreen>>(new Set());
   const [selGPUs,    setSelGPUs]    = useState<Set<LaptopGPU>>(new Set());
-
-  /* Read ?filter= from URL on mount */
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const filter = params.get('filter');
-    if (filter) {
-      const filterMap: Record<string, LaptopBrand[]> = {
-        'laptop-gaming': ['ASUS', 'MSI', 'Acer'],
-        'laptop-van-phong': ['Dell', 'Lenovo', 'HP'],
-        'laptop-do-hoa': ['Apple', 'ASUS', 'Dell'],
-        'macbook': ['Apple'],
-      };
-      const brands = filterMap[filter];
-      if (brands) {
-        setSelBrands(new Set(brands));
-      }
-    }
-  }, []);
   const [minPrice,   setMinPrice]   = useState(MIN_PRICE);
   const [maxPrice,   setMaxPrice]   = useState(MAX_PRICE);
   const [activeInput, setActiveInput] = useState<'min' | 'max'>('min');
+
+  /* Read URL params from navbar whenever searchParams change */
+  useEffect(() => {
+    const filter = searchParams.get('filter');
+    const brandParam = searchParams.get('thuong-hieu');
+    const priceParam = searchParams.get('price');
+    const gpuParam = searchParams.get('card-do-hoa-vga');
+    const cpuParam = searchParams.get('vi-xu-ly-cpu');
+    const ramParam = searchParams.get('dung-luong-ram') || searchParams.get('ram-o-cung') || searchParams.get('ram');
+    const screenParam = searchParams.get('man-hinh');
+
+    const newBrands = new Set<LaptopBrand>();
+    const newGPUs = new Set<LaptopGPU>();
+    const newCPUs = new Set<LaptopCPU>();
+    const newRAMs = new Set<LaptopRAM>();
+    const newScreens = new Set<LaptopScreen>();
+    let newMinPrice = MIN_PRICE;
+    let newMaxPrice = MAX_PRICE;
+    let newCatIdx: number | null = null;
+
+    if (filter) {
+      const filterMap: Record<string, { brands: LaptopBrand[]; catIdx: number }> = {
+        'laptop-gaming': { brands: ['ASUS', 'MSI', 'Acer'], catIdx: 2 },
+        'laptop-van-phong': { brands: ['Dell', 'Lenovo', 'HP'], catIdx: 1 },
+        'laptop-do-hoa': { brands: ['Apple', 'ASUS', 'Dell'], catIdx: 3 },
+        'laptop-hoc-tap': { brands: ['Lenovo', 'Acer', 'HP'], catIdx: 0 },
+        'laptop-mong-nhe': { brands: ['Apple', 'Dell', 'ASUS'], catIdx: 4 },
+        'laptop-pin-lau': { brands: ['Apple', 'Lenovo', 'HP'], catIdx: 5 },
+        'macbook': { brands: ['Apple'], catIdx: -1 },
+      };
+      const matched = filterMap[filter];
+      if (matched) {
+        matched.brands.forEach(b => newBrands.add(b));
+        if (matched.catIdx >= 0) newCatIdx = matched.catIdx;
+      }
+    }
+
+    if (brandParam) {
+      const brandMap: Record<string, LaptopBrand> = {
+        'asus-rog': 'ASUS', 'asus-tuf': 'ASUS', 'asus-vivobook': 'ASUS', 'asus-zenbook': 'ASUS',
+        'msi-katana': 'MSI', 'msi-cyborg': 'MSI', 'msi-stealth': 'MSI', 'msi-pulse': 'MSI',
+        'acer-nitro': 'Acer', 'acer-predator': 'Acer', 'acer-swift': 'Acer', 'acer-aspire': 'Acer',
+        'lenovo-legion': 'Lenovo', 'lenovo-loq': 'Lenovo', 'lenovo-thinkpad': 'Lenovo', 'lenovo-yoga': 'Lenovo', 'lenovo-ideapad': 'Lenovo',
+        'dell-alienware': 'Dell', 'dell-xps': 'Dell', 'dell-inspiron': 'Dell',
+        'hp-omen': 'HP', 'hp-victus': 'HP', 'hp-pavilion': 'HP', 'hp-spectre': 'HP',
+        'gigabyte-gamer': 'Gigabyte',
+        'apple-macbook-pro': 'Apple', 'apple-macbook-air': 'Apple',
+      };
+      if (brandMap[brandParam]) {
+        newBrands.add(brandMap[brandParam]);
+      } else {
+        const bp = brandParam.toLowerCase();
+        if (bp.startsWith('asus')) newBrands.add('ASUS');
+        else if (bp.startsWith('msi')) newBrands.add('MSI');
+        else if (bp.startsWith('acer')) newBrands.add('Acer');
+        else if (bp.startsWith('lenovo')) newBrands.add('Lenovo');
+        else if (bp.startsWith('dell')) newBrands.add('Dell');
+        else if (bp.startsWith('hp')) newBrands.add('HP');
+        else if (bp.startsWith('gigabyte')) newBrands.add('Gigabyte');
+        else if (bp.startsWith('apple') || bp.startsWith('macbook')) newBrands.add('Apple');
+      }
+    }
+
+    if (priceParam) {
+      const parts = priceParam.split('-');
+      if (parts.length === 2) {
+        const min = parseInt(parts[0], 10);
+        const max = parseInt(parts[1], 10);
+        if (!isNaN(min) && !isNaN(max)) {
+          newMinPrice = min;
+          newMaxPrice = Math.min(max, MAX_PRICE);
+        }
+      }
+    }
+
+    if (gpuParam) {
+      const gpuMap: Record<string, LaptopGPU> = {
+        'nvidia-rtx-5090': 'NVIDIA RTX 5090',
+        'nvidia-rtx-5080': 'NVIDIA RTX 5080',
+        'nvidia-rtx-5070': 'NVIDIA RTX 5070',
+        'nvidia-rtx-5060': 'NVIDIA RTX 5060',
+        'nvidia-rtx-4090': 'NVIDIA RTX 4090',
+        'nvidia-rtx-4080': 'NVIDIA RTX 4080',
+        'nvidia-rtx-4070': 'NVIDIA RTX 4070',
+        'nvidia-rtx-4060': 'NVIDIA RTX 4060',
+        'nvidia-rtx-4050': 'NVIDIA RTX 4050',
+        'nvidia-rtx-3050': 'NVIDIA RTX 3050',
+        'amd-radeon-rx-7000': 'AMD Radeon RX 7000',
+        'intel-arc-graphics': 'Intel Arc Graphics',
+        'intel-iris-xe-tich-hop': 'Intel Iris Xe',
+        'intel-irix-xe-tich-hop': 'Intel Iris Xe',
+        'amd-radeon-tich-hop': 'AMD Radeon',
+      };
+      if (gpuMap[gpuParam]) {
+        newGPUs.add(gpuMap[gpuParam]);
+      }
+    }
+
+    if (cpuParam) {
+      const cpuMap: Record<string, LaptopCPU> = {
+        'intel-core-i9': 'Intel Core i9',
+        'intel-core-i7': 'Intel Core i7',
+        'intel-core-i5': 'Intel Core i5',
+        'intel-core-i3': 'Intel Core i3',
+        'intel-core-ultra-9': 'Intel Core Ultra 9',
+        'intel-core-ultra-7': 'Intel Core Ultra 7',
+        'intel-core-ultra-5': 'Intel Core Ultra 5',
+        'amd-ryzen-9': 'AMD Ryzen 9',
+        'amd-ryzen-7': 'AMD Ryzen 7',
+        'amd-ryzen-5': 'AMD Ryzen 5',
+        'amd-ryzen-ai-9': 'AMD Ryzen AI 9',
+        'amd-ryzen-ai-7': 'AMD Ryzen AI 7',
+        'apple-m4-max': 'Apple M Series',
+        'apple-m4-pro': 'Apple M Series',
+        'apple-m4': 'Apple M Series',
+        'apple-m3-max': 'Apple M Series',
+        'apple-m3-pro': 'Apple M Series',
+        'apple-m3': 'Apple M Series',
+      };
+      if (cpuMap[cpuParam]) {
+        newCPUs.add(cpuMap[cpuParam]);
+      }
+    }
+
+    if (ramParam) {
+      const ramMap: Record<string, LaptopRAM> = {
+        '8gb-ram': '8GB',
+        '16gb-ram': '16GB',
+        '32gb-ram': '32GB',
+        '64gb-ram': '64GB',
+      };
+      if (ramMap[ramParam]) {
+        newRAMs.add(ramMap[ramParam]);
+      }
+    }
+
+    if (screenParam) {
+      const screenMap: Record<string, LaptopScreen> = {
+        '133-136-inch': '14 inch',
+        '14-inch': '14 inch',
+        '156-inch': '15.6 inch',
+        '16-inch': '16 inch trở lên',
+        '173-18-inch': '17.3 inch',
+        '60hz': '60Hz',
+        '120hz': '120Hz',
+        '144hz': '144Hz',
+        '165hz': '165Hz',
+        '240hz': '240Hz',
+        'man-hinh-oled': 'Màn hình OLED',
+        'man-hinh-mini-led': 'Màn hình Mini-LED',
+        'man-hinh-cam-ung': 'Màn hình cảm ứng',
+      };
+      if (screenMap[screenParam]) {
+        newScreens.add(screenMap[screenParam]);
+      }
+    }
+
+    if (filter || brandParam || priceParam || gpuParam || cpuParam || ramParam || screenParam) {
+      setSelBrands(newBrands);
+      setSelGPUs(newGPUs);
+      setSelCPUs(newCPUs);
+      setSelRAMs(newRAMs);
+      setSelScreens(newScreens);
+      setMinPrice(newMinPrice);
+      setMaxPrice(newMaxPrice);
+      setActiveCategory(newCatIdx);
+    }
+  }, [searchParams]);
 
   const [currentPage, setCurrentPage] = useState(1);
   const ITEMS_PER_PAGE = 16;
@@ -425,6 +641,7 @@ export default function LaptopIndex() {
     setMinPrice(MIN_PRICE);
     setMaxPrice(MAX_PRICE);
     setActiveCategory(null);
+    navigate('/laptop');
   };
 
   const handleCategoryClick = (idx: number) => {
@@ -440,11 +657,68 @@ export default function LaptopIndex() {
   /* Derived filtered + sorted list */
   const filteredProducts = useMemo(() => {
     let result = products.filter(p => {
-      if (selBrands.size  > 0 && !selBrands.has(p.brand))   return false;
-      if (selRAMs.size    > 0 && !selRAMs.has(p.ram))        return false;
-      if (selCPUs.size    > 0 && !selCPUs.has(p.cpu))        return false;
-      if (selScreens.size > 0 && !selScreens.has(p.screen))  return false;
-      if (selGPUs.size    > 0 && !selGPUs.has(p.gpu as LaptopGPU)) return false;
+      const specsUpper = p.specs.toUpperCase();
+      const specsLower = p.specs.toLowerCase();
+
+      if (selBrands.size > 0 && !selBrands.has(p.brand)) return false;
+
+      if (selRAMs.size > 0) {
+        const ramMatch = Array.from(selRAMs).some(r => p.ram === r || specsUpper.includes(r));
+        if (!ramMatch) return false;
+      }
+
+      if (selCPUs.size > 0) {
+        const cpuMatch = Array.from(selCPUs).some(c => {
+          if (p.cpu === c) return true;
+          if (c === "Apple M Series" && (p.brand === "Apple" || specsUpper.includes("APPLE M") || specsUpper.includes("M3") || specsUpper.includes("M4") || specsUpper.includes("M2") || specsUpper.includes("M1"))) return true;
+          if (c === "Intel Core i3" && (specsUpper.includes("I3") || p.cpu === "Intel Core i3")) return true;
+          if (c === "Intel Core i5" && (specsUpper.includes("I5") || specsUpper.includes("125H"))) return true;
+          if (c === "Intel Core i7" && specsUpper.includes("I7")) return true;
+          if (c === "Intel Core i9" && specsUpper.includes("I9")) return true;
+          if (c.includes("Ultra 5") && specsUpper.includes("ULTRA 5")) return true;
+          if (c.includes("Ultra 7") && specsUpper.includes("ULTRA 7")) return true;
+          if (c.includes("Ultra 9") && specsUpper.includes("ULTRA 9")) return true;
+          if (c.includes("Ryzen 5") && specsUpper.includes("RYZEN 5")) return true;
+          if (c.includes("Ryzen 7") && specsUpper.includes("RYZEN 7")) return true;
+          if (c.includes("Ryzen 9") && specsUpper.includes("RYZEN 9")) return true;
+          return false;
+        });
+        if (!cpuMatch) return false;
+      }
+
+      if (selGPUs.size > 0) {
+        const gpuMatch = Array.from(selGPUs).some(g => {
+          if (p.gpu === g) return true;
+          const modelCode = g.replace(/.*RTX\s*/i, "").replace(/.*RX\s*/i, "").trim();
+          if (modelCode && specsUpper.includes(modelCode.toUpperCase())) return true;
+          if (g === "Intel Iris Xe" && (specsLower.includes("iris") || specsLower.includes("intel"))) return true;
+          if (g === "Intel Arc Graphics" && specsLower.includes("arc")) return true;
+          if (g === "AMD Radeon" && specsLower.includes("radeon")) return true;
+          return false;
+        });
+        if (!gpuMatch) return false;
+      }
+
+      if (selScreens.size > 0) {
+        const screenMatch = Array.from(selScreens).some(s => {
+          if (p.screen === s) return true;
+          if (s === "14 inch" && (specsLower.includes('14"') || specsLower.includes('14 inch') || specsLower.includes('13.') || specsLower.includes('14.'))) return true;
+          if (s === "15.6 inch" && (specsLower.includes('15.6') || specsLower.includes('15.6"'))) return true;
+          if (s === "16 inch trở lên" && (specsLower.includes('16"') || specsLower.includes('16 inch') || specsLower.includes('16.1') || specsLower.includes('16.0'))) return true;
+          if (s === "17.3 inch" && (specsLower.includes('17.3') || specsLower.includes('18"'))) return true;
+          if (s === "60Hz" && specsUpper.includes("60HZ")) return true;
+          if (s === "120Hz" && specsUpper.includes("120HZ")) return true;
+          if (s === "144Hz" && specsUpper.includes("144HZ")) return true;
+          if (s === "165Hz" && specsUpper.includes("165HZ")) return true;
+          if (s === "240Hz" && specsUpper.includes("240HZ")) return true;
+          if (s === "Màn hình OLED" && specsUpper.includes("OLED")) return true;
+          if (s === "Màn hình Mini-LED" && (specsUpper.includes("MINI-LED") || specsUpper.includes("MINILED") || specsUpper.includes("LIQUID RETINA"))) return true;
+          if (s === "Màn hình cảm ứng" && (specsLower.includes("touch") || specsLower.includes("cảm ứng"))) return true;
+          return false;
+        });
+        if (!screenMatch) return false;
+      }
+
       if (p.price < minPrice || p.price > maxPrice) return false;
       return true;
     });
@@ -453,7 +727,7 @@ export default function LaptopIndex() {
     if (sortBy === "price-desc") result = [...result].sort((a, b) => b.price - a.price);
     if (sortBy === "name")       result = [...result].sort((a, b) => a.name.localeCompare(b.name));
     return result;
-  }, [products, selBrands, selRAMs, selCPUs, selScreens, selGPUs, minPrice, maxPrice, sortBy, activeCategory]);
+  }, [products, selBrands, selRAMs, selCPUs, selScreens, selGPUs, minPrice, maxPrice, sortBy]);
 
   const totalPages = useMemo(() => {
     return Math.ceil(filteredProducts.length / ITEMS_PER_PAGE) || 1;
@@ -550,6 +824,45 @@ export default function LaptopIndex() {
           />
         </div>
       </div>
+
+      {/* Nhu Cầu */}
+      <FilterGroup title="Nhu cầu sử dụng">
+        {[
+          { label: 'Học tập', brands: ['Lenovo', 'Acer', 'HP'] as LaptopBrand[] },
+          { label: 'Văn phòng', brands: ['Dell', 'Lenovo', 'HP'] as LaptopBrand[] },
+          { label: 'Gaming', brands: ['ASUS', 'MSI', 'Acer'] as LaptopBrand[] },
+          { label: 'Đồ họa - Sáng tạo', brands: ['Apple', 'ASUS', 'Dell'] as LaptopBrand[] },
+          { label: 'Mỏng nhẹ', brands: ['Apple', 'Dell', 'ASUS'] as LaptopBrand[] },
+          { label: 'Pin lâu', brands: ['Apple', 'Lenovo', 'HP'] as LaptopBrand[] },
+          { label: 'MacBook', brands: ['Apple'] as LaptopBrand[] },
+        ].map(({ label, brands }) => {
+          // Check if selBrands exactly matches this need's brands
+          const selArr = [...selBrands].sort();
+          const brandArr = [...brands].sort();
+          const checked = selArr.length === brandArr.length && selArr.every((b, i) => b === brandArr[i]);
+          return (
+            <FilterCheckbox
+              key={label}
+              label={label}
+              checked={checked}
+              onChange={() => {
+                if (checked) {
+                  setSelBrands(new Set());
+                  setActiveCategory(null);
+                } else {
+                  setSelBrands(new Set(brands));
+                  // Also sync category card
+                  const catMap: Record<string, number> = {
+                    'Học tập': 0, 'Văn phòng': 1, 'Gaming': 2,
+                    'Đồ họa - Sáng tạo': 3, 'Mỏng nhẹ': 4, 'Pin lâu': 5,
+                  };
+                  setActiveCategory(catMap[label] ?? null);
+                }
+              }}
+            />
+          );
+        })}
+      </FilterGroup>
 
       {/* Brand */}
       <FilterGroup title="Thương hiệu">
@@ -666,8 +979,51 @@ export default function LaptopIndex() {
                   Laptop chính hãng
                 </span>
               </motion.div>
-              <motion.h1 variants={heroItem} className="text-[3.2rem] md:text-[4.2rem] lg:text-[5rem] font-bold tracking-tight text-zinc-900 leading-[1.08] mb-6 whitespace-nowrap">
-                Bứt phá giới hạn<br />làm chủ công nghệ.
+              <motion.h1
+                variants={{
+                  hidden: {},
+                  show: { transition: { staggerChildren: 0.08, delayChildren: 0.1 } }
+                }}
+                className="text-[3.2rem] md:text-[4.2rem] lg:text-[5rem] font-bold tracking-tight text-zinc-900 leading-[1.08] mb-6"
+              >
+                <span className="block">
+                  {["Bứt", "phá", "giới", "hạn"].map((word, idx) => (
+                    <motion.span
+                      key={`w1-${idx}`}
+                      variants={{
+                        hidden: { opacity: 0, y: 28, filter: "blur(4px)" },
+                        show: {
+                          opacity: 1,
+                          y: 0,
+                          filter: "blur(0px)",
+                          transition: { type: "spring", stiffness: 350, damping: 24 }
+                        }
+                      }}
+                      className="inline-block mr-[0.25em] last:mr-0 cursor-default transition-transform duration-200 hover:scale-105"
+                    >
+                      {word}
+                    </motion.span>
+                  ))}
+                </span>
+                <span className="block">
+                  {["làm", "chủ", "công", "nghệ."].map((word, idx) => (
+                    <motion.span
+                      key={`w2-${idx}`}
+                      variants={{
+                        hidden: { opacity: 0, y: 28, filter: "blur(4px)" },
+                        show: {
+                          opacity: 1,
+                          y: 0,
+                          filter: "blur(0px)",
+                          transition: { type: "spring", stiffness: 350, damping: 24 }
+                        }
+                      }}
+                      className="inline-block mr-[0.25em] last:mr-0 cursor-default transition-transform duration-200 hover:scale-105"
+                    >
+                      {word}
+                    </motion.span>
+                  ))}
+                </span>
               </motion.h1>
               <motion.p variants={heroItem} className="text-[17px] text-zinc-500 mb-10 leading-relaxed">
                 Laptop sẽ giúp bạn bật nguồn cảm hứng<br />
@@ -911,8 +1267,10 @@ export default function LaptopIndex() {
               </div>
             </div>
 
-            {/* Empty state */}
-            {filteredProducts.length === 0 ? (
+            {/* Empty state or Loading state */}
+            {loading ? (
+              <ProductSkeletonGrid count={8} />
+            ) : filteredProducts.length === 0 ? (
               <div className="flex min-h-[420px] flex-col items-center justify-center rounded-2xl bg-white border border-zinc-100 shadow-sm text-center">
                 <Search className="mb-4 h-10 w-10 text-zinc-300" />
                 <h3 className="text-lg font-bold text-zinc-900">Không tìm thấy sản phẩm phù hợp</h3>

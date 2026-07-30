@@ -138,6 +138,37 @@ export default function CartCheckoutPage() {
     remainingSeconds % 60
   ).padStart(2, "0")}`;
 
+  const clearPendingPayment = () => {
+    setPaymentSession(null);
+    setQrDataUrl("");
+    if (user) {
+      localStorage.removeItem(getPendingPaymentKey(user.id || user.email));
+    }
+  };
+
+  const handleCancelPaymentSession = async () => {
+    if (paymentSession) {
+      try {
+        await fetch(`${API_BASE}/api/payments/${paymentSession.id}/cancel`, { method: "POST" });
+      } catch {
+        // ignore error
+      }
+    }
+    clearPendingPayment();
+    setCheckoutError("Đã hủy phiên thanh toán.");
+  };
+
+  const finishCheckout = () => {
+    selectedItems.forEach((item) => removeItem(item.id));
+
+    if (user) {
+      localStorage.removeItem(getCheckoutSelectionKey(user.id || user.email));
+      localStorage.removeItem(getPendingPaymentKey(user.id || user.email));
+    }
+
+    navigate("/don-hang");
+  };
+
   useEffect(() => {
     if (!paymentSession) return;
 
@@ -182,25 +213,6 @@ export default function CartCheckoutPage() {
     const interval = window.setInterval(poll, 2000);
     return () => window.clearInterval(interval);
   }, [paymentSession, selectedItems]);
-
-  const clearPendingPayment = () => {
-    setPaymentSession(null);
-    setQrDataUrl("");
-    if (user) {
-      localStorage.removeItem(getPendingPaymentKey(user.id || user.email));
-    }
-  };
-
-  const finishCheckout = () => {
-    selectedItems.forEach((item) => removeItem(item.id));
-
-    if (user) {
-      localStorage.removeItem(getCheckoutSelectionKey(user.id || user.email));
-      localStorage.removeItem(getPendingPaymentKey(user.id || user.email));
-    }
-
-    navigate("/don-hang");
-  };
 
   const validateShippingInfo = () => {
     if (!user) {
@@ -744,6 +756,16 @@ export default function CartCheckoutPage() {
                 <p className="mt-4 text-center text-[11px] font-semibold leading-5 text-white/60">
                   Quét QR bằng điện thoại, bấm xác nhận trên trang mở ra. Website sẽ tự cập nhật đơn hàng.
                 </p>
+
+                {paymentSession?.status === "pending" && (
+                  <button
+                    type="button"
+                    onClick={handleCancelPaymentSession}
+                    className="mt-4 flex w-full items-center justify-center gap-1.5 rounded-full border border-white/20 bg-white/10 px-4 py-2.5 text-xs font-bold text-white transition hover:bg-white/20 active:scale-95"
+                  >
+                    Hủy phiên thanh toán này
+                  </button>
+                )}
               </section>
             )}
 

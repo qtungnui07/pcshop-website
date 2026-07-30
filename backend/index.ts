@@ -928,6 +928,40 @@ serve({
       }
     }
 
+    // POST /api/orders/cancel to cancel an order
+    if (url.pathname === "/api/orders/cancel" && req.method === "POST") {
+      try {
+        const body = await req.json();
+        const { orderId } = body;
+        if (!orderId) {
+          return Response.json({ error: "Thiếu mã đơn hàng" }, { status: 400, headers });
+        }
+        const db = await readData();
+        const orderIndex = (db.orders || []).findIndex((o: any) => o.id === orderId);
+        if (orderIndex === -1) {
+          return Response.json({ error: "Không tìm thấy đơn hàng" }, { status: 404, headers });
+        }
+
+        const targetOrder = db.orders[orderIndex];
+        if (targetOrder.status === "done" || targetOrder.status === "shipping") {
+          return Response.json({ error: "Đơn hàng đang giao hoặc đã hoàn tất, không thể hủy." }, { status: 400, headers });
+        }
+        if (targetOrder.status === "cancelled") {
+          return Response.json({ error: "Đơn hàng này đã được hủy trước đó." }, { status: 400, headers });
+        }
+
+        targetOrder.status = "cancelled";
+        targetOrder.paymentStatus = "cancelled";
+        targetOrder.updatedAt = new Date().toISOString();
+
+        db.orders[orderIndex] = targetOrder;
+        await writeData(db);
+        return Response.json({ success: true, order: targetOrder }, { headers });
+      } catch (err) {
+        return Response.json({ error: "Invalid JSON body" }, { status: 400, headers });
+      }
+    }
+
     // POST /api/orders/bulk to overwrite orders array (for Admin panel deletion)
     if (url.pathname === "/api/orders/bulk" && req.method === "POST") {
       try {
@@ -1029,6 +1063,13 @@ serve({
         db.payments = (db.payments || []).map((item: any) => item.id === payment.id ? payment : item);
         await writeData(db);
         return Response.json({ success: true, session: payment, order }, { headers });
+      }
+
+      if (action === "cancel" && req.method === "POST") {
+        payment.status = "expired";
+        db.payments = (db.payments || []).map((item: any) => item.id === payment.id ? payment : item);
+        await writeData(db);
+        return Response.json({ success: true, session: payment }, { headers });
       }
     }
 

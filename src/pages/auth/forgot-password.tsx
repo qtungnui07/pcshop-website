@@ -27,7 +27,6 @@ export default function ForgotPassword() {
   }, []);
 
   useEffect(() => {
-    let interval: any;
     const renderWidget = () => {
       if ((window as any).turnstile && turnstileRef.current && !widgetIdRef.current) {
         clearInterval(interval);
@@ -51,7 +50,7 @@ export default function ForgotPassword() {
       }
     };
 
-    interval = setInterval(renderWidget, 100);
+    const interval: any = setInterval(renderWidget, 100);
     return () => {
       clearInterval(interval);
       if (widgetIdRef.current && (window as any).turnstile) {

@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef } from "react";
+import { motion } from "framer-motion";
 import "./style.css";
 import pcBanner from "./pc_banner.png";
 import { useAuth } from "../../context/AuthContext";
@@ -267,7 +268,54 @@ export default function HoTroIndex() {
             <div className="support-hero">
               <div className="hero-content">
                 <span className="hero-tag">HỖ TRỢ</span>
-                <h1 className="hero-title text-zinc-950">Luôn bên bạn,<br />mọi lúc mọi nơi.</h1>
+                <motion.h1
+                  initial="hidden"
+                  animate="show"
+                  variants={{
+                    hidden: {},
+                    show: { transition: { staggerChildren: 0.08, delayChildren: 0.1 } }
+                  }}
+                  className="hero-title text-zinc-950"
+                >
+                  <span className="block">
+                    {["Luôn", "bên", "bạn,"].map((word, idx) => (
+                      <motion.span
+                        key={`w1-${idx}`}
+                        variants={{
+                          hidden: { opacity: 0, y: 28, filter: "blur(4px)" },
+                          show: {
+                            opacity: 1,
+                            y: 0,
+                            filter: "blur(0px)",
+                            transition: { type: "spring", stiffness: 350, damping: 24 }
+                          }
+                        }}
+                        className="inline-block mr-[0.25em] last:mr-0 cursor-default transition-transform duration-200 hover:scale-105"
+                      >
+                        {word}
+                      </motion.span>
+                    ))}
+                  </span>
+                  <span className="block">
+                    {["mọi", "lúc", "mọi", "nơi."].map((word, idx) => (
+                      <motion.span
+                        key={`w2-${idx}`}
+                        variants={{
+                          hidden: { opacity: 0, y: 28, filter: "blur(4px)" },
+                          show: {
+                            opacity: 1,
+                            y: 0,
+                            filter: "blur(0px)",
+                            transition: { type: "spring", stiffness: 350, damping: 24 }
+                          }
+                        }}
+                        className="inline-block mr-[0.25em] last:mr-0 cursor-default transition-transform duration-200 hover:scale-105"
+                      >
+                        {word}
+                      </motion.span>
+                    ))}
+                  </span>
+                </motion.h1>
                 <p className="hero-subtitle">Đội ngũ của chúng tôi luôn sẵn sàng hỗ trợ bạn nhanh chóng và tận tâm.</p>
                 
                 <button className="my-tickets-badge-btn" onClick={scrollToTickets}>

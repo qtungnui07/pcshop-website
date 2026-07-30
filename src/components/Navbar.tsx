@@ -94,7 +94,32 @@ const getMenuLink = (menuName: string, splitCatName: string, link: string) => {
   }
 
   if (menuSlug === 'laptop') {
-    return `/laptop?${generateSlug(splitCatName)}=${generateSlug(link)}`;
+    const catSlug = generateSlug(splitCatName);
+
+    // "Nhu Cầu" category → use ?filter= param (handled by laptop page)
+    if (catSlug === 'nhu-cau') {
+      const filterSlug = generateSlug(link);
+      if (filterSlug === 'macbook-apple') return '/laptop?filter=macbook';
+      if (filterSlug === 'laptop-gaming') return '/laptop?filter=laptop-gaming';
+      if (filterSlug === 'laptop-van-phong') return '/laptop?filter=laptop-van-phong';
+      if (filterSlug === 'laptop-do-hoa-dung-phim') return '/laptop?filter=laptop-do-hoa';
+      if (filterSlug === 'laptop-hoc-tap-sinh-vien') return '/laptop?filter=laptop-hoc-tap';
+      if (filterSlug === 'laptop-mong-nhe') return '/laptop?filter=laptop-mong-nhe';
+      if (filterSlug === 'laptop-pin-lau') return '/laptop?filter=laptop-pin-lau';
+    }
+
+    // "Mức Giá" category
+    if (catSlug === 'muc-gia') {
+      const priceSlug = generateSlug(link);
+      if (priceSlug === 'duoi-15-trieu') return '/laptop?price=0-15000000';
+      if (priceSlug === '15-20-trieu') return '/laptop?price=15000000-20000000';
+      if (priceSlug === '20-25-trieu') return '/laptop?price=20000000-25000000';
+      if (priceSlug === '25-30-trieu') return '/laptop?price=25000000-30000000';
+      if (priceSlug === '30-40-trieu') return '/laptop?price=30000000-40000000';
+      if (priceSlug === 'tren-40-trieu-hi-end') return '/laptop?price=40000000-999999999';
+    }
+
+    return `/laptop?${catSlug}=${generateSlug(link)}`;
   }
 
   return `/${menuSlug}/${generateSlug(link)}`;
@@ -512,14 +537,14 @@ export default function Navbar() {
                           {/* Left side */}
                           <div className="flex flex-col w-1/3 border-r border-gray-100 pr-8">
                             <motion.h3 variants={itemVariants} className="text-[12px] text-[#86868b] mb-4 tracking-wider uppercase font-semibold">
-                              Danh mục linh kiện
+                              {currentMenu.name === 'Laptop' ? 'Danh mục Laptop' : 'Danh mục linh kiện'}
                             </motion.h3>
                             <ul className="space-y-3">
                               {/* @ts-ignore */}
                               {currentMenu.splitData?.map((cat, idx) => (
                                 <motion.li variants={itemVariants} key={idx}>
                                   <Link
-                                    to={`/linh-kien?category=${getComponentCatId(cat.name)}`}
+                                    to={currentMenu.name === 'Laptop' ? `/laptop?filter=${generateSlug(cat.name)}` : `/linh-kien?category=${getComponentCatId(cat.name)}`}
                                     onMouseEnter={() => setActiveSplitCategory(cat.name)}
                                     onClick={() => setActiveMenu(null)}
                                     className={`text-xl font-medium transition-colors block ${activeSplitCategory === cat.name ? 'text-blue-600' : 'text-[#1d1d1f] hover:text-blue-600'}`}
@@ -533,7 +558,10 @@ export default function Navbar() {
                           {/* Right side */}
                           <div className="flex-1 pl-8">
                             {/* @ts-ignore */}
-                            {currentMenu.splitData?.filter(cat => cat.name === activeSplitCategory).map((cat, idx) => (
+                            {currentMenu.splitData?.filter(cat => cat.name === activeSplitCategory).map((cat, idx) => {
+                              // @ts-ignore
+                              const hasGroups = cat.groups && cat.groups.length > 0;
+                              return (
                               <motion.div
                                 key={cat.name}
                                 initial={{ opacity: 0, x: -10 }}
@@ -544,21 +572,52 @@ export default function Navbar() {
                                 <h3 className="text-[12px] text-[#86868b] mb-4 tracking-wider uppercase font-semibold">
                                   {cat.title}
                                 </h3>
-                                <div className="grid grid-cols-2 md:grid-cols-3 gap-y-4 gap-x-8">
-                                  {/* @ts-ignore */}
-                                  {cat.links.map((link, lIdx) => (
-                                    <Link
-                                      to={getMenuLink(currentMenu?.name || '', cat.name, link)}
-                                      key={lIdx}
-                                      onClick={() => setActiveMenu(null)}
-                                      className="text-xl font-medium text-[#1d1d1f] hover:text-blue-600 transition-colors block"
-                                    >
-                                      {link}
-                                    </Link>
-                                  ))}
-                                </div>
+                                {hasGroups ? (
+                                  <div className="space-y-4">
+                                    {/* @ts-ignore */}
+                                    {cat.groups.map((group, gIdx) => (
+                                      <motion.div
+                                        key={gIdx}
+                                        initial={{ opacity: 0, y: -8 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        transition={{ duration: 0.25, delay: gIdx * 0.04 }}
+                                      >
+                                        <h4 className="text-[11px] text-[#6b6b70] mb-2.5 tracking-wider uppercase font-semibold">
+                                          {group.title}
+                                        </h4>
+                                        <div className="flex flex-wrap gap-x-6 gap-y-2">
+                                          {group.links.map((link: string, lIdx: number) => (
+                                            <Link
+                                              to={getMenuLink(currentMenu?.name || '', cat.name, link)}
+                                              key={lIdx}
+                                              onClick={() => setActiveMenu(null)}
+                                              className="text-xl font-medium text-[#1d1d1f] hover:text-blue-600 transition-colors"
+                                            >
+                                              {link}
+                                            </Link>
+                                          ))}
+                                        </div>
+                                      </motion.div>
+                                    ))}
+                                  </div>
+                                ) : (
+                                  <div className="grid grid-cols-2 md:grid-cols-3 gap-y-4 gap-x-8">
+                                    {/* @ts-ignore */}
+                                    {cat.links?.map((link, lIdx) => (
+                                      <Link
+                                        to={getMenuLink(currentMenu?.name || '', cat.name, link)}
+                                        key={lIdx}
+                                        onClick={() => setActiveMenu(null)}
+                                        className="text-xl font-medium text-[#1d1d1f] hover:text-blue-600 transition-colors block"
+                                      >
+                                        {link}
+                                      </Link>
+                                    ))}
+                                  </div>
+                                )}
                               </motion.div>
-                            ))}
+                              );
+                            })}
                           </div>
                         </div>
                       ) : (

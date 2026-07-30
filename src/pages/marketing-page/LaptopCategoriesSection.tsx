@@ -3,14 +3,15 @@ import { ChevronRight, Gamepad2, Clock, Palette, Laptop } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { laptopCategories } from './data';
 
-const getCategorySlug = (name: string) => {
-  return name.toLowerCase()
+const getCategoryUrl = (name: string) => {
+  const slug = name.toLowerCase()
     .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
     .replace(/đ/g, "d")
     .replace(/[^a-z0-9\s-]/g, "")
     .trim()
     .replace(/\s+/g, '-')
     .replace(/-+/g, '-');
+  return `/laptop?filter=${slug}`;
 };
 
 const getCategoryIcon = (name: string) => {
@@ -37,7 +38,7 @@ export default function LaptopCategoriesSection() {
           const Icon = getCategoryIcon(cat.name);
           return (
             <Link
-              to={`/laptop/${getCategorySlug(cat.name)}`}
+              to={getCategoryUrl(cat.name)}
               key={cat.name}
               className="block"
             >

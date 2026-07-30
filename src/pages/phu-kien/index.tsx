@@ -24,6 +24,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import AddToCartButton from "../../components/AddToCartButton";
+import { ProductSkeletonGrid } from "../../components/ui/skeleton";
 
 /*
   src/pages/phu-kien/index.tsx
@@ -308,7 +309,11 @@ function normalizeCombos(data: unknown): AccessoryCombo[] {
 
 function toggleSetValue<T>(set: Set<T>, value: T) {
   const next = new Set(set);
-  next.has(value) ? next.delete(value) : next.add(value);
+  if (next.has(value)) {
+    next.delete(value);
+  } else {
+    next.add(value);
+  }
   return next;
 }
 
@@ -706,11 +711,54 @@ export default function PhuKienIndex() {
               Phụ kiện cao cấp
             </div>
 
-            <h1 className="mb-7 max-w-[660px] text-[3rem] font-bold leading-[1.12] tracking-[-0.035em] text-[#1d1d1f] md:text-[4.25rem] lg:text-[4.85rem]">
-              Nâng tầm
-              <br />
-              trải nghiệm.
-            </h1>
+            <motion.h1
+              initial="hidden"
+              animate="show"
+              variants={{
+                hidden: {},
+                show: { transition: { staggerChildren: 0.08, delayChildren: 0.1 } }
+              }}
+              className="mb-7 max-w-[660px] text-[3rem] font-bold leading-[1.12] tracking-[-0.035em] text-[#1d1d1f] md:text-[4.25rem] lg:text-[4.85rem]"
+            >
+              <span className="block">
+                {["Nâng", "tầm"].map((word, idx) => (
+                  <motion.span
+                    key={`w1-${idx}`}
+                    variants={{
+                      hidden: { opacity: 0, y: 28, filter: "blur(4px)" },
+                      show: {
+                        opacity: 1,
+                        y: 0,
+                        filter: "blur(0px)",
+                        transition: { type: "spring", stiffness: 350, damping: 24 }
+                      }
+                    }}
+                    className="inline-block mr-[0.25em] last:mr-0 cursor-default transition-transform duration-200 hover:scale-105"
+                  >
+                    {word}
+                  </motion.span>
+                ))}
+              </span>
+              <span className="block">
+                {["trải", "nghiệm."].map((word, idx) => (
+                  <motion.span
+                    key={`w2-${idx}`}
+                    variants={{
+                      hidden: { opacity: 0, y: 28, filter: "blur(4px)" },
+                      show: {
+                        opacity: 1,
+                        y: 0,
+                        filter: "blur(0px)",
+                        transition: { type: "spring", stiffness: 350, damping: 24 }
+                      }
+                    }}
+                    className="inline-block mr-[0.25em] last:mr-0 cursor-default transition-transform duration-200 hover:scale-105"
+                  >
+                    {word}
+                  </motion.span>
+                ))}
+              </span>
+            </motion.h1>
 
             <p className="mb-8 max-w-[470px] text-[15px] leading-7 text-zinc-600 md:text-[16px]">
               Phụ kiện tối giản, đồng bộ và tinh tế cho góc làm việc,
@@ -1079,12 +1127,7 @@ export default function PhuKienIndex() {
             </div>
 
             {loading ? (
-              <div className="flex min-h-[420px] flex-col items-center justify-center rounded-2xl bg-[#fbfbfd] text-center shadow-sm">
-                <div className="mb-4 h-9 w-9 animate-spin rounded-full border-4 border-zinc-200 border-t-zinc-900" />
-                <h3 className="text-lg font-bold text-zinc-900">
-                  Đang tải phụ kiện từ backend...
-                </h3>
-              </div>
+              <ProductSkeletonGrid count={8} />
             ) : fetchError ? (
               <div className="flex min-h-[420px] flex-col items-center justify-center rounded-2xl bg-[#fbfbfd] text-center shadow-sm">
                 <Search className="mb-4 h-10 w-10 text-zinc-300" />

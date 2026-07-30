@@ -292,11 +292,11 @@ export default function AdminIndex() {
 
     let targetIndex = originalIndex;
     if (direction === "up") {
-      let searchIdx = indexInFilteredList - 1;
+      const searchIdx = indexInFilteredList - 1;
       if (searchIdx < 0) return;
       targetIndex = activeList.findIndex(x => x === filteredList[searchIdx]);
     } else {
-      let searchIdx = indexInFilteredList + 1;
+      const searchIdx = indexInFilteredList + 1;
       if (searchIdx >= filteredList.length) return;
       targetIndex = activeList.findIndex(x => x === filteredList[searchIdx]);
     }

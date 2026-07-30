@@ -75,7 +75,14 @@ function buildFooterColumns() {
     .map((item) => {
       let links: { label: string; to: string }[] = [];
       const menuSlug = getMenuSlug(item.name);
-      if (item.isSplit && item.splitData) {
+      if (menuSlug === 'laptop') {
+        links = [
+          { label: 'Laptop Gaming', to: '/laptop?filter=laptop-gaming' },
+          { label: 'Laptop Văn Phòng', to: '/laptop?filter=laptop-van-phong' },
+          { label: 'Laptop Đồ Họa', to: '/laptop?filter=laptop-do-hoa' },
+          { label: 'MacBook', to: '/laptop?filter=macbook' },
+        ];
+      } else if (item.isSplit && item.splitData) {
         links = item.splitData.map((d) => {
           let to = `/${menuSlug}/${generateSlug(d.name)}`;
           if (menuSlug === 'linh-kien') {

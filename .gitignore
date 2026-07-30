@@ -30,5 +30,8 @@ dist-ssr
 .agents/
 skills-lock.json
 
+# Excel files / test reports
+*.xlsx
+
 # Crash dumps (core.1 is a ~1 GB dump, never commit it)
 core.[0-9]*

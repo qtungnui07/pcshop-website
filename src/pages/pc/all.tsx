@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { type PCProduct } from "../../constants/pcData";
 import AddToCartButton from "../../components/AddToCartButton";
+import { ProductSkeletonGrid } from "../../components/ui/skeleton";
 
 const API_BASE =
   typeof window !== "undefined"
@@ -50,7 +51,7 @@ function parsePCProduct(raw: any): PCProduct {
   else if (specsStr.includes('Ryzen 7') || specsStr.includes('7800') || specsStr.includes('7700')) cpuSeriesVal = 'Ryzen 7';
   else if (specsStr.includes('Ryzen 5') || specsStr.includes('7600') || specsStr.includes('5600')) cpuSeriesVal = 'Ryzen 5';
 
-  let cpuBrandVal: 'Intel' | 'AMD' = specsStr.toLowerCase().includes('ryzen') || specsStr.toLowerCase().includes('threadripper') ? 'AMD' : 'Intel';
+  const cpuBrandVal: 'Intel' | 'AMD' = specsStr.toLowerCase().includes('ryzen') || specsStr.toLowerCase().includes('threadripper') ? 'AMD' : 'Intel';
 
   let categoryVal: any = 'PC Gaming';
   const nameLower = (raw.name || "").toLowerCase();
@@ -121,8 +122,10 @@ export default function AllPCsPage() {
   const [activeInput, setActiveInput] = useState<'min' | 'max'>('min');
   const [liked, setLiked] = useState<Set<string>>(new Set());
   const [products, setProducts] = useState<PCProduct[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    setLoading(true);
     fetch(`${API_BASE}/api/featured-pcs`)
       .then((res) => res.json())
       .then((data) => {
@@ -131,11 +134,20 @@ export default function AllPCsPage() {
           setProducts(parsed);
         }
       })
-      .catch((err) => console.error("Error fetching PCs from backend:", err));
+      .catch((err) => console.error("Error fetching PCs from backend:", err))
+      .finally(() => setLoading(false));
   }, []);
 
   const toggleLike = (id: string) => {
-    setLiked(p => { const n = new Set(p); n.has(id) ? n.delete(id) : n.add(id); return n; });
+    setLiked(p => {
+      const n = new Set(p);
+      if (n.has(id)) {
+        n.delete(id);
+      } else {
+        n.add(id);
+      }
+      return n;
+    });
   };
 
   const filteredProducts = useMemo(() => {
@@ -377,6 +389,9 @@ export default function AllPCsPage() {
             </div>
 
             {/* Product Cards Grid */}
+            {loading ? (
+              <ProductSkeletonGrid count={8} />
+            ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
               {paginatedProducts.map((p, i) => (
                 <div
@@ -435,6 +450,7 @@ export default function AllPCsPage() {
                 </div>
               ))}
             </div>
+            )}
 
             {/* Pagination */}
             {totalPages > 1 && (

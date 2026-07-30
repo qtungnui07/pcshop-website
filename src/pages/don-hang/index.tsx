@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { CheckCircle2, Clock, Loader2, PackageCheck, ReceiptText, Truck } from "lucide-react";
+import { AlertCircle, CheckCircle2, Clock, Loader2, PackageCheck, ReceiptText, Trash2, Truck, XCircle } from "lucide-react";
 import { API_BASE, useAuth } from "../../context/AuthContext";
 import { formatCartPrice, parseCartPrice, type CartItem } from "../../context/CartContext";
 
@@ -15,8 +15,9 @@ type Order = {
   items: CartItem[];
   totalItems: number;
   totalPrice: number;
-  paymentStatus: "success" | "pending";
-  status: "created" | "paid" | "processing" | "shipping" | "done";
+  paymentMethod?: string;
+  paymentStatus: "success" | "pending" | "cancelled";
+  status: "created" | "paid" | "processing" | "shipping" | "done" | "cancelled";
   createdAt: string;
   updatedAt: string;
 };
@@ -35,7 +36,15 @@ const statusText: Record<Order["status"], string> = {
   processing: "Đang xử lý",
   shipping: "Đang giao",
   done: "Hoàn tất",
+  cancelled: "Đã hủy",
 };
+
+function getPaymentMethodLabel(method?: string) {
+  if (method === "COD") return "Thanh toán khi nhận hàng (COD)";
+  if (method === "MOMO_FAKE") return "Ví MoMo (QR)";
+  if (method === "BANK_QR_FAKE") return "Chuyển khoản Ngân hàng (QR)";
+  return "Thanh toán trực tuyến";
+}
 
 function formatDate(value: string) {
   if (!value) return "";
@@ -59,6 +68,9 @@ export default function OrdersPage() {
   const [fetching, setFetching] = useState(true);
   const [error, setError] = useState("");
 
+  const [cancelModalOrder, setCancelModalOrder] = useState<Order | null>(null);
+  const [cancellingId, setCancellingId] = useState<string | null>(null);
+
   useEffect(() => {
     if (!loading && !user) {
       navigate("/auth");
@@ -67,7 +79,6 @@ export default function OrdersPage() {
 
   useEffect(() => {
     if (!user) return;
-
     setFetching(true);
     setError("");
     fetch(`${API_BASE}/api/orders?userId=${encodeURIComponent(user.id)}&email=${encodeURIComponent(user.email)}`)
@@ -80,8 +91,31 @@ export default function OrdersPage() {
       .finally(() => setFetching(false));
   }, [user]);
 
+  const handleConfirmCancel = async () => {
+    if (!cancelModalOrder) return;
+    setCancellingId(cancelModalOrder.id);
+    try {
+      const response = await fetch(`${API_BASE}/api/orders/cancel`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ orderId: cancelModalOrder.id }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Không thể hủy đơn hàng.");
+
+      setOrders((prev) =>
+        prev.map((o) => (o.id === cancelModalOrder.id ? { ...o, status: "cancelled", paymentStatus: "pending" } : o))
+      );
+      setCancelModalOrder(null);
+    } catch (err: any) {
+      alert(err.message || "Hủy đơn hàng thất bại");
+    } finally {
+      setCancellingId(null);
+    }
+  };
+
   const totalSpent = useMemo(
-    () => orders.reduce((sum, order) => sum + parseCartPrice(order.totalPrice), 0),
+    () => orders.filter(o => o.status !== "cancelled").reduce((sum, order) => sum + parseCartPrice(order.totalPrice), 0),
     [orders]
   );
 
@@ -137,6 +171,8 @@ export default function OrdersPage() {
           <div className="space-y-5">
             {orders.map((order) => {
               const currentStep = getStepIndex(order.status);
+              const isCancelled = order.status === "cancelled";
+              const canCancel = !isCancelled && order.status !== "shipping" && order.status !== "done";
 
               return (
                 <article key={order.id} className="rounded-[28px] border border-zinc-200 bg-white p-5 shadow-sm">
@@ -144,8 +180,23 @@ export default function OrdersPage() {
                     <div>
                       <div className="flex flex-wrap items-center gap-2">
                         <h2 className="text-lg font-extrabold text-zinc-950">{order.id}</h2>
-                        <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-extrabold text-emerald-600">
+                        <span
+                          className={`rounded-full px-2.5 py-1 text-[11px] font-extrabold ${
+                            isCancelled
+                              ? "bg-red-50 text-red-600"
+                              : "bg-emerald-50 text-emerald-600"
+                          }`}
+                        >
                           {statusText[order.status] || "Đang xử lý"}
+                        </span>
+                        <span
+                          className={`rounded-full px-2.5 py-1 text-[11px] font-semibold border ${
+                            order.paymentMethod === "COD"
+                              ? "bg-amber-50 text-amber-800 border-amber-200/80"
+                              : "bg-blue-50 text-blue-800 border-blue-200/80"
+                          }`}
+                        >
+                          {getPaymentMethodLabel(order.paymentMethod)}
                         </span>
                       </div>
                       <p className="mt-1 text-xs font-semibold text-zinc-400">
@@ -155,34 +206,53 @@ export default function OrdersPage() {
                         {order.address}
                       </p>
                     </div>
-                    <div className="text-left lg:text-right">
-                      <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-zinc-400">
-                        Tổng tiền
-                      </p>
-                      <p className="mt-1 text-2xl font-extrabold text-zinc-950">
-                        {formatCartPrice(order.totalPrice)}
-                      </p>
+                    <div className="flex items-center justify-between gap-4 lg:flex-col lg:items-end">
+                      <div className="text-left lg:text-right">
+                        <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-zinc-400">
+                          Tổng tiền
+                        </p>
+                        <p className={`mt-1 text-2xl font-extrabold ${isCancelled ? "text-zinc-400 line-through" : "text-zinc-950"}`}>
+                          {formatCartPrice(order.totalPrice)}
+                        </p>
+                      </div>
+                      {canCancel && (
+                        <button
+                          type="button"
+                          onClick={() => setCancelModalOrder(order)}
+                          className="inline-flex h-9 items-center justify-center gap-1.5 rounded-full border border-red-200 bg-red-50/60 px-4 text-xs font-extrabold text-red-600 transition hover:bg-red-100 active:scale-95 cursor-pointer"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                          {order.paymentMethod === "COD" ? "Hủy đơn COD" : "Hủy đơn hàng"}
+                        </button>
+                      )}
                     </div>
                   </div>
 
-                  <div className="mt-5 grid gap-3 sm:grid-cols-5">
-                    {statusSteps.map(({ id, label, Icon }, index) => {
-                      const active = index <= currentStep;
-                      return (
-                        <div
-                          key={id}
-                          className={`rounded-2xl border px-3 py-3 ${
-                            active
-                              ? "border-zinc-950 bg-zinc-950 text-white"
-                              : "border-zinc-100 bg-zinc-50 text-zinc-400"
-                          }`}
-                        >
-                          <Icon className="mb-2 h-4 w-4" />
-                          <p className="text-xs font-extrabold">{label}</p>
-                        </div>
-                      );
-                    })}
-                  </div>
+                  {isCancelled ? (
+                    <div className="mt-5 flex items-center gap-3 rounded-2xl bg-red-50 px-4 py-3 text-xs font-bold text-red-600">
+                      <XCircle className="h-4 w-4 shrink-0" />
+                      <span>Đơn hàng này đã được hủy thành công.</span>
+                    </div>
+                  ) : (
+                    <div className="mt-5 grid gap-3 sm:grid-cols-5">
+                      {statusSteps.map(({ id, label, Icon }, index) => {
+                        const active = index <= currentStep;
+                        return (
+                          <div
+                            key={id}
+                            className={`rounded-2xl border px-3 py-3 ${
+                              active
+                                ? "border-zinc-950 bg-zinc-950 text-white"
+                                : "border-zinc-100 bg-zinc-50 text-zinc-400"
+                            }`}
+                          >
+                            <Icon className="mb-2 h-4 w-4" />
+                            <p className="text-xs font-extrabold">{label}</p>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
 
                   <div className="mt-5 space-y-3">
                     {order.items.map((item) => (
@@ -207,6 +277,61 @@ export default function OrdersPage() {
                 </article>
               );
             })}
+          </div>
+        )}
+
+        {/* Modal xác nhận hủy đơn */}
+        {cancelModalOrder && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs p-4">
+            <div className="w-full max-w-md overflow-hidden rounded-[28px] bg-white p-6 shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+              <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-red-50 text-red-600">
+                <AlertCircle className="h-7 w-7" />
+              </div>
+
+              <h3 className="text-center text-xl font-extrabold text-zinc-950">
+                Xác nhận hủy đơn hàng?
+              </h3>
+              <p className="mt-2 text-center text-sm font-medium leading-relaxed text-zinc-500">
+                Bạn có chắc chắn muốn hủy đơn hàng{" "}
+                <span className="font-extrabold text-zinc-950">{cancelModalOrder.id}</span>?
+              </p>
+
+              {cancelModalOrder.paymentMethod === "COD" ? (
+                <div className="mt-4 rounded-2xl bg-amber-50 border border-amber-200/80 p-3.5 text-left text-xs font-semibold text-amber-900 leading-relaxed">
+                  💡 Đây là đơn hàng <b>Thanh toán khi nhận hàng (COD)</b>. Đơn hàng sẽ được hủy ngay lập tức mà không phát sinh bất kỳ khoản phí nào.
+                </div>
+              ) : (
+                <div className="mt-4 rounded-2xl bg-blue-50 border border-blue-200/80 p-3.5 text-left text-xs font-semibold text-blue-900 leading-relaxed">
+                  💡 Đơn hàng này đã được thanh toán trực tuyến. Khi hủy đơn, trạng thái sẽ chuyển sang <b>Đã hủy</b> để cửa hàng xử lý hoàn tiền.
+                </div>
+              )}
+
+              <div className="mt-6 flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => setCancelModalOrder(null)}
+                  className="flex-1 h-11 rounded-full border border-zinc-200 bg-white text-sm font-bold text-zinc-700 hover:bg-zinc-50 transition cursor-pointer"
+                  disabled={cancellingId === cancelModalOrder.id}
+                >
+                  Bỏ qua
+                </button>
+                <button
+                  type="button"
+                  onClick={handleConfirmCancel}
+                  disabled={cancellingId === cancelModalOrder.id}
+                  className="flex-1 h-11 inline-flex items-center justify-center gap-2 rounded-full bg-red-600 text-sm font-bold text-white transition hover:bg-red-700 disabled:opacity-50 cursor-pointer"
+                >
+                  {cancellingId === cancelModalOrder.id ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Đang hủy...
+                    </>
+                  ) : (
+                    cancelModalOrder.paymentMethod === "COD" ? "Hủy đơn COD" : "Xác nhận hủy"
+                  )}
+                </button>
+              </div>
+            </div>
           </div>
         )}
       </div>

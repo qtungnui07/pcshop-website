@@ -52,7 +52,7 @@ function parsePCProduct(raw: any): PCProduct {
   else if (specsStr.includes('Ryzen 7') || specsStr.includes('7800') || specsStr.includes('7700')) cpuSeriesVal = 'Ryzen 7';
   else if (specsStr.includes('Ryzen 5') || specsStr.includes('7600') || specsStr.includes('5600')) cpuSeriesVal = 'Ryzen 5';
 
-  let cpuBrandVal: 'Intel' | 'AMD' = specsStr.toLowerCase().includes('ryzen') || specsStr.toLowerCase().includes('threadripper') ? 'AMD' : 'Intel';
+  const cpuBrandVal: 'Intel' | 'AMD' = specsStr.toLowerCase().includes('ryzen') || specsStr.toLowerCase().includes('threadripper') ? 'AMD' : 'Intel';
 
   let categoryVal: any = 'PC Gaming';
   const nameLower = (raw.name || "").toLowerCase();
@@ -176,6 +176,42 @@ const categoryMappings = {
     to: "#cbd5e1",
     glow: "rgba(148,163,184,0.15)",
     bgGradient: "linear-gradient(135deg, #ffffff 0%, #fafafa 40%, #f5f5f5 70%, #e5e5e5 100%)",
+  },
+  "pho-thong-duoi-15tr": {
+    title: "PC PHỔ THÔNG (DƯỚI 15 TRỆU)",
+    subtitle: "cấu hình PC phổ thông đáp ứng nhu cầu học tập, giải trí & gaming nhẹ.",
+    dbCategoryName: "ALL" as const,
+    from: "#34d399",
+    to: "#059669",
+    glow: "rgba(52,211,153,0.3)",
+    bgGradient: "linear-gradient(135deg, #ffffff 0%, #ecfdf5 40%, #d1fae5 70%, #a7f3d0 100%)",
+  },
+  "tam-trung-15-30tr": {
+    title: "PC TẦM TRUNG (15 - 30 TRIỆU)",
+    subtitle: "hiệu năng cân bằng hoàn hảo cho mọi tựa game Esport & đồ họa phổ thông.",
+    dbCategoryName: "ALL" as const,
+    from: "#60a5fa",
+    to: "#2563eb",
+    glow: "rgba(96,165,250,0.3)",
+    bgGradient: "linear-gradient(135deg, #ffffff 0%, #eff6ff 40%, #dbeafe 70%, #bfdbfe 100%)",
+  },
+  "cao-cap-tren-30tr": {
+    title: "PC CAO CẤP (TRÊN 30 TRIỆU)",
+    subtitle: "hiệu năng vượt trội cho công việc thiết kế nặng, render & chiến game AAA.",
+    dbCategoryName: "ALL" as const,
+    from: "#a78bfa",
+    to: "#7c3aed",
+    glow: "rgba(167,139,250,0.3)",
+    bgGradient: "linear-gradient(135deg, #ffffff 0%, #f5f3ff 40%, #ede9fe 70%, #ddd6fe 100%)",
+  },
+  "hi-end-custom": {
+    title: "PC HI-END CUSTOM",
+    subtitle: "dàn máy đỉnh cao thiết kế custom, tản nhiệt nước & linh kiện cao cấp nhất.",
+    dbCategoryName: "ALL" as const,
+    from: "#f43f5e",
+    to: "#be123c",
+    glow: "rgba(244,63,94,0.3)",
+    bgGradient: "linear-gradient(135deg, #ffffff 0%, #fff1f2 40%, #ffe4e6 70%, #fecdd3 100%)",
   }
 };
 
@@ -195,9 +231,28 @@ export default function PCCategoryPage() {
   // States for interactive filters
   const minLimit = 0;
   const maxLimit = 100000000;
-  const [minPrice, setMinPrice] = useState(10000000);
+  const [minPrice, setMinPrice] = useState(0);
   const [maxPrice, setMaxPrice] = useState(100000000);
   
+  useEffect(() => {
+    if (slug === 'pho-thong-duoi-15tr') {
+      setMinPrice(0);
+      setMaxPrice(15000000);
+    } else if (slug === 'tam-trung-15-30tr') {
+      setMinPrice(15000000);
+      setMaxPrice(30000000);
+    } else if (slug === 'cao-cap-tren-30tr') {
+      setMinPrice(30000000);
+      setMaxPrice(50000000);
+    } else if (slug === 'hi-end-custom') {
+      setMinPrice(50000000);
+      setMaxPrice(100000000);
+    } else {
+      setMinPrice(0);
+      setMaxPrice(100000000);
+    }
+  }, [slug]);
+
   const [selectedRams, setSelectedRams] = useState<string[]>([]);
   const [selectedCpus, setSelectedCpus] = useState<string[]>([]);
   const [selectedGpus, setSelectedGpus] = useState<string[]>([]);
@@ -246,8 +301,17 @@ export default function PCCategoryPage() {
   };
 
   const resetFilters = () => {
-    setMinPrice(10000000);
-    setMaxPrice(100000000);
+    if (slug === 'pho-thong-duoi-15tr') {
+      setMinPrice(0); setMaxPrice(15000000);
+    } else if (slug === 'tam-trung-15-30tr') {
+      setMinPrice(15000000); setMaxPrice(30000000);
+    } else if (slug === 'cao-cap-tren-30tr') {
+      setMinPrice(30000000); setMaxPrice(50000000);
+    } else if (slug === 'hi-end-custom') {
+      setMinPrice(50000000); setMaxPrice(100000000);
+    } else {
+      setMinPrice(0); setMaxPrice(100000000);
+    }
     setSelectedRams([]);
     setSelectedCpus([]);
     setSelectedGpus([]);
@@ -265,7 +329,9 @@ export default function PCCategoryPage() {
   // Filter & Sort Products
   const filteredProducts = useMemo(() => {
     // 1. Filter by active category
-    let list = products.filter(p => p.category === meta.dbCategoryName);
+    let list = meta.dbCategoryName === "ALL" 
+      ? products 
+      : products.filter(p => p.category === meta.dbCategoryName);
 
     // 2. Filter by Price Range
     list = list.filter(p => p.price >= minPrice && p.price <= maxPrice);
@@ -299,7 +365,7 @@ export default function PCCategoryPage() {
 
   // Count helper functions for labels
   const getFilterCounts = useMemo(() => {
-    const baseList = products.filter(p => p.category === meta.dbCategoryName);
+    const baseList = meta.dbCategoryName === "ALL" ? products : products.filter(p => p.category === meta.dbCategoryName);
     
     const ramCounts: Record<string, number> = {};
     const cpuCounts: Record<string, number> = {};
