@@ -63,7 +63,7 @@ export default function TwoBannerCardsSection() {
         }
       })
       .catch(() => {
-        // Keep the browser-local version as an offline fallback.
+        
       });
   }, []);
 
@@ -139,7 +139,7 @@ export default function TwoBannerCardsSection() {
                 </div>
               )}
               
-              {/* Hiệu ứng mờ góc dưới */}
+              
               <div className="flex justify-end items-end w-full h-full opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                  <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center text-white">
                     →

@@ -19,7 +19,7 @@ const getCategoryIcon = (name: string) => {
   if (n.includes('van phong') || n.includes('văn phòng')) return Clock;
   if (n.includes('workstation')) return Cpu;
   if (n.includes('do hoa') || n.includes('đồ họa')) return Palette;
-  return Cpu; // Default
+  return Cpu; 
 };
 
 export default function CategoriesSection() {
@@ -49,7 +49,7 @@ export default function CategoriesSection() {
                 whileHover={{ y: -4 }}
                 className="group cursor-pointer bg-white rounded-2xl border border-zinc-100 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden"
               >
-                {/* Product image */}
+                
                 <div className="w-full aspect-[4/3] relative overflow-hidden bg-zinc-50">
                   <img
                     src={`/images/${cat.imgName}`}

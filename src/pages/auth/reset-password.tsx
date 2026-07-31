@@ -52,7 +52,7 @@ export default function ResetPassword() {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
-  // Password requirements
+  
   const hasMinLength = password.length >= 8;
   const hasUppercase = /[A-Z]/.test(password);
   const hasLowercase = /[a-z]/.test(password);
@@ -245,7 +245,7 @@ export default function ResetPassword() {
                     />
                   </div>
 
-                  {/* Password requirements */}
+                  
                   <div className="grid grid-cols-2 gap-x-4 gap-y-2 pt-3 mt-2 border-t border-gray-100/80 overflow-hidden">
                     <RequirementItem satisfied={hasMinLength} label="Tối thiểu 8 ký tự" />
                     <RequirementItem satisfied={hasUppercase} label="1 ký tự viết hoa" />

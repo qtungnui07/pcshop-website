@@ -38,7 +38,7 @@ const API_BASE = typeof window !== "undefined"
     : `${window.location.protocol}//${window.location.hostname}:${PORT}`)
   : `http://localhost:${PORT}`;
 
-// PC image presets
+
 const PC_IMAGE_TEMPLATES = [
   { name: "Infinity RGB (Purple/Pink)", filename: "pc-infinity.png", url: `${API_BASE}/images/pcs/pc-infinity.png` },
   { name: "Frost RGB (White/Cyan)", filename: "pc-frost.png", url: `${API_BASE}/images/pcs/pc-frost.png` },
@@ -184,11 +184,11 @@ export default function AdminEdit() {
   const editIndex = indexParam !== null ? parseInt(indexParam, 10) : -1;
   const isNew = editIndex === -1;
 
-  // DB State for fetching dependencies (combo needs accessory list)
+  
   const [accessories, setAccessories] = useState<any[]>([]);
   const [loadingDb, setLoadingDb] = useState(true);
 
-  // Form states
+  
   const [formName, setFormName] = useState("");
   const [formSpecs, setFormSpecs] = useState("");
   const [formPrice, setFormPrice] = useState("");
@@ -198,36 +198,36 @@ export default function AdminEdit() {
   const [isCustomImage, setIsCustomImage] = useState(false);
   const [customImageUrl, setCustomImageUrl] = useState("");
 
-  // PC background gradient fields
+  
   const [formFrom, setFormFrom] = useState("#7c3aed");
   const [formTo, setFormTo] = useState("#ec4899");
 
-  // Brand selector
+  
   const [formBrand, setFormBrand] = useState("");
 
-  // Linh kien fields
+  
   const [formLinhKienCategory, setFormLinhKienCategory] = useState("RAM");
   const [formLinhKienColor, setFormLinhKienColor] = useState("#e0e7ef");
 
-  // Phu kien fields
+  
   const [formPhuKienCategory, setFormPhuKienCategory] = useState("Tai nghe");
   const [formPhuKienColors, setFormPhuKienColors] = useState<string[]>([]);
   const [formPhuKienFallbackIcon, setFormPhuKienFallbackIcon] = useState("Headphones");
 
-  // Combo accessory fields
+  
   const [formComboProductIds, setFormComboProductIds] = useState<string[]>([]);
 
-  // Account specific fields
+  
   const [accountName, setAccountName] = useState("");
   const [accountEmail, setAccountEmail] = useState("");
   const [accountPassword, setAccountPassword] = useState("");
   const [accountRole, setAccountRole] = useState<"admin" | "user">("user");
 
-  // Validation
+  
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
 
-  // Fetch full databases on load to map form values
+  
   useEffect(() => {
     if (!user || user.role !== "admin") return;
 
@@ -236,11 +236,11 @@ export default function AdminEdit() {
       try {
         const authHeader = { "Authorization": `Bearer ${user.email}` };
         
-        // Fetch accessories since combo editing depends on it
+        
         const accRes = await fetch(`${API_BASE}/api/accessories`).then(r => r.json());
         setAccessories(accRes);
 
-        // Fetch current category database to load selected item
+        
         let catUrl = "";
         if (category === "pc") catUrl = `${API_BASE}/api/featured-pcs`;
         else if (category === "laptop") catUrl = `${API_BASE}/api/laptops`;
@@ -254,12 +254,12 @@ export default function AdminEdit() {
 
         if (!isNew && items[editIndex]) {
           const item = items[editIndex];
-          // Pre-populate fields based on categories
+          
           if (category === "accounts") {
             setAccountName(item.name || "");
             setAccountEmail(item.email || "");
             setAccountRole(item.role || "user");
-            setAccountPassword(""); // clear for safety
+            setAccountPassword(""); 
           } else if (category === "combo-phu-kien") {
             setFormName(item.title || item.name || "");
             setFormSpecs(item.desc || item.specs || "");
@@ -301,7 +301,7 @@ export default function AdminEdit() {
             }
           }
         } else {
-          // Defaults for new items
+          
           if (category === "pc") {
             setFormImage(PC_IMAGE_TEMPLATES[0].url);
             setFormFrom("#7c3aed");
@@ -398,7 +398,7 @@ export default function AdminEdit() {
     try {
       const authHeader = { "Authorization": `Bearer ${user.email}` };
       
-      // 1. Fetch current list of products/accounts from backend
+      
       let catUrl = "";
       if (category === "pc") catUrl = `${API_BASE}/api/featured-pcs`;
       else if (category === "laptop") catUrl = `${API_BASE}/api/laptops`;
@@ -410,7 +410,7 @@ export default function AdminEdit() {
       const listRes = await fetch(catUrl, { headers: authHeader });
       const currentList = await listRes.json();
 
-      // 2. Prepare the new/updated item object
+      
       let newItem: any = {};
       
       if (category === "accounts") {
@@ -494,14 +494,14 @@ export default function AdminEdit() {
         };
       }
 
-      // 3. Write back to list
+      
       if (isNew) {
         currentList.push(newItem);
       } else {
         currentList[editIndex] = newItem;
       }
 
-      // 4. PUT / POST database immediately to auto-save
+      
       const saveRes = await fetch(catUrl, {
         method: "POST",
         headers: {
@@ -512,7 +512,7 @@ export default function AdminEdit() {
       });
       if (!saveRes.ok) throw new Error("Auto-save failed");
 
-      // Redirect back with successful save
+      
       navigate(`/admin?view=${category === "accounts" ? "accounts" : "products"}${category === "accounts" ? "" : `&category=${category}`}`);
     } catch (err) {
       console.error(err);
@@ -566,7 +566,7 @@ export default function AdminEdit() {
   return (
     <div className="w-full max-w-5xl mx-auto">
       
-      {/* Back button header */}
+      
       <div className="flex items-center gap-3.5 mb-6">
         <button
           onClick={() => navigate(`/admin?view=${category === "accounts" ? "accounts" : "products"}${category === "accounts" ? "" : `&category=${category}`}`)}
@@ -586,10 +586,10 @@ export default function AdminEdit() {
 
       <form onSubmit={handleSaveForm} className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         
-        {/* LEFT COLUMN: Main Form Inputs (7-8 columns) */}
+        
         <div className="lg:col-span-7 xl:col-span-8 bg-white border border-zinc-200 p-6 rounded-2xl shadow-sm space-y-4">
           
-          {/* Smart template dropdown (except accounts/combo) */}
+          
           {category !== "accounts" && category !== "combo-phu-kien" && (
             <div className="bg-zinc-50 border border-zinc-200 rounded-xl p-3.5 space-y-1.5">
               <label className="block text-[9px] font-black text-zinc-500 uppercase tracking-widest">
@@ -615,7 +615,7 @@ export default function AdminEdit() {
             </div>
           )}
 
-          {/* DYNAMIC FIELD INPUTS */}
+          
           <div className="space-y-4 text-xs font-bold text-zinc-600">
             
             {category === "accounts" ? (
@@ -673,7 +673,7 @@ export default function AdminEdit() {
             ) : (
               <div className="space-y-4">
                 
-                {/* Brand select */}
+                
                 {category === "laptop" && (
                   <div>
                     <label className="block mb-1 text-zinc-700">Thương hiệu</label>
@@ -703,7 +703,7 @@ export default function AdminEdit() {
                   </div>
                 )}
 
-                {/* Category select */}
+                
                 {category === "linh-kien" && (
                   <div>
                     <label className="block mb-1 text-zinc-700">Danh mục Linh kiện</label>
@@ -747,7 +747,7 @@ export default function AdminEdit() {
                   </div>
                 )}
 
-                {/* Name */}
+                
                 <div>
                   <label className="block mb-1 text-zinc-700">Tên sản phẩm / Combo</label>
                   <input
@@ -761,7 +761,7 @@ export default function AdminEdit() {
                   {formErrors.name && <span className="text-[10px] text-red-500 mt-1 block">{formErrors.name}</span>}
                 </div>
 
-                {/* Specs description */}
+                
                 <div>
                   <label className="block mb-1 text-zinc-700">
                     {category === "combo-phu-kien" ? "Mô tả combo" : "Thông số kỹ thuật chi tiết (Ấn Enter xuống dòng)"}
@@ -776,7 +776,7 @@ export default function AdminEdit() {
                   />
                 </div>
 
-                {/* Price / Discount percent */}
+                
                 <div>
                   <label className="block mb-1 text-zinc-700">
                     {category === "combo-phu-kien" ? "Giảm giá combo (%)" : "Giá hiển thị"}
@@ -792,7 +792,7 @@ export default function AdminEdit() {
                   {formErrors.price && <span className="text-[10px] text-red-500 mt-1 block">{formErrors.price}</span>}
                 </div>
 
-                {/* Combo Selector for accessories */}
+                
                 {category === "combo-phu-kien" && (
                   <div className="border border-zinc-200 rounded-xl p-4 bg-zinc-50 space-y-3">
                     <label className="block text-zinc-750 font-extrabold uppercase text-[10px] tracking-wider">
@@ -849,7 +849,7 @@ export default function AdminEdit() {
 
           </div>
 
-          {/* Form Actions */}
+          
           <div className="flex items-center gap-3 border-t border-zinc-100 pt-5">
             <button
               type="submit"
@@ -870,11 +870,11 @@ export default function AdminEdit() {
 
         </div>
 
-        {/* RIGHT COLUMN: Visuals / Colors / Image Templates (4-5 columns) */}
+        
         {category !== "accounts" && (
           <div className="lg:col-span-5 xl:col-span-4 space-y-6">
 
-            {/* Live product preview */}
+            
             <div className="overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm">
               <div className="border-b border-zinc-100 px-5 py-3">
                 <h3 className="text-[10px] font-extrabold uppercase tracking-wider text-zinc-900">
@@ -939,7 +939,7 @@ export default function AdminEdit() {
               </div>
             </div>
             
-            {/* Badges details settings (Except combo / laptop) */}
+            
             {category !== "laptop" && category !== "combo-phu-kien" && (
               <div className="bg-white border border-zinc-200 p-5 rounded-2xl shadow-sm space-y-4 text-xs font-bold">
                 <h3 className="font-extrabold text-zinc-900 uppercase text-[10px] tracking-wider border-b border-zinc-100 pb-2.5">
@@ -978,7 +978,7 @@ export default function AdminEdit() {
               </div>
             )}
 
-            {/* PC Fallback settings */}
+            
             {category === "pc" && (
               <div className="bg-white border border-zinc-200 p-5 rounded-2xl shadow-sm space-y-4 text-xs font-bold">
                 <h3 className="font-extrabold text-zinc-900 uppercase text-[10px] tracking-wider border-b border-zinc-100 pb-2.5">
@@ -1011,7 +1011,7 @@ export default function AdminEdit() {
               </div>
             )}
 
-            {/* Components fallback color */}
+            
             {category === "linh-kien" && (
               <div className="bg-white border border-zinc-200 p-5 rounded-2xl shadow-sm space-y-4 text-xs font-bold">
                 <h3 className="font-extrabold text-zinc-900 uppercase text-[10px] tracking-wider border-b border-zinc-100 pb-2.5">
@@ -1034,7 +1034,7 @@ export default function AdminEdit() {
               </div>
             )}
 
-            {/* Accessories colors & icons options */}
+            
             {category === "phu-kien" && (
               <div className="bg-white border border-zinc-200 p-5 rounded-2xl shadow-sm space-y-4 text-xs font-bold">
                 <h3 className="font-extrabold text-zinc-900 uppercase text-[10px] tracking-wider border-b border-zinc-100 pb-2.5">
@@ -1082,7 +1082,7 @@ export default function AdminEdit() {
               </div>
             )}
 
-            {/* Media Image / Image Templates upload */}
+            
             <div className="bg-white border border-zinc-200 p-5 rounded-2xl shadow-sm space-y-4 text-xs font-bold">
               <h3 className="font-extrabold text-zinc-900 uppercase text-[10px] tracking-wider border-b border-zinc-100 pb-2.5 flex items-center gap-1.5">
                 <Image className="w-4.5 h-4.5 text-zinc-450" />
@@ -1136,7 +1136,7 @@ export default function AdminEdit() {
                 </div>
               )}
 
-              {/* Dynamic live image preview */}
+              
               <div className="w-full aspect-video border border-zinc-150 rounded-xl bg-zinc-50 flex items-center justify-center p-2 overflow-hidden">
                 {(isCustomImage ? customImageUrl : formImage) ? (
                   <img

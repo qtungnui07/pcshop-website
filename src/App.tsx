@@ -4,7 +4,7 @@ import { CartProvider } from './context/CartContext';
 import type { ComponentType } from 'react';
 import { useEffect, useRef } from 'react';
 
-// Automatically import all .tsx files inside the pages directory
+
 const modules = import.meta.glob('./pages/**/*.tsx', { eager: true });
 
 const routes = Object.keys(modules).map((path) => {
@@ -13,17 +13,17 @@ const routes = Object.keys(modules).map((path) => {
   
   let routePath = match[1].toLowerCase();
   
-  // Transform 'index' or 'folder/index' to correct URLs
+  
   routePath = routePath.replace(/\/index$/, '').replace(/^index$/, '/');
   
-  // Transform Next.js style dynamic routes: [category] -> :category
+  
   routePath = routePath.replace(/\[([^\]]+)\]/g, ':$1');
 
   if (routePath !== '/') {
     routePath = `/${routePath}`;
   }
 
-  // @ts-ignore
+  
   const Component = modules[path].default as ComponentType;
   
   return {
@@ -51,12 +51,12 @@ function ScrollToTop() {
     prevPathnameRef.current = pathname;
     prevCategoryRef.current = category;
 
-    // Only scroll if pathname or category has changed
+    
     if (!pathnameChanged && !categoryChanged) {
       return;
     }
 
-    // If pathname didn't change, we are on /linh-kien, category changed, but we are NOT scrolling to #danh-muc-linh-kien, we return early
+    
     if (!pathnameChanged && hasComponentCategory && !shouldScrollToComponentCategories) {
       return;
     }

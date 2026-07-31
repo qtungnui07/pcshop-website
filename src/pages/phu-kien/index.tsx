@@ -26,18 +26,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import AddToCartButton from "../../components/AddToCartButton";
 import { ProductSkeletonGrid } from "../../components/ui/skeleton";
 
-/*
-  src/pages/phu-kien/index.tsx
 
-  Trang này chỉ là FRONTEND HIỂN THỊ.
-  Không hardcode danh sách sản phẩm phụ kiện trong file này.
-
-  Luồng đúng:
-  Admin thêm/sửa/xóa phụ kiện
-  → Backend lưu dữ liệu
-  → Trang /phu-kien fetch từ /api/accessories
-  → Frontend render sản phẩm.
-*/
 
 type AccessoryProduct = {
   id: string;
@@ -690,7 +679,7 @@ export default function PhuKienIndex() {
 
   return (
     <div className="bg-white text-[#1d1d1f]">
-      {/* HERO */}
+      
       <section
         className="relative overflow-hidden border-b border-zinc-100 bg-[linear-gradient(90deg,#f8f8fa_0%,#f5f5f7_50%,#f2f2f4_100%)]"
         style={{
@@ -825,7 +814,7 @@ export default function PhuKienIndex() {
       </section>
 
       <main className="mx-auto max-w-[1700px] px-4 md:px-8 lg:px-10 xl:px-12 2xl:px-16">
-        {/* CATEGORIES */}
+        
         <section className="py-9">
           <div className="mb-5 flex items-center justify-between">
             <h2 className="text-[19px] font-bold tracking-tight text-zinc-950">
@@ -874,7 +863,7 @@ export default function PhuKienIndex() {
           </div>
         </section>
 
-        {/* MOBILE TOOLBAR */}
+        
         <section className="mb-4 flex items-center justify-between gap-3 lg:hidden">
           <button
             onClick={() => setShowMobileFilter(true)}
@@ -896,12 +885,12 @@ export default function PhuKienIndex() {
           </select>
         </section>
 
-        {/* PRODUCT AREA */}
+        
         <section
           id="accessories-products"
           className="scroll-mt-28 grid grid-cols-1 gap-8 lg:grid-cols-[245px_1fr]"
         >
-          {/* FILTER SIDEBAR */}
+          
           <aside
             className={`fixed inset-y-0 left-0 z-50 w-[300px] overflow-y-auto bg-white p-5 shadow-2xl transition-transform lg:sticky lg:top-24 lg:z-auto lg:h-fit lg:w-auto lg:translate-x-0 lg:rounded-[20px] lg:border lg:border-zinc-100 lg:shadow-[0_6px_22px_rgba(0,0,0,0.05)] ${showMobileFilter ? "translate-x-0" : "-translate-x-full"
               }`}
@@ -1081,7 +1070,7 @@ export default function PhuKienIndex() {
             />
           )}
 
-          {/* PRODUCTS */}
+          
           <div>
             <div className="mb-6 hidden items-center justify-between lg:flex">
               <p className="text-[13px] text-zinc-500">
@@ -1332,7 +1321,7 @@ export default function PhuKienIndex() {
           </div>
         </section>
 
-        {/* COMBOS */}
+        
         <section className="py-14 md:py-16 lg:ml-[277px]">
           <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>

@@ -127,7 +127,7 @@ export default function AdminIndex() {
     requestedCategory && productCategories.includes(requestedCategory) ? requestedCategory : "pc"
   );
 
-  // Database arrays
+  
   const [pcs, setPcs] = useState<PCItem[]>([]);
   const [laptops, setLaptops] = useState<LaptopItem[]>([]);
   const [components, setComponents] = useState<ComponentItem[]>([]);
@@ -138,7 +138,7 @@ export default function AdminIndex() {
   const [orders, setOrders] = useState<any[]>([]);
   const [staffMembers, setStaffMembers] = useState<any[]>([]);
 
-  // UI States
+  
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
@@ -152,7 +152,7 @@ export default function AdminIndex() {
     setTimeout(() => setToastMessage(null), 2500);
   };
 
-  // Fetch all databases on mount
+  
   const fetchData = async () => {
     if (!user || user.role !== "admin") return;
     setLoading(true);
@@ -220,7 +220,7 @@ export default function AdminIndex() {
     }
   }, [requestedCategory]);
 
-  // Determine current active list for Products view
+  
   const getActiveList = () => {
     if (activeCategory === "pc") return pcs;
     if (activeCategory === "laptop") return laptops;
@@ -253,7 +253,7 @@ export default function AdminIndex() {
     });
   };
 
-  // Direct Auto-Save to Backend
+  
   const autoSaveCategory = async (category: string, updatedList: any[]) => {
     if (!user || user.role !== "admin") return;
     let url = "";
@@ -281,7 +281,7 @@ export default function AdminIndex() {
     }
   };
 
-  // Re-ordering handler
+  
   const handleMove = async (indexInFilteredList: number, direction: "up" | "down") => {
     const filteredList = getFilteredList();
     const activeList = [...getActiveList()];
@@ -303,15 +303,15 @@ export default function AdminIndex() {
 
     if (targetIndex === -1 || targetIndex === originalIndex) return;
 
-    // Swap original items
+    
     const temp = activeList[originalIndex];
     activeList[originalIndex] = activeList[targetIndex];
     activeList[targetIndex] = temp;
 
-    // Update state
+    
     updateActiveListState(activeList);
     
-    // Auto-save direct
+    
     await autoSaveCategory(activeCategory, activeList);
     showToast("Đã cập nhật thứ tự!");
   };
@@ -326,7 +326,7 @@ export default function AdminIndex() {
     else setAccounts(newList);
   };
 
-  // Delete item
+  
   const handleDelete = async (indexInFilteredList: number) => {
     const filteredList = getFilteredList();
     const activeList = getActiveList();
@@ -342,12 +342,12 @@ export default function AdminIndex() {
     const newList = activeList.filter(x => x !== item);
     updateActiveListState(newList);
 
-    // Auto-save direct
+    
     await autoSaveCategory(activeCategory, newList);
     showToast("Đã xóa thành công!");
   };
 
-  // Ticket Status Direct Save
+  
   const handleUpdateTicketStatus = async (ticketId: string, newStatus: string) => {
     try {
       const res = await fetch(`${API_BASE}/api/tickets/update`, {
@@ -368,7 +368,7 @@ export default function AdminIndex() {
     }
   };
 
-  // Order Status & Payment Status Direct Save
+  
   const handleUpdateOrderStatus = async (orderId: string, newStatus: string) => {
     try {
       const res = await fetch(`${API_BASE}/api/orders/update`, {
@@ -409,7 +409,7 @@ export default function AdminIndex() {
     }
   };
 
-  // Order Delete Direct Save
+  
   const handleDeleteOrder = async (orderId: string) => {
     if (!confirm(`Bạn có chắc chắn muốn xóa đơn hàng #${orderId}?`)) return;
     const updatedOrders = orders.filter(o => o.id !== orderId);
@@ -454,7 +454,7 @@ export default function AdminIndex() {
     return new Intl.NumberFormat("vi-VN").format(num) + "đ";
   };
 
-  // Auth screen checking
+  
   if (authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center font-sans bg-[#f8fafc]">
@@ -501,7 +501,7 @@ export default function AdminIndex() {
     );
   }
 
-  // Statistics calculation for Dashboard
+  
   const activeOrders = orders.filter(o => o.status !== "cancelled");
   const totalRevenue = activeOrders.reduce((sum, order) => {
     if (order.paymentStatus === "success") {
@@ -512,13 +512,13 @@ export default function AdminIndex() {
   const avgOrderValue = activeOrders.length > 0 ? Math.round(totalRevenue / activeOrders.length) : 0;
   const totalProducts = pcs.length + laptops.length + components.length + accessories.length;
 
-  // Pie chart stats: Order Statuses
+  
   const processingCount = orders.filter(o => o.status === "processing").length;
   const completedCount = orders.filter(o => o.status === "completed").length;
   const cancelledCount = orders.filter(o => o.status === "cancelled").length;
   const chartTotal = orders.length || 1;
 
-  const circ = 2 * Math.PI * 40; // R=40, C=251.3
+  const circ = 2 * Math.PI * 40; 
   const completedDash = (completedCount / chartTotal) * circ;
   const processingDash = (processingCount / chartTotal) * circ;
   const cancelledDash = (cancelledCount / chartTotal) * circ;
@@ -527,7 +527,7 @@ export default function AdminIndex() {
   const processingOffset = completedDash;
   const cancelledOffset = completedDash + processingDash;
 
-  // Bar chart stats: Top 5 Best Selling products
+  
   const productSales: Record<string, { name: string; count: number; image?: string; price?: any }> = {};
   orders.forEach(order => {
     if (order.status !== "cancelled" && Array.isArray(order.items)) {
@@ -545,7 +545,7 @@ export default function AdminIndex() {
     .slice(0, 5);
   const maxSalesCount = Math.max(...bestSellers.map(x => x.count), 1);
 
-  // Search filter for Invoice/Order View
+  
   const getFilteredOrders = () => {
     if (!searchQuery.trim()) return orders;
     const q = searchQuery.toLowerCase();
@@ -561,7 +561,7 @@ export default function AdminIndex() {
 
   return (
     <div className="admin-page w-full h-full flex flex-col min-h-0">
-      {/* HEADER SECTION */}
+      
       <div className="admin-page-header flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-6 mb-7">
         <div>
           <div className="flex items-center gap-2 mb-1">
@@ -599,13 +599,13 @@ export default function AdminIndex() {
       ) : (
         <div className="admin-content-scroll w-full flex-1 min-h-0 overflow-y-auto">
           
-          {/* ────────────────────────────────────────────────────────── */}
-          {/* VIEW: DASHBOARD                                            */}
-          {/* ────────────────────────────────────────────────────────── */}
+          
+          
+          
           {view === "dashboard" && (
             <div className="space-y-6">
               
-              {/* Stat Cards Grid */}
+              
               <div className="admin-stat-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div className="admin-stat-card admin-stat-primary p-5 rounded-2xl flex items-center gap-4">
                   <div className="admin-stat-icon p-3 rounded-xl">
@@ -648,10 +648,10 @@ export default function AdminIndex() {
                 </div>
               </div>
 
-              {/* Charts Section Grid */}
+              
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
                 
-                {/* Order Status conversion Donut Chart */}
+                
                 <div className="admin-panel lg:col-span-5 p-6 rounded-2xl flex flex-col justify-between">
                   <div>
                     <h3 className="admin-panel-title font-extrabold text-sm text-zinc-950 mb-1">Trạng thái đơn hàng</h3>
@@ -659,13 +659,13 @@ export default function AdminIndex() {
                   </div>
                   
                   <div className="flex flex-col sm:flex-row items-center justify-center gap-8 py-6">
-                    {/* SVG Donut */}
+                    
                     <div className="relative w-28 h-28">
                       <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
-                        {/* Background grey ring */}
+                        
                         <circle cx="50" cy="50" r="40" fill="transparent" stroke="#f4f4f5" strokeWidth="10" />
                         
-                        {/* Completed ring */}
+                        
                         {completedCount > 0 && (
                           <circle 
                             cx="50" cy="50" r="40" fill="transparent" 
@@ -674,7 +674,7 @@ export default function AdminIndex() {
                             strokeDashoffset={-completedOffset}
                           />
                         )}
-                        {/* Processing ring */}
+                        
                         {processingCount > 0 && (
                           <circle 
                             cx="50" cy="50" r="40" fill="transparent" 
@@ -683,7 +683,7 @@ export default function AdminIndex() {
                             strokeDashoffset={-processingOffset}
                           />
                         )}
-                        {/* Cancelled ring */}
+                        
                         {cancelledCount > 0 && (
                           <circle 
                             cx="50" cy="50" r="40" fill="transparent" 
@@ -693,14 +693,14 @@ export default function AdminIndex() {
                           />
                         )}
                       </svg>
-                      {/* Centered Total Count */}
+                      
                       <div className="absolute inset-0 flex flex-col items-center justify-center">
                         <span className="text-sm font-black text-zinc-800 leading-none">{orders.length}</span>
                         <span className="text-[9px] text-zinc-400 font-bold uppercase tracking-wider mt-0.5">Đơn</span>
                       </div>
                     </div>
 
-                    {/* Legends */}
+                    
                     <div className="space-y-2 text-xs font-bold text-zinc-600">
                       <div className="flex items-center gap-2">
                         <span className="w-2.5 h-2.5 rounded bg-emerald-500" />
@@ -723,7 +723,7 @@ export default function AdminIndex() {
                   </div>
                 </div>
 
-                {/* Best Sellers Horizontal Bar Chart */}
+                
                 <div className="admin-panel lg:col-span-7 p-6 rounded-2xl flex flex-col justify-between">
                   <div>
                     <h3 className="admin-panel-title font-extrabold text-sm text-zinc-950 mb-1">Sản phẩm bán chạy</h3>
@@ -763,7 +763,7 @@ export default function AdminIndex() {
 
               </div>
 
-              {/* Stock Inventory level cards layout */}
+              
               <div className="admin-panel p-6 rounded-2xl">
                 <h3 className="admin-panel-title font-extrabold text-sm text-zinc-950 mb-4">Tổng quan danh mục kho</h3>
                 
@@ -797,9 +797,9 @@ export default function AdminIndex() {
             </div>
           )}
 
-          {/* ────────────────────────────────────────────────────────── */}
-          {/* VIEW: PRODUCTS                                             */}
-          {/* ────────────────────────────────────────────────────────── */}
+          
+          
+          
           {view === "products" && (
             <div className="space-y-6">
               {loadError && (
@@ -811,7 +811,7 @@ export default function AdminIndex() {
                 </div>
               )}
               
-              {/* Category selector buttons layout */}
+              
               <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-3">
                 {CATEGORIES.slice(0, 4).concat({ id: "combo-phu-kien", name: "Combo phụ kiện", icon: Sparkles, color: "text-amber-600 bg-amber-50 border-amber-200" }).map((cat) => {
                   const CatIcon = cat.icon;
@@ -836,7 +836,7 @@ export default function AdminIndex() {
                 })}
               </div>
 
-              {/* Toolbar: Search and Create */}
+              
               <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3 bg-zinc-50 border border-zinc-200 px-4 py-3 rounded-2xl shadow-sm">
                 <div className="relative flex-1">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
@@ -858,7 +858,7 @@ export default function AdminIndex() {
                 </Link>
               </div>
 
-              {/* Product list */}
+              
               {getFilteredList().length === 0 ? (
                 <div className="text-center py-20 border-2 border-dashed border-zinc-200 rounded-2xl text-zinc-400 text-xs font-bold bg-white">
                   {searchQuery.trim() ? "Không tìm thấy sản phẩm nào khớp từ khóa." : "Không có sản phẩm nào trong danh mục này."}
@@ -883,7 +883,7 @@ export default function AdminIndex() {
                       >
                         <div className="flex items-center gap-4 min-w-0 flex-1">
                           
-                          {/* Thumbnail images based on category */}
+                          
                           {activeCategory === "pc" && (
                             <div className="w-14 h-14 bg-zinc-950 rounded-xl flex items-center justify-center p-1 border border-zinc-200 relative overflow-hidden shrink-0">
                               {item.image ? (
@@ -941,7 +941,7 @@ export default function AdminIndex() {
                             </div>
                           )}
 
-                          {/* Product Details info block */}
+                          
                           <div className="min-w-0 flex-1">
                             <div className="flex items-center gap-1.5 mb-0.5">
                               {item.brand && (
@@ -965,7 +965,7 @@ export default function AdminIndex() {
 
                         </div>
 
-                        {/* Reorder and Delete controls */}
+                        
                         <div className="flex items-center gap-2 ml-4 shrink-0" onClick={(event) => event.stopPropagation()}>
                           <div className="flex flex-col">
                             <button
@@ -1010,13 +1010,13 @@ export default function AdminIndex() {
             </div>
           )}
 
-          {/* ────────────────────────────────────────────────────────── */}
-          {/* VIEW: ORDERS (INVOICES)                                    */}
-          {/* ────────────────────────────────────────────────────────── */}
+          
+          
+          
           {view === "orders" && (
             <div className="space-y-6">
               
-              {/* Search Toolbar */}
+              
               <div className="flex flex-col sm:flex-row justify-between gap-3 bg-zinc-50 border border-zinc-200 px-4 py-3 rounded-2xl shadow-sm">
                 <div className="relative flex-1">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
@@ -1030,7 +1030,7 @@ export default function AdminIndex() {
                 </div>
               </div>
 
-              {/* Order List layout */}
+              
               {getFilteredOrders().length === 0 ? (
                 <div className="text-center py-20 border-2 border-dashed border-zinc-200 rounded-2xl text-zinc-400 text-xs font-bold bg-white">
                   Chưa có hóa đơn nào phù hợp.
@@ -1041,7 +1041,7 @@ export default function AdminIndex() {
                     const isExpanded = !!expandedOrders[order.id];
                     return (
                       <div key={order.id} className="bg-white border border-zinc-200 rounded-2xl shadow-sm overflow-hidden transition hover:border-zinc-300">
-                        {/* Header summary info row */}
+                        
                         <div className="p-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-zinc-50/50 border-b border-zinc-100">
                           <div>
                             <div className="flex flex-wrap items-center gap-2">
@@ -1057,7 +1057,7 @@ export default function AdminIndex() {
                           </div>
 
                           <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
-                            {/* Update Payment status dropdown */}
+                            
                             <div className="flex flex-col">
                               <label className="text-[9px] uppercase font-black text-zinc-400 tracking-wider mb-0.5">Thanh toán</label>
                               <select
@@ -1072,7 +1072,7 @@ export default function AdminIndex() {
                               </select>
                             </div>
 
-                            {/* Update Order status dropdown */}
+                            
                             <div className="flex flex-col">
                               <label className="text-[9px] uppercase font-black text-zinc-400 tracking-wider mb-0.5">Tiến trình</label>
                               <select
@@ -1109,10 +1109,10 @@ export default function AdminIndex() {
                           </div>
                         </div>
 
-                        {/* Collapsible Details section */}
+                        
                         {isExpanded && (
                           <div className="p-4 bg-white space-y-4">
-                            {/* Contact & Delivery Details */}
+                            
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
                               <div>
                                 <h5 className="font-extrabold text-zinc-500 uppercase text-[9px] tracking-wider mb-1">Thông tin giao nhận</h5>
@@ -1131,7 +1131,7 @@ export default function AdminIndex() {
                               </div>
                             </div>
 
-                            {/* Products Item Table */}
+                            
                             <div>
                               <h5 className="font-extrabold text-zinc-500 uppercase text-[9px] tracking-wider mb-2">Mặt hàng đặt mua</h5>
                               <div className="border border-zinc-100 rounded-xl overflow-hidden">
@@ -1156,7 +1156,7 @@ export default function AdminIndex() {
                               </div>
                             </div>
 
-                            {/* Bottom invoice total */}
+                            
                             <div className="flex justify-between items-center border-t border-zinc-100 pt-3">
                               <span className="text-[10px] text-zinc-400 font-bold uppercase tracking-wider">Tổng cộng: {order.totalItems} sản phẩm</span>
                               <span className="text-sm font-black text-blue-600">{formatPrice(order.totalPrice)}</span>
@@ -1172,13 +1172,13 @@ export default function AdminIndex() {
             </div>
           )}
 
-          {/* ────────────────────────────────────────────────────────── */}
-          {/* VIEW: TICKETS (SUPPORT)                                    */}
-          {/* ────────────────────────────────────────────────────────── */}
+          
+          
+          
           {view === "tickets" && (
             <div className="space-y-6">
               
-              {/* Tickets Search */}
+              
               <div className="bg-zinc-50 border border-zinc-200 px-4 py-3 rounded-2xl shadow-sm">
                 <div className="relative flex-1">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
@@ -1192,7 +1192,7 @@ export default function AdminIndex() {
                 </div>
               </div>
 
-              {/* Tickets List */}
+              
               {tickets.length === 0 ? (
                 <div className="text-center py-20 border-2 border-dashed border-zinc-200 rounded-2xl text-zinc-400 text-xs font-bold bg-white">
                   Chưa có yêu cầu hỗ trợ nào.
@@ -1265,13 +1265,13 @@ export default function AdminIndex() {
             </div>
           )}
 
-          {/* ────────────────────────────────────────────────────────── */}
-          {/* VIEW: ACCOUNTS                                             */}
-          {/* ────────────────────────────────────────────────────────── */}
+          
+          
+          
           {view === "accounts" && (
             <div className="space-y-6">
               
-              {/* Accounts Toolbar */}
+              
               <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3 bg-zinc-50 border border-zinc-200 px-4 py-3 rounded-2xl shadow-sm">
                 <div className="relative flex-1">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
@@ -1293,7 +1293,7 @@ export default function AdminIndex() {
                 </Link>
               </div>
 
-              {/* Accounts List */}
+              
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {accounts.filter(acc => {
                   if (!searchQuery.trim()) return true;
@@ -1355,9 +1355,9 @@ export default function AdminIndex() {
             </div>
           )}
 
-          {/* ────────────────────────────────────────────────────────── */}
-          {/* VIEW: STAFF (CONTACT DIRECTORY)                            */}
-          {/* ────────────────────────────────────────────────────────── */}
+          
+          
+          
           {view === "staff" && (
             <div className="space-y-6">
               
@@ -1365,12 +1365,12 @@ export default function AdminIndex() {
                 <p>Bảng điều khiển nhân viên kỹ thuật và điều hành của cửa hàng. Bạn có thể sử dụng các thông tin liên hệ dưới đây để phân công hoặc trao đổi nội bộ.</p>
               </div>
 
-              {/* Staff grid */}
+              
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
                 {staffMembers.map((staff, idx) => (
                   <div key={idx} className="bg-white border border-zinc-200 rounded-2xl shadow-sm p-5 hover:border-zinc-300 transition flex flex-col justify-between relative overflow-hidden">
                     
-                    {/* Status Badge overlay */}
+                    
                     <div className="absolute top-4 right-4 flex items-center gap-1">
                       <span className={`w-2 h-2 rounded-full ${
                         staff.status === 'online' ? 'bg-emerald-500' :
@@ -1432,7 +1432,7 @@ export default function AdminIndex() {
         </div>
       )}
 
-      {/* FLOAT AUTO-SAVE INDICATOR TOAST */}
+      
       <AnimatePresence>
         {toastMessage && (
           <motion.div

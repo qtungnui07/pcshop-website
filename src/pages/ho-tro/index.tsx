@@ -20,7 +20,7 @@ interface Ticket {
   title: string;
   description: string;
   attachments: string[];
-  status: string; // pending | processing | completed | cancelled
+  status: string; 
   createdAt: string;
 }
 
@@ -37,7 +37,7 @@ export default function HoTroIndex() {
   const [activeFilter, setActiveFilter] = useState<string>("all");
   const [activeSort, setActiveSort] = useState<string>("newest");
 
-  // Form State
+  
   const [requestType, setRequestType] = useState<string>("warranty");
   const [productCategory, setProductCategory] = useState<string>("");
   const [productName, setProductName] = useState<string>("");
@@ -52,21 +52,21 @@ export default function HoTroIndex() {
   const [ticketDescription, setTicketDescription] = useState<string>("");
   const [activeFiles, setActiveFiles] = useState<File[]>([]);
   
-  // Validation classes
+  
   const [errors, setErrors] = useState<Record<string, boolean>>({});
 
-  // Dropdown drag state
+  
   const [isDragOver, setIsDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Detail Modal State
+  
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // Toast feedback
+  
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-  // Load tickets on mount
+  
   useEffect(() => {
     fetch(`${API_BASE}/api/tickets`)
       .then((res) => res.json())
@@ -118,7 +118,7 @@ export default function HoTroIndex() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  // Drag and Drop File Handlers
+  
   const handleFiles = (fileList: FileList) => {
     const updated = [...activeFiles];
     for (let i = 0; i < fileList.length; i++) {
@@ -141,7 +141,7 @@ export default function HoTroIndex() {
   const submitTicket = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Validations
+    
     const newErrors: Record<string, boolean> = {};
     if (!productCategory) newErrors.productCategory = true;
     if (!productName.trim()) newErrors.productName = true;
@@ -159,7 +159,7 @@ export default function HoTroIndex() {
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
-      // Focus first error
+      
       const firstErrorKey = Object.keys(newErrors)[0];
       const element = document.getElementById(firstErrorKey);
       if (element) {
@@ -243,7 +243,7 @@ export default function HoTroIndex() {
     }
   };
 
-  // Filter & Sort dynamic data
+  
   const userTickets = user ? tickets.filter(t => t.contactEmail === user.email) : [];
   const filteredTickets = userTickets
     .filter(t => activeFilter === "all" || t.status === activeFilter)
@@ -259,12 +259,12 @@ export default function HoTroIndex() {
     <div className="w-full font-sans ho-tro-scope">
       <main className="main-content max-w-[1200px] mx-auto px-4 md:px-6">
         
-        {/* ═════════════════════════════════════════════════════════════════ */}
-        {/* VIEW 1: SUPPORT HOME                                              */}
-        {/* ═════════════════════════════════════════════════════════════════ */}
+        
+        
+        
         {currentView === "home" && (
           <section className="view-section active">
-            {/* Hero Banner */}
+            
             <div className="support-hero">
               <div className="hero-content">
                 <span className="hero-tag">HỖ TRỢ</span>
@@ -335,9 +335,9 @@ export default function HoTroIndex() {
               </div>
             </div>
 
-            {/* Support Categories Grid */}
+            
             <div className="support-cards-grid">
-              {/* Warranty Card */}
+              
               <div className="support-card">
                 <div className="card-icon-wrapper red-theme">
                   <svg viewBox="0 0 24 24" width="28" height="28" stroke="currentColor" strokeWidth="2" fill="none">
@@ -349,7 +349,7 @@ export default function HoTroIndex() {
                 <button className="btn btn-primary w-full cursor-pointer" onClick={() => openCreateForm("warranty")}>Tạo Ticket</button>
               </div>
 
-              {/* Repair Card */}
+              
               <div className="support-card">
                 <div className="card-icon-wrapper orange-theme">
                   <svg viewBox="0 0 24 24" width="28" height="28" stroke="currentColor" strokeWidth="2" fill="none">
@@ -361,7 +361,7 @@ export default function HoTroIndex() {
                 <button className="btn btn-primary w-full cursor-pointer" onClick={() => openCreateForm("repair")}>Tạo Ticket</button>
               </div>
 
-              {/* Cleaning Card */}
+              
               <div className="support-card">
                 <div className="card-icon-wrapper blue-theme">
                   <svg viewBox="0 0 24 24" width="28" height="28" stroke="currentColor" strokeWidth="2" fill="none">
@@ -373,7 +373,7 @@ export default function HoTroIndex() {
                 <button className="btn btn-primary w-full cursor-pointer" onClick={() => openCreateForm("cleaning")}>Tạo Ticket</button>
               </div>
 
-              {/* Consulting Card */}
+              
               <div className="support-card">
                 <div className="card-icon-wrapper green-theme">
                   <svg viewBox="0 0 24 24" width="28" height="28" stroke="currentColor" strokeWidth="2" fill="none">
@@ -386,13 +386,13 @@ export default function HoTroIndex() {
               </div>
             </div>
 
-            {/* Your Requests Section */}
+            
             <div id="section-my-requests" className="my-requests-section">
               <div className="section-header-row">
                 <h2 className="section-title">Yêu cầu của bạn</h2>
                 {user && (
                   <div className="filter-controls">
-                    {/* Status Tabs */}
+                    
                     <div className="status-tabs">
                       {["all", "pending", "processing", "completed", "cancelled"].map((status) => (
                         <button
@@ -404,7 +404,7 @@ export default function HoTroIndex() {
                         </button>
                       ))}
                     </div>
-                    {/* Sort Select */}
+                    
                     <div className="sort-wrapper">
                       <select
                         value={activeSort}
@@ -420,7 +420,7 @@ export default function HoTroIndex() {
                 )}
               </div>
 
-              {/* Dynamic list */}
+              
               {!user ? (
                 <div className="empty-requests-box">
                   <div className="empty-icon-wrapper">
@@ -515,7 +515,7 @@ export default function HoTroIndex() {
               )}
             </div>
 
-            {/* Benefit Row */}
+            
             <div className="benefits-row">
               <div className="benefit-item">
                 <div className="benefit-icon">
@@ -555,7 +555,7 @@ export default function HoTroIndex() {
               </div>
             </div>
 
-            {/* Workflow Section */}
+            
             <div className="workflow-section">
               <h3 className="workflow-title">Quy trình hỗ trợ</h3>
               <p className="workflow-subtitle">Đơn giản – Nhanh chóng – Hiệu quả</p>
@@ -626,12 +626,12 @@ export default function HoTroIndex() {
           </section>
         )}
 
-        {/* ═════════════════════════════════════════════════════════════════ */}
-        {/* VIEW 2: CREATE TICKET FORM                                        */}
-        {/* ═════════════════════════════════════════════════════════════════ */}
+        
+        
+        
         {currentView === "create" && (
           <section className="view-section active">
-            {/* Breadcrumbs */}
+            
             <div className="breadcrumbs">
               <button onClick={() => setCurrentView("home")} className="hover:text-black transition-colors cursor-pointer bg-transparent border-none outline-none font-semibold">Trang chủ</button>
               <span className="divider">/</span>
@@ -640,18 +640,18 @@ export default function HoTroIndex() {
               <span className="current">Tạo Ticket</span>
             </div>
 
-            {/* Page Title */}
+            
             <div className="page-title-area">
               <h1 className="page-title text-zinc-950 font-extrabold">Tạo Ticket</h1>
               <p className="page-subtitle">Vui lòng điền đầy đủ thông tin để chúng tôi hỗ trợ bạn nhanh chóng.</p>
             </div>
 
-            {/* Double-column Form Layout */}
+            
             <div className="form-layout-grid">
               
-              {/* Left Column Form */}
+              
               <form onSubmit={submitTicket} className="ticket-form-card" noValidate>
-                {/* SECTION 1: Select Request Type */}
+                
                 <div className="form-section">
                   <h3 className="form-section-title">1. Chọn loại yêu cầu</h3>
                   <div className="request-type-selector-grid">
@@ -715,7 +715,7 @@ export default function HoTroIndex() {
                   </div>
                 </div>
 
-                {/* SECTION 2: Product Information */}
+                
                 <div className="form-section">
                   <h3 className="form-section-title">2. Thông tin sản phẩm</h3>
                   
@@ -805,7 +805,7 @@ export default function HoTroIndex() {
                   </div>
                 </div>
 
-                {/* SECTION 3: Contact Information */}
+                
                 <div className="form-section">
                   <h3 className="form-section-title">3. Thông tin liên hệ</h3>
                   
@@ -878,7 +878,7 @@ export default function HoTroIndex() {
                   </div>
                 </div>
 
-                {/* SECTION 4: Problem Description */}
+                
                 <div className="form-section">
                   <h3 className="form-section-title">4. Mô tả vấn đề</h3>
                   
@@ -947,7 +947,7 @@ export default function HoTroIndex() {
                       </div>
                     </div>
                     
-                    {/* Uploaded Files */}
+                    
                     {activeFiles.length > 0 && (
                       <div className="uploaded-files-list">
                         {activeFiles.map((file, index) => {
@@ -974,14 +974,14 @@ export default function HoTroIndex() {
                   </div>
                 </div>
 
-                {/* Form Action Controls */}
+                
                 <div className="form-actions-row">
                   <button type="button" className="btn btn-secondary cursor-pointer" onClick={() => setCurrentView("home")}>Hủy bỏ</button>
                   <button type="submit" className="btn btn-dark cursor-pointer">Gửi yêu cầu</button>
                 </div>
               </form>
 
-              {/* Right Column Help Sidebar */}
+              
               <aside className="form-helper-sidebar">
                 <div className="sidebar-widget info-widget">
                   <h4 className="widget-title">Quy trình hỗ trợ</h4>
@@ -1066,9 +1066,9 @@ export default function HoTroIndex() {
 
       </main>
 
-      {/* ═════════════════════════════════════════════════════════════════ */}
-      {/* TICKET DETAIL MODAL                                               */}
-      {/* ═════════════════════════════════════════════════════════════════ */}
+      
+      
+      
       {isModalOpen && selectedTicket && (
         <div className="modal-overlay active" onClick={() => setIsModalOpen(false)}>
           <div className="modal-card" onClick={(e) => e.stopPropagation()}>
@@ -1084,7 +1084,7 @@ export default function HoTroIndex() {
             </div>
             
             <div className="modal-body-content">
-              {/* Timeline Status */}
+              
               <div className="modal-timeline-container">
                 <h4 className="details-section-heading">Trạng thái xử lý</h4>
                 <div className="modal-steps-horizontal">
@@ -1133,7 +1133,7 @@ export default function HoTroIndex() {
               </div>
 
               <div className="modal-details-grid">
-                {/* Col 1 */}
+                
                 <div className="details-column">
                   <div className="details-block">
                     <h4 className="details-section-heading">Thông tin sản phẩm</h4>
@@ -1192,7 +1192,7 @@ export default function HoTroIndex() {
                   </div>
                 </div>
 
-                {/* Col 2 */}
+                
                 <div className="details-column">
                   <div className="details-block">
                     <h4 className="details-section-heading">Chi tiết vấn đề</h4>
@@ -1232,7 +1232,7 @@ export default function HoTroIndex() {
         </div>
       )}
 
-      {/* TOAST FEEDBACK */}
+      
       {toastMessage && (
         <div className="toast-card active">
           <div className="toast-icon-wrapper">

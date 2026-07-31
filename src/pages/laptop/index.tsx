@@ -154,7 +154,7 @@ function MacBookNeoViewer() {
   );
 }
 
-/* ── TYPES ─────────────────────────────────────────────────────────── */
+
 type LaptopBrand = "ASUS" | "Apple" | "Dell" | "Lenovo" | "HP" | "Acer" | "MSI" | "Gigabyte";
 type LaptopCPU =
   | "Intel Core i3" | "Intel Core i5" | "Intel Core i7" | "Intel Core i9"
@@ -188,7 +188,7 @@ interface LaptopProduct {
   img: string;
 }
 
-/* ── DATA ──────────────────────────────────────────────────────────── */
+
 const categories = [
   {
     icon: GraduationCap,
@@ -266,7 +266,7 @@ const GPUS:   LaptopGPU[]     = [
 const MAX_PRICE = 55_000_000;
 const MIN_PRICE = 0;
 
-/* ── HELPERS ────────────────────────────────────────────────────────── */
+
 function formatPrice(p: number) {
   return new Intl.NumberFormat("vi-VN").format(p) + " đ";
 }
@@ -281,7 +281,7 @@ function toggleSet<T>(set: Set<T>, value: T): Set<T> {
   return next;
 }
 
-/* ── FilterCheckbox ─────────────────────────────────────────────────── */
+
 function FilterCheckbox({
   checked, label, count, onChange,
 }: {
@@ -304,7 +304,7 @@ function FilterCheckbox({
   );
 }
 
-/* ── FilterGroup ────────────────────────────────────────────────────── */
+
 function FilterGroup({ title, children }: { title: string; children: React.ReactNode }) {
   const [open, setOpen] = useState(true);
   return (
@@ -380,12 +380,12 @@ function parseLaptopProduct(raw: any, index: number): LaptopProduct {
   else if (specsStr.includes('15.6"') || specsStr.includes('15.6 inch')) screenVal = "15.6 inch";
   else if (specsStr.includes('16"') || specsStr.includes('16 inch') || specsStr.includes('16.1"')) screenVal = "16 inch trở lên";
   else if (specsStr.includes('14"') || specsStr.includes('14 inch')) screenVal = "14 inch";
-  // Detect refresh rate nếu có trong specs
+  
   if (specsUpper.includes("240HZ") || specsStr.includes("240Hz")) screenVal = "240Hz";
   else if (specsUpper.includes("165HZ") || specsStr.includes("165Hz")) screenVal = "165Hz";
   else if (specsUpper.includes("144HZ") || specsStr.includes("144Hz")) screenVal = "144Hz";
   else if (specsUpper.includes("120HZ") || specsStr.includes("120Hz")) screenVal = "120Hz";
-  // Detect công nghệ màn hình
+  
   if (specsUpper.includes("OLED") && !specsUpper.includes("MINI-LED")) screenVal = "Màn hình OLED";
   else if (specsUpper.includes("MINI-LED") || specsUpper.includes("MINILED")) screenVal = "Màn hình Mini-LED";
   else if (specsUpper.includes("TOUCH") || specsStr.includes("cảm ứng") || specsStr.includes("Touch")) screenVal = "Màn hình cảm ứng";
@@ -405,7 +405,7 @@ function parseLaptopProduct(raw: any, index: number): LaptopProduct {
   };
 }
 
-/* ── PAGE ───────────────────────────────────────────────────────────── */
+
 export default function LaptopIndex() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -439,7 +439,7 @@ export default function LaptopIndex() {
   const [showMobileFilter, setShowMobileFilter] = useState(false);
   const [activeCategory, setActiveCategory] = useState<number | null>(null);
 
-  /* Filter state */
+  
   const [selBrands,  setSelBrands]  = useState<Set<LaptopBrand>>(new Set());
   const [selRAMs,    setSelRAMs]    = useState<Set<LaptopRAM>>(new Set());
   const [selCPUs,    setSelCPUs]    = useState<Set<LaptopCPU>>(new Set());
@@ -449,7 +449,7 @@ export default function LaptopIndex() {
   const [maxPrice,   setMaxPrice]   = useState(MAX_PRICE);
   const [activeInput, setActiveInput] = useState<'min' | 'max'>('min');
 
-  /* Read URL params from navbar whenever searchParams change */
+  
   useEffect(() => {
     const filter = searchParams.get('filter');
     const brandParam = searchParams.get('thuong-hieu');
@@ -654,7 +654,7 @@ export default function LaptopIndex() {
     }
   };
 
-  /* Derived filtered + sorted list */
+  
   const filteredProducts = useMemo(() => {
     let result = products.filter(p => {
       const specsUpper = p.specs.toUpperCase();
@@ -750,10 +750,10 @@ export default function LaptopIndex() {
   const percentMin = ((minPrice - MIN_PRICE) / (MAX_PRICE - MIN_PRICE)) * 100;
   const percentMax = ((maxPrice - MIN_PRICE) / (MAX_PRICE - MIN_PRICE)) * 100;
 
-  /* Sidebar JSX — reused for both desktop + mobile */
+  
   const sidebarContent = (
     <div className="space-y-0">
-      {/* Price */}
+      
       <div className="pb-4">
         <h4 className="text-[13px] font-semibold text-zinc-900 mb-3">Giá</h4>
         <div className="flex items-center gap-2 mb-4">
@@ -825,7 +825,7 @@ export default function LaptopIndex() {
         </div>
       </div>
 
-      {/* Nhu Cầu */}
+      
       <FilterGroup title="Nhu cầu sử dụng">
         {[
           { label: 'Học tập', brands: ['Lenovo', 'Acer', 'HP'] as LaptopBrand[] },
@@ -836,7 +836,7 @@ export default function LaptopIndex() {
           { label: 'Pin lâu', brands: ['Apple', 'Lenovo', 'HP'] as LaptopBrand[] },
           { label: 'MacBook', brands: ['Apple'] as LaptopBrand[] },
         ].map(({ label, brands }) => {
-          // Check if selBrands exactly matches this need's brands
+          
           const selArr = [...selBrands].sort();
           const brandArr = [...brands].sort();
           const checked = selArr.length === brandArr.length && selArr.every((b, i) => b === brandArr[i]);
@@ -851,7 +851,7 @@ export default function LaptopIndex() {
                   setActiveCategory(null);
                 } else {
                   setSelBrands(new Set(brands));
-                  // Also sync category card
+                  
                   const catMap: Record<string, number> = {
                     'Học tập': 0, 'Văn phòng': 1, 'Gaming': 2,
                     'Đồ họa - Sáng tạo': 3, 'Mỏng nhẹ': 4, 'Pin lâu': 5,
@@ -864,7 +864,7 @@ export default function LaptopIndex() {
         })}
       </FilterGroup>
 
-      {/* Brand */}
+      
       <FilterGroup title="Thương hiệu">
         {BRANDS.map(b => (
           <FilterCheckbox
@@ -877,7 +877,7 @@ export default function LaptopIndex() {
         ))}
       </FilterGroup>
 
-      {/* RAM */}
+      
       <FilterGroup title="RAM">
         {RAMS.map(r => (
           <FilterCheckbox
@@ -890,7 +890,7 @@ export default function LaptopIndex() {
         ))}
       </FilterGroup>
 
-      {/* CPU */}
+      
       <FilterGroup title="CPU">
         {CPUS.map(c => (
           <FilterCheckbox
@@ -903,7 +903,7 @@ export default function LaptopIndex() {
         ))}
       </FilterGroup>
 
-      {/* Screen */}
+      
       <FilterGroup title="Màn hình">
         {SCREENS.map(s => (
           <FilterCheckbox
@@ -916,7 +916,7 @@ export default function LaptopIndex() {
         ))}
       </FilterGroup>
 
-      {/* GPU */}
+      
       <FilterGroup title="Card đồ họa">
         {GPUS.map(g => (
           <FilterCheckbox
@@ -929,7 +929,7 @@ export default function LaptopIndex() {
         ))}
       </FilterGroup>
 
-      {/* Reset */}
+      
       {hasActiveFilter && (
         <button
           onClick={resetFilters}
@@ -943,7 +943,7 @@ export default function LaptopIndex() {
 
   return (
     <div className="bg-white min-h-screen pb-16">
-      {/* ══ 1. HERO ═════════════════════════════════════════════════════ */}
+      
       <div 
         className="overflow-hidden relative"
         style={{
@@ -956,14 +956,14 @@ export default function LaptopIndex() {
           paddingRight: "calc(50vw - 50%)",
         }}
       >
-        {/* Top-right blue glow */}
+        
         <div style={{
           position: "absolute", top: "-10%", right: "-5%",
           width: 800, height: 800,
           background: "radial-gradient(circle, rgba(147,197,253,0.35) 0%, rgba(165,180,252,0.15) 40%, transparent 70%)",
           pointerEvents: "none",
         }} />
-        {/* Bottom left soft white fade */}
+        
         <div style={{
           position: "absolute", bottom: 0, left: 0,
           width: 600, height: 400,
@@ -1040,12 +1040,9 @@ export default function LaptopIndex() {
                 >
                   Khám phá ngay <ArrowRight className="w-4 h-4" />
                 </button>
-                {/* <button className="inline-flex items-center gap-2 px-8 py-3.5 bg-white/80 border border-zinc-300 hover:bg-white text-zinc-800 text-[15px] font-semibold rounded-full transition-all duration-200 shadow-sm active:scale-95 cursor-pointer">
-                  Tư vấn chọn laptop <ArrowRight className="w-4 h-4" />
-                </button>
-                 */}
+                
                  <Link
-                  to="/ho-tro" // Thay đường dẫn bạn muốn đến tại đây
+                  to="/ho-tro" 
                   className="inline-flex items-center gap-2 px-8 py-3.5 bg-white/80 border border-zinc-300 hover:bg-white text-zinc-800 text-[15px] font-semibold rounded-full transition-all duration-200 shadow-sm active:scale-95 cursor-pointer text-center"
                 >
                   Tư vấn chọn laptop <ArrowRight className="w-4 h-4" />
@@ -1068,7 +1065,7 @@ export default function LaptopIndex() {
               className="relative hidden lg:flex items-center justify-center"
               style={{ alignSelf: "stretch" }}
             >
-              {/* Blue glow behind Laptop */}
+              
               <div style={{
                 position: "absolute",
                 width: 600, height: 600,
@@ -1078,7 +1075,7 @@ export default function LaptopIndex() {
                 zIndex: 0,
               }} />
               
-              {/* Floor reflection */}
+              
               <div style={{
                 position: "absolute",
                 width: 500, height: 60,
@@ -1098,7 +1095,7 @@ export default function LaptopIndex() {
 
       <div className="max-w-[1700px] mx-auto px-4 md:px-8 lg:px-10 xl:px-12 2xl:px-16 mt-8 md:mt-10">
 
-        {/* ══ 2. CHỌN THEO NHU CẦU ═══════════════════════════════════════ */}
+        
         <section id="chon-laptop-theo-nhu-cau" className="scroll-mt-28 mb-16 md:mb-20">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-xl md:text-2xl font-bold tracking-tight text-zinc-900">Chọn laptop theo nhu cầu</h2>
@@ -1124,25 +1121,25 @@ export default function LaptopIndex() {
                       : "border-zinc-100 bg-white shadow-sm hover:shadow-md hover:border-zinc-200 hover:-translate-y-0.5"
                   }`}
                 >
-                  {/* Thumbnail image */}
+                  
                   <div className="w-full aspect-[4/3] relative overflow-hidden bg-zinc-100">
                     <img
                       src={cat.img}
                       alt={cat.title}
                       className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                     />
-                    {/* Overlay khi active */}
+                    
                     {isActive && (
                       <div className="absolute inset-0 bg-zinc-900/20" />
                     )}
-                    {/* Icon badge */}
+                    
                     <div className={`absolute top-2.5 left-2.5 w-8 h-8 rounded-xl backdrop-blur flex items-center justify-center border shadow-sm transition-colors ${
                       isActive ? "bg-zinc-900 border-zinc-900" : "bg-white/80 border-white/20"
                     }`}>
                       <cat.icon className={`w-4 h-4 ${isActive ? "text-white" : "text-zinc-500"}`} strokeWidth={1.8} />
                     </div>
                   </div>
-                  {/* Label */}
+                  
                   <div className={`flex items-center justify-between px-3.5 py-3 ${
                     isActive ? "bg-zinc-900" : "bg-white"
                   }`}>
@@ -1159,7 +1156,7 @@ export default function LaptopIndex() {
           </div>
         </section>
 
-        {/* ══ 3. MOBILE TOOLBAR ══════════════════════════════════════════ */}
+        
         <section className="mb-4 flex items-center justify-between gap-3 lg:hidden">
           <button
             onClick={() => setShowMobileFilter(true)}
@@ -1180,11 +1177,11 @@ export default function LaptopIndex() {
           </select>
         </section>
 
-        {/* ══ 4. MAIN LAYOUT: FILTERS & GRID ════════════════════════════ */}
+        
         <div id="products-section" />
         <div className="flex flex-col lg:flex-row gap-8 lg:gap-10">
 
-          {/* Desktop Sidebar */}
+          
           <aside className="hidden lg:block w-[260px] shrink-0">
             <div className="bg-white rounded-2xl p-5 border border-zinc-100 shadow-sm sticky top-24">
               <div className="flex items-center justify-between mb-4">
@@ -1202,7 +1199,7 @@ export default function LaptopIndex() {
             </div>
           </aside>
 
-          {/* Mobile Sidebar Drawer */}
+          
           <aside
             className={`fixed inset-y-0 left-0 z-50 w-[300px] overflow-y-auto bg-white p-5 shadow-2xl transition-transform lg:hidden ${showMobileFilter ? "translate-x-0" : "-translate-x-full"}`}
           >
@@ -1229,9 +1226,9 @@ export default function LaptopIndex() {
             />
           )}
 
-          {/* Product Grid */}
+          
           <main className="flex-1 min-w-0">
-            {/* Toolbar */}
+            
             <div className="hidden lg:flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4">
               <p className="text-[13px] text-zinc-500">
                 <span className="font-semibold text-zinc-900">{filteredProducts.length}</span> sản phẩm
@@ -1267,7 +1264,7 @@ export default function LaptopIndex() {
               </div>
             </div>
 
-            {/* Empty state or Loading state */}
+            
             {loading ? (
               <ProductSkeletonGrid count={8} />
             ) : filteredProducts.length === 0 ? (
@@ -1370,7 +1367,7 @@ export default function LaptopIndex() {
               </div>
             )}
 
-            {/* Pagination */}
+            
             {totalPages > 1 && (
               <div className="flex items-center justify-center gap-2 mt-10">
                 <button

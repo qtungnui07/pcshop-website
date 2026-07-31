@@ -19,7 +19,7 @@ interface PCItem {
   imgName?: string;
 }
 
-/* ── DATA ─────────────────────────────────────────────────────────── */
+
 
 const pcCategories = [
   { name: "PC Gaming",     imgName: "cat-gaming.png",      Icon: Gamepad2 },
@@ -52,7 +52,7 @@ const brands = [
   { name: "Apple", logo: "https://upload.wikimedia.org/wikipedia/commons/f/fa/Apple_logo_black.svg" },
 ];
 
-/* ── GRADIENT BLOCK placeholder ───────────────────────────────────── */
+
 function Grad({ from, to, glow, className = "", children }: {
   from: string; to: string; glow?: string; className?: string; children?: React.ReactNode;
 }) {
@@ -80,7 +80,7 @@ const API_BASE = typeof window !== "undefined"
     : `${window.location.protocol}//${window.location.hostname}:3001`)
   : "http://localhost:3001";
 
-/* ── PAGE ─────────────────────────────────────────────────────────── */
+
 export default function PCIndex() {
   const navigate = useNavigate();
   const [liked, setLiked] = useState<Set<number>>(new Set());
@@ -140,7 +140,7 @@ export default function PCIndex() {
 
   return (
     <div>
-      {/* ══ 1. HERO — full-width, flush with navbar ═══════════════════ */}
+      
       <div
         style={{
           background: "linear-gradient(135deg, #ffffff 0%, #f0f6ff 40%, #e3effe 70%, #dceafd 100%)",
@@ -154,14 +154,14 @@ export default function PCIndex() {
           position: "relative",
         }}
       >
-        {/* Top-right blue glow */}
+        
         <div style={{
           position: "absolute", top: "-10%", right: "-5%",
           width: 800, height: 800,
           background: "radial-gradient(circle, rgba(147,197,253,0.35) 0%, rgba(165,180,252,0.15) 40%, transparent 70%)",
           pointerEvents: "none",
         }} />
-        {/* Bottom left soft white fade */}
+        
         <div style={{
           position: "absolute", bottom: 0, left: 0,
           width: 600, height: 400,
@@ -170,7 +170,7 @@ export default function PCIndex() {
         }} />
         <div className="max-w-[1500px] mx-auto px-4 md:px-8 lg:px-10 xl:px-12 2xl:px-19 relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-2" style={{ minHeight: "calc(100vh - 96px)" }}>
-            {/* Left content */}
+            
             <motion.div
               variants={heroContainer}
               initial="hidden"
@@ -257,7 +257,7 @@ export default function PCIndex() {
               </motion.div>
             </motion.div>
 
-            {/* Right — PC image with lighting */}
+            
             <motion.div
               variants={heroRight}
               initial="hidden"
@@ -265,7 +265,7 @@ export default function PCIndex() {
               className="hidden lg:flex items-end justify-center relative overflow-visible"
               style={{ alignSelf: "stretch" }}
             >
-              {/* Blue glow behind PC */}
+              
               <div style={{
                 position: "absolute",
                 width: 600, height: 600,
@@ -274,7 +274,7 @@ export default function PCIndex() {
                 pointerEvents: "none",
                 zIndex: 0,
               }} />
-              {/* Floor reflection */}
+              
               <div style={{
                 position: "absolute",
                 width: 500, height: 60,
@@ -304,10 +304,10 @@ export default function PCIndex() {
         </div>
       </div>
 
-      {/* ══ REST of page inside normal container ═══════════════════════ */}
+      
       <div className="max-w-[1700px] mx-auto px-4 md:px-8 lg:px-10 xl:px-12 2xl:px-16">
 
-        {/* ══ 2. SHOP THEO NHU CẦU ══════════════════════════════════════ */}
+        
         <section className="mt-16 md:mt-20">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-xl md:text-2xl font-bold tracking-tight text-zinc-900">Shop theo nhu cầu</h2>
@@ -341,7 +341,7 @@ export default function PCIndex() {
           </div>
         </section>
 
-        {/* ══ 3. PC NỔI BẬT ═════════════════════════════════════════════ */}
+        
         <section className="mt-16 md:mt-20">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-xl md:text-2xl font-bold tracking-tight text-zinc-900">PC nổi bật</h2>
@@ -351,7 +351,7 @@ export default function PCIndex() {
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
             {loading ? (
-              // Loading skeleton
+              
               Array.from({ length: 5 }).map((_, i) => (
                 <div key={i} className="w-full bg-white rounded-2xl border border-zinc-100 shadow-sm overflow-hidden">
                   <div className="w-full aspect-[4/3.5] bg-zinc-100 animate-pulse" />
@@ -410,11 +410,11 @@ export default function PCIndex() {
           </div>
         </section>
 
-        {/* ══ 4. BRANDS ══════════════════════════════════════════════════ */}
+        
         <section className="mt-16 md:mt-20 border-t border-b border-zinc-200/60 py-5 overflow-hidden">
           <div className="flex w-full overflow-hidden select-none">
             <div className="flex gap-20 animate-infinite-scroll py-2">
-              {/* Loop multiple times to make it seamless on wide screens */}
+              
               {[...brands, ...brands, ...brands].map((b, i) => (
                 <div key={i} className="flex items-center justify-center h-8 w-24 shrink-0 cursor-pointer">
                   <img 
@@ -428,22 +428,8 @@ export default function PCIndex() {
           </div>
         </section>
 
-        {/* ══ 5. PERKS ═══════════════════════════════════════════════════ */}
-        {/* <section className="mt-10 mb-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
-            {perks.map(({ icon: Icon, title, desc }, i) => (
-              <div key={i} className="flex items-start gap-3 py-2">
-                <div className="w-10 h-10 rounded-xl bg-zinc-100 flex items-center justify-center shrink-0">
-                  <Icon className="w-5 h-5 text-zinc-600" strokeWidth={1.8} />
-                </div>
-                <div>
-                  <p className="text-[13px] font-semibold text-zinc-800 leading-tight">{title}</p>
-                  <p className="text-[12px] text-zinc-400 leading-tight mt-0.5">{desc}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section> */}
+        
+        
 
       </div>
     </div>

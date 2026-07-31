@@ -20,7 +20,7 @@ const getCategoryIcon = (name: string) => {
   if (n.includes('van phong') || n.includes('văn phòng')) return Clock;
   if (n.includes('macbook')) return Laptop;
   if (n.includes('do hoa') || n.includes('đồ họa')) return Palette;
-  return Laptop; // Default
+  return Laptop; 
 };
 
 export default function LaptopCategoriesSection() {
@@ -50,7 +50,7 @@ export default function LaptopCategoriesSection() {
                 whileHover={{ y: -4 }}
                 className="group cursor-pointer bg-white rounded-2xl border border-zinc-100 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden"
               >
-                {/* Product image */}
+                
                 <div className="w-full aspect-[4/3] relative overflow-hidden bg-zinc-50">
                   <img
                     src={cat.image}

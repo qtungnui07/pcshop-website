@@ -223,12 +223,12 @@ export default function PCCategoryPage() {
   const { addItem } = useCart();
   const slug = (category || '').toLowerCase();
   
-  // Resolve category configuration, fallback to pc-gaming
+  
   const meta = useMemo(() => {
     return categoryMappings[slug as keyof typeof categoryMappings] || defaultMeta;
   }, [slug]);
 
-  // States for interactive filters
+  
   const minLimit = 0;
   const maxLimit = 100000000;
   const [minPrice, setMinPrice] = useState(0);
@@ -275,7 +275,7 @@ export default function PCCategoryPage() {
       .catch((err) => console.error("Error fetching PCs from backend:", err));
   }, []);
 
-  // Static list values to show in filters
+  
   const ramOptions = ["8GB", "16GB", "32GB", "64GB", "128GB"];
   const cpuOptions = [
     { label: "Intel Core i5", value: "Core i5" },
@@ -287,7 +287,7 @@ export default function PCCategoryPage() {
   ];
   const gpuOptions = ["RTX 4060", "RTX 4060 Ti", "RTX 4070", "RTX 4070 Ti", "RTX 4080", "RTX 4090", "RX 7600"];
 
-  // Toggle filter selections
+  
   const handleRamToggle = (val: string) => {
     setSelectedRams(prev => prev.includes(val) ? prev.filter(x => x !== val) : [...prev, val]);
   };
@@ -326,34 +326,34 @@ export default function PCCategoryPage() {
     });
   };
 
-  // Filter & Sort Products
+  
   const filteredProducts = useMemo(() => {
-    // 1. Filter by active category
+    
     let list = meta.dbCategoryName === "ALL" 
       ? products 
       : products.filter(p => p.category === meta.dbCategoryName);
 
-    // 2. Filter by Price Range
+    
     list = list.filter(p => p.price >= minPrice && p.price <= maxPrice);
 
-    // 3. Filter by RAM selection
+    
     if (selectedRams.length > 0) {
       list = list.filter(p => selectedRams.includes(p.ram));
     }
 
-    // 4. Filter by CPU selection
+    
     if (selectedCpus.length > 0) {
       list = list.filter(p => selectedCpus.includes(p.cpuSeries));
     }
 
-    // 5. Filter by GPU selection
+    
     if (selectedGpus.length > 0) {
       list = list.filter(p => {
         return selectedGpus.some(gpu => p.gpu.includes(gpu));
       });
     }
 
-    // 6. Sort
+    
     if (sortBy === 'price-asc') {
       list.sort((a, b) => a.price - b.price);
     } else if (sortBy === 'price-desc') {
@@ -363,7 +363,7 @@ export default function PCCategoryPage() {
     return list;
   }, [products, meta.dbCategoryName, minPrice, maxPrice, selectedRams, selectedCpus, selectedGpus, sortBy]);
 
-  // Count helper functions for labels
+  
   const getFilterCounts = useMemo(() => {
     const baseList = meta.dbCategoryName === "ALL" ? products : products.filter(p => p.category === meta.dbCategoryName);
     
@@ -386,7 +386,7 @@ export default function PCCategoryPage() {
     return { ramCounts, cpuCounts, gpuCounts };
   }, [products, meta.dbCategoryName]);
 
-  // Hero section animation variants
+  
   const heroContainer = {
     hidden: {},
     show: { transition: { staggerChildren: 0.1, delayChildren: 0.05 } },
@@ -405,7 +405,7 @@ export default function PCCategoryPage() {
   return (
     <div className="bg-[#fafafa] min-h-screen pb-16">
       
-      {/* ══ 1. HERO SECTION — Matches general PC style but category specific ══ */}
+      
       <div
         style={{
           background: meta.bgGradient,
@@ -419,14 +419,14 @@ export default function PCCategoryPage() {
           position: "relative",
         }}
       >
-        {/* Top-right blue glow */}
+        
         <div style={{
           position: "absolute", top: "-10%", right: "-5%",
           width: 800, height: 800,
           background: `radial-gradient(circle, ${meta.glow} 0%, transparent 70%)`,
           pointerEvents: "none",
         }} />
-        {/* Bottom left soft white fade */}
+        
         <div style={{
           position: "absolute", bottom: 0, left: 0,
           width: 600, height: 400,
@@ -437,14 +437,14 @@ export default function PCCategoryPage() {
         <div className="max-w-[1500px] mx-auto px-4 md:px-8 lg:px-10 xl:px-12 2xl:px-19 relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-2" style={{ minHeight: "calc(100vh - 96px)" }}>
             
-            {/* Left content */}
+            
             <motion.div
               variants={heroContainer}
               initial="hidden"
               animate="show"
               className="flex flex-col items-start justify-center pr-8 py-12 relative z-10"
             >
-              {/* Breadcrumbs */}
+              
               <div className="flex items-center gap-1.5 text-xs text-[#86868b] font-medium mb-6 relative z-10">
                 <Link to="/" className="hover:text-black transition-colors">Trang chủ</Link>
                 <ChevronRight className="w-3.5 h-3.5" />
@@ -497,7 +497,7 @@ export default function PCCategoryPage() {
               </motion.div>
             </motion.div>
 
-            {/* Right — PC image with lighting */}
+            
             <motion.div
               variants={heroRight}
               initial="hidden"
@@ -505,7 +505,7 @@ export default function PCCategoryPage() {
               className="hidden lg:flex items-end justify-center relative overflow-visible"
               style={{ alignSelf: "stretch" }}
             >
-              {/* Blue glow behind PC */}
+              
               <div style={{
                 position: "absolute",
                 width: 600, height: 600,
@@ -514,7 +514,7 @@ export default function PCCategoryPage() {
                 pointerEvents: "none",
                 zIndex: 0,
               }} />
-              {/* Floor reflection */}
+              
               <div style={{
                 position: "absolute",
                 width: 500, height: 60,
@@ -545,15 +545,15 @@ export default function PCCategoryPage() {
         </div>
       </div>
 
-      {/* ══ 2. PRODUCT LISTING AND FILTERS SECTION ══ */}
+      
       <div id="products-section" className="max-w-[1700px] mx-auto px-4 md:px-8 lg:px-10 xl:px-12 2xl:px-16 pt-10">
         <div className="flex flex-col lg:flex-row gap-8 lg:gap-10">
           
-          {/* LEFT COLUMN: Sidebar Filters */}
+          
           <aside className="w-full lg:w-[280px] shrink-0">
             <div className="bg-white rounded-2xl p-5 border border-zinc-200/60 shadow-sm sticky top-20">
               
-              {/* Header Filters */}
+              
               <div className="flex items-center justify-between pb-4 border-b border-zinc-200/80">
                 <span className="text-[14px] font-bold text-zinc-900 uppercase tracking-wider">Bộ lọc</span>
                 {(minPrice !== 10000000 || maxPrice !== 100000000 || selectedRams.length > 0 || selectedCpus.length > 0 || selectedGpus.length > 0) && (
@@ -566,14 +566,14 @@ export default function PCCategoryPage() {
                 )}
               </div>
 
-              {/* Price Range Slider */}
+              
               <div className="py-5 border-b border-zinc-200/70">
                 <div className="flex items-center justify-between mb-4">
                   <h4 className="text-[13px] font-bold text-zinc-900">Khoảng giá</h4>
                   <ChevronDown className="w-4 h-4 text-zinc-400" />
                 </div>
                 
-                {/* Numeric Price display boxes */}
+                
                 <div className="flex items-center gap-2 mb-4">
                   <div className="flex-1 bg-zinc-50 border border-zinc-200 rounded px-2.5 py-1.5 text-[11px] font-semibold text-zinc-700 text-center">
                     {minPrice.toLocaleString('vi-VN')} đ
@@ -584,9 +584,9 @@ export default function PCCategoryPage() {
                   </div>
                 </div>
 
-                {/* Range Slider Track */}
+                
                 <div className="relative h-1.5 w-full bg-zinc-100 rounded-full mb-6">
-                  {/* Colored active fill */}
+                  
                   <div 
                     className="absolute h-full bg-zinc-900 rounded-full"
                     style={{ 
@@ -595,7 +595,7 @@ export default function PCCategoryPage() {
                     }}
                   />
                   
-                  {/* Range Input 1 (Min Price) */}
+                  
                   <input 
                     type="range" 
                     min={minLimit} 
@@ -612,7 +612,7 @@ export default function PCCategoryPage() {
                     style={{ zIndex: 10 }}
                   />
                   
-                  {/* Range Input 2 (Max Price) */}
+                  
                   <input 
                     type="range" 
                     min={minLimit} 
@@ -631,7 +631,7 @@ export default function PCCategoryPage() {
                 </div>
               </div>
 
-              {/* RAM Filter */}
+              
               <div className="py-5 border-b border-zinc-200/70">
                 <div className="flex items-center justify-between mb-4">
                   <h4 className="text-[13px] font-bold text-zinc-900">Dung lượng RAM</h4>
@@ -658,7 +658,7 @@ export default function PCCategoryPage() {
                 </div>
               </div>
 
-              {/* CPU Filter */}
+              
               <div className="py-5 border-b border-zinc-200/70">
                 <div className="flex items-center justify-between mb-4">
                   <h4 className="text-[13px] font-bold text-zinc-900">Dòng CPU</h4>
@@ -685,7 +685,7 @@ export default function PCCategoryPage() {
                 </div>
               </div>
 
-              {/* GPU Filter */}
+              
               <div className="py-5 border-b border-zinc-200/70">
                 <div className="flex items-center justify-between mb-4">
                   <h4 className="text-[13px] font-bold text-zinc-900">Card Đồ Họa</h4>
@@ -712,7 +712,7 @@ export default function PCCategoryPage() {
                 </div>
               </div>
 
-              {/* Clear filters shortcut */}
+              
               <div className="pt-5">
                 <button 
                   onClick={resetFilters} 
@@ -725,15 +725,15 @@ export default function PCCategoryPage() {
             </div>
           </aside>
 
-          {/* RIGHT COLUMN: Products listing */}
+          
           <main className="flex-1">
             
-            {/* Filter statistics & View layout switcher */}
+            
             <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4 border-b border-zinc-200/50 pb-4">
               <h2 className="text-[14px] font-semibold text-zinc-500">{filteredProducts.length} sản phẩm</h2>
               
               <div className="flex items-center gap-3">
-                {/* Sort selector */}
+                
                 <div className="relative">
                   <select 
                     value={sortBy} 
@@ -747,7 +747,7 @@ export default function PCCategoryPage() {
                   <ChevronDown className="w-4 h-4 text-zinc-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
                 </div>
 
-                {/* View switcher (Grid vs List) */}
+                
                 <div className="flex items-center bg-white border border-zinc-200 rounded-lg p-1">
                   <button 
                     onClick={() => setIsGridView(true)} 
@@ -765,7 +765,7 @@ export default function PCCategoryPage() {
               </div>
             </div>
 
-            {/* List products grid */}
+            
             {filteredProducts.length === 0 ? (
               <div className="text-center py-20 bg-white rounded-2xl border border-zinc-200/50">
                 <p className="text-zinc-400 text-base font-medium">Không tìm thấy sản phẩm phù hợp.</p>
@@ -777,7 +777,7 @@ export default function PCCategoryPage() {
                 </button>
               </div>
             ) : isGridView ? (
-              // GRID VIEW
+              
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                 {filteredProducts.map((p) => (
                   <div 
@@ -785,7 +785,7 @@ export default function PCCategoryPage() {
                     onClick={() => navigate(`/san-pham/${p.id}`)}
                     className="group bg-white rounded-2xl border border-zinc-200/40 p-4 shadow-sm hover:shadow-md hover:border-zinc-250 transition-all duration-300 flex flex-col relative cursor-pointer"
                   >
-                    {/* Favorite Heart Button */}
+                    
                     <button 
                       onClick={(e) => {
                         e.stopPropagation();
@@ -796,7 +796,7 @@ export default function PCCategoryPage() {
                       <Heart className={`w-4 h-4 transition-colors ${liked.has(p.id) ? "fill-red-500 text-red-500" : "text-zinc-400"}`} />
                     </button>
                     
-                    {/* Badge display */}
+                    
                     {p.badge && (
                       <span 
                         className="absolute top-4 left-4 z-10 px-2.5 py-0.5 text-[9px] font-bold text-white rounded"
@@ -806,7 +806,7 @@ export default function PCCategoryPage() {
                       </span>
                     )}
 
-                    {/* Image */}
+                    
                      <div className={`aspect-[4/3] flex items-center justify-center mb-4 relative overflow-hidden rounded-xl ${
                       p.img.includes('/images/') ? 'bg-zinc-900' : 'bg-zinc-50/50 p-4'
                     }`}>
@@ -820,7 +820,7 @@ export default function PCCategoryPage() {
                       />
                     </div>
 
-                    {/* Content Details */}
+                    
                     <div className="flex flex-col flex-1">
                       <h3 className="text-[13.5px] font-bold text-zinc-900 leading-snug mb-2 line-clamp-2 min-h-[38px]">
                         {p.name}
@@ -848,7 +848,7 @@ export default function PCCategoryPage() {
                 ))}
               </div>
             ) : (
-              // LIST VIEW
+              
               <div className="space-y-4">
                 {filteredProducts.map((p) => (
                   <div 
@@ -856,7 +856,7 @@ export default function PCCategoryPage() {
                     onClick={() => navigate(`/san-pham/${p.id}`)}
                     className="group bg-white rounded-2xl border border-zinc-200/40 p-4 shadow-sm hover:shadow-md hover:border-zinc-250 transition-all duration-300 flex flex-row items-center gap-6 relative cursor-pointer"
                   >
-                    {/* Badge */}
+                    
                     {p.badge && (
                       <span 
                         className="absolute top-4 left-4 z-10 px-2 py-0.5 text-[9px] font-bold text-white rounded"
@@ -866,7 +866,7 @@ export default function PCCategoryPage() {
                       </span>
                     )}
 
-                    {/* Image container */}
+                    
                      <div className={`w-[180px] h-[135px] shrink-0 flex items-center justify-center rounded-xl overflow-hidden ${
                       p.img.includes('/images/') ? 'bg-zinc-900' : 'bg-zinc-50/50 p-3'
                     }`}>
@@ -880,7 +880,7 @@ export default function PCCategoryPage() {
                       />
                     </div>
 
-                    {/* Details content */}
+                    
                     <div className="flex-1 flex flex-col py-1">
                       <h3 className="text-[15px] font-bold text-zinc-900 leading-snug mb-1">
                         {p.name}
@@ -893,7 +893,7 @@ export default function PCCategoryPage() {
                       </div>
                     </div>
 
-                    {/* Right action tools */}
+                    
                     <div className="flex flex-col items-end gap-10 pr-2">
                       <button 
                         onClick={(e) => {
@@ -942,7 +942,7 @@ export default function PCCategoryPage() {
               </div>
             )}
 
-            {/* ══ Pagination Layout indicator (Visual only matching the mockup) ══ */}
+            
             {filteredProducts.length > 0 && (
               <div className="flex items-center justify-center gap-2 mt-12">
                 <button className="w-9 h-9 flex items-center justify-center rounded-lg border border-zinc-200 text-zinc-400 hover:bg-zinc-50 transition-colors"><ChevronDown className="w-4 h-4 rotate-90" /></button>

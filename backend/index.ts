@@ -6,7 +6,7 @@ const DB_DIR = "./backend/db";
 const DATABASE_URL = Bun.env.DATABASE_URL || "postgres://pcshop:pcshop@localhost:5432/pcshop";
 const sql = new SQL(DATABASE_URL);
 
-// In-memory rate limiting and password reset token maps
+
 const rateLimits = new Map<string, { count: number; resetTime: number }>();
 const resetTokens = new Map<string, { email: string; expiresAt: number }>();
 
@@ -38,7 +38,7 @@ try {
   }
 }
 
-// Default data initialized if data.json doesn't exist
+
 const defaultPCs = [
   {
     badge: "Bán chạy",
@@ -464,7 +464,7 @@ async function readCollection(name: string, defaultValue: any) {
     return typeof existing[0].data === "string" ? JSON.parse(existing[0].data) : existing[0].data;
   }
 
-  // First PostgreSQL startup: seed from the existing JSON collection when available.
+  
   let seedData = defaultValue;
   const legacyFile = Bun.file(`${DB_DIR}/${name}.json`);
   if (await legacyFile.exists()) {
@@ -507,7 +507,7 @@ async function initializeDatabase() {
       updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
     )
   `;
-  // Repair rows created by the initial adapter version, which double-encoded JSON.
+  
   await sql`
     UPDATE app_collections
     SET data = (data #>> '{}')::jsonb, updated_at = NOW()
@@ -517,7 +517,7 @@ async function initializeDatabase() {
 }
 
 async function readData() {
-  // Check if we need to migrate from old data.json
+  
   const oldFile = Bun.file("./backend/data.json");
   let oldDb: any = null;
   if (await oldFile.exists()) {
@@ -545,7 +545,7 @@ async function readData() {
     readCollection("flashcardAppliedDesigns", oldDb?.flashcardAppliedDesigns ?? defaultFlashcardAppliedDesigns),
   ]);
 
-  // Auto-migrate image URLs to subfolders if they aren't migrated yet
+  
   let pcsChanged = false;
   const migratedPcs = pcs.map((pc: any) => {
     if (pc.image && pc.image.includes("/images/pc-") && !pc.image.includes("/images/pcs/pc-")) {
@@ -570,7 +570,7 @@ async function readData() {
     await writeCollection("accounts", migratedAccounts);
   }
 
-  // If old file existed, write them out and backup/remove the old file
+  
   if (oldDb) {
     await writeCollection("pcs", pcs);
     await writeCollection("components", components);
@@ -652,7 +652,7 @@ serve({
       return new Response(null, { headers });
     }
 
-    // Serve static images
+    
     if (url.pathname.startsWith("/images/")) {
       const imageName = url.pathname.replace("/images/", "");
       const filePath = `./backend/public/images/${imageName}`;
@@ -660,7 +660,7 @@ serve({
       return new Response(file, { headers });
     }
 
-    // Flashcard Designer — public published designs and admin-only publishing
+    
     if (url.pathname === "/api/flashcard-designs/applied") {
       const db = await readData();
       if (req.method === "GET") {
@@ -683,7 +683,7 @@ serve({
       }
     }
 
-    // Flashcard Designer — shared draft persistence for admin-created designs
+    
     if (url.pathname === "/api/flashcard-designs") {
       const db = await readData();
       if (req.method === "GET") {
@@ -713,7 +713,7 @@ serve({
       return Response.json({ error: "Method Not Allowed" }, { status: 405, headers });
     }
 
-    // GET & POST featured PCs (backward compatible with admin panel)
+    
     if (url.pathname === "/api/featured-pcs") {
       if (req.method === "POST") {
         try {
@@ -726,7 +726,7 @@ serve({
           return Response.json({ error: "Invalid JSON body" }, { status: 400, headers });
         }
       }
-      // Default GET
+      
       const db = await readData();
       const origin = `${req.headers.get("x-forwarded-proto") || "http"}://${req.headers.get("x-forwarded-host") || req.headers.get("host") || `localhost:${PORT}`}`;
       const pcsWithOrigin = db.pcs.map((pc: any) => ({
@@ -736,7 +736,7 @@ serve({
       return Response.json(pcsWithOrigin, { headers });
     }
 
-    // GET & POST Components
+    
     if (url.pathname === "/api/components") {
       if (req.method === "POST") {
         try {
@@ -753,7 +753,7 @@ serve({
       return Response.json(db.components, { headers });
     }
 
-    // GET & POST Laptops
+    
     if (url.pathname === "/api/laptops") {
       if (req.method === "POST") {
         try {
@@ -776,7 +776,7 @@ serve({
       return Response.json(laptopsWithOrigin, { headers });
     }
 
-    // GET & POST Accessories
+    
     if (url.pathname === "/api/accessories") {
       if (req.method === "POST") {
         try {
@@ -798,7 +798,7 @@ serve({
       return Response.json(accessoriesWithOrigin, { headers });
     }
 
-    // GET & POST Accessory Combos
+    
     if (url.pathname === "/api/accessory-combos") {
       if (req.method === "POST") {
         try {
@@ -820,7 +820,7 @@ serve({
       return Response.json(combosWithOrigin, { headers });
     }
 
-    // GET & POST Support Tickets
+    
     if (url.pathname === "/api/tickets") {
       if (req.method === "POST") {
         try {
@@ -833,12 +833,12 @@ serve({
           return Response.json({ error: "Invalid JSON body" }, { status: 400, headers });
         }
       }
-      // Default GET
+      
       const db = await readData();
       return Response.json(db.tickets, { headers });
     }
 
-    // POST /api/tickets/bulk to overwrite tickets array (for Admin panel)
+    
     if (url.pathname === "/api/tickets/bulk" && req.method === "POST") {
       try {
         const body = await req.json();
@@ -851,10 +851,10 @@ serve({
       }
     }
 
-    // POST Update support ticket (e.g. status)
+    
     if (url.pathname === "/api/tickets/update" && req.method === "POST") {
       try {
-        const body = await req.json(); // { id, status }
+        const body = await req.json(); 
         const db = await readData();
         db.tickets = db.tickets.map((t: any) => t.id === body.id ? { ...t, ...body } : t);
         await writeData(db);
@@ -864,7 +864,7 @@ serve({
       }
     }
 
-    // GET & POST Orders
+    
     if (url.pathname === "/api/orders") {
       const db = await readData();
 
@@ -913,7 +913,7 @@ serve({
       return Response.json(orders, { headers });
     }
 
-    // POST Update order status
+    
     if (url.pathname === "/api/orders/update" && req.method === "POST") {
       try {
         const body = await req.json();
@@ -928,7 +928,7 @@ serve({
       }
     }
 
-    // POST /api/orders/cancel to cancel an order
+    
     if (url.pathname === "/api/orders/cancel" && req.method === "POST") {
       try {
         const body = await req.json();
@@ -962,7 +962,7 @@ serve({
       }
     }
 
-    // POST /api/orders/bulk to overwrite orders array (for Admin panel deletion)
+    
     if (url.pathname === "/api/orders/bulk" && req.method === "POST") {
       try {
         const body = await req.json();
@@ -975,7 +975,7 @@ serve({
       }
     }
 
-    // POST /api/payments - create a 5-minute fake QR payment session
+    
     if (url.pathname === "/api/payments" && req.method === "POST") {
       try {
         const body = await req.json();
@@ -1073,7 +1073,7 @@ serve({
       }
     }
 
-    // GET & POST Product Reviews
+    
     if (url.pathname === "/api/reviews") {
       const db = await readData();
 
@@ -1236,9 +1236,9 @@ serve({
       }
     }
 
-    // ── AUTHENTICATION ENDPOINTS ──────────────────────────────────────
+    
 
-    // POST /api/auth/register
+    
     if (url.pathname === "/api/auth/register" && req.method === "POST") {
       try {
         const { name, email, password } = await req.json();
@@ -1264,7 +1264,7 @@ serve({
         db.accounts = [...(db.accounts || []), newUser];
         await writeData(db);
 
-        // Don't send password back
+        
         const { password: _, ...userWithoutPassword } = newUser;
         return Response.json({ success: true, user: userWithoutPassword }, { headers });
       } catch (err) {
@@ -1272,7 +1272,7 @@ serve({
       }
     }
 
-    // POST /api/auth/login
+    
     if (url.pathname === "/api/auth/login" && req.method === "POST") {
       try {
         const { email, password } = await req.json();
@@ -1294,7 +1294,7 @@ serve({
       }
     }
 
-    // POST /api/auth/google-login
+    
     if (url.pathname === "/api/auth/google-login" && req.method === "POST") {
       try {
         const { email, name, avatar } = await req.json();
@@ -1305,7 +1305,7 @@ serve({
         let user = db.accounts?.find((u: any) => u.email.toLowerCase() === email.toLowerCase());
 
         if (user) {
-          // If local user exists, let them log in and associate Google avatar if empty
+          
           let updated = false;
           if (!user.avatar && avatar) {
             user.avatar = avatar;
@@ -1320,12 +1320,12 @@ serve({
             await writeData(db);
           }
         } else {
-          // Create new user for google auth
+          
           user = {
             id: `acc-${Date.now()}`,
             name: name.trim(),
             email: email.toLowerCase().trim(),
-            password: "", // Google accounts don't have local passwords
+            password: "", 
             role: email.toLowerCase().trim() === "admin@qtitpc.dev" ? "admin" : "user",
             avatar: avatar || "",
             provider: "google"
@@ -1341,7 +1341,7 @@ serve({
       }
     }
 
-    // POST /api/auth/forgot-password
+    
     if (url.pathname === "/api/auth/forgot-password" && req.method === "POST") {
       try {
         const { email, turnstileToken } = await req.json();
@@ -1352,7 +1352,7 @@ serve({
         const ip = getClientIP(req);
         const now = Date.now();
 
-        // 1. IP Rate Limiting
+        
         const limitInfo = rateLimits.get(ip);
         if (limitInfo && now < limitInfo.resetTime) {
           if (limitInfo.count >= 3) {
@@ -1364,10 +1364,10 @@ serve({
           }
           limitInfo.count += 1;
         } else {
-          rateLimits.set(ip, { count: 1, resetTime: now + 10 * 60 * 1000 }); // 10 minutes window
+          rateLimits.set(ip, { count: 1, resetTime: now + 10 * 60 * 1000 }); 
         }
 
-        // 2. Cloudflare Turnstile verification
+        
         if (!turnstileToken) {
           return Response.json({ error: "Xác thực Captcha không hợp lệ" }, { status: 400, headers });
         }
@@ -1383,21 +1383,21 @@ serve({
           return Response.json({ error: "Xác thực Captcha thất bại. Vui lòng thử lại." }, { status: 400, headers });
         }
 
-        // 3. Check if email exists in DB
+        
         const db = await readData();
         const user = db.accounts?.find((u: any) => u.email.toLowerCase() === email.toLowerCase());
         if (!user) {
           return Response.json({ error: "Email này không tồn tại trong hệ thống" }, { status: 400, headers });
         }
 
-        // 4. Generate Reset Token
+        
         const token = crypto.randomUUID();
         resetTokens.set(token, {
           email: email.toLowerCase().trim(),
-          expiresAt: now + 60 * 60 * 1000 // 1 hour expiration
+          expiresAt: now + 60 * 60 * 1000 
         });
 
-        // 5. Send recovery email using Resend
+        
         const resetLink = `https://pc.qtitpc.dev/auth/reset-password?token=${token}`;
         console.log(`[Forgot Password] Reset link for ${email}: ${resetLink}`);
 
@@ -1466,7 +1466,7 @@ serve({
       }
     }
 
-    // GET /api/auth/verify-reset-token
+    
     if (url.pathname === "/api/auth/verify-reset-token" && req.method === "GET") {
       const token = url.searchParams.get("token");
       if (!token) {
@@ -1481,7 +1481,7 @@ serve({
       return Response.json({ valid: true, email: tokenInfo.email }, { headers });
     }
 
-    // POST /api/auth/reset-password
+    
     if (url.pathname === "/api/auth/reset-password" && req.method === "POST") {
       try {
         const { token, password } = await req.json();
@@ -1501,11 +1501,11 @@ serve({
           return Response.json({ error: "Không tìm thấy người dùng." }, { status: 400, headers });
         }
 
-        // Update password
+        
         db.accounts[userIndex].password = password;
         await writeData(db);
 
-        // Delete reset token so it cannot be reused
+        
         resetTokens.delete(token);
 
         return Response.json({ success: true }, { headers });
@@ -1515,7 +1515,7 @@ serve({
       }
     }
 
-    // POST /api/upload
+    
     if (url.pathname === "/api/upload" && req.method === "POST") {
       try {
         const formData = await req.formData();
@@ -1557,7 +1557,7 @@ serve({
       }
     }
 
-    // POST /api/auth/update-profile
+    
     if (url.pathname === "/api/auth/update-profile" && req.method === "POST") {
       try {
         const body = await req.json();
@@ -1575,18 +1575,18 @@ serve({
 
         const user = db.accounts[userIndex];
 
-        // Update fields
+        
         user.name = name ? name.trim() : user.name;
         if (phone !== undefined) user.phone = phone.trim();
         if (address !== undefined) user.address = address.trim();
         if (avatar !== undefined) user.avatar = avatar;
         if (newPassword) user.password = newPassword;
 
-        // Save
+        
         db.accounts[userIndex] = user;
         await writeData(db);
 
-        // Remove password before returning
+        
         const { password, ...safeUser } = user;
 
         return Response.json({ success: true, user: safeUser }, { headers });
@@ -1596,9 +1596,9 @@ serve({
       }
     }
 
-    // ── ACCOUNTS MANAGEMENT ENDPOINTS (ADMIN ONLY) ───────────────────
+    
 
-    // GET /api/staff
+    
     if (url.pathname === "/api/staff" && req.method === "GET") {
       const db = await readData();
       if (!verifyAdmin(req, db)) {
@@ -1607,7 +1607,7 @@ serve({
       return Response.json(db.staff || [], { headers });
     }
 
-    // GET /api/accounts
+    
     if (url.pathname === "/api/accounts" && req.method === "GET") {
       const db = await readData();
       if (!verifyAdmin(req, db)) {
@@ -1616,7 +1616,7 @@ serve({
       return Response.json(db.accounts || [], { headers });
     }
 
-    // POST /api/accounts
+    
     if (url.pathname === "/api/accounts" && req.method === "POST") {
       try {
         const db = await readData();

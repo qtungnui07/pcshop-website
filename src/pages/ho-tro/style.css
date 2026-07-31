@@ -1,20 +1,20 @@
-/* ================================================================= */
-/* GLOBAL DESIGN SYSTEM & VARIABLES                                  */
-/* ================================================================= */
+
+
+
 .ho-tro-scope {
-    /* Color Palette */
+    
     --color-bg-primary: #f8fafc;
     --color-bg-secondary: #ffffff;
     --color-text-primary: #0f172a;
     --color-text-secondary: #475569;
     --color-text-muted: #94a3b8;
     
-    --color-primary: #020617; /* Dark slate black */
+    --color-primary: #020617; 
     --color-primary-light: #334155;
     --color-border: #e2e8f0;
     --color-border-hover: #cbd5e1;
     
-    /* Category Color Themes (For Icons and Accents) */
+    
     --color-theme-red: #ef4444;
     --color-theme-red-light: #fef2f2;
     --color-theme-orange: #f97316;
@@ -24,7 +24,7 @@
     --color-theme-green: #10b981;
     --color-theme-green-light: #ecfdf5;
 
-    /* Status Colors */
+    
     --color-status-pending-text: #b45309;
     --color-status-pending-bg: #fef3c7;
     --color-status-processing-text: #1d4ed8;
@@ -34,14 +34,14 @@
     --color-status-cancelled-text: #b91c1c;
     --color-status-cancelled-bg: #fee2e2;
 
-    /* Fonts & Radii */
+    
     --font-sans: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     --radius-sm: 8px;
     --radius-md: 12px;
     --radius-lg: 20px;
     --radius-full: 9999px;
     
-    /* Shadows & Transitions */
+    
     --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
     --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
     --shadow-lg: 0 10px 15px -3px rgba(15, 23, 42, 0.08), 0 4px 6px -4px rgba(15, 23, 42, 0.03);
@@ -51,127 +51,11 @@
     --transition-normal: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Commented out global selectors to avoid conflicts in React
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
 
-body {
-    font-family: var(--font-sans);
-    background-color: var(--color-bg-primary);
-    color: var(--color-text-primary);
-    line-height: 1.5;
-    -webkit-font-smoothing: antialiased;
-}
 
-.global-header {
-    background-color: rgba(255, 255, 255, 0.85);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border-bottom: 1px solid var(--color-border);
-    position: sticky;
-    top: 0;
-    z-index: 100;
-}
 
-.header-container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 24px;
-    height: 72px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-}
 
-.logo {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    text-decoration: none;
-    color: var(--color-primary);
-    font-weight: 700;
-    font-size: 20px;
-    letter-spacing: -0.5px;
-}
 
-.logo-icon {
-    color: var(--color-primary);
-}
-
-.nav-links {
-    display: flex;
-    gap: 32px;
-}
-
-.nav-link {
-    text-decoration: none;
-    color: var(--color-text-secondary);
-    font-size: 15px;
-    font-weight: 500;
-    padding: 8px 0;
-    border-bottom: 2px solid transparent;
-    transition: var(--transition-fast);
-}
-
-.nav-link:hover {
-    color: var(--color-primary);
-}
-
-.nav-link.active {
-    color: var(--color-primary);
-    border-bottom-color: var(--color-primary);
-    font-weight: 600;
-}
-
-.header-actions {
-    display: flex;
-    gap: 16px;
-}
-
-.action-btn {
-    background: none;
-    border: none;
-    color: var(--color-text-secondary);
-    cursor: pointer;
-    padding: 8px;
-    border-radius: var(--radius-full);
-    transition: var(--transition-fast);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.action-btn:hover {
-    background-color: var(--color-bg-primary);
-    color: var(--color-primary);
-}
-
-.main-content {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 40px 24px 80px 24px;
-}
-
-.global-footer {
-    background-color: #ffffff;
-    border-top: 1px solid var(--color-border);
-    padding: 30px 24px;
-    text-align: center;
-    margin-top: 40px;
-}
-
-.footer-container p {
-    font-size: 14px;
-    color: var(--color-text-muted);
-}
-*/
-
-/* ================================================================= */
-/* SPA CORE VIEW SYSTEMS & ANIMATIONS                                */
-/* ================================================================= */
 .view-section {
     display: none;
     animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
@@ -192,7 +76,7 @@ body {
     }
 }
 
-/* Buttons System */
+
 .btn {
     display: inline-flex;
     align-items: center;
@@ -250,11 +134,11 @@ body {
     background-color: #dc2626;
 }
 
-/* ================================================================= */
-/* SUPPORT MODULE: VIEW 1 - SUPPORT HOMEPAGE LAYOUTS                 */
-/* ================================================================= */
 
-/* Support Hero Section */
+
+
+
+
 .support-hero {
     background-color: #ffffff;
     border-radius: var(--radius-lg);
@@ -301,7 +185,7 @@ body {
     margin-bottom: 32px;
 }
 
-/* Dynamic counter badge */
+
 .my-tickets-badge-btn {
     display: inline-flex;
     align-items: center;
@@ -324,7 +208,7 @@ body {
     box-shadow: var(--shadow-md);
 }
 
-/* Hero PC Image Container */
+
 .hero-image-container {
     display: flex;
     justify-content: center;
@@ -346,7 +230,7 @@ body {
     to { transform: translateY(-8px) scale(1.05); }
 }
 
-/* Category Grid & Cards */
+
 .support-cards-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -383,7 +267,7 @@ body {
     margin-bottom: 20px;
 }
 
-/* Color theme mappings (Updated to black per request) */
+
 .red-theme,
 .orange-theme,
 .blue-theme,
@@ -410,9 +294,9 @@ body {
     width: 100%;
 }
 
-/* ================================================================= */
-/* SUPPORT MODULE: USER TICKETS LIST ("Yêu cầu của bạn")            */
-/* ================================================================= */
+
+
+
 .my-requests-section {
     background-color: #ffffff;
     border-radius: var(--radius-lg);
@@ -444,7 +328,7 @@ body {
     flex-wrap: wrap;
 }
 
-/* Status tabs stylings */
+
 .status-tabs {
     display: flex;
     background-color: var(--color-bg-primary);
@@ -476,7 +360,7 @@ body {
     box-shadow: var(--shadow-sm);
 }
 
-/* Custom Select Dropdowns */
+
 .sort-wrapper {
     position: relative;
     display: flex;
@@ -511,7 +395,7 @@ body {
     pointer-events: none;
 }
 
-/* Empty State Container */
+
 .empty-requests-box {
     display: flex;
     flex-direction: column;
@@ -562,7 +446,7 @@ body {
     padding: 12px 28px;
 }
 
-/* Active requests grid list style */
+
 .requests-grid-list {
     display: grid;
     grid-template-columns: 1fr;
@@ -620,7 +504,7 @@ body {
     color: var(--color-text-primary);
 }
 
-/* Dynamic status badges */
+
 .ticket-status-badge {
     display: inline-flex;
     align-items: center;
@@ -648,7 +532,7 @@ body {
     color: var(--color-status-cancelled-text);
 }
 
-/* Benefit badges */
+
 .benefits-row {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -684,9 +568,9 @@ body {
     color: var(--color-text-muted);
 }
 
-/* ================================================================= */
-/* SUPPORT MODULE: PROCESS TIMELINE (Horizontal flow)                */
-/* ================================================================= */
+
+
+
 .workflow-section {
     background-color: #ffffff;
     border: 1px solid var(--color-border);
@@ -781,11 +665,11 @@ body {
     color: var(--color-text-muted);
 }
 
-/* ================================================================= */
-/* SUPPORT MODULE: VIEW 2 - CREATE TICKET VIEW                       */
-/* ================================================================= */
 
-/* Breadcrumbs style */
+
+
+
+
 .breadcrumbs {
     display: flex;
     align-items: center;
@@ -830,7 +714,7 @@ body {
     color: var(--color-text-secondary);
 }
 
-/* Form layouts grid structure */
+
 .form-layout-grid {
     display: grid;
     grid-template-columns: 1.4fr 0.6fr;
@@ -868,7 +752,7 @@ body {
     color: var(--color-text-primary);
 }
 
-/* Input Fields and Select Dropdowns */
+
 .form-group {
     display: flex;
     flex-direction: column;
@@ -922,7 +806,7 @@ body {
     gap: 20px;
 }
 
-/* Custom dropdown wrappers */
+
 .select-field-wrapper,
 .date-field-wrapper {
     position: relative;
@@ -936,7 +820,7 @@ body {
     padding-right: 40px;
 }
 
-/* Validation styling */
+
 .form-group.invalid input,
 .form-group.invalid select,
 .form-group.invalid textarea {
@@ -955,7 +839,7 @@ body {
     display: block;
 }
 
-/* Selection list grid for Type Selectors */
+
 .request-type-selector-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -986,7 +870,7 @@ body {
     background-color: var(--color-bg-primary);
 }
 
-/* Customized Radio Button Checkmark Circle */
+
 .card-radio-custom {
     width: 20px;
     height: 20px;
@@ -1008,7 +892,7 @@ body {
     transition: var(--transition-fast);
 }
 
-/* Activated state of type cards */
+
 .type-selector-card input[type="radio"]:checked ~ .card-radio-custom {
     background-color: #000000;
     border-color: #000000;
@@ -1056,7 +940,7 @@ body {
     line-height: 1.35;
 }
 
-/* Textarea wrapper characters counter */
+
 .textarea-wrapper {
     position: relative;
     width: 100%;
@@ -1075,7 +959,7 @@ body {
     color: var(--color-text-muted);
 }
 
-/* Drag & Drop File Upload Area styles */
+
 .file-drop-area {
     border: 2px dashed var(--color-border);
     border-radius: var(--radius-md);
@@ -1179,7 +1063,7 @@ body {
     background-color: var(--color-theme-red-light);
 }
 
-/* Actions Row */
+
 .form-actions-row {
     display: flex;
     justify-content: flex-end;
@@ -1191,9 +1075,9 @@ body {
     min-width: 120px;
 }
 
-/* ================================================================= */
-/* SUPPORT MODULE: SIDEBAR HELPERS (Vertical timeline / guidelines)   */
-/* ================================================================= */
+
+
+
 .form-helper-sidebar {
     display: flex;
     flex-direction: column;
@@ -1215,7 +1099,7 @@ body {
     margin-bottom: 24px;
 }
 
-/* Vertical timeline indicator styles */
+
 .vertical-steps-timeline {
     display: flex;
     flex-direction: column;
@@ -1234,7 +1118,7 @@ body {
     padding-bottom: 0;
 }
 
-/* Draw connecting lines */
+
 .vertical-step:not(:last-child)::after {
     content: '';
     position: absolute;
@@ -1287,7 +1171,7 @@ body {
     line-height: 1.4;
 }
 
-/* Warnings & Notice list stylings */
+
 .notices-list {
     list-style: none;
     display: flex;
@@ -1323,9 +1207,9 @@ body {
     line-height: 1.4;
 }
 
-/* ================================================================= */
-/* SUPPORT MODULE: MODALS & POPUPS                                   */
-/* ================================================================= */
+
+
+
 .modal-overlay {
     position: fixed;
     top: 0;
@@ -1524,7 +1408,7 @@ body {
     align-items: center;
 }
 
-/* Horizontal Modal status flow styling */
+
 .modal-timeline-container {
     background-color: var(--color-bg-primary);
     border: 1px solid var(--color-border);
@@ -1575,11 +1459,11 @@ body {
     height: 2px;
     background-color: var(--color-border);
     margin: 0 12px;
-    margin-bottom: 24px; /* offset label gap */
+    margin-bottom: 24px; 
     transition: var(--transition-normal);
 }
 
-/* Completed/Active node stages */
+
 .modal-step-node.active .node-circle {
     background-color: var(--color-primary);
     border-color: var(--color-primary);
@@ -1617,7 +1501,7 @@ body {
     font-weight: 600;
 }
 
-/* Toasts and Feedback notifications */
+
 .toast-card {
     position: fixed;
     bottom: 24px;
@@ -1668,9 +1552,9 @@ body {
     color: var(--color-text-muted);
 }
 
-/* ================================================================= */
-/* RESPONSIVE DESIGN (Adaptive styling)                             */
-/* ================================================================= */
+
+
+
 @media (max-width: 1024px) {
     .support-hero {
         padding: 40px;
@@ -1732,7 +1616,7 @@ body {
         gap: 24px;
     }
     .nav-links {
-        display: none; /* simple hidden state for mobile header simplification */
+        display: none; 
     }
     .section-header-row {
         flex-direction: column;

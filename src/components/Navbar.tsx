@@ -96,7 +96,7 @@ const getMenuLink = (menuName: string, splitCatName: string, link: string) => {
   if (menuSlug === 'laptop') {
     const catSlug = generateSlug(splitCatName);
 
-    // "Nhu Cầu" category → use ?filter= param (handled by laptop page)
+    
     if (catSlug === 'nhu-cau') {
       const filterSlug = generateSlug(link);
       if (filterSlug === 'macbook-apple') return '/laptop?filter=macbook';
@@ -108,7 +108,7 @@ const getMenuLink = (menuName: string, splitCatName: string, link: string) => {
       if (filterSlug === 'laptop-pin-lau') return '/laptop?filter=laptop-pin-lau';
     }
 
-    // "Mức Giá" category
+    
     if (catSlug === 'muc-gia') {
       const priceSlug = generateSlug(link);
       if (priceSlug === 'duoi-15-trieu') return '/laptop?price=0-15000000';
@@ -266,7 +266,7 @@ export default function Navbar() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [searchOpen]);
 
-  // Click outside to close user menu
+  
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (accountMenuRef.current && !accountMenuRef.current.contains(event.target as Node)) {
@@ -312,9 +312,9 @@ export default function Navbar() {
   useEffect(() => {
     if (activeMenu) {
       const menu = navItems.find(i => i.name === activeMenu);
-      // @ts-ignore - dynamic property
+      
       if (menu?.isSplit && menu.splitData) {
-        // @ts-ignore
+        
         setActiveSplitCategory(menu.splitData[0].name);
       }
     }
@@ -415,7 +415,7 @@ export default function Navbar() {
                 </Link>
               )}
 
-              {/* Account Dropdown Menu */}
+              
               <AnimatePresence>
                 {user && accountMenuOpen && (
                   <motion.div
@@ -425,7 +425,7 @@ export default function Navbar() {
                     transition={{ duration: 0.2, ease: "easeOut" }}
                     className="absolute right-0 top-full mt-2 w-72 bg-white/95 backdrop-blur-xl border border-gray-100 rounded-2xl shadow-xl py-4 z-50 overflow-hidden"
                   >
-                    {/* User Profile Summary */}
+                    
                     <div className="px-5 pb-3 border-b border-gray-100">
                       <div className="flex items-center gap-3">
                         {user.avatar ? (
@@ -462,7 +462,7 @@ export default function Navbar() {
                       </div>
                     </div>
 
-                    {/* Menu Options */}
+                    
                     <div className="pt-2">
                       {user.role === "admin" && (
                         <Link
@@ -510,7 +510,7 @@ export default function Navbar() {
         <AnimatePresence>
           {activeMenu && (() => {
             const currentMenu = navItems.find(i => i.name === activeMenu);
-            // @ts-ignore
+            
             if (!currentMenu?.dropdown && !currentMenu?.isSplit) return null;
             return (
               <motion.div
@@ -531,16 +531,16 @@ export default function Navbar() {
                       style={{ gridArea: '1 / 1' }}
                       className="max-w-[1200px] w-full mx-auto px-4 md:px-8 py-12"
                     >
-                      {/* @ts-ignore */}
+                      
                       {currentMenu?.isSplit ? (
                         <div className="flex gap-16">
-                          {/* Left side */}
+                          
                           <div className="flex flex-col w-1/3 border-r border-gray-100 pr-8">
                             <motion.h3 variants={itemVariants} className="text-[12px] text-[#86868b] mb-4 tracking-wider uppercase font-semibold">
                               {currentMenu.name === 'Laptop' ? 'Danh mục Laptop' : 'Danh mục linh kiện'}
                             </motion.h3>
                             <ul className="space-y-3">
-                              {/* @ts-ignore */}
+                              
                               {currentMenu.splitData?.map((cat, idx) => (
                                 <motion.li variants={itemVariants} key={idx}>
                                   <Link
@@ -555,11 +555,11 @@ export default function Navbar() {
                               ))}
                             </ul>
                           </div>
-                          {/* Right side */}
+                          
                           <div className="flex-1 pl-8">
-                            {/* @ts-ignore */}
+                            
                             {currentMenu.splitData?.filter(cat => cat.name === activeSplitCategory).map((cat, idx) => {
-                              // @ts-ignore
+                              
                               const hasGroups = cat.groups && cat.groups.length > 0;
                               return (
                               <motion.div
@@ -574,7 +574,7 @@ export default function Navbar() {
                                 </h3>
                                 {hasGroups ? (
                                   <div className="space-y-4">
-                                    {/* @ts-ignore */}
+                                    
                                     {cat.groups.map((group, gIdx) => (
                                       <motion.div
                                         key={gIdx}
@@ -602,7 +602,7 @@ export default function Navbar() {
                                   </div>
                                 ) : (
                                   <div className="grid grid-cols-2 md:grid-cols-3 gap-y-4 gap-x-8">
-                                    {/* @ts-ignore */}
+                                    
                                     {cat.links?.map((link, lIdx) => (
                                       <Link
                                         to={getMenuLink(currentMenu?.name || '', cat.name, link)}

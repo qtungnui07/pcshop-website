@@ -63,17 +63,17 @@ export default function ProfileIndex() {
 
   const [activeTab, setActiveTab] = useState<"info" | "security">("info");
   
-  // Profile info states
+  
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
   const [avatar, setAvatar] = useState("");
   
-  // Password change states
+  
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   
-  // UI states
+  
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -81,21 +81,21 @@ export default function ProfileIndex() {
   
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Password requirements
+  
   const hasMinLength = newPassword.length >= 8;
   const hasUppercase = /[A-Z]/.test(newPassword);
   const hasLowercase = /[a-z]/.test(newPassword);
   const hasSpecial = /[^A-Za-z0-9]/.test(newPassword);
   const isPasswordValid = hasMinLength && hasUppercase && hasLowercase && hasSpecial;
 
-  // Protect route
+  
   useEffect(() => {
     if (!loading && !user) {
       navigate("/auth");
     }
   }, [user, loading, navigate]);
 
-  // Sync state with user profile
+  
   useEffect(() => {
     if (user) {
       setName(user.name || "");
@@ -113,7 +113,7 @@ export default function ProfileIndex() {
     );
   }
 
-  // Handle avatar upload
+  
   const handleAvatarClick = () => {
     fileInputRef.current?.click();
   };
@@ -122,7 +122,7 @@ export default function ProfileIndex() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Client-side image check
+    
     const allowedExtensions = ["png", "jpg", "jpeg", "gif", "webp"];
     const extension = file.name.split(".").pop()?.toLowerCase();
     if (!extension || !allowedExtensions.includes(extension)) {
@@ -150,7 +150,7 @@ export default function ProfileIndex() {
 
       setAvatar(data.url);
       
-      // Update account DB with new avatar
+      
       const updateRes = await updateProfile({
         name,
         phone,
@@ -170,7 +170,7 @@ export default function ProfileIndex() {
     }
   };
 
-  // Handle save changes
+  
   const handleSaveInfo = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) {
@@ -202,7 +202,7 @@ export default function ProfileIndex() {
     }
   };
 
-  // Handle change password
+  
   const handleUpdatePassword = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
@@ -253,11 +253,11 @@ export default function ProfileIndex() {
       <div className="max-w-[850px] mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           
-          {/* Left Column: Avatar & Summary */}
+          
           <div className="md:col-span-1">
             <div className="bg-white border border-gray-100 rounded-3xl p-6 shadow-sm flex flex-col items-center text-center">
               
-              {/* Avatar Uploader container */}
+              
               <div className="relative group cursor-pointer" onClick={handleAvatarClick}>
                 <div className="w-28 h-28 rounded-full overflow-hidden border-2 border-zinc-950 flex items-center justify-center bg-gray-50">
                   {uploading ? (
@@ -271,12 +271,12 @@ export default function ProfileIndex() {
                   )}
                 </div>
                 
-                {/* Hover Camera Overlay */}
+                
                 <div className="absolute inset-0 bg-black/45 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                   <Camera className="w-6 h-6 text-white" />
                 </div>
 
-                {/* Hidden input */}
+                
                 <input
                   type="file"
                   ref={fileInputRef}
@@ -306,7 +306,7 @@ export default function ProfileIndex() {
                 )}
               </div>
 
-              {/* Navigation Tabs */}
+              
               <div className="w-full mt-8 flex flex-col gap-1 border-t border-gray-100 pt-4">
                 <button
                   onClick={() => { setActiveTab("info"); setError(null); setSuccess(null); }}
@@ -337,13 +337,13 @@ export default function ProfileIndex() {
             </div>
           </div>
 
-          {/* Right Column: Tab Forms */}
+          
           <div className="md:col-span-2">
             <div className="bg-white border border-gray-100 rounded-3xl p-6 md:p-8 shadow-sm min-h-[400px]">
               
               <AnimatePresence mode="wait">
                 
-                {/* Form: General Info */}
+                
                 {activeTab === "info" && (
                   <motion.div
                     key="info"
@@ -356,7 +356,7 @@ export default function ProfileIndex() {
                     
                     <form onSubmit={handleSaveInfo} className="space-y-5">
                       
-                      {/* Name input */}
+                      
                       <div>
                         <label className="block text-xs font-semibold text-gray-500 mb-1.5 uppercase tracking-wider">Họ và tên</label>
                         <div className="relative">
@@ -374,7 +374,7 @@ export default function ProfileIndex() {
                         </div>
                       </div>
 
-                      {/* Email input (Read-only) */}
+                      
                       <div>
                         <label className="block text-xs font-semibold text-gray-500 mb-1.5 uppercase tracking-wider">Địa chỉ Email</label>
                         <div className="relative">
@@ -391,7 +391,7 @@ export default function ProfileIndex() {
                         <p className="mt-1 text-[10px] text-gray-400">Không thể thay đổi email tài khoản.</p>
                       </div>
 
-                      {/* Phone input */}
+                      
                       <div>
                         <label className="block text-xs font-semibold text-gray-500 mb-1.5 uppercase tracking-wider">Số điện thoại</label>
                         <div className="relative">
@@ -408,7 +408,7 @@ export default function ProfileIndex() {
                         </div>
                       </div>
 
-                      {/* Default Address input */}
+                      
                       <div>
                         <label className="block text-xs font-semibold text-gray-500 mb-1.5 uppercase tracking-wider">Địa chỉ nhận hàng mặc định</label>
                         <div className="relative">
@@ -425,7 +425,7 @@ export default function ProfileIndex() {
                         </div>
                       </div>
 
-                      {/* Toast Alerts */}
+                      
                       <AnimatePresence>
                         {error && (
                           <motion.div
@@ -470,7 +470,7 @@ export default function ProfileIndex() {
                   </motion.div>
                 )}
 
-                {/* Form: Security (Password change) */}
+                
                 {activeTab === "security" && user.provider === "local" && (
                   <motion.div
                     key="security"
@@ -483,7 +483,7 @@ export default function ProfileIndex() {
 
                     <form onSubmit={handleUpdatePassword} className="space-y-5">
                       
-                      {/* New Password */}
+                      
                       <div>
                         <label className="block text-xs font-semibold text-gray-500 mb-1.5 uppercase tracking-wider">Mật khẩu mới</label>
                         <div className="relative">
@@ -501,7 +501,7 @@ export default function ProfileIndex() {
                         </div>
                       </div>
 
-                      {/* Password Requirements Validation */}
+                      
                       {newPassword && (
                         <motion.div
                           initial={{ opacity: 0, height: 0 }}
@@ -515,7 +515,7 @@ export default function ProfileIndex() {
                         </motion.div>
                       )}
 
-                      {/* Confirm New Password */}
+                      
                       <div>
                         <label className="block text-xs font-semibold text-gray-500 mb-1.5 uppercase tracking-wider">Nhập lại mật khẩu mới</label>
                         <div className="relative">
@@ -533,7 +533,7 @@ export default function ProfileIndex() {
                         </div>
                       </div>
 
-                      {/* Toast Alerts */}
+                      
                       <AnimatePresence>
                         {error && (
                           <motion.div

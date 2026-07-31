@@ -10,28 +10,28 @@ import TwoBannerCardsSection from './marketing-page/TwoBannerCardsSection';
 export default function Home() {
   return (
     <div className="bg-[#f5f5f7] min-h-screen">
-      {/* ══════════════════ HERO ══════════════════ */}
+      
       <HeroSection />
 
-      {/* ══════════════════ FEATURED CATEGORIES ══════════════════ */}
+      
       <FeaturedCategoriesSection />
 
-      {/* ══════════════════ PRODUCT CAROUSEL ══════════════════ */}
+      
       <ProductCarousel />
 
-      {/* ══════════════════ TWO BANNER CARDS ══════════════════ */}
+      
       <TwoBannerCardsSection />
 
-      {/* ══════════════════ CATEGORIES ══════════════════ */}
+      
       <CategoriesSection />
       
-      {/* ══════════════════ LAPTOP CATEGORIES ══════════════════ */}
+      
       <LaptopCategoriesSection />
 
-      {/* ══════════════════ BRAND / VIDEO ══════════════════ */}
+      
       <BrandSection />
 
-      {/* ══════════════════ TRUST BADGES ══════════════════ */}
+      
       <TrustBadgesSection />
     </div>
   );

@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hỗ trợ khách hàng - PCStore</title>
-    <!-- Google Fonts for Premium Typography -->
+    
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -12,9 +12,9 @@
 </head>
 <body>
 
-    <!-- ========================================== -->
-    <!-- GLOBAL WEBSITE HEADER (E-COMMERCE NAVIGATION) -->
-    <!-- ========================================== -->
+    
+    
+    
     <header class="global-header">
         <div class="header-container">
             <a href="#" class="logo" id="nav-logo">
@@ -47,13 +47,13 @@
         </div>
     </header>
 
-    <!-- Main Container wrapping support views -->
+    
     <main class="main-content">
-        <!-- ================================================================= -->
-        <!-- SUPPORT MODULE: VIEW 1 - SUPPORT HOME (TRANG CHỦ HỖ TRỢ) -->
-        <!-- ================================================================= -->
+        
+        
+        
         <section id="view-support-home" class="view-section active">
-            <!-- Hero Banner -->
+            
             <div class="support-hero">
                 <div class="hero-content">
                     <span class="hero-tag">HỖ TRỢ</span>
@@ -77,9 +77,9 @@
                 </div>
             </div>
 
-            <!-- Support Categories Grid -->
+            
             <div class="support-cards-grid">
-                <!-- Warranty Card -->
+                
                 <div class="support-card" data-category="warranty">
                     <div class="card-icon-wrapper red-theme">
                         <svg viewBox="0 0 24 24" width="28" height="28" stroke="currentColor" stroke-width="2" fill="none">
@@ -91,7 +91,7 @@
                     <button class="btn btn-primary btn-create-ticket-from-card" data-category="warranty">Tạo Ticket</button>
                 </div>
 
-                <!-- Repair Card -->
+                
                 <div class="support-card" data-category="repair">
                     <div class="card-icon-wrapper orange-theme">
                         <svg viewBox="0 0 24 24" width="28" height="28" stroke="currentColor" stroke-width="2" fill="none">
@@ -103,7 +103,7 @@
                     <button class="btn btn-primary btn-create-ticket-from-card" data-category="repair">Tạo Ticket</button>
                 </div>
 
-                <!-- Cleaning Card -->
+                
                 <div class="support-card" data-category="cleaning">
                     <div class="card-icon-wrapper blue-theme">
                         <svg viewBox="0 0 24 24" width="28" height="28" stroke="currentColor" stroke-width="2" fill="none">
@@ -115,7 +115,7 @@
                     <button class="btn btn-primary btn-create-ticket-from-card" data-category="cleaning">Tạo Ticket</button>
                 </div>
 
-                <!-- Consulting Card -->
+                
                 <div class="support-card" data-category="consulting">
                     <div class="card-icon-wrapper green-theme">
                         <svg viewBox="0 0 24 24" width="28" height="28" stroke="currentColor" stroke-width="2" fill="none">
@@ -128,12 +128,12 @@
                 </div>
             </div>
 
-            <!-- Your Requests Section -->
+            
             <div id="section-my-requests" class="my-requests-section">
                 <div class="section-header-row">
                     <h2 class="section-title">Yêu cầu của bạn</h2>
                     <div class="filter-controls">
-                        <!-- Status Tabs -->
+                        
                         <div class="status-tabs" id="status-tabs-container">
                             <button class="tab-btn active" data-status="all">Tất cả</button>
                             <button class="tab-btn" data-status="pending">Chờ xử lý</button>
@@ -141,7 +141,7 @@
                             <button class="tab-btn" data-status="completed">Hoàn thành</button>
                             <button class="tab-btn" data-status="cancelled">Đã hủy</button>
                         </div>
-                        <!-- Sort Dropdown -->
+                        
                         <div class="sort-wrapper">
                             <select id="sort-select" class="sort-select">
                                 <option value="newest">Mới nhất</option>
@@ -152,13 +152,13 @@
                     </div>
                 </div>
 
-                <!-- Requests Dynamic Container -->
+                
                 <div id="requests-list-container" class="requests-list-container">
-                    <!-- Dynamic Empty State or Ticket Grid Items loaded from JS -->
+                    
                 </div>
             </div>
 
-            <!-- Benefit Value Badges -->
+            
             <div class="benefits-row">
                 <div class="benefit-item">
                     <div class="benefit-icon">
@@ -198,7 +198,7 @@
                 </div>
             </div>
 
-            <!-- Workflow Section -->
+            
             <div class="workflow-section">
                 <h3 class="workflow-title">Quy trình hỗ trợ</h3>
                 <p class="workflow-subtitle">Đơn giản – Nhanh chóng – Hiệu quả</p>
@@ -268,11 +268,11 @@
             </div>
         </section>
 
-        <!-- ================================================================= -->
-        <!-- SUPPORT MODULE: VIEW 2 - CREATE TICKET (TRANG TẠO TICKET CHUYÊN BIỆT) -->
-        <!-- ================================================================= -->
+        
+        
+        
         <section id="view-create-ticket" class="view-section">
-            <!-- Breadcrumbs -->
+            
             <div class="breadcrumbs">
                 <a href="#" class="btn-breadcrumb-home">Trang chủ</a>
                 <span class="divider">/</span>
@@ -281,17 +281,17 @@
                 <span class="current">Tạo Ticket</span>
             </div>
 
-            <!-- Page Title -->
+            
             <div class="page-title-area">
                 <h1 class="page-title">Tạo Ticket</h1>
                 <p class="page-subtitle">Vui lòng điền đầy đủ thông tin để chúng tôi hỗ trợ bạn nhanh chóng.</p>
             </div>
 
-            <!-- Double-column Form Layout -->
+            
             <div class="form-layout-grid">
-                <!-- Left Column: The Interactive Form -->
+                
                 <form id="ticket-form" class="ticket-form-card" novalidate>
-                    <!-- SECTION 1: Select Request Type -->
+                    
                     <div class="form-section">
                         <h3 class="form-section-title">1. Chọn loại yêu cầu</h3>
                         <div class="request-type-selector-grid">
@@ -355,7 +355,7 @@
                         </div>
                     </div>
 
-                    <!-- SECTION 2: Product Information -->
+                    
                     <div class="form-section">
                         <h3 class="form-section-title">2. Thông tin sản phẩm</h3>
                         
@@ -412,7 +412,7 @@
                         </div>
                     </div>
 
-                    <!-- SECTION 3: Contact Information -->
+                    
                     <div class="form-section">
                         <h3 class="form-section-title">3. Thông tin liên hệ</h3>
                         
@@ -445,7 +445,7 @@
                         </div>
                     </div>
 
-                    <!-- SECTION 4: Problem Description -->
+                    
                     <div class="form-section">
                         <h3 class="form-section-title">4. Mô tả vấn đề</h3>
                         
@@ -478,21 +478,21 @@
                                     <p class="drop-text-secondary">Hỗ trợ: JPG, PNG, PDF, MP4 (Tối đa 10MB / file)</p>
                                 </div>
                             </div>
-                            <!-- Mock List of Uploaded Files -->
+                            
                             <div class="uploaded-files-list" id="uploaded-files-list"></div>
                         </div>
                     </div>
 
-                    <!-- Form Action Controls -->
+                    
                     <div class="form-actions-row">
                         <button type="button" class="btn btn-secondary btn-cancel-ticket" id="btn-cancel-form">Hủy bỏ</button>
                         <button type="submit" class="btn btn-dark" id="btn-submit-form">Gửi yêu cầu</button>
                     </div>
                 </form>
 
-                <!-- Right Column: Helper Sidebar Widgets -->
+                
                 <aside class="form-helper-sidebar">
-                    <!-- Widget 1: Support Workflow steps visual -->
+                    
                     <div class="sidebar-widget info-widget">
                         <h4 class="widget-title">Quy trình hỗ trợ</h4>
                         <div class="vertical-steps-timeline">
@@ -527,7 +527,7 @@
                         </div>
                     </div>
 
-                    <!-- Widget 2: Notes / Warnings -->
+                    
                     <div class="sidebar-widget notices-widget">
                         <h4 class="widget-title">Thông tin lưu ý</h4>
                         <ul class="notices-list">
@@ -574,11 +574,11 @@
         </section>
     </main>
 
-    <!-- ================================================================= -->
-    <!-- SUPPORT MODULE: MODALS (POPUP CHI TIẾT TICKET & THÔNG BÁO THÀNH CÔNG) -->
-    <!-- ================================================================= -->
     
-    <!-- 1. Ticket Detail Popup Modal -->
+    
+    
+    
+    
     <div id="ticket-detail-modal" class="modal-overlay">
         <div class="modal-card">
             <button class="modal-close-btn" id="btn-close-detail-modal" aria-label="Đóng">
@@ -591,7 +591,7 @@
             </div>
             
             <div class="modal-body-content">
-                <!-- Status timeline inside modal -->
+                
                 <div class="modal-timeline-container">
                     <h4 class="details-section-heading">Trạng thái xử lý</h4>
                     <div class="modal-steps-horizontal" id="modal-status-steps">
@@ -620,7 +620,7 @@
                 </div>
 
                 <div class="modal-details-grid">
-                    <!-- Column 1: Product info and contact -->
+                    
                     <div class="details-column">
                         <div class="details-block">
                             <h4 class="details-section-heading">Thông tin sản phẩm</h4>
@@ -675,7 +675,7 @@
                         </div>
                     </div>
 
-                    <!-- Column 2: Problem details & attachments -->
+                    
                     <div class="details-column">
                         <div class="details-block">
                             <h4 class="details-section-heading">Chi tiết vấn đề</h4>
@@ -687,7 +687,7 @@
                         <div class="details-block" id="modal-detail-files-block">
                             <h4 class="details-section-heading">Tệp đính kèm</h4>
                             <div class="detail-attachments-list" id="modal-detail-attachments">
-                                <!-- Dynamic attachment link buttons -->
+                                
                             </div>
                         </div>
                     </div>
@@ -700,7 +700,7 @@
         </div>
     </div>
 
-    <!-- 2. Success Feedback Toast/Notification -->
+    
     <div id="toast-notification" class="toast-card">
         <div class="toast-icon-wrapper">
             <svg viewBox="0 0 24 24" width="20" height="20" stroke="white" stroke-width="3" fill="none"><polyline points="20 6 9 17 4 12"></polyline></svg>
@@ -711,7 +711,7 @@
         </div>
     </div>
 
-    <!-- Global Footer -->
+    
     <footer class="global-footer">
         <div class="footer-container">
             <p>&copy; 2026 PCStore. Thiết kế bởi Antigravity AI.</p>

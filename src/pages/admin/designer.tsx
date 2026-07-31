@@ -384,8 +384,8 @@ export default function FlashcardDesigner() {
       window.removeEventListener("pointermove", onMove);
       window.removeEventListener("pointerup", onUp);
     };
-  // Pointer listeners intentionally bind to the current canvas snapshot.
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+  
+  
   }, [design, selected, scale]);
 
   if (!design) return null;

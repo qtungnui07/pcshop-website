@@ -11,7 +11,7 @@ const componentsHeroImage = "/images/pc.png";
 import AddToCartButton from "../../components/AddToCartButton";
 import { ProductSkeletonGrid } from "../../components/ui/skeleton";
 
-/* ── TYPES ─────────────────────────────────────────────────────────── */
+
 interface Product {
   id: string;
   name: string;
@@ -24,7 +24,7 @@ interface Product {
   category?: string;
 }
 
-/* ── DATA ──────────────────────────────────────────────────────────── */
+
 const componentCategories = [
   { id: "ram",       label: "RAM",             glow: "rgba(167,139,250,0.35)", image: "ram.webp" },
   { id: "cpu",       label: "CPU / Vi Xử Lý",  glow: "rgba(56,189,248,0.25)", image: "cpu.webp" },
@@ -60,7 +60,7 @@ const perks = [
   { icon: CheckCircle2,title: "Cam kết chính hãng 100%" },
 ];
 
-/* ── HELPERS ────────────────────────────────────────────────────────── */
+
 function parsePrice(priceStr: string) {
   return parseInt(priceStr.replace(/\D/g, ''), 10) || 0;
 }
@@ -69,7 +69,7 @@ function formatPrice(p: number) {
   return new Intl.NumberFormat("vi-VN").format(p) + " đ";
 }
 
-/* ── FilterCheckbox ─────────────────────────────────────────────────── */
+
 function FilterCheckbox({
   checked, label, count, onChange,
 }: {
@@ -92,7 +92,7 @@ function FilterCheckbox({
   );
 }
 
-/* ── FilterGroup ────────────────────────────────────────────────────── */
+
 function FilterGroup({ title, children }: { title: string; children: React.ReactNode }) {
   const [open, setOpen] = useState(true);
   return (
@@ -109,7 +109,7 @@ function FilterGroup({ title, children }: { title: string; children: React.React
   );
 }
 
-/* ── PRODUCT IMAGE ─────────────────────────────────────────────────── */
+
 function ProductImage({
   src,
   alt,
@@ -166,7 +166,7 @@ const API_BASE = typeof window !== "undefined"
     : `${window.location.protocol}//${window.location.hostname}:3001`)
   : "http://localhost:3001";
 
-/* ── PAGE ──────────────────────────────────────────────────────────── */
+
 export default function LinhKienIndex() {
   const navigate = useNavigate();
   const reduceMotion = useReducedMotion();
@@ -179,7 +179,7 @@ export default function LinhKienIndex() {
   const [sortBy, setSortBy] = useState("newest");
   const [showMobileFilter, setShowMobileFilter] = useState(false);
 
-  /* Filter state */
+  
   const [selBrands,  setSelBrands]  = useState<Set<string>>(new Set());
   const [selCapacities, setSelCapacities] = useState<Set<string>>(new Set());
   const [selTypes, setSelTypes] = useState<Set<string>>(new Set());
@@ -193,7 +193,7 @@ export default function LinhKienIndex() {
 
   const [searchParams, setSearchParams] = useSearchParams();
 
-  // Load from API on mount
+  
   useEffect(() => {
     setLoading(true);
     fetch(`${API_BASE}/api/components`)
@@ -203,7 +203,7 @@ export default function LinhKienIndex() {
       .finally(() => setLoading(false));
   }, []);
 
-  // Sync from URL params to React states
+  
   useEffect(() => {
     const category = searchParams.get("category") || "ram";
     setActiveCategory(category);
@@ -255,7 +255,7 @@ export default function LinhKienIndex() {
   const [currentPage, setCurrentPage] = useState(1);
   const ITEMS_PER_PAGE = 16;
 
-  // Reset page when category or filters change
+  
   useEffect(() => {
     setCurrentPage(1);
   }, [
@@ -287,7 +287,7 @@ export default function LinhKienIndex() {
     setMinPrice(MIN_PRICE);
     setMaxPrice(MAX_PRICE);
 
-    // Keep only category in search params
+    
     setSearchParams({ category: activeCategory }, { replace: true });
   };
 
@@ -302,7 +302,7 @@ export default function LinhKienIndex() {
     else next.add(value);
     setFn(next);
 
-    // Sync to URL
+    
     const newParams = new URLSearchParams(searchParams);
     if (next.size > 0) {
       newParams.set(paramName, Array.from(next).join(","));
@@ -317,48 +317,48 @@ export default function LinhKienIndex() {
     setSearchParams({ category: catId }, { replace: true });
   };
 
-  /* Derived filtered + sorted list */
+  
   const filteredProducts = useMemo(() => {
     let result = products.filter(p => {
-      // 1. Filter by category
+      
       const pCat = (p.category || 'RAM').toLowerCase();
       if (pCat !== activeCategory.toLowerCase()) return false;
 
-      // 2. Filter by price range
+      
       const priceNum = parsePrice(p.price);
       if (priceNum < minPrice || priceNum > maxPrice) return false;
 
-      // 3. Filter by Brand
+      
       if (selBrands.size > 0) {
         if (!Array.from(selBrands).some(b => p.name.toLowerCase().includes(b.toLowerCase()))) return false;
       }
       
-      // 4. Filter by Capacity
+      
       if (selCapacities.size > 0) {
         if (!Array.from(selCapacities).some(c => p.specs.includes(c))) return false;
       }
 
-      // 5. Filter by Type (DDR4, DDR5, NVMe, SATA, AIO, etc.)
+      
       if (selTypes.size > 0) {
         if (!Array.from(selTypes).some(t => p.specs.toLowerCase().includes(t.toLowerCase()))) return false;
       }
 
-      // 6. Filter by Bus (RAM only)
+      
       if (activeCategory === "ram" && selBuses.size > 0) {
         if (!Array.from(selBuses).some(b => p.specs.includes(b.replace('MHz', '')))) return false;
       }
 
-      // 7. Filter by CPU / VGA Series
+      
       if (selSeries.size > 0) {
         if (!Array.from(selSeries).some(s => p.name.toLowerCase().includes(s.toLowerCase()) || p.specs.toLowerCase().includes(s.toLowerCase()))) return false;
       }
 
-      // 8. Filter by PSU Wattage
+      
       if (selWattages.size > 0) {
         if (!Array.from(selWattages).some(w => p.specs.toLowerCase().includes(w.toLowerCase()))) return false;
       }
 
-      // 9. Filter by Mainboard / Case Size
+      
       if (selSizes.size > 0) {
         if (!Array.from(selSizes).some(sz => p.specs.toLowerCase().includes(sz.toLowerCase()) || p.name.toLowerCase().includes(sz.toLowerCase()))) return false;
       }
@@ -457,10 +457,10 @@ export default function LinhKienIndex() {
   const percentMin = ((minPrice - MIN_PRICE) / (MAX_PRICE - MIN_PRICE)) * 100;
   const percentMax = ((maxPrice - MIN_PRICE) / (MAX_PRICE - MIN_PRICE)) * 100;
 
-  /* Sidebar JSX — reused for both desktop + mobile */
+  
   const sidebarContent = (
     <div className="space-y-0">
-      {/* Price */}
+      
       <div className="pb-4">
         <h4 className="text-[13px] font-semibold text-zinc-900 mb-3">Giá</h4>
         <div className="flex items-center gap-2 mb-4">
@@ -513,7 +513,7 @@ export default function LinhKienIndex() {
               const val = Math.min(Number(e.target.value), maxPrice - 500000);
               setMinPrice(val);
               
-              // Sync price to URL
+              
               const newParams = new URLSearchParams(searchParams);
               newParams.set("minPrice", String(val));
               setSearchParams(newParams, { replace: true });
@@ -531,7 +531,7 @@ export default function LinhKienIndex() {
               const val = Math.max(Number(e.target.value), minPrice + 500000);
               setMaxPrice(val);
 
-              // Sync price to URL
+              
               const newParams = new URLSearchParams(searchParams);
               newParams.set("maxPrice", String(val));
               setSearchParams(newParams, { replace: true });
@@ -542,7 +542,7 @@ export default function LinhKienIndex() {
         </div>
       </div>
 
-      {/* Brand Filters */}
+      
       {getCategoryBrands(activeCategory).length > 0 && (
         <FilterGroup title="Thương hiệu">
           {getCategoryBrands(activeCategory).map(b => (
@@ -557,7 +557,7 @@ export default function LinhKienIndex() {
         </FilterGroup>
       )}
 
-      {/* Dynamic Filters based on category */}
+      
       {activeCategory === "ram" && (
         <>
           <FilterGroup title="Dung lượng">
@@ -736,7 +736,7 @@ export default function LinhKienIndex() {
   return (
     <div className="bg-[#fafafa] min-h-screen pb-16">
 
-      {/* ══ 1. HERO ═════════════════════════════════════════════════════ */}
+      
       <div 
         className="relative overflow-hidden" 
         style={{ 
@@ -750,14 +750,14 @@ export default function LinhKienIndex() {
           position: "relative",
         }}
       >
-        {/* Top-right blue glow */}
+        
         <div style={{
           position: "absolute", top: "-10%", right: "-5%",
           width: 800, height: 800,
           background: "radial-gradient(circle, rgba(147,197,253,0.35) 0%, rgba(165,180,252,0.15) 40%, transparent 70%)",
           pointerEvents: "none",
         }} />
-        {/* Bottom left soft white fade */}
+        
         <div style={{
           position: "absolute", bottom: 0, left: 0,
           width: 600, height: 400,
@@ -768,7 +768,7 @@ export default function LinhKienIndex() {
         <div className="max-w-[1700px] mx-auto px-4 md:px-8 lg:px-10 xl:px-12 2xl:px-16 relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center" style={{ minHeight: "calc(100vh - 96px)" }}>
 
-            {/* Left */}
+            
             <motion.div variants={heroContainer} initial="hidden" animate="show" className="max-w-2xl flex flex-col items-start justify-center pr-8 py-12 relative z-10">
               <motion.div variants={heroItem}>
                 <span className="inline-block px-3 py-1 bg-white/70 text-zinc-500 rounded-full text-[11px] font-semibold uppercase tracking-widest mb-6 border border-zinc-200/60">
@@ -841,7 +841,7 @@ export default function LinhKienIndex() {
                 </button>
               </motion.div>
 
-              {/* Mini perks */}
+              
               <motion.div variants={heroItem} className="flex flex-wrap items-center gap-x-8 gap-y-3 pt-7 border-t border-zinc-300/40 w-full">
                 {perks.map(({ icon: Icon, title }) => (
                   <div key={title} className="flex items-center gap-2">
@@ -852,7 +852,7 @@ export default function LinhKienIndex() {
               </motion.div>
             </motion.div>
 
-            {/* Right — components hero image */}
+            
             <motion.div
               initial={{ opacity: 0, x: 40, scale: 0.96 }}
               animate={{ opacity: 1, x: 0, scale: 1 }}
@@ -860,7 +860,7 @@ export default function LinhKienIndex() {
               className="relative hidden lg:flex items-center justify-center"
               style={{ alignSelf: "stretch" }}
             >
-              {/* Blue glow behind PC */}
+              
               <div style={{
                 position: "absolute",
                 width: 600, height: 600,
@@ -870,7 +870,7 @@ export default function LinhKienIndex() {
                 zIndex: 0,
               }} />
               
-              {/* Floor reflection */}
+              
               <div style={{
                 position: "absolute",
                 width: 500, height: 60,
@@ -894,10 +894,10 @@ export default function LinhKienIndex() {
         </div>
       </div>
 
-      {/* ══ MAIN CONTENT ════════════════════════════════════════════════ */}
+      
       <div className="max-w-[1700px] mx-auto px-4 md:px-8 lg:px-10 xl:px-12 2xl:px-16 mt-10">
 
-        {/* ══ 2. CATEGORY NAV ═══════════════════════════════════════════ */}
+        
         <section id="danh-muc-linh-kien" className="scroll-mt-28 mb-10">
           <div className="flex items-center justify-between mb-5">
             <h2 className="text-[18px] font-bold text-zinc-900">Danh mục linh kiện</h2>
@@ -915,7 +915,7 @@ export default function LinhKienIndex() {
                     ? "border-zinc-900 ring-2 ring-zinc-900/10"
                     : "border-zinc-100"}`}
               >
-                {/* Gradient block */}
+                
                 <div
                   className="w-full aspect-[4/3] relative flex items-center justify-center overflow-hidden"
                   style={{}}
@@ -937,7 +937,7 @@ export default function LinhKienIndex() {
                     <div className="absolute inset-0 ring-2 ring-inset ring-white/20" />
                   )}
                 </div>
-                {/* Label row */}
+                
                 <div className="flex items-center justify-between px-3 py-2.5">
                   <span className={`text-[12px] font-semibold leading-tight transition-colors
                     ${activeCategory === cat.id ? "text-zinc-950" : "text-zinc-800 group-hover:text-zinc-950"}`}>
@@ -951,7 +951,7 @@ export default function LinhKienIndex() {
           </div>
         </section>
 
-        {/* ══ 3. MOBILE TOOLBAR ══════════════════════════════════════════ */}
+        
         <section className="mb-4 flex items-center justify-between gap-3 lg:hidden">
           <button
             onClick={() => setShowMobileFilter(true)}
@@ -972,10 +972,10 @@ export default function LinhKienIndex() {
           </select>
         </section>
 
-        {/* ══ 4. FILTER + GRID ══════════════════════════════════════════ */}
+        
         <div className="flex flex-col lg:flex-row gap-7 lg:gap-8">
 
-          {/* Desktop Sidebar */}
+          
           <aside className="hidden lg:block w-[260px] shrink-0">
             <div className="bg-white rounded-2xl p-5 border border-zinc-100 shadow-sm sticky top-24">
               <div className="flex items-center justify-between mb-4">
@@ -993,7 +993,7 @@ export default function LinhKienIndex() {
             </div>
           </aside>
 
-          {/* Mobile Sidebar Drawer */}
+          
           <aside
             className={`fixed inset-y-0 left-0 z-50 w-[300px] overflow-y-auto bg-white p-5 shadow-2xl transition-transform lg:hidden ${showMobileFilter ? "translate-x-0" : "-translate-x-full"}`}
           >
@@ -1020,9 +1020,9 @@ export default function LinhKienIndex() {
             />
           )}
 
-          {/* Products */}
+          
           <main id="components-grid-top" className="flex-1 min-w-0">
-            {/* Toolbar */}
+            
             <div className="hidden lg:flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
               <p className="text-[13px] text-zinc-500 font-medium">
                 <span className="font-semibold text-zinc-900">{filteredProducts.length}</span> sản phẩm
@@ -1058,7 +1058,7 @@ export default function LinhKienIndex() {
               </div>
             </div>
 
-            {/* Loading state or Empty state */}
+            
             {loading ? (
               <ProductSkeletonGrid count={8} />
             ) : (
@@ -1103,7 +1103,7 @@ export default function LinhKienIndex() {
                       onClick={() => navigate(`/san-pham/${p.id}`)}
                       className="group bg-white rounded-2xl border border-zinc-100 p-3.5 shadow-sm hover:shadow-md hover:border-zinc-200 transition-all duration-300 flex flex-col relative cursor-pointer"
                     >
-                      {/* Badge */}
+                      
                       {p.badge && (
                         <span
                           className="absolute top-3 left-3 z-10 px-2 py-0.5 text-[10px] font-bold text-white rounded-full"
@@ -1112,7 +1112,7 @@ export default function LinhKienIndex() {
                           {p.badge}
                         </span>
                       )}
-                      {/* Like */}
+                      
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
@@ -1123,7 +1123,7 @@ export default function LinhKienIndex() {
                         <Heart className={`w-3.5 h-3.5 transition-colors ${liked.has(p.name) ? "fill-red-500 text-red-500" : "text-zinc-300"}`} />
                       </button>
                       <ProductImage src={p.image} alt={p.name} color={p.color} />
-                      {/* Info */}
+                      
                       <div className="mt-3 flex flex-col flex-1">
                         <h3 className="text-[13px] font-bold text-zinc-900 leading-tight mb-1 line-clamp-2">{p.name}</h3>
                         <p className="text-[11.5px] text-zinc-400 mb-3 flex-1">{p.specs}</p>
@@ -1190,7 +1190,7 @@ export default function LinhKienIndex() {
             </AnimatePresence>
             )}
 
-            {/* Pagination */}
+            
             {totalPages > 1 && (
               <div className="flex items-center justify-center gap-1.5 mt-10">
                 <button

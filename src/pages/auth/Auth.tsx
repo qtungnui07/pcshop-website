@@ -41,7 +41,7 @@ export default function Auth() {
   const navigate = useNavigate();
   const [isLogin, setIsLogin] = useState(true);
 
-  // Form states
+  
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -49,13 +49,13 @@ export default function Auth() {
   const [generalError, setGeneralError] = useState<string | null>(null);
   const [resetSuccessMessage, setResetSuccessMessage] = useState<string | null>(null);
 
-  // Password requirement formulas
+  
   const hasMinLength = password.length >= 8;
   const hasUppercase = /[A-Z]/.test(password);
   const hasLowercase = /[a-z]/.test(password);
   const hasSpecial = /[^A-Za-z0-9]/.test(password);
 
-  // Redirect if user is already logged in
+  
   const { user } = useAuth();
   useEffect(() => {
     if (user) {
@@ -98,19 +98,19 @@ export default function Auth() {
     setGeneralError(null);
     const newErrors: { name?: string; email?: string; password?: string } = {};
 
-    // Name check
+    
     if (!isLogin && !name.trim()) {
       newErrors.name = 'Vui lòng nhập họ và tên';
     }
 
-    // Email check
+    
     if (!email.trim()) {
       newErrors.email = 'Vui lòng nhập email';
     } else if (!/\S+@\S+\.\S+/.test(email)) {
       newErrors.email = 'Email không đúng định dạng';
     }
 
-    // Password check
+    
     if (!password) {
       newErrors.password = 'Vui lòng nhập mật khẩu';
     } else if (!isLogin) {
@@ -324,7 +324,7 @@ export default function Auth() {
                   </motion.p>
                 )}
 
-                {/* Password requirement checklist during registration */}
+                
                 {!isLogin && (
                   <motion.div
                     initial={{ opacity: 0, height: 0 }}

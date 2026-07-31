@@ -46,7 +46,7 @@ interface APIProduct {
   image?: string;
 }
 
-/** Map API PC data → carousel product format */
+
 function mapPCToCarouselProduct(pc: APIProduct): Product {
   return {
     badge: pc.badge || "",
@@ -84,7 +84,7 @@ export default function ProductCarousel({
   });
   const navigate = useNavigate();
 
-  // Fetch from API if no products passed as prop
+  
   useEffect(() => {
     if (products) {
       return;
@@ -132,7 +132,7 @@ export default function ProductCarousel({
         }
       })
       .catch(() => {
-        // Keep the browser-local version as an offline fallback.
+        
       });
   }, []);
 
@@ -171,7 +171,7 @@ export default function ProductCarousel({
     }
   };
 
-  /** Determine the detail page link and prefix based on apiEndpoint */
+  
   const getPrefix = () => {
     if (apiEndpoint.includes("laptop")) return "laptop";
     if (apiEndpoint.includes("accessories")) return "accessory";
@@ -185,7 +185,7 @@ export default function ProductCarousel({
     return `/san-pham/${prefix}-${name}`;
   };
 
-  // Loading skeleton
+  
   if (loading) {
     return (
       <div className="mt-16 md:mt-24 pb-12">

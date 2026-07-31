@@ -71,12 +71,12 @@ export default function MainLayout() {
     };
   }, [isAdmin]);
 
-  // Determine active view to highlight sidebar item correctly
+  
   const getActiveView = () => {
     if (location.pathname === '/admin/edit') {
       const category = searchParams.get('category') || '';
       if (category === 'accounts') return 'accounts';
-      return 'products'; // Editing products maps to product management
+      return 'products'; 
     }
     if (location.pathname === '/admin/designer') return 'designer';
     return searchParams.get('view') || 'dashboard';
@@ -100,12 +100,12 @@ export default function MainLayout() {
     navigate('/auth');
   };
 
-  // 1. Admin Layout Rendering
+  
   if (showAdminSidebar) {
     return (
       <div className="admin-shell min-h-screen lg:h-[100dvh] lg:overflow-hidden flex flex-col lg:flex-row text-zinc-900 font-sans antialiased relative">
         
-        {/* Mobile Header Bar */}
+        
         <header className="admin-mobile-header lg:hidden flex items-center justify-between px-4 py-3.5 text-white sticky top-0 z-40">
           <div className="flex items-center gap-2">
             <span className="admin-logo-symbol admin-logo-symbol-mobile" aria-hidden="true">
@@ -122,7 +122,7 @@ export default function MainLayout() {
           </button>
         </header>
 
-        {/* Backdrop for mobile drawer */}
+        
         {mobileSidebarOpen && (
           <div 
             onClick={() => setMobileSidebarOpen(false)}
@@ -130,14 +130,14 @@ export default function MainLayout() {
           />
         )}
 
-        {/* Responsive Sidebar */}
+        
         <aside className={`
           admin-sidebar fixed top-0 bottom-0 left-0 z-30 w-[264px] text-zinc-400
           flex flex-col justify-between transition-transform duration-300 lg:translate-x-0
           ${mobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
           lg:fixed lg:h-[100dvh]
         `}>
-          {/* Top Logo Section */}
+          
           <div>
             <div className="admin-brand flex items-center gap-3.5 px-6 py-5">
               <div className="admin-wordmark" role="img" aria-label="NovaPC Admin">
@@ -150,7 +150,7 @@ export default function MainLayout() {
               </div>
             </div>
 
-            {/* Navigation links */}
+            
             <nav className="px-3.5 py-6 space-y-1">
               {menuItems.map((item) => {
                 const isActive = activeView === item.view;
@@ -174,9 +174,9 @@ export default function MainLayout() {
             </nav>
           </div>
 
-          {/* Bottom Profile and Sign Out Section */}
+          
           <div className="admin-profile-zone p-4">
-            {/* User Profile Summary */}
+            
             {user && (
               <div className="flex items-center gap-3 mb-4 px-2">
                 <img 
@@ -191,7 +191,7 @@ export default function MainLayout() {
               </div>
             )}
 
-            {/* Navigation utilities */}
+            
             <div className="space-y-1">
               <Link 
                 to="/" 
@@ -211,7 +211,7 @@ export default function MainLayout() {
           </div>
         </aside>
 
-        {/* Main Content Area */}
+        
         <div className="admin-workspace flex-1 flex flex-col min-h-screen lg:min-h-0 lg:h-[100dvh] min-w-0 lg:ml-[264px]">
           <main className="admin-main flex-1 p-4 md:p-6 lg:p-8">
             <Outlet />
@@ -222,7 +222,7 @@ export default function MainLayout() {
     );
   }
 
-  // 2. Default Client Layout (or Loading)
+  
   return (
     <div
       className={`min-h-screen text-[#1d1d1f] font-sans selection:bg-blue-200 flex flex-col relative ${
@@ -239,7 +239,7 @@ export default function MainLayout() {
     >
       <Navbar />
       
-      {/* Abstract background glow shapes spanning the whole layout on auth pages */}
+      
       {isAuth && (
         <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
           <div className="absolute top-0 left-0 w-[60%] h-[600px] rounded-full bg-blue-400/15 blur-[120px]" />

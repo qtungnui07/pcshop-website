@@ -35,12 +35,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Clerk hooks
+  
   const { isLoaded: isClerkLoaded, isSignedIn: isClerkSignedIn, user: clerkUser } = useClerkUser();
   const { signOut: clerkSignOut } = useClerkAuth();
   const { signIn: clerkSignIn } = useSignIn();
 
-  // Load local user from localStorage on mount
+  
   useEffect(() => {
     const savedUser = localStorage.getItem("pcshop_user");
     if (savedUser) {
@@ -53,14 +53,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  // Update loading state once Clerk has loaded
+  
   useEffect(() => {
     if (isClerkLoaded) {
       setLoading(false);
     }
   }, [isClerkLoaded]);
 
-  // Synchronize Clerk user state with our database
+  
   useEffect(() => {
     if (isClerkLoaded && isClerkSignedIn && clerkUser) {
       const syncUser = async () => {
@@ -87,7 +87,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       };
       syncUser();
     } else if (isClerkLoaded && !isClerkSignedIn && user?.provider === "google") {
-      // If Clerk is signed out but local user is still Google, clear local session
+      
       setUser(null);
       localStorage.removeItem("pcshop_user");
     }

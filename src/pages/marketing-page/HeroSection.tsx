@@ -31,7 +31,7 @@ export default function HeroSection() {
         </motion.div>
       </AnimatePresence>
 
-      {/* Slide dots */}
+      
       <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-2 z-10">
         {heroSlides.map((_, i) => (
           <button

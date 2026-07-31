@@ -10,7 +10,7 @@ import { useAuth } from "../../context/AuthContext";
 import { formatCartPrice, useCart } from "../../context/CartContext";
 
 
-// Helper to determine API Base URL
+
 const API_BASE = typeof window !== "undefined"
   ? (window.location.hostname.includes("qtitpc.dev")
     ? "https://api-pc.qtitpc.dev"
@@ -54,7 +54,7 @@ interface NormalizedProduct {
   brand?: string;
   colors?: string[];
   badge?: string;
-  from?: string; // for PC gradients
+  from?: string; 
   to?: string;
 }
 
@@ -95,7 +95,7 @@ const parseApiResponse = async (res: Response) => {
   }
 };
 
-// Helper to compare strings case-insensitively and ignore special characters/spaces
+
 const isNameMatch = (itemName: string, targetName: string) => {
   if (!itemName || !targetName) return false;
   const clean = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, "");
@@ -144,7 +144,7 @@ export default function ProductDetailPage() {
     const fetchProduct = async () => {
       try {
         if (id.startsWith("latest-")) {
-          // Legacy URL format — resolve via PC API
+          
           const title = id.replace("latest-", "");
           let data: any[] = [];
           try {
@@ -188,7 +188,7 @@ export default function ProductDetailPage() {
             data = [];
           }
           
-          // Find matching laptop (by name, ID or index)
+          
           let match = data.find((item: any, idx: number) => 
             isNameMatch(item.name, laptopId) || 
             String(item.id) === id ||
@@ -212,7 +212,7 @@ export default function ProductDetailPage() {
             };
             setProduct(normalized);
 
-            // Related: other laptops
+            
             const related = data
               .filter((item: any) => item.name !== match.name)
               .slice(0, 4)
@@ -240,7 +240,7 @@ export default function ProductDetailPage() {
             data = [];
           }
 
-          // Find match (by name, ID or index)
+          
           let match = data.find((item: any, idx: number) => 
             isNameMatch(item.name, pcId) || 
             String(item.id) === id ||
@@ -267,7 +267,7 @@ export default function ProductDetailPage() {
             };
             setProduct(normalized);
 
-            // Related
+            
             const related = data
               .filter((item: any) => item.name !== match.name)
               .slice(0, 4)
@@ -316,7 +316,7 @@ export default function ProductDetailPage() {
               setSelectedColor(match.colors[0]);
             }
 
-            // Related
+            
             const related = data
               .filter((item: any) => item.name !== match.name && item.category === match.category)
               .slice(0, 4)
@@ -360,7 +360,7 @@ export default function ProductDetailPage() {
             };
             setProduct(normalized);
 
-            // Related
+            
             const related = data
               .filter((item: any) => item.name !== match.name && item.category === match.category)
               .slice(0, 4)
@@ -418,13 +418,13 @@ export default function ProductDetailPage() {
     fetchReviews();
   }, [id, product]);
 
-  // Split specs by newlines or bullets for simple bullet view
+  
   const specList = useMemo(() => {
     if (!product?.specs) return [];
     return product.specs.split(/[•\n/|]+/).map(s => s.trim()).filter(Boolean);
   }, [product]);
 
-  // Parse specs dynamically into a highly structured list for the specs table
+  
   const parsedSpecs = useMemo(() => {
     if (!product?.specs) return [];
     const rawParts = product.specs.split(/[\n•|]+/);
@@ -469,7 +469,7 @@ export default function ProductDetailPage() {
     return result;
   }, [product]);
 
-  // Handle immediate purchase
+  
   const handleBuyNow = () => {
     if (!product) return;
     const success = addItem({
@@ -581,9 +581,9 @@ export default function ProductDetailPage() {
     }).format(date);
   };
 
-  // Dynamic visual gallery CSS transformation values depending on thumb clicked
+  
   const getGalleryTransformClass = (_idx: number) => {
-    return ""; // Flat layout (ko nghiêng nghiêng)
+    return ""; 
   };
 
   if (loading) {
@@ -623,7 +623,7 @@ export default function ProductDetailPage() {
     >
       <div className="max-w-[1400px] mx-auto px-4 md:px-8">
         
-        {/* Breadcrumbs */}
+        
         <motion.div variants={detailItemVariants} className="flex items-center gap-1.5 text-xs text-zinc-500 font-medium mb-6">
           <Link to="/" className="hover:text-black transition-colors">Trang chủ</Link>
           <ChevronRight className="w-3 h-3" />
@@ -634,7 +634,7 @@ export default function ProductDetailPage() {
           <span className="text-zinc-900 font-semibold truncate max-w-[200px] md:max-w-none">{product.name}</span>
         </motion.div>
 
-        {/* Back Button */}
+        
         <motion.button
           variants={detailItemVariants}
           onClick={() => navigate(-1)}
@@ -643,13 +643,13 @@ export default function ProductDetailPage() {
           <ArrowLeft className="w-4 h-4" /> Quay lại danh sách
         </motion.button>
 
-        {/* Main Product Section */}
+        
         <motion.div variants={detailContainerVariants} className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start mb-12">
           
-          {/* Left Column: Interactive Image Gallery */}
+          
           <motion.div variants={detailItemVariants} className="lg:col-span-7 flex flex-col md:flex-row gap-4">
             
-            {/* Gallery Thumbnails List */}
+            
             <div className="order-2 md:order-1 flex md:flex-col gap-3 justify-center md:justify-start">
               {[0, 1, 2, 3].map((idx) => (
                 <motion.button
@@ -679,7 +679,7 @@ export default function ProductDetailPage() {
               ))}
             </div>
 
-            {/* Main Interactive Screen */}
+            
             <motion.div
               initial={{ opacity: 0, y: 20, scale: 0.96 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -721,22 +721,22 @@ export default function ProductDetailPage() {
             </motion.div>
           </motion.div>
 
-          {/* Right Column: Info & Action Box */}
+          
           <motion.div variants={detailItemVariants} className="lg:col-span-5 bg-white rounded-[2.5rem] p-8 md:p-10 border border-zinc-200/50 shadow-sm flex flex-col justify-between">
             <div>
-              {/* Category & Brand */}
+              
               <div className="flex items-center gap-2 mb-3 text-[11px] font-bold text-zinc-400 uppercase tracking-widest">
                 <span>{product.category}</span>
                 <span>•</span>
                 <span className="text-blue-600 font-extrabold">{product.brand || "PC Shop"}</span>
               </div>
 
-              {/* Title */}
+              
               <h1 className="text-3xl font-extrabold tracking-tight text-zinc-900 leading-tight mb-4">
                 {product.name}
               </h1>
 
-              {/* Rating */}
+              
               <div className="flex items-center gap-1.5 mb-6">
                 <div className="flex text-amber-400">
                   {Array.from({ length: 5 }).map((_, rIdx) => (
@@ -751,12 +751,12 @@ export default function ProductDetailPage() {
                 <span className="text-xs font-semibold text-zinc-500 hover:underline cursor-pointer">{reviewSummary.count} đánh giá</span>
               </div>
 
-              {/* Price */}
+              
               <div className="text-3xl font-black text-zinc-950 mb-6">
                 {formatCartPrice(product.price)}
               </div>
 
-              {/* Promo Offers & Installments Box */}
+              
               <div className="mb-6 p-4 rounded-2xl bg-amber-50/50 border border-amber-100 text-xs text-amber-950">
                 <div className="font-bold flex items-center gap-1.5 mb-2.5 text-amber-900 uppercase tracking-wider">
                   <Gift className="w-4 h-4 shrink-0 text-amber-700" /> Quà tặng & Khuyến mãi đặc biệt
@@ -777,7 +777,7 @@ export default function ProductDetailPage() {
                 </ul>
               </div>
 
-              {/* Highlights list */}
+              
               {specList.length > 0 && (
                 <div className="mb-8 border-t border-zinc-100 pt-6">
                   <h3 className="text-xs font-bold text-zinc-800 uppercase tracking-wider mb-4">Điểm nổi bật</h3>
@@ -794,7 +794,7 @@ export default function ProductDetailPage() {
                 </div>
               )}
 
-              {/* Color Selector */}
+              
               {product.colors && product.colors.length > 0 && (
                 <div className="mb-8 border-t border-zinc-100 pt-6">
                   <h3 className="text-xs font-bold text-zinc-800 uppercase tracking-wider mb-4">Chọn màu sắc</h3>
@@ -817,7 +817,7 @@ export default function ProductDetailPage() {
               )}
             </div>
 
-            {/* Buying Action Box */}
+            
             <div className="border-t border-zinc-100 pt-6 mt-6">
               <div className="flex flex-col sm:flex-row items-stretch gap-3 mb-6">
                 <button
@@ -850,7 +850,7 @@ export default function ProductDetailPage() {
                 </div>
               </div>
 
-              {/* Store Benefits */}
+              
               <div className="grid grid-cols-3 gap-3 border-t border-zinc-100/60 pt-6">
                 <div className="flex flex-col items-center text-center gap-1.5">
                   <Shield className="w-5 h-5 text-zinc-400" strokeWidth={1.5} />
@@ -872,7 +872,7 @@ export default function ProductDetailPage() {
           </motion.div>
         </motion.div>
 
-        {/* Detailed Specs Block & Warranty Block */}
+        
         <motion.div
           className="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-12"
           initial="hidden"
@@ -881,7 +881,7 @@ export default function ProductDetailPage() {
           variants={detailContainerVariants}
         >
           
-          {/* Detailed Specifications Table */}
+          
           <motion.div variants={detailItemVariants} className="lg:col-span-7 bg-white rounded-[2rem] p-8 border border-zinc-200/50 shadow-sm">
             <h2 className="text-lg font-bold text-zinc-950 mb-6 flex items-center gap-2">
               Thông số kỹ thuật chi tiết
@@ -915,7 +915,7 @@ export default function ProductDetailPage() {
             )}
           </motion.div>
 
-          {/* Warranty / Delivery policies */}
+          
           <motion.div variants={detailItemVariants} className="lg:col-span-5 bg-white rounded-[2rem] p-8 border border-zinc-200/50 shadow-sm flex flex-col justify-between">
             <div>
               <h2 className="text-lg font-bold text-zinc-950 mb-6">Chính sách mua hàng &amp; bảo hành</h2>
@@ -958,19 +958,19 @@ export default function ProductDetailPage() {
 
         </motion.div>
 
-        {/* Detailed Reviews tabs block */}
+        
         <motion.div
           {...viewportAnimation}
           className="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-12"
         >
           
-          {/* Reviews column */}
+          
           <div className="lg:col-span-12 bg-white rounded-[2rem] p-8 md:p-10 border border-zinc-200/50 shadow-sm">
             <h2 className="text-lg font-bold text-zinc-950 mb-8 flex items-center gap-2">
               Khách hàng đánh giá <span className="px-2 py-0.5 text-xs bg-zinc-100 rounded-full font-bold text-zinc-600">{reviewSummary.count} đánh giá</span>
             </h2>
             
-            {/* Advanced Rating Breakdown */}
+            
             <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-center border-b border-zinc-100 pb-8 mb-8">
               <div className="md:col-span-4 flex flex-col items-center text-center border-r border-zinc-100/80 pr-4">
                 <span className="text-5xl font-black text-zinc-900">{reviewSummary.average.toFixed(1)}</span>
@@ -985,7 +985,7 @@ export default function ProductDetailPage() {
                 <span className="text-xs font-semibold text-zinc-400">Điểm đánh giá trung bình dựa trên đánh giá thực tế</span>
               </div>
               
-              {/* Bars chart */}
+              
               <div className="md:col-span-8 space-y-2 max-w-lg w-full">
                 {reviewSummary.distribution.map((row) => (
                   <div key={row.star} className="flex items-center gap-3 text-xs font-semibold">
@@ -1068,7 +1068,7 @@ export default function ProductDetailPage() {
               )}
             </div>
 
-            {/* Reviews list */}
+            
             <div className="space-y-6">
               {reviews.map((rev) => {
                 const helpful = isReviewHelpful(rev);
@@ -1123,7 +1123,7 @@ export default function ProductDetailPage() {
 
         </motion.div>
 
-        {/* Related Products Section */}
+        
         {relatedProducts.length > 0 && (
           <motion.div
             {...viewportAnimation}

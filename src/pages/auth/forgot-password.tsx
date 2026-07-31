@@ -15,7 +15,7 @@ export default function ForgotPassword() {
   const widgetIdRef = useRef<string | null>(null);
 
   useEffect(() => {
-    // Inject Turnstile script explicitly
+    
     if (!document.getElementById("cloudflare-turnstile-script")) {
       const script = document.createElement("script");
       script.id = "cloudflare-turnstile-script";
@@ -96,7 +96,7 @@ export default function ForgotPassword() {
 
       if (!response.ok) {
         setError(data.error || 'Có lỗi xảy ra, vui lòng thử lại.');
-        // Reset Turnstile on error so user can try again
+        
         if ((window as any).turnstile && widgetIdRef.current) {
           (window as any).turnstile.reset(widgetIdRef.current);
         }
@@ -184,7 +184,7 @@ export default function ForgotPassword() {
                 )}
               </div>
 
-              {/* Turnstile Captcha */}
+              
               <div className="flex justify-center my-4 overflow-hidden min-h-[65px]">
                 <div ref={turnstileRef} className="mx-auto"></div>
               </div>

@@ -173,7 +173,7 @@ export default function AllPCsPage() {
   const percentMin = ((minPrice - MIN_PRICE) / (MAX_PRICE - MIN_PRICE)) * 100;
   const percentMax = ((maxPrice - MIN_PRICE) / (MAX_PRICE - MIN_PRICE)) * 100;
 
-  // Calculate dynamic options count for the sidebar filters
+  
   const filterData = useMemo(() => {
     const counts = {
       category: { 'PC Gaming': 0, 'PC Đồ Họa': 0, 'PC Văn Phòng': 0, 'PC Workstation': 0, 'PC Mini': 0 },
@@ -183,18 +183,18 @@ export default function AllPCsPage() {
     };
 
     products.forEach(p => {
-      // Category
+      
       const catKey = p.category as keyof typeof counts.category;
       if (counts.category[catKey] !== undefined) counts.category[catKey]++;
-      // RAM
+      
       const ramKey = p.ram as keyof typeof counts.ram;
       if (counts.ram[ramKey] !== undefined) counts.ram[ramKey]++;
       
-      // CPU
+      
       const cpuKey = `${p.cpuBrand} ${p.cpuSeries}` as keyof typeof counts.cpu;
       if (counts.cpu[cpuKey] !== undefined) counts.cpu[cpuKey]++;
       
-      // GPU
+      
       let gpuKey: keyof typeof counts.gpu = 'Onboard';
       if (p.gpu.includes('4090')) gpuKey = 'RTX 4090';
       else if (p.gpu.includes('4080')) gpuKey = 'RTX 4080';
@@ -260,10 +260,10 @@ export default function AllPCsPage() {
   return (
     <div className="bg-[#fafafa] min-h-screen pb-16 pt-20">
       
-      {/* Main Container */}
+      
       <div className="max-w-[1700px] mx-auto px-4 md:px-8 lg:px-10 xl:px-12 2xl:px-16 pt-8">
         
-        {/* Breadcrumbs */}
+        
         <div className="flex items-center gap-1.5 text-xs text-[#86868b] font-medium mb-6">
           <Link to="/" className="hover:text-black transition-colors">Trang chủ</Link>
           <ChevronRight className="w-3.5 h-3.5" />
@@ -272,15 +272,15 @@ export default function AllPCsPage() {
           <span className="text-[#1d1d1f] font-semibold">Tất cả PC</span>
         </div>
 
-        {/* Title */}
+        
         <h1 className="text-3xl md:text-4xl xl:text-[44px] font-semibold tracking-tight text-[#1d1d1f] mb-8">
           Tất cả PC
         </h1>
 
-        {/* Layout: Sidebar and Main Content */}
+        
         <div className="flex flex-col lg:flex-row gap-8 lg:gap-10">
           
-          {/* Sidebar */}
+          
           <aside className="w-full lg:w-[260px] shrink-0">
             <div className="bg-white rounded-2xl p-5 border border-zinc-100 shadow-sm">
               <div className="py-2 border-b border-zinc-200/70">
@@ -294,7 +294,7 @@ export default function AllPCsPage() {
                     {formatPrice(maxPrice)}
                   </div>
                 </div>
-                {/* Dual range slider */}
+                
                 <div 
                   className="h-1 bg-zinc-200 rounded-full mb-6 relative mt-4 cursor-pointer"
                   onMouseMove={e => {
@@ -373,7 +373,7 @@ export default function AllPCsPage() {
             </div>
           </aside>
 
-          {/* Product Grid Column */}
+          
           <main id="products-grid-top" className="flex-1">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4">
               <h2 className="text-[15px] font-medium text-zinc-500">{filteredProducts.length} sản phẩm</h2>
@@ -388,7 +388,7 @@ export default function AllPCsPage() {
               </div>
             </div>
 
-            {/* Product Cards Grid */}
+            
             {loading ? (
               <ProductSkeletonGrid count={8} />
             ) : (
@@ -452,7 +452,7 @@ export default function AllPCsPage() {
             </div>
             )}
 
-            {/* Pagination */}
+            
             {totalPages > 1 && (
               <div className="flex items-center justify-center gap-2 mt-10">
                 <button

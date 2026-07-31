@@ -151,7 +151,7 @@ export default function CartCheckoutPage() {
       try {
         await fetch(`${API_BASE}/api/payments/${paymentSession.id}/cancel`, { method: "POST" });
       } catch {
-        // ignore error
+        
       }
     }
     clearPendingPayment();

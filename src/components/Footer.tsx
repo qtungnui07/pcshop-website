@@ -67,8 +67,8 @@ const getComponentCatId = (name: string) => {
   return generateSlug(name);
 };
 
-// Derive footer columns directly from navItems so Navbar & Footer stay in sync.
-// - Each nav item with a dropdown or isSplit becomes a column.
+
+
 function buildFooterColumns() {
   return navItems
     .filter((item) => (item.dropdown && item.dropdown.length > 0) || item.isSplit)
@@ -113,7 +113,7 @@ function buildFooterColumns() {
     });
 }
 
-// Nav items without a dropdown and not split become "quick links" in the footer bottom bar
+
 function buildQuickLinks() {
   return navItems
     .filter((item) => (!item.dropdown || item.dropdown.length === 0) && !item.isSplit)
@@ -199,18 +199,18 @@ export default function Footer() {
   const footerColumns = buildFooterColumns();
   const quickLinks = buildQuickLinks();
 
-  // Dynamic grid columns based on count (including the Showroom column)
+  
   const colCount = Math.min(footerColumns.length + 1, 6);
 
   return (
     <footer className="footer">
       <div className="footer-inner">
-        {/* Columns Grid — auto-synced from navItems + Contact Column */}
+        
         <div
           className="footer-columns"
           style={{ gridTemplateColumns: `repeat(${colCount}, 1fr)` }}
         >
-          {/* Cột thông tin Showroom & Liên hệ */}
+          
           <div className="footer-col footer-col-contact">
             <h3 className="footer-col-title">Showroom & Liên hệ</h3>
             <ul className="footer-col-links">
@@ -253,7 +253,7 @@ export default function Footer() {
           ))}
         </div>
 
-        {/* Partners Row */}
+        
         <div className="footer-partners">
           <div className="partner-group">
             <span className="partner-title">Phương thức thanh toán</span>
@@ -275,7 +275,7 @@ export default function Footer() {
           </div>
         </div>
 
-        {/* Bottom bar */}
+        
         <div className="footer-bottom">
           <div className="footer-info-legal">
             <p className="footer-copyright">
@@ -288,7 +288,7 @@ export default function Footer() {
           </div>
 
           <div className="footer-right-widgets">
-            {/* Quick links for nav items without dropdown */}
+            
             {quickLinks.length > 0 && (
               <div className="footer-quick-links">
                 {quickLinks.map((link, i) => (
