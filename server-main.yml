@@ -22,4 +22,6 @@ ingress:
     service: http://127.0.0.1:3002
   - hostname: fb.qtitpc.dev
     service: http://127.0.0.1:9812
+  - hostname: tohe.qtitpc.dev
+    service: http://127.0.0.1:3080
   - service: http_status:404

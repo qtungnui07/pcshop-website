@@ -103,7 +103,7 @@ export default function ProductCarousel({
       .finally(() => setLoading(false));
   }, [products, apiEndpoint]);
 
-  const displayProducts = products || fetchedProducts;
+  const displayProducts = (products || fetchedProducts).slice(0, 6);
 
   const checkScroll = () => {
     if (scrollRef.current) {

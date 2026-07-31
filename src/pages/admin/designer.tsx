@@ -288,7 +288,7 @@ export default function FlashcardDesigner() {
       .then((response) => response.json())
       .then((products: Array<{ name?: string; title?: string; badge?: string; specs?: string; description?: string; price?: string; from?: string; to?: string }>) => {
         if (!Array.isArray(products)) return;
-        const generated = products.map((product, index) => {
+        const generated = products.slice(0, 6).map((product, index) => {
           const name = product.name || product.title || `Sản phẩm ${index + 1}`;
           const sourceKey = `product:${name}`;
           const base = starterDesigns[0];
